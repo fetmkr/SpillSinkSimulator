@@ -499,3 +499,29 @@ Renders are gitignored (5.7 GB, regenerable). Every extracted number is in
 - When a mesh check fails, locate the defect (component bounds, edge
   positions) before changing anything. The slab-clearance bug was found that
   way in one measurement after two wrong guesses.
+
+## 2026-08-11 — the fair fight (IMPORTANT, supersedes the 5.2x claim)
+
+`scripts/fairfight.py` -> `results/sweep_fairfight.csv`. The four-design
+comparison was NOT tip-matched: groove tip 0.8 mm line at pitch 13 = 6.2%
+exposed, cone tip r0.2 point per cell = 0.26%. 24x, inside families whose
+reflectance is dominated by the tip. Matched on depth, pitch AND tip:
+
+    1D V-groove d30/p7.5/tip0.2   0.0148 / 0.0153 / 0.2553 %
+    3D cone     d30/p7.5/r0.2     0.0051 / 0.0056 / 0.2149 %   -> 2.9x, not 5.2x
+
+The remaining 1.8x was tip and geometry the groove could have had too.
+Best 1D at any depth: d50/p13/tip0.2 = 0.0104% head-on.
+
+CORRECTION: "the tip does not matter for cones" (round 1, 16x tip -> 16%
+change) came from the base-gap geometry and is WRONG. At d30/p7.5, cone tip
+r0.2 -> r0.8 costs 4.6x (0.0051 -> 0.0237%). Scales like r, not r^2 -> the
+return is the flank near the tip, not the tip disc.
+
+The cone's remaining outright win is FORM (priority 1): core 0.11 vs 0.99 at
+-40 deg. Nothing in the fair fight touches that.
+
+Renders 081-084 are the geometry actually measured/exported (081/082 the
+tip-0.2 grooves, 083/084 the cones exactly as export_cone.py writes the STL,
+tileable, backing 3, depth_jitter 0). Report: report/2026-08-11/*_compare.png
+via scripts/report_compare.py.

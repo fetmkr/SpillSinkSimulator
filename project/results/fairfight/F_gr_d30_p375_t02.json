@@ -1,0 +1,583 @@
+{
+  "tag": "F_gr_d30_p375_t02",
+  "params": {
+    "depth": 30.0,
+    "pitch_mean": 3.75,
+    "tip_width": 0.2,
+    "arc_segments": 24,
+    "valley_round": 0.4,
+    "margin_depths": 6.5
+  },
+  "derived": {
+    "family": "ridge",
+    "depth_mm": 30.0,
+    "pitch_mean_mm": 3.75,
+    "pitch_jitter": 0.25,
+    "tip_width_mm": 0.2,
+    "tip_fraction": 0.05333333333333334,
+    "half_angle_deg": 3.576334374997351,
+    "est_bounces": 12.582716066652278,
+    "tilt_deg": 0.0,
+    "tilt_jitter": 0.0,
+    "valley_round_mm": 0.4,
+    "margin_depths": 6.5,
+    "predicted_return_rho05": 0.033600000000000005
+  },
+  "warnings": [],
+  "material_mode": "mixed",
+  "rho_diffuse": 0.05,
+  "rho_slat": 0.005,
+  "rho_chamber": 0.005,
+  "rho_control": 0.05,
+  "rho_specular": 0.005,
+  "spec_roughness": 0.3,
+  "samples": 512,
+  "n_slats": 1,
+  "n_baffles": 0,
+  "modes": {
+    "F_gr_d30_p375_t02__hemi_view_th-80.0": {
+      "theta": -80.0,
+      "panel": {
+        "mean": 0.0015645911917090416,
+        "p50": 0.0015641158679500222,
+        "p99": 0.001690936740487814,
+        "max": 0.0017586854519322515,
+        "px": 10290
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 10290
+      },
+      "ratio_mean": 0.03129194926521707,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-80.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-80.0.png",
+      "px_panel": [
+        697.0588028430939,
+        991.1764740943909,
+        232.9760491847992,
+        267.0247256755829
+      ],
+      "px_ctrl": [
+        108.82352590560913,
+        402.9411643743515,
+        232.9760044813156,
+        267.0246660709381
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-70.0": {
+      "theta": -70.0,
+      "panel": {
+        "mean": 0.0006536233122460544,
+        "p50": 0.000666823994833976,
+        "p99": 0.0007990130688995123,
+        "max": 0.0008585899486206472,
+        "px": 19698
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 19698
+      },
+      "ratio_mean": 0.01307251961894893,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-70.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-70.0.png",
+      "px_panel": [
+        697.0588684082031,
+        991.1765396595001,
+        216.46888554096222,
+        283.53163599967957
+      ],
+      "px_ctrl": [
+        108.82359147071838,
+        402.94122993946075,
+        216.46884083747864,
+        283.5316061973572
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-60.0": {
+      "theta": -60.0,
+      "panel": {
+        "mean": 0.0004123637918382883,
+        "p50": 0.000409993197536096,
+        "p99": 0.0006727411528117955,
+        "max": 0.0007319484720937908,
+        "px": 29106
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 29106
+      },
+      "ratio_mean": 0.00824731012433059,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-60.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-60.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        200.980544090271,
+        299.0197539329529
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        200.98049938678741,
+        299.0196943283081
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-50.0": {
+      "theta": -50.0,
+      "panel": {
+        "mean": 0.00031333082006312907,
+        "p50": 0.0002831352758221328,
+        "p99": 0.0006439544958993793,
+        "max": 0.0007006509113125503,
+        "px": 37338
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 37338
+      },
+      "ratio_mean": 0.006266641520545915,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-50.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-50.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        186.98175251483917,
+        313.0185306072235
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        186.98172271251678,
+        313.01847100257874
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-40.0": {
+      "theta": -40.0,
+      "panel": {
+        "mean": 0.00026453082682564855,
+        "p50": 0.00018277803610544652,
+        "p99": 0.0006536197033710778,
+        "max": 0.000711863103788346,
+        "px": 44394
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 44394
+      },
+      "ratio_mean": 0.005290638137755539,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-40.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-40.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        174.89750683307648,
+        325.102299451828
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        174.8974770307541,
+        325.1022696495056
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-30.0": {
+      "theta": -30.0,
+      "panel": {
+        "mean": 0.00023672881070524454,
+        "p50": 0.00015595907461829484,
+        "p99": 0.0006588667165488005,
+        "max": 0.0007216662634164095,
+        "px": 49686
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 49686
+      },
+      "ratio_mean": 0.004734595545071055,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-30.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-30.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        165.09544849395752,
+        334.90434288978577
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        165.09541869163513,
+        334.9043130874634
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-20.0": {
+      "theta": -20.0,
+      "panel": {
+        "mean": 0.00021845211449544877,
+        "p50": 0.00012683836393989623,
+        "p99": 0.0006728114676661789,
+        "max": 0.000731542706489563,
+        "px": 54390
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 54390
+      },
+      "ratio_mean": 0.004369060453945647,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-20.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-20.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        157.87336230278015,
+        342.1267867088318
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        157.87333250045776,
+        342.1267569065094
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th-10.0": {
+      "theta": -10.0,
+      "panel": {
+        "mean": 0.00021278226631693542,
+        "p50": 8.194983820430934e-05,
+        "p99": 0.0006830609636381269,
+        "max": 0.0007407096563838422,
+        "px": 56742
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 56742
+      },
+      "ratio_mean": 0.004255663018934165,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-10.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th-10.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        153.45019102096558,
+        346.5496897697449
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        153.45017611980438,
+        346.5496897697449
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+00.0": {
+      "theta": 0.0,
+      "panel": {
+        "mean": 0.0002362114901188761,
+        "p50": 0.00010272370127495378,
+        "p99": 0.0007159034139476717,
+        "max": 0.0007802455802448094,
+        "px": 57918
+      },
+      "control": {
+        "mean": 0.04999978840351105,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 57918
+      },
+      "ratio_mean": 0.004724249795070913,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+00.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+00.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        151.96065604686737,
+        348.03909063339233
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        151.96065604686737,
+        348.03909063339233
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+10.0": {
+      "theta": 10.0,
+      "panel": {
+        "mean": 0.00021298414503689855,
+        "p50": 8.08145705377683e-05,
+        "p99": 0.000682781042996794,
+        "max": 0.0007408864912576973,
+        "px": 56742
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 56742
+      },
+      "ratio_mean": 0.0042597006101194055,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+10.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+10.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        153.4503549337387,
+        346.5498685836792
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        153.4503549337387,
+        346.5498983860016
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+20.0": {
+      "theta": 20.0,
+      "panel": {
+        "mean": 0.0002182891039410606,
+        "p50": 0.00012362663983367383,
+        "p99": 0.0006660198559984565,
+        "max": 0.0007319280994124711,
+        "px": 54390
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 54390
+      },
+      "ratio_mean": 0.004365800229303747,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+20.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+20.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        157.87331759929657,
+        342.1267867088318
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        157.87334740161896,
+        342.1267867088318
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+30.0": {
+      "theta": 30.0,
+      "panel": {
+        "mean": 0.0002366125991102308,
+        "p50": 0.00017568310431670398,
+        "p99": 0.0006540385656990111,
+        "max": 0.0007120063528418541,
+        "px": 49686
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 49686
+      },
+      "ratio_mean": 0.004732271303681094,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+30.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+30.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        165.0952845811844,
+        334.9042236804962
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        165.09531438350677,
+        334.9042534828186
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+40.0": {
+      "theta": 40.0,
+      "panel": {
+        "mean": 0.0002645979111548513,
+        "p50": 0.00019433433772064745,
+        "p99": 0.0006539095193147659,
+        "max": 0.0007123182876966894,
+        "px": 44394
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 44394
+      },
+      "ratio_mean": 0.0052919798298176135,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+40.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+40.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        174.897700548172,
+        325.1025080680847
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        174.89773035049438,
+        325.1025378704071
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+50.0": {
+      "theta": 50.0,
+      "panel": {
+        "mean": 0.000313199037918821,
+        "p50": 0.00028277240926399827,
+        "p99": 0.0006439241115003824,
+        "max": 0.0007209251052699983,
+        "px": 37338
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 37338
+      },
+      "ratio_mean": 0.0062640058670949674,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+50.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+50.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        186.9817078113556,
+        313.0185008049011
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        186.98175251483917,
+        313.0185306072235
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+60.0": {
+      "theta": 60.0,
+      "panel": {
+        "mean": 0.0004149034502916038,
+        "p50": 0.00044011184945702553,
+        "p99": 0.0006724051781930029,
+        "max": 0.0007196713704615831,
+        "px": 29106
+      },
+      "control": {
+        "mean": 0.049999792128801346,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 29106
+      },
+      "ratio_mean": 0.008298103504566516,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+60.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+60.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        200.98036527633667,
+        299.01960492134094
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        200.98040997982025,
+        299.01963472366333
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+70.0": {
+      "theta": 70.0,
+      "panel": {
+        "mean": 0.0006529131205752492,
+        "p50": 0.0006659848149865866,
+        "p99": 0.0007979125366546214,
+        "max": 0.0008593332604505122,
+        "px": 19698
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 19698
+      },
+      "ratio_mean": 0.0130583157275395,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+70.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+70.0.png",
+      "px_panel": [
+        697.0588684082031,
+        991.1765396595001,
+        216.46864712238312,
+        283.53142738342285
+      ],
+      "px_ctrl": [
+        108.82359147071838,
+        402.94122993946075,
+        216.4686918258667,
+        283.5314869880676
+      ]
+    },
+    "F_gr_d30_p375_t02__hemi_view_th+80.0": {
+      "theta": 80.0,
+      "panel": {
+        "mean": 0.0015620456542819738,
+        "p50": 0.001562654273584485,
+        "p99": 0.0016873390413820744,
+        "max": 0.0017583660082891583,
+        "px": 10290
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 10290
+      },
+      "ratio_mean": 0.031241038312603622,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+80.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fairfight/F_gr_d30_p375_t02__hemi_view_th+80.0.png",
+      "px_panel": [
+        697.0588028430939,
+        991.1764740943909,
+        232.97563195228577,
+        267.02430844306946
+      ],
+      "px_ctrl": [
+        108.82352590560913,
+        402.9411643743515,
+        232.97569155693054,
+        267.02436804771423
+      ]
+    }
+  }
+}

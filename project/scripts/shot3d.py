@@ -79,6 +79,65 @@ DESIGNS = {
         90.0,
         "the same at 30 mm depth: 0.0084% head-on, 1.8x worse than 50 mm but "
         "a wall two fifths as thick"),
+    "cmp_groove_p13": (
+        "ridge",
+        dict(face_w=120.0, face_h=120.0, depth=50.0, pitch_mean=13.0,
+             tip_width=0.8, arc_segments=24, valley_round=0.4,
+             margin_depths=0.15),
+        120.0, "COMPARISON: 1D V-groove, depth 50, pitch 13, tip 0.8 mm"),
+    "cmp_groove_p08": (
+        "ridge",
+        dict(face_w=120.0, face_h=120.0, depth=50.0, pitch_mean=8.0,
+             tip_width=0.8, arc_segments=24, valley_round=0.4,
+             margin_depths=0.15),
+        120.0, "COMPARISON: 1D V-groove, depth 50, pitch 8, tip 0.8 mm"),
+    "cmp_cone_p75": (
+        "cone3d",
+        dict(face_w=80.0, face_h=80.0, depth=30.0, pitch=7.5, tip_radius=0.2,
+             jitter=0.30, margin_depths=0.0, centre_margin_pitches=1.0),
+        80.0, "COMPARISON: 3D cone array, depth 30, pitch 7.5, tip r 0.2 mm"),
+    "cmp_cone_p375": (
+        "cone3d",
+        dict(face_w=60.0, face_h=60.0, depth=30.0, pitch=3.75, tip_radius=0.2,
+             jitter=0.30, margin_depths=0.0, centre_margin_pitches=1.0),
+        60.0, "COMPARISON: 3D cone array, depth 30, pitch 3.75, tip r 0.2 mm"),
+    # --- the four the comparison report actually argues about --------------
+    # tip convention: ONE NOZZLE, 0.4 mm ACROSS, for both families. ridge
+    # tip_width is a full width and cone tip_radius is a radius, so the
+    # earlier "tip 0.2 both" pair was still a factor of two apart -- and a
+    # 0.2 mm ridge is half a nozzle and cannot be printed at all.
+    "fair_groove_d50_p13": (
+        "ridge",
+        dict(face_w=120.0, face_h=120.0, depth=50.0, pitch_mean=13.0,
+             tip_width=0.4, arc_segments=24, valley_round=0.4,
+             margin_depths=0.15),
+        120.0, "1D V-groove d50 p13, tip 0.4 mm across -- best 1D head-on, "
+        "0.0159%"),
+    "fair_groove_d30_p75": (
+        "ridge",
+        dict(face_w=80.0, face_h=80.0, depth=30.0, pitch_mean=7.5,
+             tip_width=0.4, arc_segments=24, valley_round=0.4,
+             margin_depths=0.15),
+        80.0, "1D V-groove d30 p7.5, tip 0.4 across -- matched to the cone on "
+        "depth, pitch and printable tip, 0.0237%"),
+    # exactly the geometry export_cone.py writes to STL: tileable, backing 3,
+    # no height jitter, tip r0.2. what gets printed is what gets rendered
+    "stl_cone_d30_p75": (
+        "cone3d",
+        dict(face_w=100.0, face_h=100.0, depth=30.0, pitch=7.5,
+             tip_radius=0.2, jitter=0.30, radial_seg=24, height_seg=3,
+             margin_depths=0.0, centre_margin_pitches=1.0, backing=3.0,
+             tileable=True, depth_jitter=0.0),
+        100.0, "AS EXPORTED: 3D cone d30 p7.5 r0.2, tileable 100x100 STL, "
+        "0.0051% head-on"),
+    "stl_cone_d30_p375": (
+        "cone3d",
+        dict(face_w=100.0, face_h=100.0, depth=30.0, pitch=3.75,
+             tip_radius=0.2, jitter=0.30, radial_seg=24, height_seg=3,
+             margin_depths=0.0, centre_margin_pitches=1.0, backing=3.0,
+             tileable=True, depth_jitter=0.0),
+        100.0, "AS EXPORTED: 3D cone d30 p3.75 r0.2, tileable 100x100 STL, "
+        "0.0803% all-angle"),
     "cone_bimodal": (
         "cone3d",
         dict(face_w=70.0, face_h=70.0, depth=30.0, pitch=7.5, tip_radius=0.4,

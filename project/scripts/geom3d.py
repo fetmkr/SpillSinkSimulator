@@ -107,7 +107,13 @@ class Cone3DParams:
     second_tip: float = 0.4        # secondary tip radius
 
     # --- variation ---
-    depth_jitter: float = 0.15     # per-cone height variation
+    # Height jitter is OFF by default. With it on, the shallowest cone sets
+    # where the backing slab has to sit for every cone to reach it, and that
+    # slab then fills the deepest valleys: at depth 30 and jitter 0.15 the slab
+    # rises to -25 mm and 5 mm of valley disappears, which measured 4x worse
+    # (0.0046 -> 0.0183%). Position jitter alone already breaks periodicity,
+    # and this keeps the measured geometry identical to the exported one.
+    depth_jitter: float = 0.0
     tilt_deg: float = 0.0          # lean the cones, bird-of-paradise style
     tilt_jitter: float = 0.0
 

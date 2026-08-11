@@ -39,3 +39,15 @@ when it was generated, so dead ends stay next to survivors.
 | 072 | cone3d | [3d_cone_d80](072_3d_cone_d80.png) | family 5, irregular cone array. 0.0044% head-on, 6x better than the groove, and the first design to destroy form as well | |
 | 073 | cone3d | [3d_cone_d30](073_3d_cone_d30.png) | the same at 30 mm depth: 0.0084% head-on, 1.8x worse than 50 mm but a wall two fifths as thick | |
 | 074 | cone3d | [3d_cone_bimodal](074_3d_cone_bimodal.png) | two cone sizes: a finer, shorter array dropped into the valleys to catch the rays that skim the primary flanks | |
+| 075 | ridge | [3d_cmp_groove_p13](075_3d_cmp_groove_p13.png) | COMPARISON: 1D V-groove, depth 50, pitch 13, tip 0.8 mm | |
+| 076 | ridge | [3d_cmp_groove_p08](076_3d_cmp_groove_p08.png) | COMPARISON: 1D V-groove, depth 50, pitch 8, tip 0.8 mm | |
+| 077 | cone3d | [3d_cmp_cone_p75](077_3d_cmp_cone_p75.png) | COMPARISON: 3D cone array, depth 30, pitch 7.5, tip r 0.2 mm | |
+| 078 | cone3d | [3d_cmp_cone_p375](078_3d_cmp_cone_p375.png) | COMPARISON: 3D cone array, depth 30, pitch 3.75, tip r 0.2 mm | |
+| 079 | cone3d | [3d_cmp_cone_p75](079_3d_cmp_cone_p75.png) | COMPARISON: 3D cone array, depth 30, pitch 7.5, tip r 0.2 mm | |
+| 080 | cone3d | [3d_cmp_cone_p375](080_3d_cmp_cone_p375.png) | COMPARISON: 3D cone array, depth 30, pitch 3.75, tip r 0.2 mm | |
+| 081 | ridge | [3d_fair_groove_d50_p13](081_3d_fair_groove_d50_p13.png) | FAIR: 1D V-groove d50 p13, tip 0.2 mm -- best 1D head-on, 0.0104% | |
+| 082 | ridge | [3d_fair_groove_d30_p75](082_3d_fair_groove_d30_p75.png) | FAIR: 1D V-groove d30 p7.5 tip 0.2 -- matched to the cone on every dimension, 0.0148% | |
+| 083 | cone3d | [3d_stl_cone_d30_p75](083_3d_stl_cone_d30_p75.png) | AS EXPORTED: 3D cone d30 p7.5 r0.2, tileable 100x100 STL, 0.0051% head-on | |
+| 084 | cone3d | [3d_stl_cone_d30_p375](084_3d_stl_cone_d30_p375.png) | AS EXPORTED: 3D cone d30 p3.75 r0.2, tileable 100x100 STL, 0.0803% all-angle | |
+| 085 | ridge | [3d_fair_groove_d50_p13](085_3d_fair_groove_d50_p13.png) | 1D V-groove d50 p13, tip 0.4 mm across -- best 1D head-on, 0.0159% | |
+| 086 | ridge | [3d_fair_groove_d30_p75](086_3d_fair_groove_d30_p75.png) | 1D V-groove d30 p7.5, tip 0.4 across -- matched to the cone on depth, pitch and printable tip, 0.0237% | |

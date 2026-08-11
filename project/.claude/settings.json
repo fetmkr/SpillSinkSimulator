@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/.claude/review_hook.py",
+            "timeout": 90
+          }
+        ]
+      }
+    ]
+  }
+}
