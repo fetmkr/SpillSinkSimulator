@@ -66,6 +66,16 @@ class Cone3DParams:
     # reads world background instead of panel, which is exactly what produced
     # an impossible 27% "reflectance" on the first run.
     margin_depths: float = 6.5
+    # Measurement builds need cones far past the window; an export wants the
+    # pattern to stop at the panel edge. 0 places centres only inside the face.
+    centre_margin_pitches: float = 1.0
+    # Tileable placement: the centre field is made exactly periodic over
+    # face_w x face_h, so a cone crossing the right edge has its other half
+    # entering at the left edge of the neighbouring module. Cutting the tile at
+    # the boundary then reassembles whole cones when modules are butted, with
+    # no flat border anywhere -- a flat border would be the brightest thing on
+    # the panel.
+    tileable: bool = False
 
     # --- cone ---
     tip_radius: float = 0.4        # THE exposed feature. 0.4 = a 0.8 mm tip,
@@ -79,6 +89,22 @@ class Cone3DParams:
     overlap: float = 1.15
     radial_seg: int = 32           # facets around the cone
     height_seg: int = 3            # rings down the flank
+
+    # --- secondary (interstitial) cones ---
+    # Head-on reflectance comes from the exposed tips; grazing reflectance
+    # comes from the smooth flanks of the big cones. Different surfaces, so
+    # they can be attacked separately: drop a finer array into the valleys
+    # between the primary cones, but SHORTER, so its tips sit below the
+    # primary tips and are shadowed at head-on while still trapping the rays
+    # that skim the primary flanks.
+    #
+    # This is the butterfly's ridges-plus-trabeculae hierarchy at a scale
+    # where geometric optics still applies. It is not the flank serration
+    # that failed earlier: a sawtooth only deflects a grazing ray, a cone
+    # still traps it.
+    second_ratio: float = 0.0      # secondary pitch / primary pitch; 0 = off
+    second_depth_frac: float = 0.55  # secondary height / primary height
+    second_tip: float = 0.4        # secondary tip radius
 
     # --- variation ---
     depth_jitter: float = 0.15     # per-cone height variation
@@ -126,9 +152,32 @@ def centres(p: Cone3DParams) -> list[tuple[float, float]]:
         dz = p.pitch * math.sqrt(3.0) / 2.0
     else:
         dx = dz = p.pitch
+
+    if p.tileable:
+        # snap the lattice so a whole number of cells spans the module, and an
+        # even number of rows so the hex row offset returns to phase 0
+        nx = max(1, round(p.face_w / dx))
+        nz = max(2, round(p.face_h / dz))
+        if p.lattice == "hex" and nz % 2:
+            nz += 1
+        dx, dz = p.face_w / nx, p.face_h / nz
+        base = []
+        for iz in range(nz):
+            for ix in range(nx):
+                x = ix * dx + (dx * 0.5 if (p.lattice == "hex" and iz % 2)
+                               else 0.0)
+                z = iz * dz - p.face_h / 2.0
+                x += (2.0 * next(rng) - 1.0) * p.jitter * p.pitch
+                z += (2.0 * next(rng) - 1.0) * p.jitter * p.pitch
+                base.append((x, z))
+        for gx in (-1, 0, 1):
+            for gz in (-1, 0, 1):
+                out += [(x + gx * p.face_w, z + gz * p.face_h)
+                        for x, z in base]
+        return out
     # generous margin: cones must run past the measurement window on all sides
     mz = p.margin_depths * p.depth
-    mx = 0.35 * p.face_w
+    mx = max(p.margin_depths * p.depth, p.centre_margin_pitches * p.pitch)
     nx = int((p.face_w + 2 * mx) / dx) + 2
     nz = int((p.face_h + 2 * mz) / dz) + 2
     ix0 = -int(mx / dx) - 1
@@ -141,6 +190,30 @@ def centres(p: Cone3DParams) -> list[tuple[float, float]]:
             z += (2.0 * next(rng) - 1.0) * p.jitter * p.pitch
             out.append((x, z))
     return out
+
+
+def _cone_verts(verts, faces, cx, cz, H, R, r_tip, shift, n, m, y_top=0.0):
+    """One closed cone, appended in place. `y_top` sinks the apex."""
+    base0 = len(verts)
+    for k in range(m + 1):
+        f = k / m
+        r = r_tip + (R - r_tip) * f
+        y = y_top - H * f
+        for i in range(n):
+            a = 2.0 * math.pi * i / n
+            verts.append((cx + r * math.cos(a), y,
+                          cz + r * math.sin(a) - shift * f))
+    apex = len(verts); verts.append((cx, y_top, cz))
+    floor = len(verts); verts.append((cx, y_top - H, cz - shift))
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((apex, base0 + i, base0 + j))
+        for k in range(m):
+            a0 = base0 + k * n
+            a1 = base0 + (k + 1) * n
+            faces.append((a0 + i, a1 + i, a1 + j, a0 + j))
+        b = base0 + m * n
+        faces.append((floor, b + j, b + i))
 
 
 def build_mesh(p: Cone3DParams):
@@ -160,7 +233,18 @@ def build_mesh(p: Cone3DParams):
     n = max(6, p.radial_seg)
     m = max(1, p.height_seg)
 
+    # slab extent, computed here so cones can be filtered against it: any cone
+    # whose centre falls outside it is not attached and would survive a boolean
+    # union as its own shell, which is what makes a print non-manifold
+    sx0 = -(max(p.margin_depths * p.depth,
+                p.centre_margin_pitches * p.pitch) + R)
+    sx1 = p.face_w - sx0
+    sz1 = p.face_h / 2.0 + max(p.margin_depths * p.depth,
+                               p.centre_margin_pitches * p.pitch) + R
+
     for cx, cz in centres(p):
+        if not (sx0 <= cx <= sx1 and -sz1 <= cz <= sz1):
+            continue
         H = p.depth * (1.0 + (2.0 * next(rng) - 1.0) * p.depth_jitter)
         tilt = math.radians(p.tilt_deg
                             + (2.0 * next(rng) - 1.0) * p.tilt_jitter)
@@ -168,43 +252,51 @@ def build_mesh(p: Cone3DParams):
         # the base slides, which is what the bird-of-paradise barbule does
         shift = H * math.tan(tilt)
 
-        base0 = len(verts)
-        # apex cap ring, then rings down the flank to the base
-        for k in range(m + 1):
-            f = k / m
-            r = p.tip_radius + (R - p.tip_radius) * f
-            y = -H * f
-            for i in range(n):
-                a = 2.0 * math.pi * i / n
-                verts.append((cx + r * math.cos(a),
-                              y,
-                              cz + r * math.sin(a) - shift * f))
-        apex = len(verts)
-        verts.append((cx, 0.0, cz))          # single point closing the cap
-        floor = len(verts)
-        verts.append((cx, -H, cz - shift))   # single point closing the base
+        _cone_verts(verts, faces, cx, cz, H, R, p.tip_radius, shift, n, m)
 
-        for i in range(n):
-            j = (i + 1) % n
-            faces.append((apex, base0 + i, base0 + j))
-            for k in range(m):
-                a0 = base0 + k * n
-                a1 = base0 + (k + 1) * n
-                faces.append((a0 + i, a1 + i, a1 + j, a0 + j))
-            b = base0 + m * n
-            faces.append((floor, b + j, b + i))
+    # secondary array, dropped into the valleys and deliberately shorter so
+    # its tips sit in the shadow of the primary ones
+    if p.second_ratio > 0.0:
+        sp = Cone3DParams(**{**p.__dict__, "pitch": p.pitch * p.second_ratio,
+                             "second_ratio": 0.0, "seed": p.seed + 101})
+        R2 = sp.effective_overlap() * sp.pitch / 2.0
+        rng2 = _lcg(p.seed * 17 + 3)
+        H2 = p.depth * p.second_depth_frac
+        for cx, cz in centres(sp):
+            h = H2 * (1.0 + (2.0 * next(rng2) - 1.0) * p.depth_jitter)
+            # sunk so the tip starts below the primary apex plane
+            # apex sunk so it starts below the primary apex plane and its
+            # base lands on the same valley floor
+            _cone_verts(verts, faces, cx, cz, h, R2, p.second_tip, 0.0,
+                        max(6, n // 2), max(1, m - 1),
+                        y_top=-(p.depth - h))
 
     # backing slab, so nothing sees daylight through the tile
-    y0 = -p.depth * (1.0 + p.depth_jitter) - 0.5
+    # The slab top must sit ABOVE the shallowest cone base, or no cone reaches
+    # it. The previous "-0.5 clearance" put it 0.5 mm below the DEEPEST base,
+    # so every cone floated and a boolean union left the slab as its own shell
+    # -- measured directly: the cone mass spanned y -34.45..0 and the slab
+    # y -38..-35.
+    y0 = -p.depth * (1.0 - p.depth_jitter) + 0.5
     y1 = y0 - p.backing
     # kept inside the panel's own X lane: the flat control sits at
     # face_w + GAP and must not have this slab reaching under it
-    w = p.face_w
-    h = p.face_h / 2.0 + p.margin_depths * p.depth + 2 * p.pitch
+    # the slab follows the same margin as the cone field, so an export with a
+    # small margin comes out flush with the panel edge instead of oversize
+    # one extra pitch beyond the cone field, so every cone lands ON the slab.
+    # Without it the outermost cones float free and a boolean union leaves
+    # them as separate shells, which is what makes a print non-manifold.
+    # the slab has to reach the outermost cone BASE, or edge cones float free
+    # and the boolean union leaves them as separate shells
+    R = p.effective_overlap() * p.pitch / 2.0
+    mx = max(p.margin_depths * p.depth,
+             p.centre_margin_pitches * p.pitch) + R
+    h = p.face_h / 2.0 + max(p.margin_depths * p.depth,
+                             p.centre_margin_pitches * p.pitch) + R
     m0 = len(verts)
     for y in (y0, y1):
-        verts += [(-0.35 * w, y, -h), (1.35 * w, y, -h),
-                  (1.35 * w, y, h), (-0.35 * w, y, h)]
+        verts += [(-mx, y, -h), (p.face_w + mx, y, -h),
+                  (p.face_w + mx, y, h), (-mx, y, h)]
     faces += [(m0, m0 + 1, m0 + 2, m0 + 3),
               (m0 + 7, m0 + 6, m0 + 5, m0 + 4)]
     for i in range(4):
@@ -233,6 +325,10 @@ def describe(p: Cone3DParams) -> dict:
         "half_angle_deg": p.half_angle_deg(),
         "depth_jitter": p.depth_jitter,
         "margin_depths": p.margin_depths,
+        "second_ratio": p.second_ratio,
+        "second_depth_frac": p.second_depth_frac,
+        "second_tip_mm": p.second_tip,
+        "tileable": p.tileable,
         "overlap": p.overlap,
         "effective_overlap": p.effective_overlap(),
         "overlap_was_raised": p.gap_risk(),

@@ -257,6 +257,80 @@ longer where it entered.
 collinear, first hit visible, one bounce, no displacement. That rule has not
 been broken by any of the five families.
 
+### What the cone family settled
+
+**Depth is not the lever it looked like; the tip is, again — but only once it
+is a large enough fraction of the cell.** The scale sweep held aspect ratio
+fixed and shrank everything, expecting scale invariance since the tip had been
+shown not to matter. It is not invariant, because the tip radius was pinned at
+0.4 mm in every case: at pitch 20 that is 0.15% of the cell, at pitch 2.5 it is
+9.3%. The measured 0.0484% at pitch 2.5 against a tip-area estimate of 0.047%
+settles it. The full rule is
+
+    reflectance  ~=  max( tip_area_fraction x rho ,  flank floor(A) )
+
+so "the tip does not matter for cones" holds only while the first term is below
+the second.
+
+At depth 30, tip radius 0.4 -> 0.2 -> 0.1 mm gives 0.0083 -> 0.0046 -> 0.0037%.
+**Tip radius is now fixed at 0.2 mm (0.4 mm across, one nozzle width)**, which
+makes depth 30 equal to depth 50 with a 0.4 mm radius tip. A sharper tip buys
+back 20 mm of wall.
+
+Depth comparison at that tip, best pitch for each:
+
+| depth | pitch | head-on | ±40° | all |
+|---|---|---|---|---|
+| 30 | 7.5 | 0.0046% | 0.0056% | 0.220% |
+| 30 | 3.75 | — | — | 0.089% |
+| 50 | 13 | 0.0047% | 0.0055% | 0.174% |
+| 80 | 13 | 0.0044% | 0.0049% | 0.128% |
+
+Pitch sets which end of the angle range wins: coarse is better head-on, fine is
+better at grazing, and which to pick still depends on the rig's incidence
+distribution.
+
+**Bimodal cones — DEAD.** A finer, shorter array dropped into the valleys to
+catch rays skimming the primary flanks. Measured: the all-angle figure is
+*identical* to four decimals (0.2132%) in every variant, so the secondary array
+contributes nothing at grazing — those rays never reach that deep. Meanwhile
+its tips are fully exposed and cost 2x head-on (0.0083 -> 0.0164). Shrinking
+just the secondary tips to 0.1 mm returns the head-on figure to baseline,
+proving the entire effect was added tip area and nothing else.
+
+**Tilt — WITHDRAWN**, see the round-1 note above.
+
+### Printability, measured not assumed
+
+The exported cone STL was a few hundred interpenetrating closed solids. It was
+watertight (0 open edges, 0 non-manifold) but in several shells, and a slicer
+using an even-odd fill rule would turn every overlap into a hole.
+
+A boolean union got it to 4 shells, not 1. Rather than guess, the shells were
+located: the cone mass spanned y −34.45..0 and the backing slab y −38..−35 —
+**the slab was 0.5 mm clear of the deepest cone and touching nothing.** The
+"−0.5 mm clearance" in the slab placement was itself the defect. The slab now
+sits above the *shallowest* cone base, and height jitter is off for exports.
+
+Exports are also **tileable with no border**. The centre field is made exactly
+periodic over the module, so the tile can be cut at the boundary and the half
+cone removed on the right is the half entering on the left; butting two modules
+rebuilds whole cones. Verified on the exported mesh: the z faces match vertex
+for vertex, and the x faces agree geometrically to a median of 5 nm and a worst
+case of 0.9 µm — a two-hundredth of a printer layer. A flat border was rejected
+outright: it would be the brightest feature on the panel.
+
+Every export now prints `[UNION] open / nonmanifold / shells` and is only
+shipped on `OK`.
+
+### 3D images of everything
+
+`scripts/shot3d.py` renders any family to `profiles/NNN_3d_<name>.png` and logs
+a line to INDEX.md, so the numbered record now carries pictures of the dead ends
+as well as the survivors. A failed design still has to be explained to someone,
+and the picture is what makes that a sentence anyone can follow. Run it for
+every new geometry, not only the good ones.
+
 `scripts/cone3d_sweep.py` is the first real sweep: tip series (does head-on
 fall as r²?), aspect ratio (do cones just need more depth per pitch?), pitch,
 hex vs square, jitter on/off, and tilt 20/30° plus tilt jitter for the
@@ -384,6 +458,12 @@ needs enough facets that fake mirror normals do not manufacture a glint.
 | `profile_laby.py` | family 4, folded channels (dead) |
 | `geom3d.py` | family 5, 3D cone array (current work) |
 | `cone3d_sweep.py` | first 3D sweep, with re-measured 1D references |
+| `cone_scale.py` | aspect-ratio-fixed size sweep; found the tip pinning |
+| `cone_bimodal.py` | two cone sizes (dead) plus the tip series at depth 30 |
+| `cone3d_mtf.py` | form measurement for the 3D family |
+| `export_cone.py` | STL: union, trim to face, tileable, 100 x 100 only |
+| `shot3d.py` | numbered 3D render of any family, into profiles/ |
+| `plot_cone_vs_ridge.py` | the cone-vs-groove comparison sheet |
 | `raytrace2d.py` | independent 2D specular tracer; bounce count and Z displacement |
 | `validate.py`, `test_floor.py`, `test_tessellation.py` | measurement-chain checks |
 | `sweep.py`, `ridge_sweep.py`, `ridge_best.py`, `ridge_micro.py`, `fdm_optimum.py`, `pitch_tip_grid.py` | sweeps |
@@ -412,3 +492,10 @@ Renders are gitignored (5.7 GB, regenerable). Every extracted number is in
 - Withdraw a broken conclusion plainly and move on.
 - Search prior art before designing; do not let a guess be the starting point.
 - Keep this file current as the work moves, not only at handoff.
+- Render a 3D view of every geometry tried, successes and failures alike, and
+  number it into profiles/ — the client sees pictures, not CSVs.
+- STL is 100 x 100 mm only, single shell, tileable, no flat border. Verify
+  open edges / non-manifold / shell count on the exported file before shipping.
+- When a mesh check fails, locate the defect (component bounds, edge
+  positions) before changing anything. The slab-clearance bug was found that
+  way in one measurement after two wrong guesses.

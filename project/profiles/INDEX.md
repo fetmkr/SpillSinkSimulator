@@ -32,3 +32,10 @@ when it was generated, so dead ends stay next to survivors.
 | 065 | ridge | [ridge_micro_d50_tooth030](065_ridge_micro_d50_tooth030.png) | FIXED serration — tooth pitch 1.0 mm, tooth DEPTH 0.30 mm, tapered to zero at the ridge tip and the valley so the mouth stays open |  |
 | 066 | ridge | [ridge_micro_d50_tooth100](066_ridge_micro_d50_tooth100.png) | FIXED serration — tooth pitch 2.0 mm, tooth DEPTH 1.00 mm, tapered to zero at the ridge tip and the valley so the mouth stays open |  |
 | 067 | ridge | [ridge_micro_d50_fine_tooth010](067_ridge_micro_d50_fine_tooth010.png) | FIXED serration — tooth pitch 0.5 mm, tooth DEPTH 0.10 mm, tapered to zero at the ridge tip and the valley so the mouth stays open |  |
+| 068 | slat | [3d_slat_chamber](068_3d_slat_chamber.png) | family 1, angled slats over a hidden chamber. DEAD: the slats blocked the chamber entirely, so its geometry could not matter | |
+| 069 | scatter | [3d_scatter_trough](069_3d_scatter_trough.png) | family 2, open troughs, aimed at destroying form. DEAD: at retro-incidence the first hit is visible and one bounce cannot displace a photon | |
+| 070 | ridge | [3d_ridge_vgroove](070_3d_ridge_vgroove.png) | family 3, deep V-grooves, the wall-scale form of a beam dump. Best extruded design: 0.027% head-on, but the line comes back as a line | |
+| 071 | ridge | [3d_ridge_serrated](071_3d_ridge_serrated.png) | V-grooves with serrated flanks, copying butterfly hierarchy. DEAD: sub-wavelength physics does not transfer to mm scale; a sawtooth only deflects a grazing ray where a pit would trap it | |
+| 072 | cone3d | [3d_cone_d80](072_3d_cone_d80.png) | family 5, irregular cone array. 0.0044% head-on, 6x better than the groove, and the first design to destroy form as well | |
+| 073 | cone3d | [3d_cone_d30](073_3d_cone_d30.png) | the same at 30 mm depth: 0.0084% head-on, 1.8x worse than 50 mm but a wall two fifths as thick | |
+| 074 | cone3d | [3d_cone_bimodal](074_3d_cone_bimodal.png) | two cone sizes: a finer, shorter array dropped into the valleys to catch the rays that skim the primary flanks | |
