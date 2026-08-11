@@ -235,6 +235,28 @@ The cost of irregularity is now measured too: jitter 0 -> 0.30 costs 21% head-on
 (0.0042 -> 0.0051) and 2.3x at grazing (0.101 -> 0.230). That is the price of
 the no-periodic-array rule, and it is worth paying.
 
+### Form — the first time both axes moved together
+
+`scripts/cone3d_mtf.py`, same LSF harness, 300 mm panel so the window is
++/-90 mm and a wide smear is not clipped:
+
+| θ | | 1D V-groove d50 | 3D cone d120 |
+|---|---|---|---|
+| −40° | core / MTF@20 / energy | 0.993 / 0.984 / 0.0327 | **0.112 / 0.063 / 0.00038** |
+| 0° | core | 1.000 | 1.000 |
+| +40° | core / MTF@20 / energy | 0.996 / 0.985 / 0.0313 | **0.172 / 0.116 / 0.00033** |
+
+The groove keeps core at 0.99-1.00 at every angle — form completely intact.
+The cone drops it to 0.11-0.17 off-normal AND is 86x dimmer at the same time.
+Every earlier family traded one axis against the other; this is the first that
+improves both. The mechanism is the azimuthal freedom that also makes cones
+trap worse per bounce: a ray can walk around the cone, and where it exits is no
+longer where it entered.
+
+**θ = 0 is still core 1.000 for every geometry ever tried.** Observer and beam
+collinear, first hit visible, one bounce, no displacement. That rule has not
+been broken by any of the five families.
+
 `scripts/cone3d_sweep.py` is the first real sweep: tip series (does head-on
 fall as r²?), aspect ratio (do cones just need more depth per pitch?), pitch,
 hex vs square, jitter on/off, and tilt 20/30° plus tilt jitter for the

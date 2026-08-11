@@ -10,21 +10,16 @@ Writes into project/report/YYYY-MM-DD/ :
     HHMM_snapshot.json  the same numbers as data
     README.md           what was done that day, appended per report
 
-REFLECTANCE IS THE HEADLINE NUMBER. Every measurement here is an absolute
-directional-hemispherical reflectance: under uniform illumination of radiance
-L0 a Lambertian surface of albedo rho leaves radiance rho*L0, so the rendered
-pixel value IS rho_dh, and the flat control reads 0.050000 exactly as it
-should. The ratio against that flat control is carried as a secondary column
-because it is what stays meaningful when the coating assumption changes -- but
-it is not the answer to "how reflective is it".
+REFLECTANCE IS THE HEADLINE NUMBER, absolute and in percent. Under uniform
+illumination of radiance L0 a Lambertian surface of albedo rho leaves radiance
+rho*L0, so a rendered pixel IS rho_dh and the flat control reads 0.050000. The
+ratio against that control is carried as a secondary column.
 
-Each run also writes a snapshot JSON. Nothing on the sheet compares against it
-today -- the per-report diff column was dropped because it is noise while the
-design is still moving. The snapshots accumulate so that a later pass over the
-whole report/ folder can reconstruct the history in one go.
+Snapshots accumulate so a later pass over the whole report/ folder can rebuild
+the history; nothing on the sheet compares against them today.
 
-Everything is read back out of results/*.csv, so the report can never quote a
-number that was not measured.
+Every number is read back out of results/*.csv and results/*.json, so the
+report cannot quote something that was not measured.
 """
 
 from __future__ import annotations
@@ -34,6 +29,7 @@ import sys
 import csv
 import json
 import glob
+import math
 from datetime import datetime
 from collections import defaultdict
 
@@ -45,193 +41,180 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(ROOT, "results")
 REPORT = os.path.join(ROOT, "report")
 
-# the configuration currently being recommended
-BEST = {"family": "ridge", "depth_mm": 50.0, "pitch_mm": 13.0,
-        "tip_mm": 0.8, "rho": 0.005, "gloss": 0.30}
+BEST = {"family": "3D cone array", "tag": "J_d80_jit30", "form_tag":
+        "K_cone_d120_p13", "depth_mm": 80.0, "pitch_mm": 13.0, "tip_mm": 0.8,
+        "jitter": 0.30, "rho": 0.005, "gloss": 0.30}
 
-# Context for the headline number. Coating and wall figures are the working
-# assumptions of this project; the last four are published values, quoted so
-# the simulated result can be placed against something real.
+# label, tag, which CSV, colour
+ROWS = [
+    ("1D V-groove  d50 p13", "R_ref_d50_p13", "r1", "#c02020"),
+    ("1D V-groove  d50 p8", "R_ref_d50_p08", "r1", "#c02020"),
+    ("3D cone  d50 p13", "J_jit30", "r2", "#2171b5"),
+    ("3D cone  d80 p13", "J_d80_jit30", "r2", "#e6550d"),
+    ("3D cone  d120 p13", "J_d120_jit30", "r2", "#2171b5"),
+    ("3D cone  d80 p8", "J_d80_p08", "r2", "#41ab5d"),
+    ("3D cone  no jitter", "J_nojit", "r2", "#888888"),
+    ("3D cone  tilt 30", "J_tilt30_jit30", "r2", "#888888"),
+]
+
 BENCH = [
     ("plain matte black wall", 5.0, "assumed baseline", "#c02020"),
     ("good black anodise", 2.0, "assumed", "#c02020"),
-    ("Musou-Black class coating, flat", 0.5, "assumed; spec ~0.6%", "#b35806"),
-    ("deep-sea fish skin", 0.5, "Davis 2020, Curr Biol", "#666666"),
-    ("ultra-black butterfly scale", 0.2, "Davis 2020, Nat Commun", "#666666"),
-    ("optimised laser beam dump", 0.1, "RP Photonics", "#666666"),
-    ("Vantablack (CNT forest)", 0.03, "Surrey NanoSystems", "#666666"),
+    ("Musou-Black class, flat", 0.5, "assumed; spec ~0.6%", "#b35806"),
+    ("deep-sea fish skin", 0.5, "Davis 2020 Curr Biol", "#666666"),
+    ("ultra-black butterfly", 0.2, "Davis 2020 Nat Commun", "#666666"),
+    ("optimised beam dump", 0.1, "RP Photonics", "#666666"),
+    ("Vantablack (CNT)", 0.03, "Surrey NanoSystems", "#666666"),
 ]
 
 
-def load_curves(path, keyfields):
-    """key -> {theta: (absolute rho_dh, ratio vs flat)}."""
+def load_csv(name, key="tag"):
+    path = os.path.join(RESULTS, name)
     if not os.path.exists(path):
-        return {}
-    rows = [r for r in csv.DictReader(open(path))
-            if r.get("mode") == "hemi_view"]
-    cur = defaultdict(dict)
-    for r in rows:
-        key = tuple(float(r[f]) for f in keyfields if f in r)
-        cur[key][float(r["theta"])] = (float(r["panel_mean"]),
-                                       float(r["ratio_vs_flat"]))
-    return cur
+        return {}, {}
+    cur, meta = defaultdict(dict), {}
+    for r in csv.DictReader(open(path)):
+        if "rho" in r:
+            val = float(r["rho"]) * 100.0
+        elif r.get("mode") == "hemi_view":
+            val = float(r["panel_mean"]) * 100.0
+        else:
+            continue
+        cur[r[key]][float(r["theta"])] = val
+        meta[r[key]] = r
+    return cur, meta
 
 
-def band(d, lo, hi, idx=0):
-    v = [x[idx] for t, x in d.items() if lo <= t <= hi]
+def band(d, lo, hi):
+    v = [x for t, x in d.items() if lo <= t <= hi]
     return max(v) if v else None
 
 
 def collect():
     snap = {"generated": datetime.now().isoformat(timespec="minutes"),
-            "best": dict(BEST), "grid": {}, "curve": {}, "counts": {},
-            "units": {"rho": "absolute directional-hemispherical reflectance",
-                      "ratio": "same quantity divided by a flat rho=0.05 plate"}}
+            "best": dict(BEST), "cases": {}, "curve": {}, "form": {},
+            "counts": {},
+            "units": {"reflectance": "absolute, percent, "
+                      "directional-hemispherical"}}
 
-    keys = ("depth_mm", "pitch_mm", "tip_width_mm")
-    grid = load_curves(os.path.join(RESULTS, "sweep_pitch_tip.csv"), keys)
-    fdm = load_curves(os.path.join(RESULTS, "sweep_fdm.csv"), keys)
+    r1, m1 = load_csv("sweep_cone3d.csv")
+    r2, m2 = load_csv("sweep_cone3d_r2.csv")
+    src = {"r1": (r1, m1), "r2": (r2, m2)}
 
-    for src in (grid, fdm):
-        for k, d in src.items():
-            name = "%.0f/%.0f/%.1f" % k
-            if name in snap["grid"]:
-                continue
-            snap["grid"][name] = {
-                "rho0": d.get(0.0, (None, None))[0],
-                "rho40": band(d, -40, 40, 0),
-                "rhoall": band(d, -90, 90, 0),
-                "ratio0": d.get(0.0, (None, None))[1],
-                "ratio40": band(d, -40, 40, 1),
-                "ratioall": band(d, -90, 90, 1),
-            }
+    for label, tag, which, _c in ROWS:
+        cur, meta = src[which]
+        if tag not in cur:
+            continue
+        d = cur[tag]
+        snap["cases"][label] = {
+            "tag": tag,
+            "head_on": d.get(0.0), "w40": band(d, -40, 40),
+            "wall": band(d, -90, 90),
+            "depth": float(meta[tag]["depth_mm"]),
+            "pitch": float(meta[tag]["pitch_mm"]),
+            "aspect": float(meta[tag]["aspect"]),
+        }
 
-    key = (BEST["depth_mm"], BEST["pitch_mm"], BEST["tip_mm"])
-    src = grid.get(key) or fdm.get(key) or {}
-    snap["curve"] = {str(t): v[0] for t, v in sorted(src.items())}
+    if BEST["tag"] in r2:
+        snap["curve"] = {str(t): v for t, v in sorted(r2[BEST["tag"]].items())}
+
+    fpath = os.path.join(RESULTS, "cone3d_mtf.json")
+    if os.path.exists(fpath):
+        for c in json.load(open(fpath)):
+            snap["form"][c["tag"]] = {
+                th: {"core": v["panel"]["core_frac"],
+                     "rms": v["panel"]["rms_mm"],
+                     "mtf20": v["panel"]["mtf_20mm"],
+                     "energy": v["energy_ratio"]}
+                for th, v in c["thetas"].items()}
 
     snap["counts"] = {
         "renders": sum(len(glob.glob(os.path.join(ROOT, "renders", d, "*.exr")))
                        for d in os.listdir(os.path.join(ROOT, "renders"))
                        if os.path.isdir(os.path.join(ROOT, "renders", d))),
-        "sweep_csvs": len(glob.glob(os.path.join(RESULTS, "sweep_*.csv"))),
+        "sweeps": len(glob.glob(os.path.join(RESULTS, "sweep_*.csv"))),
         "profiles": len(glob.glob(os.path.join(ROOT, "profiles", "*.png"))),
         "stl": len(glob.glob(os.path.join(ROOT, "export", "*.stl"))),
     }
     return snap
 
 
-def previous(exclude=None):
-    files = sorted(glob.glob(os.path.join(REPORT, "*", "*_snapshot.json")))
-    files = [f for f in files if f != exclude]
-    if not files:
-        return None, None
-    day = os.path.basename(os.path.dirname(files[-1]))
-    return json.load(open(files[-1])), day + " " + os.path.basename(files[-1])[:4]
-
-
-def fmt_delta(now, then):
-    if then is None or now is None:
-        return "new", "#2171b5"
-    if then == 0:
-        return "", "#333333"
-    ch = (now - then) / then * 100.0
-    if abs(ch) < 0.5:
-        return "same", "#888888"
-    return ("%+.0f%%" % ch), ("#1a9850" if ch < 0 else "#d73027")
-
-
-def draw(snap, prev, prev_tag, note):
-    fig = plt.figure(figsize=(17.0, 17.6))
-    gs = fig.add_gridspec(6, 3,
-                          height_ratios=[0.30, 0.62, 0.95, 1.15, 0.72, 0.82],
-                          hspace=0.55, wspace=0.24)
+def draw(snap, note):
     b = snap["best"]
-    kbest = "%.0f/%.0f/%.1f" % (b["depth_mm"], b["pitch_mm"], b["tip_mm"])
-    mbest = snap["grid"].get(kbest, {})
+    best = None
+    for label, tag, _w, _c in ROWS:
+        if tag == b["tag"] and label in snap["cases"]:
+            best = snap["cases"][label]
+    fig = plt.figure(figsize=(17.5, 15.6))
+    gs = fig.add_gridspec(5, 3, height_ratios=[0.30, 0.58, 1.00, 1.05, 0.86],
+                          hspace=0.58, wspace=0.24)
 
-    # ---- header ---------------------------------------------------------
-    ax = fig.add_subplot(gs[0, :])
-    ax.axis("off")
+    # ---------------- header ----------------
+    ax = fig.add_subplot(gs[0, :]); ax.axis("off")
     ax.text(0, 1.0, "Anechoic laser wall panel", fontsize=16,
             fontweight="bold", va="top")
-    ax.text(0, 0.50, snap["generated"].replace("T", "  "), fontsize=10.5,
+    ax.text(0, 0.48, snap["generated"].replace("T", "  "), fontsize=10.5,
             color="#555555", va="top")
-    ax.text(0.27, 1.0, "current recommendation", fontsize=10,
+    ax.text(0.25, 1.0, "current recommendation", fontsize=10,
             fontweight="bold", va="top")
-    ax.text(0.27, 0.58,
-            "ridge V-grooves, irregular pitch\n"
-            "depth %.0f   pitch %.0f   tip %.1f  mm\n"
-            "coating rho %.3f (%.1f%%) Musou-Black class\ngloss roughness %.2f"
-            % (b["depth_mm"], b["pitch_mm"], b["tip_mm"], b["rho"],
-               b["rho"] * 100, b["gloss"]),
-            fontsize=9.2, va="top", family="monospace")
-    if mbest.get("rho0") is not None:
-        ax.text(0.585, 1.0, "measured reflectance", fontsize=10,
+    ax.text(0.25, 0.58,
+            "%s, irregular\ndepth %.0f   pitch %.0f   tip %.1f  mm\n"
+            "coating rho %.3f (%.1f%%)   gloss %.2f"
+            % (b["family"], b["depth_mm"], b["pitch_mm"], b["tip_mm"],
+               b["rho"], b["rho"] * 100, b["gloss"]),
+            fontsize=9.4, va="top", family="monospace")
+    if best:
+        ax.text(0.575, 1.0, "measured reflectance", fontsize=10,
                 fontweight="bold", va="top", color="#e6550d")
-        ax.text(0.585, 0.58,
+        ax.text(0.575, 0.58,
                 "head-on      %.4f %%\nworst +/-40  %.4f %%\nworst all    %.4f %%"
-                % (mbest["rho0"] * 100, mbest["rho40"] * 100,
-                   mbest["rhoall"] * 100),
+                % (best["head_on"], best["w40"], best["wall"]),
                 fontsize=11, va="top", family="monospace", color="#e6550d",
                 fontweight="bold")
     c = snap["counts"]
     ax.text(0.855, 1.0, "project totals", fontsize=10, fontweight="bold",
             va="top")
-    ax.text(0.855, 0.58,
-            "%d renders\n%d sweeps\n%d profiles   %d STL"
-            % (c["renders"], c["sweep_csvs"], c["profiles"], c["stl"]),
-            fontsize=9.5, va="top", family="monospace")
+    ax.text(0.855, 0.58, "%d renders\n%d sweeps\n%d profiles   %d STL"
+            % (c["renders"], c["sweeps"], c["profiles"], c["stl"]),
+            fontsize=9.4, va="top", family="monospace")
     if note:
-        ax.text(0, -0.30, "note:  " + note, fontsize=10.5, va="top",
+        ax.text(0, -0.28, "note:  " + note, fontsize=10.5, va="top",
                 color="#b35806")
 
-    # ---- conditions ------------------------------------------------------
-    # A first-time reader has none of the context, and every number below is
-    # conditional on this block. It is stated before the results, not after.
-    axc = fig.add_subplot(gs[1, :])
-    axc.axis("off")
+    # ---------------- conditions ----------------
+    axc = fig.add_subplot(gs[1, :]); axc.axis("off")
     axc.text(0, 1.02, "What is being measured, and under what assumptions",
              fontsize=11.5, fontweight="bold", va="top")
-    # Lines are kept short on purpose. The first version ran the left column
-    # under the right one and the two collided into unreadable mush.
-    left = [
-        ("problem", "laser projectors form an aerial image in haze; every"),
-        ("", "beam carries on and lands on a wall, painting a sharp"),
-        ("", "bright copy that outshines the artwork. this is the wall."),
-        ("panel", "500 x 500 mm, one cross-section extruded along an axis,"),
-        ("", "irregular pitch so a scanning beam meets no periodic array"),
-        ("quantity", "absolute directional-hemispherical reflectance"),
-        ("", "rho_dh(theta): the fraction of a beam that leaves again"),
+    cols = [
+        (0.005, 0.085, [
+            ("problem", "laser projectors form an aerial image in haze;", "#111"),
+            ("", "every beam carries on and lands on a wall, painting", "#111"),
+            ("", "a sharp copy that outshines it. this is the wall.", "#111"),
+            ("panel", "500 x 500 mm module; irregular cell placement so", "#111"),
+            ("", "a scanning beam meets no periodic array", "#111"),
+            ("quantity", "absolute directional-hemispherical reflectance:", "#111"),
+            ("", "the fraction of an arriving beam that leaves again", "#111")]),
+        (0.345, 0.425, [
+            ("method", "Cycles path tracing, 128 bounces, no denoise,", "#111"),
+            ("", "no clamp, linear colour. uniform illumination with", "#111"),
+            ("", "the camera tilted to theta; by reciprocity that", "#111"),
+            ("", "reads rho_dh(theta) with no glint spikes", "#111"),
+            ("coating", "rho %.3f (%.1f%%) ASSUMED, Musou-Black class"
+             % (b["rho"], b["rho"] * 100), "#b35806"),
+            ("", "(spec ~0.6%). reflectance is exactly linear in it,", "#b35806"),
+            ("", "so another coating rescales every number here", "#b35806")]),
+        (0.685, 0.775, [
+            ("baseline", "a flat plate of the SAME coating in the same", "#111"),
+            ("", "frame; a plain matte black wall is taken as 5%", "#111"),
+            ("checks", "emission 1.0 -> 1.000000", "#111"),
+            ("", "flat rho 0.05 -> 0.050001", "#111"),
+            ("", "box cavity f=1/6 -> 0.2356 (0.233 before)", "#111"),
+            ("", "rho=0 panel -> exactly 0, so no noise floor", "#111"),
+            ("NOT", "Fresnel, so grazing figures are optimistic;", "#8c510a"),
+            ("modelled", "wavelength; coating reach into the cell;", "#8c510a"),
+            ("", "panel-to-panel tiling", "#8c510a")]),
     ]
-    mid = [
-        ("method", "Cycles path tracing, 128 bounces, no denoise,", "#111111"),
-        ("", "no clamp, linear colour. uniform illumination", "#111111"),
-        ("", "with the camera tilted to theta; by reciprocity", "#111111"),
-        ("", "that reads rho_dh(theta) with no glint spikes", "#111111"),
-        ("coating", "rho %.3f (%.1f%%) ASSUMED, Musou-Black class"
-         % (b["rho"], b["rho"] * 100), "#b35806"),
-        ("", "(published spec ~0.6%). reflectance is exactly", "#b35806"),
-        ("", "linear in it, so another coating just rescales", "#b35806"),
-        ("", "every number on this sheet by the same factor", "#b35806"),
-    ]
-    right = [
-        ("baseline", "a flat plate of the SAME coating, in the", "#111111"),
-        ("", "same frame; a plain matte black wall is 5%", "#111111"),
-        ("checks", "emission 1.0 -> 1.000000", "#111111"),
-        ("", "flat rho 0.05 -> 0.050001", "#111111"),
-        ("", "box cavity f=1/6 -> 0.2356 (0.233 before)", "#111111"),
-        ("", "rho=0 panel -> exactly 0, so no noise floor", "#111111"),
-        ("NOT", "Fresnel, so grazing figures are optimistic;", "#8c510a"),
-        ("modelled", "wavelength; coating thinning down the", "#8c510a"),
-        ("", "groove; panel-to-panel tiling", "#8c510a"),
-    ]
-
-    # three columns, because two put thirteen wrapped lines against seven and
-    # the right-hand block collapsed on itself
-    for x0, xk, block in ((0.005, 0.085, [(k, v, "#111111") for k, v in left]),
-                          (0.345, 0.425, mid),
-                          (0.685, 0.775, right)):
+    for x0, xk, block in cols:
         y = 0.72
         for k, v, colr in block:
             if k:
@@ -240,113 +223,107 @@ def draw(snap, prev, prev_tag, note):
             axc.text(xk, y, v, fontsize=8.3, family="monospace", color=colr)
             y -= 0.115
 
-    # ---- the geometry itself ---------------------------------------------
-    # A reader should not have to imagine the shape from three numbers. The
-    # section is drawn live from the same generator the renders use, so it can
-    # never disagree with them.
+    # ---------------- geometry ----------------
     axg = fig.add_subplot(gs[2, 0])
     try:
-        import profile_ridge as PR
-        from matplotlib.patches import Polygon
-        pr = PR.RidgeParams(depth=b["depth_mm"], pitch_mean=b["pitch_mm"],
-                            tip_width=b["tip_mm"], face_h=90.0,
-                            valley_round=0.5, arc_segments=16)
-        for loop in PR.build_cross_section(pr).stage1:
-            axg.add_patch(Polygon(loop, closed=True, facecolor="#4da3ff",
-                                  edgecolor="#1b5fa8", lw=0.5))
-        axg.plot([0, 0], [-45, 45], color="#e04040", lw=0.9, ls="--")
-        axg.set_xlim(-b["depth_mm"] * 1.12, b["depth_mm"] * 0.18)
-        axg.set_ylim(-42, 42)
+        import geom3d as G3
+        p = G3.Cone3DParams(depth=b["depth_mm"], pitch=b["pitch_mm"],
+                            tip_radius=b["tip_mm"] / 2.0)
+        R = p.effective_overlap() * p.pitch / 2.0
+        for k in (-1, 0, 1):
+            xs = [k * p.pitch - R, k * p.pitch - b["tip_mm"] / 2,
+                  k * p.pitch + b["tip_mm"] / 2, k * p.pitch + R]
+            ys = [-p.depth, 0.0, 0.0, -p.depth]
+            axg.fill(xs, ys, facecolor="#4da3ff", edgecolor="#1b5fa8", lw=0.6,
+                     alpha=0.85)
+        axg.plot([-1.6 * p.pitch, 1.6 * p.pitch], [0, 0], color="#e04040",
+                 lw=0.9, ls="--")
+        axg.set_xlim(-1.7 * p.pitch, 1.7 * p.pitch)
+        axg.set_ylim(-p.depth * 1.12, p.depth * 0.22)
         axg.set_aspect("equal")
-        axg.set_xlabel("Y depth (mm)   <- into wall     light from +Y ->",
-                       fontsize=8)
-        axg.set_ylabel("Z (mm)", fontsize=8)
+        axg.set_xlabel("across the face (mm)", fontsize=8)
+        axg.set_ylabel("depth (mm)", fontsize=8)
         axg.tick_params(labelsize=7.5)
         axg.grid(alpha=0.18, lw=0.4)
-        axg.set_title("cross-section, actual scale", fontsize=10)
+        axg.set_title("one cone in section, actual scale\n"
+                      "(3 of ~600 across a 500 mm module)", fontsize=9.5)
     except Exception as exc:
         axg.axis("off")
-        axg.text(0.5, 0.5, "section unavailable\n%s" % exc, ha="center",
-                 fontsize=8)
+        axg.text(0.5, 0.5, str(exc), ha="center", fontsize=8)
 
     axi = fig.add_subplot(gs[2, 1:])
     shot = os.path.join(REPORT, "assets", "recommended_3d.png")
     if os.path.exists(shot):
         import matplotlib.image as mpimg
         axi.imshow(mpimg.imread(shot))
-        axi.set_title("recommended geometry, %.0f mm of panel shown "
-                      "(neutral grey; the real coating renders black)"
-                      % 120.0, fontsize=10)
-    else:
-        axi.text(0.5, 0.5, "no render at report/assets/recommended_3d.png",
-                 ha="center", fontsize=9, color="#888888")
+        axi.set_title("the recommended surface (neutral grey; the real "
+                      "coating renders black)", fontsize=10)
     axi.axis("off")
 
-    # ---- performance table, reflectance first -----------------------------
-    ax1 = fig.add_subplot(gs[3, :2])
-    ax1.axis("off")
+    # ---------------- reflectance table + curve ----------------
+    ax1 = fig.add_subplot(gs[3, :2]); ax1.axis("off")
     ax1.text(0, 1.03, "Reflectance in percent — absolute, at coating rho = "
              "%.3f" % b["rho"], fontsize=11.5, fontweight="bold", va="top")
-    ax1.text(0, 0.925, "grey columns repeat the same numbers as a ratio "
-             "against a flat plate of the same coating", fontsize=8.5,
-             color="#777777", va="top")
+    xs = [0.0, 0.30, 0.42, 0.53, 0.66, 0.79]
+    for x, h in zip(xs, ["case", "depth", "A", "head-on", "+/-40", "all"]):
+        ax1.text(x, 0.93, h, fontsize=9, fontweight="bold")
+    y = 0.855
+    for label, tag, _w, colr in ROWS:
+        if label not in snap["cases"]:
+            continue
+        m = snap["cases"][label]
+        hit = tag == b["tag"]
+        fw = "bold" if hit else "normal"
+        cc = "#e6550d" if hit else colr
+        for x, v in zip(xs, [label, "%.0f" % m["depth"], "%.1f" % m["aspect"],
+                             "%.4f" % m["head_on"], "%.4f" % m["w40"],
+                             "%.4f" % m["wall"]]):
+            ax1.text(x, y, v, fontsize=8.8, color=cc, fontweight=fw,
+                     family="monospace" if x > 0.2 else "sans-serif")
+        y -= 0.075
 
-    rows = []
-    for depth in (30.0, 50.0):
-        for pitch in (8.0, 13.0, 20.0, 30.0):
-            for tip in (0.4, 0.8, 1.6):
-                k = "%.0f/%.0f/%.1f" % (depth, pitch, tip)
-                if k in snap["grid"] and snap["grid"][k]["rho0"] is not None:
-                    rows.append((depth, pitch, tip, k, snap["grid"][k]))
+    y -= 0.05
+    ax1.text(0, y, "Form — does the line come back as a line?", fontsize=11.5,
+             fontweight="bold", va="top")
+    y -= 0.08
+    fx = [0.0, 0.30, 0.44, 0.58, 0.74]
+    for x, h in zip(fx, ["case", "theta", "core frac", "MTF @20mm",
+                         "energy vs flat"]):
+        ax1.text(x, y, h, fontsize=9, fontweight="bold")
+    y -= 0.072
+    for tag, colr in ((b["form_tag"], "#e6550d"),
+                      ("K_ridge_d50_p13", "#c02020")):
+        f = snap["form"].get(tag)
+        if not f:
+            continue
+        for th in ("-40", "+0", "+40"):
+            if th not in f:
+                continue
+            v = f[th]
+            nm = ("3D cone d120" if "cone" in tag else "1D V-groove d50") \
+                if th == "-40" else ""
+            for x, s in zip(fx, [nm, th, "%.3f" % v["core"],
+                                 "%.4f" % v["mtf20"],
+                                 "%.5f" % v["energy"]]):
+                ax1.text(x, y, s, fontsize=8.8, color=colr,
+                         family="monospace" if x > 0.2 else "sans-serif")
+            y -= 0.072
 
-    half = (len(rows) + 1) // 2
-    cols = [(0.0, rows[:half]), (0.535, rows[half:])]
-    dx = [0.0, 0.040, 0.079, 0.117, 0.162, 0.230, 0.298, 0.362, 0.418]
-    hdr = ["dep", "pit", "tip", "A", "head-on", "+/-40", "all",
-           "x flat", "x flat"]
-    for x0, chunk in cols:
-        y = 0.845
-        for d_, h in zip(dx, hdr):
-            ax1.text(x0 + d_, y, h, fontsize=8.6, fontweight="bold",
-                     color="#777777" if h == "x flat" else "#111111")
-        y -= 0.056
-        for depth, pitch, tip, k, m in chunk:
-            hit = (depth == b["depth_mm"] and pitch == b["pitch_mm"]
-                   and tip == b["tip_mm"])
-            col = "#e6550d" if hit else "#333333"
-            fw = "bold" if hit else "normal"
-            vals = ["%.0f" % depth, "%.0f" % pitch, "%.1f" % tip,
-                    "%.1f" % (depth / pitch),
-                    "%.4f" % (m["rho0"] * 100),
-                    "%.4f" % (m["rho40"] * 100),
-                    "%.4f" % (m["rhoall"] * 100)]
-            for d_, v in zip(dx, vals):
-                ax1.text(x0 + d_, y, v, fontsize=8.6, color=col,
-                         fontweight=fw, family="monospace")
-            ax1.text(x0 + dx[7], y, "%.4f" % m["ratio0"], fontsize=8.2,
-                     color="#999999", family="monospace")
-            ax1.text(x0 + dx[8], y, "%.4f" % m["ratio40"], fontsize=8.2,
-                     color="#999999", family="monospace")
-            y -= 0.056
-
-    # ---- angle curve, absolute ------------------------------------------
     ax2 = fig.add_subplot(gs[3, 2])
     if snap["curve"]:
         ts = sorted(float(t) for t in snap["curve"])
         ax2.axvspan(-40, 40, color="#2171b5", alpha=0.08)
-        ax2.plot(ts, [snap["curve"][str(t)] * 100 for t in ts], marker="o",
-                 ms=3.5, lw=2.2, color="#e6550d", label="recommended")
+        ax2.plot(ts, [snap["curve"][str(t)] for t in ts], marker="o", ms=3.5,
+                 lw=2.2, color="#e6550d", label="recommended")
     seen = set()
-    for lbl, val, _src, colr in BENCH:
+    for lbl, val, _s, colr in BENCH:
         if val > 3:
             continue
         ax2.axhline(val, color=colr, lw=0.9, ls=":", alpha=0.8)
-        if val in seen:          # two references share 0.5%; label it once
-            continue
-        seen.add(val)
-        ax2.text(-79, val * 1.14, lbl, color=colr, fontsize=6.8)
-    ax2.set_yscale("log")
-    ax2.set_ylim(5e-3, 8.0)
+        if val not in seen:
+            seen.add(val)
+            ax2.text(-79, val * 1.14, lbl, color=colr, fontsize=6.8)
+    ax2.set_yscale("log"); ax2.set_ylim(2e-3, 8.0)
     ax2.set_xticks(range(-80, 81, 40))
     ax2.set_xlabel("incidence angle (deg)")
     ax2.set_ylabel("reflectance  (%)")
@@ -354,174 +331,101 @@ def draw(snap, prev, prev_tag, note):
     ax2.grid(alpha=0.22, which="both", lw=0.5)
     ax2.legend(fontsize=8, loc="upper center")
 
-    # ---- why this configuration ------------------------------------------
-    # Derived from the grid rather than written down, so it cannot drift out
-    # of date when BEST changes.
-    ax5 = fig.add_subplot(gs[4, :])
-    ax5.axis("off")
-    ax5.text(0, 1.0, "Why this configuration", fontsize=11.5,
-             fontweight="bold", va="top")
-
-    def val(dep, pit, tip):
-        m = snap["grid"].get("%.0f/%.0f/%.1f" % (dep, pit, tip))
-        if not m or m["rho0"] is None:
-            return None
-        return (m["rho0"] * 100, m["rho40"] * 100, m["rhoall"] * 100)
-
-    depths = sorted({float(k.split("/")[0]) for k in snap["grid"]})
-    pitches = sorted({float(k.split("/")[1]) for k in snap["grid"]})
-    tips = sorted({float(k.split("/")[2]) for k in snap["grid"]})
-    other_d = [d for d in depths if d != b["depth_mm"]]
-
-    # 1) depth: is the chosen depth better everywhere, or only sometimes?
-    wins = tot = 0
-    for pit in pitches:
-        for tip in tips:
-            a, c2 = val(b["depth_mm"], pit, tip), None
-            for od in other_d:
-                c2 = val(od, pit, tip)
-                if a and c2:
-                    tot += 1
-                    wins += int(a[0] < c2[0] and a[1] < c2[1] and a[2] < c2[2])
-    y = 0.80
-    ax5.text(0.01, y, "depth %.0f mm" % b["depth_mm"], fontsize=9.5,
-             fontweight="bold", family="monospace")
-    ax5.text(0.13, y,
-             "beats every shallower depth on all three metrics in %d of %d "
-             "pitch/tip combinations -- unconditional, take it if the depth "
-             "budget allows" % (wins, tot),
-             fontsize=9.2, family="monospace")
-
-    # 2) tip: what does the printable tip cost against the sharpest tested?
-    y -= 0.30
-    here = [t for t in tips
-            if t != b["tip_mm"] and val(b["depth_mm"], b["pitch_mm"], t)]
-    sharp = min(here) if here else None
-    a = val(b["depth_mm"], b["pitch_mm"], b["tip_mm"])
-    c2 = val(b["depth_mm"], b["pitch_mm"], sharp) if sharp else None
-    ax5.text(0.01, y, "tip %.1f mm" % b["tip_mm"], fontsize=9.5,
-             fontweight="bold", family="monospace")
-    if a and c2:
-        ax5.text(0.13, y,
-                 "NOT an optical choice. %.1f mm would give %.4f%% head-on "
-                 "instead of %.4f%% (%.2fx better), but %.1f mm is exactly one "
-                 "nozzle width\nwith no margin; %.1f mm is two and prints "
-                 "reliably. This is the one place manufacturability overrode "
-                 "the measurement."
-                 % (sharp, c2[0], a[0], a[0] / c2[0], sharp, b["tip_mm"]),
-                 fontsize=9.2, family="monospace", color="#8c510a")
-
-    # 3) pitch: the genuinely undetermined one
-    y -= 0.34
-    ax5.text(0.01, y, "pitch %.0f mm" % b["pitch_mm"], fontsize=9.5,
-             fontweight="bold", family="monospace")
-    parts = []
-    for pit in pitches:
-        v = val(b["depth_mm"], pit, b["tip_mm"])
-        if v:
-            parts.append("p%-2.0f %.4f/%.4f" % (pit, v[0], v[2]))
-    ax5.text(0.13, y,
-             "A HEDGE, not an optimum. head-on / worst-all at this depth and "
-             "tip:   " + "   ".join(parts) + "\n"
-             "a coarser pitch keeps winning head-on and keeps losing at "
-             "grazing; %.0f mm minimises the product of the two, but that "
-             "weighting is my choice, not a measurement." % b["pitch_mm"],
-             fontsize=9.2, family="monospace", color="#8c510a")
-
-    # ---- benchmark table -------------------------------------------------
-    ax4 = fig.add_subplot(gs[5, 0])
-    ax4.axis("off")
+    # ---------------- benchmark + laws ----------------
+    ax4 = fig.add_subplot(gs[4, 0]); ax4.axis("off")
     ax4.text(0, 1.0, "Where this sits", fontsize=11.5, fontweight="bold",
              va="top")
-    y = 0.87
-    ax4.text(0.0, y, "surface", fontsize=8.8, fontweight="bold")
-    ax4.text(0.62, y, "refl.", fontsize=8.8, fontweight="bold")
-    ax4.text(0.80, y, "source", fontsize=8.8, fontweight="bold")
-    y -= 0.075
+    y = 0.86
+    for x, h in ((0.0, "surface"), (0.60, "refl."), (0.78, "source")):
+        ax4.text(x, y, h, fontsize=8.8, fontweight="bold")
+    y -= 0.078
     entries = list(BENCH)
-    if mbest.get("rho0") is not None:
-        entries.append(("THIS PANEL, head-on", mbest["rho0"] * 100,
-                        "simulated", "#e6550d"))
-        entries.append(("THIS PANEL, worst angle", mbest["rhoall"] * 100,
-                        "simulated", "#e6550d"))
-    for lbl, val, src, colr in sorted(entries, key=lambda e: -e[1]):
+    if best:
+        entries += [("THIS PANEL, worst angle", best["wall"], "simulated",
+                     "#e6550d"),
+                    ("THIS PANEL, head-on", best["head_on"], "simulated",
+                     "#e6550d")]
+    for lbl, val, src_, colr in sorted(entries, key=lambda e: -e[1]):
         hit = lbl.startswith("THIS")
-        ax4.text(0.0, y, lbl, fontsize=8.6, color=colr,
+        ax4.text(0.0, y, lbl, fontsize=8.5, color=colr,
                  fontweight="bold" if hit else "normal")
-        ax4.text(0.62, y, "%.3f%%" % val, fontsize=8.6, color=colr,
+        ax4.text(0.60, y, "%.3f%%" % val, fontsize=8.5, color=colr,
                  family="monospace", fontweight="bold" if hit else "normal")
-        ax4.text(0.80, y, src, fontsize=7.4, color="#888888")
-        y -= 0.075
+        ax4.text(0.78, y, src_, fontsize=7.2, color="#888888")
+        y -= 0.078
 
-    # ---- design laws + open questions ------------------------------------
-    ax3 = fig.add_subplot(gs[5, 1:])
-    ax3.axis("off")
-    ax3.text(0, 1.0, "Design laws, measured", fontsize=11.5,
+    ax3 = fig.add_subplot(gs[4, 1:]); ax3.axis("off")
+    ax3.text(0, 1.0, "What the 3D step changed", fontsize=11.5,
              fontweight="bold", va="top")
     y = 0.86
     for line in (
-        "reflectance  ~  0.09 x (tip width / pitch) x rho     "
-        "-- only the RATIO tip/pitch matters, so a coarser",
-        "                pitch buys a blunter tip; and it is exactly linear "
-        "in the coating reflectance",
-        "aspect ratio A = depth / pitch:  A >= 2 holds +/-40 deg,  A >= 6 "
-        "holds every angle;  below A = 1 it triples",
-        "gloss roughness 0.30 is an interior optimum -- 0.15 leaves a "
-        "specular lobe aimed at the observer, 0.50 scatters back",
+        "the tip stops being the answer. shrinking it 16x moves head-on 16%, "
+        "against the 1D family where it was",
+        "   everything -- so a cone can be blunt and deep, which is what a "
+        "printer can actually make",
+        "aspect ratio A = depth / pitch takes over as the lever, and it is the "
+        "grazing arm that keeps wanting more",
+        "form is destroyed for the first time: core 0.11 at -40 deg against "
+        "0.99 for the groove, and 86x dimmer with it",
+        "head-on is still core 1.000 for every geometry tried. observer and "
+        "beam collinear, one bounce, no displacement.",
     ):
         ax3.text(0.01, y, line, fontsize=8.8, family="monospace")
-        y -= 0.082
+        y -= 0.093
 
-    y -= 0.115
-    ax3.text(0, y, "Open, and blocking a final choice", fontsize=11.5,
-             fontweight="bold", va="top")
-    y -= 0.135
+    y -= 0.05
+    ax3.text(0, y, "Open", fontsize=11.5, fontweight="bold", va="top")
+    y -= 0.10
     for line in (
-        "1. incidence angle distribution of the real rig -- the pitch choice "
-        "flips on whether +/-80 deg has to be held",
-        "2. does the coating reach the bottom of the groove? an uncoated "
-        "floor is not rho 0.005, it is bare substrate",
-        "3. no Fresnel in the material model, so the grazing-angle figures "
-        "are optimistic by an unmeasured factor",
-        "4. every absolute number above assumes the coating really is "
-        "rho 0.005; unverified until a coupon is measured",
+        "1. incidence angle distribution of the real rig -- it decides "
+        "whether the grazing arm matters at all",
+        "2. no Fresnel in the material model, so grazing figures are "
+        "optimistic by an unmeasured factor",
+        "3. every absolute number assumes the coating is rho 0.005; "
+        "unverified until a coupon is measured",
+        "4. can a coating reach the root of a 13 mm x 80 mm cone? deeper "
+        "cells are harder to coat, not easier",
     ):
         ax3.text(0.01, y, line, fontsize=8.8, family="monospace",
                  color="#8c510a")
-        y -= 0.082
+        y -= 0.093
 
     out = os.path.join(snap["daydir"], snap["time"] + "_report.png")
-    fig.savefig(out, dpi=118, bbox_inches="tight")
+    fig.savefig(out, dpi=115, bbox_inches="tight")
     plt.close(fig)
     return out
 
 
-def append_readme(daydir, snap, note, png, prev_tag):
+def append_readme(daydir, snap, note, png):
     path = os.path.join(daydir, "README.md")
     first = not os.path.exists(path)
     b = snap["best"]
-    k = "%.0f/%.0f/%.1f" % (b["depth_mm"], b["pitch_mm"], b["tip_mm"])
-    m = snap["grid"].get(k)
+    best = None
+    for label, tag, _w, _c in ROWS:
+        if tag == b["tag"] and label in snap["cases"]:
+            best = snap["cases"][label]
     with open(path, "a") as f:
         if first:
             f.write("# %s\n\n" % os.path.basename(daydir))
         f.write("## %s\n\n" % snap["time"])
         if note:
             f.write("%s\n\n" % note)
-        f.write("- recommendation: depth %.0f mm, pitch %.0f mm, tip %.1f mm, "
-                "coating rho %.3f, gloss %.2f\n"
-                % (b["depth_mm"], b["pitch_mm"], b["tip_mm"], b["rho"],
-                   b["gloss"]))
-        if m:
+        f.write("- recommendation: %s, depth %.0f mm, pitch %.0f mm, tip "
+                "%.1f mm, coating rho %.3f, gloss %.2f\n"
+                % (b["family"], b["depth_mm"], b["pitch_mm"], b["tip_mm"],
+                   b["rho"], b["gloss"]))
+        if best:
             f.write("- **reflectance: head-on %.4f%%, worst +/-40 %.4f%%, "
                     "worst all %.4f%%**\n"
-                    % (m["rho0"] * 100, m["rho40"] * 100, m["rhoall"] * 100))
-            f.write("  (as a ratio against a flat plate of the same coating: "
-                    "%.4f / %.4f / %.4f)\n"
-                    % (m["ratio0"], m["ratio40"], m["ratioall"]))
+                    % (best["head_on"], best["w40"], best["wall"]))
+        fm = snap["form"].get(b["form_tag"], {})
+        if "-40" in fm:
+            f.write("- form at -40 deg: core %.3f, MTF@20mm %.4f "
+                    "(1D groove: 0.993 / 0.984)\n"
+                    % (fm["-40"]["core"], fm["-40"]["mtf20"]))
         c = snap["counts"]
         f.write("- totals: %d renders, %d sweeps, %d profiles, %d STL\n"
-                % (c["renders"], c["sweep_csvs"], c["profiles"], c["stl"]))
+                % (c["renders"], c["sweeps"], c["profiles"], c["stl"]))
         f.write("- [%s](%s)\n\n" % (os.path.basename(png),
                                     os.path.basename(png)))
     return path
@@ -536,20 +440,15 @@ def main():
     snap["daydir"] = os.path.join(REPORT, snap["day"])
     os.makedirs(snap["daydir"], exist_ok=True)
 
+    png = draw(snap, note)
     js = os.path.join(snap["daydir"], snap["time"] + "_snapshot.json")
-    prev, prev_tag = previous(exclude=js)
-
-    png = draw(snap, prev, prev_tag, note)
-    out = {k: v for k, v in snap.items() if k != "daydir"}
     with open(js, "w") as f:
-        json.dump(out, f, indent=2)
-    rd = append_readme(snap["daydir"], snap, note, png, prev_tag)
+        json.dump({k: v for k, v in snap.items() if k != "daydir"}, f, indent=2)
+    rd = append_readme(snap["daydir"], snap, note, png)
 
     print("[REPORT]", os.path.relpath(png, ROOT))
     print("[SNAP]  ", os.path.relpath(js, ROOT))
     print("[LOG]   ", os.path.relpath(rd, ROOT))
-    print("[DIFF]  ", ("compared against " + prev_tag) if prev_tag
-          else "first report, nothing to compare against yet")
 
 
 if __name__ == "__main__":
