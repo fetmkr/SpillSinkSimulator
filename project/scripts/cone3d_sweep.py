@@ -61,7 +61,28 @@ def ridge(tag, **params):
     return cfg
 
 
-CASES = [
+# Second round. The first found that (a) the tip is NOT the return for cones --
+# shrinking it 16x moved the result 16% -- so the flanks are, (b) aspect ratio
+# is therefore the lever, and (c) the no-jitter case came out 8x darker, which
+# turned out to be a defect: base radius 1.15 x pitch/2 could not span a
+# 0.30 x pitch jitter, so the backing slab was showing through the gaps. That
+# is fixed; these cases re-test jitter against a properly covered array, and
+# push the aspect ratio where the first round said it wanted to go.
+CASES2 = [
+    cone("J_nojit", jitter=0.0),
+    cone("J_jit15", jitter=0.15),
+    cone("J_jit30", jitter=0.30),
+    cone("J_jit45", jitter=0.45),
+    # aspect ratio, now with the gaps closed
+    cone("J_d80_jit30", depth=80.0, jitter=0.30),
+    cone("J_d120_jit30", depth=120.0, jitter=0.30),
+    cone("J_d80_p08", depth=80.0, pitch=8.0, jitter=0.30),
+    # the directional bias, on a gap-free array
+    cone("J_tilt30_jit30", tilt_deg=30.0, jitter=0.30),
+    cone("J_tilt30_nojit", tilt_deg=30.0, jitter=0.0),
+]
+
+CASES_ROUND1 = [
     # the 1D reference, re-measured with the corrected Z extent
     ridge("R_ref_d50_p13"),
     ridge("R_ref_d50_p08", pitch_mean=8.0),
@@ -108,18 +129,22 @@ def flat(res):
             "aspect": d.get("aspect", d["depth_mm"] / d.get("pitch_mean_mm", 1)),
             "lattice": d.get("lattice", "-"),
             "tilt_deg": d.get("tilt_deg", 0.0),
+            "jitter": d.get("jitter", 0.0),
+            "eff_overlap": d.get("effective_overlap", 0.0),
         })
     return rows
 
 
 def main():
     os.makedirs(RENDERS, exist_ok=True)
+    which = CASES2 if "--round2" in sys.argv else CASES_ROUND1
+    out = "sweep_cone3d_r2.csv" if "--round2" in sys.argv else "sweep_cone3d.csv"
     rows, t0 = [], time.time()
-    for i, cfg in enumerate(CASES, 1):
-        print("[CASE] (%d/%d) %-16s t+%.0fs" % (i, len(CASES), cfg["tag"],
+    for i, cfg in enumerate(which, 1):
+        print("[CASE] (%d/%d) %-16s t+%.0fs" % (i, len(which), cfg["tag"],
                                                 time.time() - t0), flush=True)
         rows.extend(flat(BR.run(cfg)))
-    path = os.path.join(RESULTS, "sweep_cone3d.csv")
+    path = os.path.join(RESULTS, out)
     with open(path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()

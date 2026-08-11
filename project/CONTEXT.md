@@ -197,6 +197,44 @@ overall — which is what the Gaboon viper's "no specular peak, gradual falloff"
 looks like. The cone is worst head-on, because head-on is where the apex is
 seen unforeshortened.
 
+### Round 1, and the defect it hid
+
+A second geometry defect turned up: the cone base radius was 1.15 x pitch/2
+against a jitter of 0.30 x pitch, so two neighbours could drift far enough
+apart that their bases no longer met and the backing slab showed through. It
+presented as "regular arrays are 8x darker than jittered ones", which is not a
+physical result -- it was gaps. `Cone3DParams.effective_overlap()` now enforces
+`overlap >= 1 + 2 * jitter`.
+
+**Everything measured in round 1 is inflated by that.** The same configuration
+reads 0.0344% head-on with gaps and 0.0051% without -- a factor of 6.7. In
+particular the round-1 conclusion that a 30 degree tilt buys a 5x directional
+improvement is WITHDRAWN: it was measured against the broken baseline. Against
+a gap-free one, tilt is worse head-on (0.0085 vs 0.0051) and 21x worse at
++/-40 (0.137 vs 0.0064). The bird-of-paradise directional bias does not
+reproduce at this geometry and scale.
+
+### Round 2, gaps closed — where the 3D family actually stands
+
+| case | depth | pitch | jitter | head-on | ±40° | all |
+|---|---|---|---|---|---|---|
+| J_jit30 | 50 | 13 | 0.30 | 0.0051% | 0.0064% | 0.230% |
+| J_d120_jit30 | 120 | 13 | 0.30 | **0.0045%** | **0.0048%** | 0.098% |
+| **J_d80_p08** | 80 | 8 | 0.30 | 0.0068% | 0.0068% | **0.070%** |
+| J_nojit | 50 | 13 | 0 | 0.0042% | 0.0050% | 0.101% |
+| 1D groove, re-measured | 50 | 13 | — | 0.0268% | 0.0311% | 0.258% |
+
+**The 3D cone array beats the 1D groove by four to six times on every metric.**
+Aspect ratio is still the lever, and the tip is still not: shrinking the tip
+16x moved head-on by 16%, against the 1D family where the tip was the entire
+signal. That is the practical win — a cone can be blunt and deep instead of
+sharp and shallow, which is the opposite of what a 0.4 mm nozzle struggles
+with.
+
+The cost of irregularity is now measured too: jitter 0 -> 0.30 costs 21% head-on
+(0.0042 -> 0.0051) and 2.3x at grazing (0.101 -> 0.230). That is the price of
+the no-periodic-array rule, and it is worth paying.
+
 `scripts/cone3d_sweep.py` is the first real sweep: tip series (does head-on
 fall as r²?), aspect ratio (do cones just need more depth per pitch?), pitch,
 hex vs square, jitter on/off, and tilt 20/30° plus tilt jitter for the

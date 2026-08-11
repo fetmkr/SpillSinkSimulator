@@ -70,8 +70,13 @@ class Cone3DParams:
     # --- cone ---
     tip_radius: float = 0.4        # THE exposed feature. 0.4 = a 0.8 mm tip,
                                    # matching the 1D design it is compared to
-    overlap: float = 1.15          # base radius as a multiple of pitch/2, >1
-                                   # so neighbours intersect and leave no flat
+    # Base radius as a multiple of pitch/2. It has to cover the jitter, not
+    # just the nominal spacing: two neighbours can drift 2*jitter*pitch apart,
+    # and if their bases do not still meet the backing slab shows through as a
+    # flat patch. The first sweep had overlap 1.15 against jitter 0.30 and the
+    # no-jitter case came out 8x darker -- that was gaps, not regularity being
+    # better. `effective_overlap()` enforces the floor.
+    overlap: float = 1.15
     radial_seg: int = 32           # facets around the cone
     height_seg: int = 3            # rings down the flank
 
@@ -81,6 +86,13 @@ class Cone3DParams:
     tilt_jitter: float = 0.0
 
     # ---- derived ----------------------------------------------------------
+
+    def effective_overlap(self) -> float:
+        """Base radius multiple, raised if needed to cover the jitter."""
+        return max(self.overlap, 1.0 + 2.0 * self.jitter)
+
+    def gap_risk(self) -> bool:
+        return self.overlap < 1.0 + 2.0 * self.jitter
 
     def cell_area(self) -> float:
         """Mean area served by one cone."""
@@ -144,7 +156,7 @@ def build_mesh(p: Cone3DParams):
     faces: list[tuple[int, ...]] = []
     rng = _lcg(p.seed * 31 + 7)
 
-    R = p.overlap * p.pitch / 2.0
+    R = p.effective_overlap() * p.pitch / 2.0
     n = max(6, p.radial_seg)
     m = max(1, p.height_seg)
 
@@ -221,6 +233,9 @@ def describe(p: Cone3DParams) -> dict:
         "half_angle_deg": p.half_angle_deg(),
         "depth_jitter": p.depth_jitter,
         "margin_depths": p.margin_depths,
+        "overlap": p.overlap,
+        "effective_overlap": p.effective_overlap(),
+        "overlap_was_raised": p.gap_risk(),
         "tilt_deg": p.tilt_deg,
     }
 
