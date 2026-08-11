@@ -81,6 +81,8 @@ class RidgeParams:
     # from; 0 keeps it normal to the wall.
     tilt_deg: float = 0.0
     tilt_jitter: float = 0.0
+    margin_depths: float = 6.5     # ridges generated this many depths past the
+                                   # face on each side; see pitch_sequence
 
     # --- tessellation ---
     arc_segments: int = 6
@@ -113,13 +115,24 @@ class RidgeParams:
 
 
 def pitch_sequence(p: RidgeParams) -> list[float]:
-    n = max(2, int(round(p.face_h / p.pitch_mean)))
+    """
+    Pitches covering the face PLUS a margin on each side.
+
+    A camera tilted to theta looking at depth D travels D / tan(90 - theta) in
+    Z before reaching the valley floor -- 5.7 D at theta = 80. Without ridges
+    that far past the measurement window the tilted view runs off the end of
+    the panel and reads world background instead of geometry. This was found
+    when the 3D family returned an impossible 27% at theta = 80; the same
+    defect silently inflated the |theta| >= 50 arm of every 1D sweep before it.
+    """
+    span = p.face_h + 2.0 * p.margin_depths * p.depth
+    n = max(2, int(round(span / p.pitch_mean)))
     if p.pitch_jitter <= 0.0:
-        return [p.face_h / n] * n
+        return [span / n] * n
     rng = _lcg(p.pitch_seed)
     raw = [1.0 + p.pitch_jitter * (2.0 * next(rng) - 1.0) for _ in range(n)]
     s = sum(raw)
-    return [r / s * p.face_h for r in raw]
+    return [r / s * span for r in raw]
 
 
 def _arc(c: Pt, r: float, a0: float, a1: float, n: int) -> list[Pt]:
@@ -186,7 +199,7 @@ def front_profile(p: RidgeParams) -> list[Pt]:
     the floor is not a perfect corner.
     """
     pts: list[Pt] = []
-    z = p.face_h / 2.0
+    z = p.face_h / 2.0 + p.margin_depths * p.depth
     pitches = pitch_sequence(p)
     rng = _lcg(p.pitch_seed * 7 + 3)
     tw = max(p.tip_width, 1e-4)
@@ -269,6 +282,7 @@ def describe(p: RidgeParams) -> dict:
         "tilt_deg": p.tilt_deg,
         "tilt_jitter": p.tilt_jitter,
         "valley_round_mm": p.valley_round,
+        "margin_depths": p.margin_depths,
         "predicted_return_rho05": p.predicted_return(0.05),
     }
 

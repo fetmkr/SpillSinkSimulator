@@ -75,6 +75,9 @@ def describe(p):
     if name == "RidgeParams":
         import profile_ridge
         return profile_ridge.describe(p)
+    if name == "Cone3DParams":
+        import geom3d
+        return geom3d.describe(p)
     return profile2d.describe(p)
 
 
@@ -152,6 +155,19 @@ def loops_to_object(loops, width, x0, name, material):
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(mesh)
     bm.free()
+    obj = bpy.data.objects.new(name, mesh)
+    obj.data.materials.append(material)
+    bpy.context.collection.objects.link(obj)
+    return obj
+
+
+def mesh_to_object(verts, faces, name, material):
+    """Build an object from an explicit 3D mesh, for families that are not an
+    extruded cross-section."""
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata([(v[0], v[1], v[2]) for v in verts], [], faces)
+    mesh.validate(verbose=False)
+    mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     obj.data.materials.append(material)
     bpy.context.collection.objects.link(obj)
@@ -422,6 +438,10 @@ def build_scene(cfg):
         import profile_ridge as PR
         p = PR.RidgeParams(**cfg["params"])
         cs = PR.build_cross_section(p)
+    elif fam == "cone3d":
+        import geom3d as G3
+        p = G3.Cone3DParams(**cfg["params"])
+        cs = None
     else:
         p = PanelParams(**cfg["params"])
         cs = build_cross_section(p)
@@ -447,9 +467,16 @@ def build_scene(cfg):
     m_s1 = m_slat_d if mat_mode == "all_diffuse" else make_glossy(
         "coat_specular", rho_spec, rough)
 
-    loops_to_object(cs.stage1, p.face_w, 0.0, "slats", m_s1)
-    loops_to_object(cs.stage2, p.face_w, 0.0, "baffles", m_chamber)
-    loops_to_object(cs.shell, p.face_w, 0.0, "shell", m_chamber)
+    if cs is None:
+        import geom3d as G3
+        from types import SimpleNamespace
+        v, f = G3.build_mesh(p)
+        mesh_to_object(v, f, "cones", m_s1)
+        cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
+    else:
+        loops_to_object(cs.stage1, p.face_w, 0.0, "slats", m_s1)
+        loops_to_object(cs.stage2, p.face_w, 0.0, "baffles", m_chamber)
+        loops_to_object(cs.shell, p.face_w, 0.0, "shell", m_chamber)
 
     ctrl_x0 = p.face_w + GAP
     make_flat_plate(p, ctrl_x0, "control", m_ctrl)

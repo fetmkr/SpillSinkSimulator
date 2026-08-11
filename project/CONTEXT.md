@@ -117,6 +117,13 @@ a laser beam dump: only the ridge line is exposed head-on, everything else is
 at grazing incidence. Grounded in beam-dump practice (cone in a ribbed
 canister, back-reflection < 0.1%) and V-groove cavity theory.
 
+**`geom3d.py` — irregular 3D cone array. IN PROGRESS, first non-extruded
+family.** Cones built as interpenetrating closed solids on a backing slab; for
+an opaque surface the union is the geometry, so no Voronoi or height field is
+needed and the apex radius stays under exact control. Added
+`blender_render.mesh_to_object` alongside `loops_to_object`; everything
+downstream needed no change, as predicted.
+
 **`profile_laby.py` — folded labyrinth channels.** Dead. Specular rays do not
 follow a folded channel; they go straight and hit the outer wall of the fold.
 Path length is only meaningful for rays already grazing along the channel.
@@ -155,7 +162,50 @@ back as a line. Priority 1 remains unmet.
 
 ---
 
-## 6. Audit findings — one fixed, three still open
+## 5b. What the 3D step has established so far
+
+**A margin defect was found, and it voids every grazing number measured before
+2026-08-11.** A camera tilted to θ looking at depth D travels D/tan(90−θ) in Z
+before it reaches the valley floor — 5.7 D at θ = 80. Neither family generated
+geometry that far past the measurement window, so the tilted view ran off the
+tile and read world background instead of panel. It surfaced as an impossible
+27% "reflectance" on the first 3D run (55× the coating's own reflectance).
+Both `geom3d.py` and `profile_ridge.py` now take `margin_depths = 6.5`. This is
+audit item A-4, and it is now fixed rather than open. **Any |θ| ≥ 50 figure in
+a CSV written before this date is void; the head-on and ±40 figures are not
+affected.**
+
+**The tip law does NOT carry over to cones.** For a 1D ridge the head-on return
+is the exposed tip and nothing else — verified across 24 combinations. A cone's
+tip is a point, so its exposed fraction is πr²/cell = 0.343% against the
+ridge's 2r/pitch = 6.15%, which predicts 0.0017% head-on. Measured: **0.0344%,
+twenty times higher.** The flanks dominate, and the reason is geometric: a 2D
+V-groove confines a ray to the cross-section plane where each bounce ratchets
+it toward the apex, while on a 3D cone the ray can walk azimuthally around and
+escape after fewer bounces. Cones trap worse per bounce than grooves.
+
+**But cones are far more isotropic**, which was the point of going 3D:
+
+| θ | 3D cone d50/p13/tip0.8 | 1D groove, same numbers |
+|---|---|---|
+| head-on | 0.0344% | 0.0264% |
+| ±40° | **0.0054%** | 0.0293% |
+| ±80° | 0.157% | 0.266% (old, void) |
+
+Five times better off-axis, thirty percent worse head-on, and much flatter
+overall — which is what the Gaboon viper's "no specular peak, gradual falloff"
+looks like. The cone is worst head-on, because head-on is where the apex is
+seen unforeshortened.
+
+`scripts/cone3d_sweep.py` is the first real sweep: tip series (does head-on
+fall as r²?), aspect ratio (do cones just need more depth per pitch?), pitch,
+hex vs square, jitter on/off, and tilt 20/30° plus tilt jitter for the
+bird-of-paradise directional bias. It re-measures the 1D reference rather than
+quoting the old numbers, because of the margin fix above.
+
+---
+
+## 6. Audit findings — two fixed, two still open
 
 An adversarial methodology audit (`Agent`, general-purpose) found:
 
@@ -165,8 +215,10 @@ An adversarial methodology audit (`Agent`, general-purpose) found:
   `arc_segments` are now 24. The conclusion was withdrawn.
 - **OPEN:** no Fresnel in the material model, so grazing figures are optimistic
   by an unmeasured factor.
-- **OPEN:** the panel is modelled in isolation with free top/bottom edges; it
-  will be installed tiled, which changes the |θ| ≥ 50 arm.
+- **FIXED:** the panel was modelled with too little geometry past the
+  measurement window, so tilted views ran off it and read background. See §5b.
+  Genuine panel-to-panel tiling is still not modelled, but the window is now
+  fully surrounded by geometry.
 - **OPEN:** the LSF/MTF pipeline has real defects — |FFT| discards phase so MTF
   is translation-invariant by construction, and `fwhm_mm` collapses to one
   pixel on spiky profiles. The proposed fix is a full response matrix
@@ -270,6 +322,8 @@ needs enough facets that fake mirror normals do not manufacture a glint.
 | `profile_scatter.py` | family 2, troughs (dead) |
 | `profile_ridge.py` | family 3, V-grooves (current) |
 | `profile_laby.py` | family 4, folded channels (dead) |
+| `geom3d.py` | family 5, 3D cone array (current work) |
+| `cone3d_sweep.py` | first 3D sweep, with re-measured 1D references |
 | `raytrace2d.py` | independent 2D specular tracer; bounce count and Z displacement |
 | `validate.py`, `test_floor.py`, `test_tessellation.py` | measurement-chain checks |
 | `sweep.py`, `ridge_sweep.py`, `ridge_best.py`, `ridge_micro.py`, `fdm_optimum.py`, `pitch_tip_grid.py` | sweeps |
@@ -297,3 +351,4 @@ Renders are gitignored (5.7 GB, regenerable). Every extracted number is in
 - Run an adversarial methodology audit periodically.
 - Withdraw a broken conclusion plainly and move on.
 - Search prior art before designing; do not let a guess be the starting point.
+- Keep this file current as the work moves, not only at handoff.
