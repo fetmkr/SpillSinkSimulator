@@ -1,0 +1,17 @@
+# Renders — 5.7 GB of EXR/PNG, and all of it is regenerable by re-running the
+# sweeps. The numbers extracted from them live in project/results/*.csv, which
+# IS committed, so nothing here is lost by leaving the frames out.
+project/renders/
+*.exr
+
+# Derived intermediate: EXR crops dumped to npz by scripts/dump_crops.py
+project/results/crops.npz
+
+# Published papers used as references. Left out because they are other
+# people's copyrighted PDFs, not this project's work; the citations are in the
+# report and in the script docstrings. Drop this line if you want them tracked.
+project/reference/*.pdf
+
+__pycache__/
+*.pyc
+.DS_Store

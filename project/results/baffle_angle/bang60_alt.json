@@ -1,0 +1,588 @@
+{
+  "tag": "bang60_alt",
+  "params": {
+    "baffle_deg": 60.0,
+    "baffle_alternate": true,
+    "baffle_pitch": 40.0,
+    "baffle_len": 46.0
+  },
+  "derived": {
+    "depth_mm": 100.0,
+    "slat_len_mm": 30.0,
+    "slat_deg": 45.0,
+    "slat_zone_depth_mm": 21.213203435596427,
+    "chamber_depth_mm": 78.78679656440357,
+    "slat_overlap": 1.0606601717798212,
+    "pitch_mean_mm": 20.0,
+    "pitch_jitter": 0.25,
+    "open_face_fraction": 0.95,
+    "chamber_aperture_fraction": 0.14344841290560087,
+    "flare_mm": 20.0,
+    "chamfer_mm": 30.0,
+    "baffle_rows": 2,
+    "baffle_count": 24,
+    "baffle_len_mm": 46.0,
+    "baffle_pitch_mm": 40.0,
+    "baffle_deg": 60.0,
+    "baffle_alternate": true,
+    "baffle_z_cover_mm": 23.000000000000004,
+    "baffle_closure": 1.1500000000000001,
+    "back_profile": "flat",
+    "bend_radius_center_mm": 2.0,
+    "thickness_mm": 1.0
+  },
+  "warnings": [],
+  "material_mode": "mixed",
+  "rho_diffuse": 0.05,
+  "rho_specular": 0.05,
+  "spec_roughness": 0.05,
+  "samples": 384,
+  "n_slats": 25,
+  "n_baffles": 26,
+  "modes": {
+    "bang60_alt__hemi_view_th-80.0": {
+      "theta": -80,
+      "panel": {
+        "mean": 0.04999857768416405,
+        "p50": 0.04999997094273567,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 10290
+      },
+      "control": {
+        "mean": 0.04999994486570358,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 10290
+      },
+      "ratio_mean": 0.9999726563390579,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-80.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-80.0.png",
+      "px_panel": [
+        697.0588028430939,
+        991.1764740943909,
+        232.9760491847992,
+        267.0247256755829
+      ],
+      "px_ctrl": [
+        108.82352590560913,
+        402.9411643743515,
+        232.9760044813156,
+        267.0246660709381
+      ]
+    },
+    "bang60_alt__hemi_view_th-70.0": {
+      "theta": -70,
+      "panel": {
+        "mean": 0.04999908432364464,
+        "p50": 0.04999999329447746,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 19698
+      },
+      "control": {
+        "mean": 0.04999995604157448,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 19698
+      },
+      "ratio_mean": 0.9999825656260755,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-70.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-70.0.png",
+      "px_panel": [
+        697.0588684082031,
+        991.1765396595001,
+        216.46888554096222,
+        283.53163599967957
+      ],
+      "px_ctrl": [
+        108.82359147071838,
+        402.94122993946075,
+        216.46884083747864,
+        283.5316061973572
+      ]
+    },
+    "bang60_alt__hemi_view_th-60.0": {
+      "theta": -60,
+      "panel": {
+        "mean": 0.049999114125967026,
+        "p50": 0.04999999329447746,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 29106
+      },
+      "control": {
+        "mean": 0.04999995231628418,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 29106
+      },
+      "ratio_mean": 0.9999832361776697,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-60.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-60.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        200.980544090271,
+        299.0197539329529
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        200.98049938678741,
+        299.0196943283081
+      ]
+    },
+    "bang60_alt__hemi_view_th-50.0": {
+      "theta": -50,
+      "panel": {
+        "mean": 0.04984946548938751,
+        "p50": 0.04999999329447746,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 37338
+      },
+      "control": {
+        "mean": 0.04999995976686478,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 37338
+      },
+      "ratio_mean": 0.9969901120285101,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-50.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-50.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        186.98175251483917,
+        313.0185306072235
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        186.98172271251678,
+        313.01847100257874
+      ]
+    },
+    "bang60_alt__hemi_view_th-40.0": {
+      "theta": -40,
+      "panel": {
+        "mean": 0.042085256427526474,
+        "p50": 0.04999999329447746,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 44394
+      },
+      "control": {
+        "mean": 0.049999967217445374,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 44394
+      },
+      "ratio_mean": 0.8417056804157784,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-40.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-40.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        174.89750683307648,
+        325.102299451828
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        174.8974770307541,
+        325.1022696495056
+      ]
+    },
+    "bang60_alt__hemi_view_th-30.0": {
+      "theta": -30,
+      "panel": {
+        "mean": 0.02906252257525921,
+        "p50": 0.048136889934539795,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 49686
+      },
+      "control": {
+        "mean": 0.049999967217445374,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 49686
+      },
+      "ratio_mean": 0.5812508326029276,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-30.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-30.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        165.09544849395752,
+        334.90434288978577
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        165.09541869163513,
+        334.9043130874634
+      ]
+    },
+    "bang60_alt__hemi_view_th-20.0": {
+      "theta": -20,
+      "panel": {
+        "mean": 0.01883838325738907,
+        "p50": 0.00020833346934523433,
+        "p99": 0.04999999329447746,
+        "max": 0.04999999329447746,
+        "px": 54390
+      },
+      "control": {
+        "mean": 0.049999963492155075,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 54390
+      },
+      "ratio_mean": 0.37676794024749205,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-20.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-20.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        157.87336230278015,
+        342.1267867088318
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        157.87333250045776,
+        342.1267569065094
+      ]
+    },
+    "bang60_alt__hemi_view_th-10.0": {
+      "theta": -10,
+      "panel": {
+        "mean": 0.009944488294422626,
+        "p50": 1.3020831829635426e-05,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 56742
+      },
+      "control": {
+        "mean": 0.049999963492155075,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 56742
+      },
+      "ratio_mean": 0.19888991110929316,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-10.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th-10.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        153.45019102096558,
+        346.5496897697449
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        153.45017611980438,
+        346.5496897697449
+      ]
+    },
+    "bang60_alt__hemi_view_th+00.0": {
+      "theta": 0,
+      "panel": {
+        "mean": 0.001848643645644188,
+        "p50": 9.193971891363617e-06,
+        "p99": 0.02955068275332451,
+        "max": 0.03063160926103592,
+        "px": 57918
+      },
+      "control": {
+        "mean": 0.049999963492155075,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 57918
+      },
+      "ratio_mean": 0.03697289990890169,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+00.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+00.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        151.96065604686737,
+        348.03909063339233
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        151.96065604686737,
+        348.03909063339233
+      ]
+    },
+    "bang60_alt__hemi_view_th+10.0": {
+      "theta": 10,
+      "panel": {
+        "mean": 0.0025565980467945337,
+        "p50": 2.604161090857815e-05,
+        "p99": 0.02883954904973507,
+        "max": 0.030357373878359795,
+        "px": 56742
+      },
+      "control": {
+        "mean": 0.049999963492155075,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 56742
+      },
+      "ratio_mean": 0.05113199827027195,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+10.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+10.0.png",
+      "px_panel": [
+        697.0589995384216,
+        991.1766707897186,
+        153.4503549337387,
+        346.5498685836792
+      ],
+      "px_ctrl": [
+        108.82370620965958,
+        402.94136106967926,
+        153.4503549337387,
+        346.5498983860016
+      ]
+    },
+    "bang60_alt__hemi_view_th+20.0": {
+      "theta": 20,
+      "panel": {
+        "mean": 0.003951402381062508,
+        "p50": 0.0005367777193896472,
+        "p99": 0.025572342798113823,
+        "max": 0.029574120417237282,
+        "px": 54390
+      },
+      "control": {
+        "mean": 0.049999963492155075,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 54390
+      },
+      "ratio_mean": 0.07902810532416643,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+20.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+20.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        157.87331759929657,
+        342.1267867088318
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        157.87334740161896,
+        342.1267867088318
+      ]
+    },
+    "bang60_alt__hemi_view_th+30.0": {
+      "theta": 30,
+      "panel": {
+        "mean": 0.00554361566901207,
+        "p50": 0.0041055865585803986,
+        "p99": 0.02335643395781517,
+        "max": 0.02561781369149685,
+        "px": 49686
+      },
+      "control": {
+        "mean": 0.049999967217445374,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 49686
+      },
+      "ratio_mean": 0.11087238607384245,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+30.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+30.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        165.0952845811844,
+        334.9042236804962
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        165.09531438350677,
+        334.9042534828186
+      ]
+    },
+    "bang60_alt__hemi_view_th+40.0": {
+      "theta": 40,
+      "panel": {
+        "mean": 0.008890167810022831,
+        "p50": 0.008618724532425404,
+        "p99": 0.028766702860593796,
+        "max": 0.030461177229881287,
+        "px": 44394
+      },
+      "control": {
+        "mean": 0.049999967217445374,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 44394
+      },
+      "ratio_mean": 0.1778034727774978,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+40.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+40.0.png",
+      "px_panel": [
+        697.0590651035309,
+        991.1767363548279,
+        174.897700548172,
+        325.1025080680847
+      ],
+      "px_ctrl": [
+        108.82377177476883,
+        402.9414266347885,
+        174.89773035049438,
+        325.1025378704071
+      ]
+    },
+    "bang60_alt__hemi_view_th+50.0": {
+      "theta": 50,
+      "panel": {
+        "mean": 0.009835861623287201,
+        "p50": 0.009936421178281307,
+        "p99": 0.029135096818208694,
+        "max": 0.031107047572731972,
+        "px": 37338
+      },
+      "control": {
+        "mean": 0.04999995976686478,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 37338
+      },
+      "ratio_mean": 0.19671739075689168,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+50.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+50.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        186.9817078113556,
+        313.0185008049011
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        186.98175251483917,
+        313.0185306072235
+      ]
+    },
+    "bang60_alt__hemi_view_th+60.0": {
+      "theta": 60,
+      "panel": {
+        "mean": 0.004454611334949732,
+        "p50": 0.00047195624210871756,
+        "p99": 0.028699729591608047,
+        "max": 0.03021182119846344,
+        "px": 29106
+      },
+      "control": {
+        "mean": 0.04999995231628418,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 29106
+      },
+      "ratio_mean": 0.08909231166404406,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+60.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+60.0.png",
+      "px_panel": [
+        697.0589339733124,
+        991.1766052246094,
+        200.98036527633667,
+        299.01960492134094
+      ],
+      "px_ctrl": [
+        108.82364884018898,
+        402.94129550457,
+        200.98040997982025,
+        299.01963472366333
+      ]
+    },
+    "bang60_alt__hemi_view_th+70.0": {
+      "theta": 70,
+      "panel": {
+        "mean": 0.0041767568327486515,
+        "p50": 0.0005192682147026062,
+        "p99": 0.0238606259226799,
+        "max": 0.02421216480433941,
+        "px": 19698
+      },
+      "control": {
+        "mean": 0.04999995604157448,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 19698
+      },
+      "ratio_mean": 0.08353521009649927,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+70.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+70.0.png",
+      "px_panel": [
+        697.0588684082031,
+        991.1765396595001,
+        216.46864712238312,
+        283.53142738342285
+      ],
+      "px_ctrl": [
+        108.82359147071838,
+        402.94122993946075,
+        216.4686918258667,
+        283.5314869880676
+      ]
+    },
+    "bang60_alt__hemi_view_th+80.0": {
+      "theta": 80,
+      "panel": {
+        "mean": 0.006698111537843943,
+        "p50": 0.0036179358139634132,
+        "p99": 0.020364511758089066,
+        "max": 0.020618421956896782,
+        "px": 10290
+      },
+      "control": {
+        "mean": 0.04999994486570358,
+        "p50": 0.04999998211860657,
+        "p99": 0.04999998211860657,
+        "max": 0.04999998211860657,
+        "px": 10290
+      },
+      "ratio_mean": 0.13396237847530854,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+80.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/baffle_angle/bang60_alt__hemi_view_th+80.0.png",
+      "px_panel": [
+        697.0588028430939,
+        991.1764740943909,
+        232.97563195228577,
+        267.02430844306946
+      ],
+      "px_ctrl": [
+        108.82352590560913,
+        402.9411643743515,
+        232.97569155693054,
+        267.02436804771423
+      ]
+    }
+  }
+}

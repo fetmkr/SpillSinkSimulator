@@ -1,0 +1,32 @@
+{
+  "linearity": {
+    "emission_1.0_reads": 1.0,
+    "emission_0.5_reads": 0.5,
+    "expect": [
+      1.0,
+      0.5
+    ],
+    "pass": true
+  },
+  "lambertian": {
+    "rho": 0.05,
+    "reads": 0.050000812858343124,
+    "expect_index": 0.0389,
+    "flat_vs_flat_ratio": 1.0,
+    "pass": true
+  },
+  "box_cavity": {
+    "aperture_fraction": 0.16666666666666666,
+    "cavity_mean": 0.01177777536213398,
+    "flat_mean": 0.050000812858343124,
+    "ratio_measured": 0.2355516778397482,
+    "ratio_formula": 0.17391304347826086,
+    "ratio_recorded_previously": 0.233,
+    "formula_optimism_pct": -26.1677755500522
+  },
+  "bounce_sensitivity": {
+    "12": 0.23555177097049163,
+    "32": 0.23555149157826138,
+    "128": 0.23555199448427586
+  }
+}

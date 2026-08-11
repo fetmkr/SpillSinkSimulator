@@ -1,0 +1,60 @@
+{
+  "tag": "SMOKE",
+  "params": {
+    "depth": 100.0,
+    "d1": 40.0,
+    "d2": 40.0,
+    "plenum": 20.0
+  },
+  "derived": {
+    "depth_mm": 100.0,
+    "d1_mm": 40.0,
+    "d2_mm": 40.0,
+    "plenum_mm": 20.0,
+    "depth_ratio_s1": 0.5,
+    "a1_deg": 60.0,
+    "a2_deg": 15.0,
+    "L1_mm": 79.99999999999999,
+    "L2_mm": 41.41104721640332,
+    "duct_w1_mm": 10.000000000000002,
+    "duct_w2_mm": 19.318516525781366,
+    "expansion": 1.9318516525781362,
+    "aspect_L1_over_w1": 7.999999999999997,
+    "aperture_fraction": 0.95,
+    "fin_drop_mm": 79.99999999999997,
+    "pitch_mean_mm": 20.0,
+    "pitch_jitter": 0.25,
+    "bend_radius_center_mm": 2.0,
+    "back_profile": "flat",
+    "vane_count": 0
+  },
+  "warnings": [],
+  "material_mode": "mixed",
+  "rho_diffuse": 0.05,
+  "rho_specular": 0.05,
+  "spec_roughness": 0.05,
+  "samples": 64,
+  "n_fins": 29,
+  "modes": {
+    "SMOKE__hemi_th+00.0": {
+      "theta": 0.0,
+      "panel": {
+        "mean": 1.0,
+        "p50": 1.0,
+        "p99": 1.0,
+        "max": 1.0,
+        "px": 14553
+      },
+      "control": {
+        "mean": 1.0,
+        "p50": 1.0,
+        "p99": 1.0,
+        "max": 1.0,
+        "px": 14553
+      },
+      "ratio_mean": 1.0,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/_smoke/SMOKE__hemi_th+00.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/_smoke/SMOKE__hemi_th+00.0.png"
+    }
+  }
+}
