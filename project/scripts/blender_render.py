@@ -693,7 +693,13 @@ def render_to(path_exr, path_png):
 
     result = bpy.data.images.get("Render Result")
     ims.file_format = "PNG"
-    ims.color_depth = "16"
+    # 8, NOT 16. The PNG is a picture for a person to look at; every number in
+    # this project is read from the EXR beside it, which stays 32-bit float.
+    # A 16-bit PNG of a 1400x950 preview is 5.3 MB against 1.4 MB for the same
+    # image at 8-bit, and the difference is below one 8-bit level (measured:
+    # max 0.992 of a level, mean 0.353). 36 gallery images cost 142 MB for it,
+    # and project/renders/ holds 9.4 GB of the same waste.
+    ims.color_depth = "8"
     result.save_render(filepath=path_png, scene=sc)
 
 
