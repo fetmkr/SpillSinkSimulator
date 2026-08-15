@@ -146,6 +146,165 @@ DESIGNS = {
         70.0,
         "two cone sizes: a finer, shorter array dropped into the valleys to "
         "catch the rays that skim the primary flanks"),
+
+    # --- family 6: the first non-pillar, non-extruded topologies ------------
+    # margin_depths is small here ON PURPOSE. These entries are PICTURES, not
+    # measurements: a measurement build needs 6.5 depths of geometry past the
+    # window or a tilted camera reads world background, but a portrait of the
+    # tile wants the tile and nothing else. Never copy these params into a
+    # sweep.
+    "topo_honeycomb": (
+        "topo",
+        dict(topology="honeycomb", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, wall_top=0.4, wall_bot=1.2, margin_depths=0.2),
+        60.0,
+        "family 6, hex cell walls. Built as the NEGATIVE CONTROL for the "
+        "exposed-area law -- 41x more exposed area than the cone -- and it "
+        "lost by only 1.30x, which killed the law instead"),
+    # --- family 7: geom_cell, the sibling cavity-lattice module -------------
+    "cell_square": (
+        "cell",
+        dict(variant="square", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, wall_top=0.4, wall_bot=1.2, margin_depths=0.2),
+        60.0,
+        "family 7, square cells. Tests whether the hex tiling ever mattered"),
+    "cell_triangle": (
+        "cell",
+        dict(variant="triangle", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, wall_top=0.4, wall_bot=1.2, margin_depths=0.2),
+        60.0,
+        "family 7, triangular cells: more wall per unit area, 18.5% exposed "
+        "against the square's 10.7% at the same pitch"),
+    "cell_mixed": (
+        "cell",
+        dict(variant="mixed", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, wall_top=0.4, wall_bot=1.2, margin_depths=0.2),
+        60.0,
+        "family 7, Voronoi on thinned seeds so cell AREA varies ~3x -- a "
+        "different irregularity from geom_topo's equal-area jittered cells, "
+        "and the lowest exposed area of the five at 8.6%"),
+    "cell_reentrant": (
+        "cell",
+        dict(variant="reentrant", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, wall_top=0.4, wall_bot=1.2, lean_deg=6.0,
+             margin_depths=0.2),
+        60.0,
+        "family 7, walls that DIVERGE with depth, so the cell is wider at the "
+        "floor than at its mouth. The lean is bounded: diverging walls meet "
+        "the neighbour's and reseal the cell, and 10 degrees sealed it at 95% "
+        "of depth, so the default is 6"),
+    "cell_nested": (
+        "cell",
+        dict(variant="nested", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=11.0, wall_top=0.4, wall_bot=1.2, margin_depths=0.2),
+        60.0,
+        "family 7, a coarse cell whose floor carries a finer lattice, sunk "
+        "below the primary wall tops so it is shadowed head-on. Unlike the "
+        "bimodal CONE array that died because its secondary tips were fully "
+        "exposed and cost 2x head-on"),
+
+    # the darkness leader from sweep_buildable, at the parameters actually
+    # measured -- wall 0.1 mm, depth 50, pitch 11. The older "cell_nested"
+    # entry above is a different design (wall 0.4, depth 30) and must not be
+    # confused with it.
+    "cell_nest_WINNER": (
+        "cell",
+        dict(variant="nested", face_w=60.0, face_h=60.0, depth=50.0,
+             pitch=11.0, wall_top=0.1, wall_bot=0.1, margin_depths=0.2),
+        60.0,
+        "RANKING 1 LEADER: nested cell, pitch 11 / depth 50 / wall 0.1 mm. "
+        "0.2041% +/- 0.0032%, 30x darker than a flat plate of the same "
+        "coating. A coarse cell whose floor carries a finer lattice, sunk "
+        "below the primary wall tops so it is shadowed head-on"),
+
+    "stack_comb_cone": (
+        "stack",
+        dict(face_w=60.0, face_h=60.0, margin_depths=0.15, backing=2.0,
+             top="comb", top_depth=25.0,
+             top_params=dict(pitch=6.5, wall_top=0.08, wall_bot=0.08,
+                             jitter=0.0),
+             bot="cone", bot_depth=25.0,
+             bot_params=dict(pitch=5.5, tip_radius=0.2, jitter=0.30,
+                             radial_seg=24, height_seg=12, depth_jitter=0.0)),
+        60.0,
+        "PHASE 3: commercial honeycomb over a cone field. The honeycomb owns "
+        "total reflectance and is last on the other two axes; the cone owns "
+        "both viewer-facing axes. The question is whether the stack keeps the "
+        "honeycomb's exposed wall tops -- which are what make its head-on "
+        "brightness equal to a bare flat plate"),
+    "stack_cone_comb": (
+        "stack",
+        dict(face_w=60.0, face_h=60.0, margin_depths=0.15, backing=2.0,
+             top="cone", top_depth=25.0,
+             top_params=dict(pitch=5.5, tip_radius=0.2, jitter=0.30,
+                             radial_seg=24, height_seg=12, depth_jitter=0.0),
+             bot="comb", bot_depth=25.0,
+             bot_params=dict(pitch=6.5, wall_top=0.08, wall_bot=0.08,
+                             jitter=0.0)),
+        60.0,
+        "PHASE 3: the same two layers the other way up. Only the TOP layer is "
+        "exposed head-on, so this should inherit the cone's 0.068 rather than "
+        "the honeycomb's 1.640"),
+    "stack_comb_blades": (
+        "stack",
+        dict(face_w=60.0, face_h=60.0, margin_depths=0.15, backing=2.0,
+             top="comb", top_depth=25.0,
+             top_params=dict(pitch=6.5, wall_top=0.08, wall_bot=0.08,
+                             jitter=0.0),
+             bot="shingle", bot_depth=25.0,
+             bot_params=dict(pitch=5.5, plate_t_top=0.1, plate_t_bot=0.1,
+                             tilt_deg=2.0, tilt_jitter=0.0,
+                             azimuth_mode="grid", jitter=0.30)),
+        60.0,
+        "PHASE 3: bought honeycomb over a slotted blade grid -- both sheet "
+        "metal, both cheap, and the blades are the only layer that moves light "
+        "sideways"),
+
+    "comb_commercial": (
+        "topo",
+        dict(topology="comb", face_w=60.0, face_h=60.0, depth=50.0,
+             pitch=6.5, wall_top=0.08, wall_bot=0.08, comb_expand=1.0,
+             margin_depths=0.2),
+        60.0,
+        "COMMERCIAL expanded aluminium honeycomb: every cell identical, walls "
+        "along the ribbon direction DOUBLE thickness where the foils are "
+        "bonded, and periodic by construction. The `honeycomb` entries "
+        "elsewhere in this record are a Voronoi idealisation with every cell a "
+        "different shape -- not a product, and the numbers quoted for \"the "
+        "honeycomb you can buy\" were measured on that for a day"),
+
+    "topo_honeycomb_lean": (
+        "topo",
+        dict(topology="honeycomb", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=5.5, wall_top=0.4, wall_bot=1.2, cell_lean_deg=30.0,
+             cell_lean_domain=16.0, margin_depths=0.2),
+        60.0,
+        "family 6, LEANING cell lattice: the two results of the night in one "
+        "structure. Narrow full-depth cells are what holds up under a diffuse "
+        "coating; inclined walls are what redirects a bounce under a specular "
+        "one. Cells lean by displacing the Voronoi SITES with depth, along a "
+        "direction field smooth over 16 pitches -- locally coherent so the "
+        "tessellation survives, globally isotropic so the panel has no axis"),
+    "topo_shingle": (
+        "topo",
+        dict(topology="shingle", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, tilt_deg=60.0, plate_over=1.45, plate_t_top=0.05,
+             plate_t_bot=0.9, margin_depths=0.2),
+        60.0,
+        "family 6, overlapping inclined plates knife-edged at the mouth, after "
+        "Rosalia alpina's tent scales. 2.5x worse than the cone: inclined "
+        "plates do redirect a specular bounce, just not enough to pay for the "
+        "area"),
+    "topo_truss": (
+        "topo",
+        dict(topology="truss", face_w=60.0, face_h=60.0, depth=30.0,
+             pitch=7.5, layers=5, strut_r=0.35, links=2, strut_seg=4,
+             margin_depths=0.2),
+        60.0,
+        "family 6, sparse strut lattice. DEAD: a grazing amplifier under a "
+        "specular coating -- 0.0183 at +/-40 against 0.0096 head-on, and it "
+        "swings 4.6x between the two material extremes, the widest of anything "
+        "measured"),
 }
 
 
@@ -166,6 +325,24 @@ def build(family, params, material):
         import geom3d as G3
         p = G3.Cone3DParams(**params)
         v, f = G3.build_mesh(p)
+        BR.mesh_to_object(v, f, "geo", material)
+        return p
+    if family == "topo":
+        import geom_topo as GT
+        p = GT.TopoParams(**params)
+        v, f = GT.build_mesh(p)
+        BR.mesh_to_object(v, f, "geo", material)
+        return p
+    if family == "stack":
+        import geom_stack as ST
+        p = ST.StackParams(**params)
+        v, f = ST.build_mesh(p)
+        BR.mesh_to_object(v, f, "geo", material)
+        return p
+    if family == "cell":
+        import geom_cell as GC
+        p = GC.CellParams(**params)
+        v, f = GC.build_mesh(p)
         BR.mesh_to_object(v, f, "geo", material)
         return p
     mod = {"slat": "profile2d", "scatter": "profile_scatter",

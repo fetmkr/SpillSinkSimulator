@@ -1,0 +1,824 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Spill Sink Panel Simulator</title>
+<style>
+/* Instrument-panel light chrome around a dark screen: the arrangement of a
+   piece of lab hardware, where the case is pale and only the display is lit.
+   Numerals are monospace everywhere they can be compared down a column. */
+:root{
+  --bg:#dedbd4; --panel:#e9e7e1; --sunk:#f5f4f0; --line:#c8c4bb; --line2:#b3aea3;
+  --ink:#16181a; --ink2:#55585c; --ink3:#84878b;
+  --a:#ff4d00; --b:#1d7fd4; --c:#7a5cc4; --no:#c0341c; --ok:#1f7a44;
+  --screen:#101215;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);display:grid;
+  grid-template-columns:296px 1fr 300px;
+  font:400 12.5px/1.5 "Helvetica Neue",Helvetica,Inter,-apple-system,sans-serif;
+  letter-spacing:.005em;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+.col{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.col.left{border-right:1px solid var(--line);background:var(--panel)}
+.col.right{border-left:1px solid var(--line);background:var(--panel)}
+#view{position:relative;background:var(--screen)}
+/* the grid row is auto-sized, so a percentage height on the canvas
+   collapses to zero and the viewport renders nothing. Pin it instead. */
+#view canvas{display:block;position:absolute;inset:0;width:100%;height:100%}
+h2{font:700 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink3);margin:6px 0 2px;
+  padding-bottom:4px;border-bottom:1px solid var(--line)}
+#brand{font:700 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);display:flex;align-items:center;
+  gap:7px;margin:0 0 2px}
+#brand i{width:9px;height:9px;background:var(--a);border-radius:50%;
+  display:inline-block;font-style:normal}
+#brand small{margin-left:auto;color:var(--ink3);font-weight:400;
+  letter-spacing:.1em}
+label{display:block;font-size:11.5px;color:var(--ink2)}
+select,input[type=number]{width:100%;background:var(--sunk);color:var(--ink);
+  border:1px solid var(--line2);border-radius:3px;padding:6px 7px;font:inherit}
+select:focus,input:focus{outline:1px solid var(--a)}
+.row{display:flex;flex-direction:column;gap:3px}
+.sl{display:grid;grid-template-columns:1fr 60px;gap:6px;align-items:center}
+.sl .nm{font:400 11px/1.3 ui-monospace,Menlo,monospace;color:var(--ink2);
+  grid-column:1/-1;display:flex;justify-content:space-between}
+.sl .nm b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--a);background:transparent}
+input[type=range].f{accent-color:var(--b)}
+.grp{border:1px solid var(--line);border-radius:4px;padding:10px;
+  display:flex;flex-direction:column;gap:9px;background:var(--sunk)}
+.grp.f{border-color:#3a2f16}
+button{width:100%;background:#fff;color:var(--ink);border:1px solid var(--line2);
+  border-radius:3px;padding:8px;font:600 12px/1 inherit;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:8px}
+button:hover:not(:disabled){border-color:var(--a);color:#fff}
+button:disabled{opacity:.45;cursor:progress}
+button .t{font:400 10px/1 ui-monospace,Menlo,monospace;color:var(--ink3)}
+button.go{border-color:var(--a);color:var(--a);font-weight:700}
+button:hover:not(:disabled){background:var(--a);color:#fff;border-color:var(--a)}
+dl.kv{margin:0;display:flex;flex-direction:column;gap:3px;
+  font:400 11.5px/1.6 ui-monospace,Menlo,monospace}
+dl.kv div{display:flex;justify-content:space-between;gap:8px;
+  border-bottom:1px dotted var(--line);padding-bottom:2px}
+dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.big{font:650 26px/1 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.big small{font:400 11px/1 ui-monospace,Menlo,monospace;color:var(--ink3);
+  display:block;margin-top:4px}
+.pill{font:600 9.5px/1.6 ui-monospace,Menlo,monospace;border-radius:2px;
+  padding:1px 6px;letter-spacing:.06em}
+.pill.ok{background:var(--ok);color:#06210f}
+.pill.no{background:var(--no);color:#2a0b06}
+.pill.wait{background:var(--line2);color:var(--ink2)}
+#chart{width:100%;height:96px;display:block}
+.note{font-size:11px;color:var(--ink3);line-height:1.5}
+.err{color:var(--no);font:400 11px/1.5 ui-monospace,Menlo,monospace;
+  white-space:pre-wrap;max-height:120px;overflow:auto}
+#illum{position:absolute;left:12px;top:10px;max-width:330px;
+  background:rgba(10,13,15,.82);border:1px solid var(--line2);border-radius:3px;
+  padding:9px 11px;font:400 10.5px/1.6 ui-monospace,Menlo,monospace;
+  color:var(--ink3);pointer-events:none}
+#illum b{color:var(--ink);font:600 9.5px/1.8 ui-monospace,Menlo,monospace;
+  letter-spacing:.11em;text-transform:uppercase;display:block;margin-bottom:4px}
+#illum .ln{display:flex;gap:6px;align-items:baseline}
+#illum .ln i{width:5px;height:5px;border-radius:50%;background:var(--a);
+  flex:none;transform:translateY(-1px)}
+#illum em{color:var(--no);font-style:normal}
+#hud{position:absolute;left:12px;bottom:10px;font:400 10.5px/1.6 ui-monospace,Menlo,monospace;
+  color:var(--ink3);pointer-events:none}
+/* bottom-left, above the hud line. Top-left is where the illumination card
+   sits and the buttons were completely hidden behind it. */
+#views{position:absolute;left:12px;bottom:30px;display:flex;gap:4px;flex-wrap:wrap;
+  z-index:3}
+/* `width:auto` and `display:inline-block` undo the panel's full-width button
+   rule, which stacked these six into a column of 319 px bars across the
+   viewport. */
+#views button{display:inline-block;width:auto;margin:0;white-space:nowrap;
+  background:rgba(255,255,255,.06);border-color:#39414a;color:#c6ccd2;
+  font:500 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;
+  padding:6px 9px;border:1px solid var(--line2);border-radius:3px;
+  background:var(--sunk);color:var(--ink2);cursor:pointer}
+#views button:hover{color:#fff;border-color:var(--a);background:rgba(255,77,0,.25)}
+#views button.on{color:#fff;background:var(--a);border-color:var(--a)}
+#busy{position:absolute;right:12px;top:10px;font:600 10px/1 ui-monospace,Menlo,monospace;
+  color:var(--a);letter-spacing:.1em;opacity:0;transition:opacity .15s}
+#busy.on{opacity:1}
+.match{border:1px solid var(--line2);border-radius:4px;padding:9px;background:var(--sunk)}
+.match .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  margin-bottom:6px}
+.match .nm{font:600 11.5px/1.3 ui-monospace,Menlo,monospace}
+</style>
+
+<div class="col left">
+  <div id="brand"><i></i>Spill Sink Panel Simulator<small>v2</small></div>
+  <h2>Start from a measured design</h2>
+  <div class="row"><select id="preset"></select>
+    <p class="note" id="presetnote">Loads the exact geometry behind a number in
+      the reports. Then change anything.</p></div>
+
+  <h2>Structure</h2>
+  <div class="row"><label>Top layer</label><select id="top"></select></div>
+  <div class="row"><label>Floor</label><select id="floor"></select></div>
+  <div id="floornote" class="note" style="display:none"></div>
+
+  <div class="grp">
+    <div class="sl"><span class="nm">panel size <b id="v_panel">100.0</b> mm sq</span>
+      <input type="range" id="panel" min="20" max="200" step="10" value="100">
+      <input type="number" id="n_panel" step="10" value="100"></div>
+    <div class="sl"><span class="nm">envelope depth <b id="v_depth">50.0</b></span>
+      <input type="range" id="depth" min="10" max="80" step="1" value="50">
+      <input type="number" id="n_depth" step="1" value="50"></div>
+    <div class="sl" id="fdwrap"><span class="nm">floor depth <b id="v_fdepth">3.0</b></span>
+      <input type="range" class="f" id="fdepth" min="0.5" max="25" step="0.5" value="3">
+      <input type="number" id="n_fdepth" step="0.5" value="3"></div>
+  </div>
+
+  <h2 id="toph">Top parameters</h2>
+  <div class="grp" id="tp"></div>
+  <h2 id="floorh">Floor parameters</h2>
+  <div class="grp f" id="fp"></div>
+
+  <h2>Coating</h2>
+  <div class="grp">
+    <div class="row"><label>Painted surface</label><select id="coat"></select></div>
+    <div class="row"><label>Below the paint (as bought)</label>
+      <select id="deepcoat"><option value="">— painted all the way down —</option></select></div>
+    <div class="sl" id="pdwrap"><span class="nm">paint reaches <b id="v_pd">10.0</b> mm</span>
+      <input type="range" id="pd" min="0" max="50" step="1" value="10">
+      <input type="number" id="n_pd" step="1" value="10"></div>
+    <p class="note" id="coatnote"></p>
+    <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.76</b></span>
+      <input type="range" id="df" min="0" max="1" step="0.02" value="0.76">
+      <input type="number" id="n_df" step="0.02" value="0.76"></div>
+    <div class="sl"><span class="nm">specular roughness <b id="v_rg">0.30</b></span>
+      <input type="range" id="rg" min="0.05" max="0.6" step="0.01" value="0.30">
+      <input type="number" id="n_rg" step="0.01" value="0.30"></div>
+    <p class="note">Neither was measured. They set the absolute level of every
+      number; ratios between designs are robust.</p>
+  </div>
+</div>
+
+<div id="view">
+  <canvas id="gl"></canvas>
+  <div id="views">
+    <button data-view="home">home</button><button data-view="top">top</button>
+    <button data-view="bottom">bottom</button><button data-view="left">left</button>
+    <button data-view="right">right</button><button data-view="front">front</button>
+  </div>
+  <div id="hud"></div>
+  <div id="illum">
+    <b>Illumination</b>
+    <div class="ln"><i></i>uniform hemisphere, radiance 1 &mdash; <em>not</em> a lamp</div>
+    <div class="ln"><i></i>view direction &theta; = <b id="il_th">0&deg;</b>, &phi; = 0&deg;</div>
+    <div class="ln"><i></i>reads &rho;<sub>dh</sub>(&theta;) by Helmholtz reciprocity</div>
+    <div class="ln"><i></i>control patch: matte black wall, &rho; = 0.05</div>
+  <div class="ln" style="margin-top:5px"><i style="background:#555f66"></i>grey dome = incoming, all directions at once</div>
+  <div class="ln"><i style="background:#49c2ca"></i>cyan = the direction being read (&theta;)</div>
+  <div class="ln"><i style="background:#d9a847"></i>amber = panel normal</div>
+  </div>
+  <div id="busy">RENDERING</div>
+</div>
+
+<div class="col right">
+  <h2>Renderer</h2>
+  <div class="row"><select id="renderer">
+    <option value="cycles">Cycles &mdash; the published path</option>
+    <option value="mitsuba">Mitsuba 3.9.1 &mdash; independent code</option>
+    <option value="both">Both &mdash; cross-check, all three axes</option>
+  </select></div>
+  <p class="note" id="rendnote"></p>
+
+  <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
+  <dl class="kv" id="derived"></dl>
+
+  <h2>Total reflectance</h2>
+  <button class="go" id="m1">Measure &theta;=0 <span class="t">0.6 s</span></button>
+  <button class="go" id="m5">Measure 5 angles <span class="t">2 s</span></button>
+  <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
+  <canvas id="chart"></canvas>
+
+  <h2>Second renderer</h2>
+  <button id="mx">Cross-check in Mitsuba <span class="t">~40 s</span></button>
+  <dl class="kv" id="xout"><div><dt>not cross-checked</dt><dd>&mdash;</dd></div></dl>
+  <p class="note">One click, both codes, same mesh, same
+   <b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> &mdash; not the fitted coating,
+   which has no identical construction in Mitsuba. Separate from the Renderer
+   selector above: this always runs the pair and reports the gap, whatever the
+   selector is set to.<br><br>
+   <b>Cycles is the reference, not the other way round.</b> It reproduces the
+   integrating-sphere closed form to 0.27&nbsp;%, a thin-wall canyon to
+   0.00&nbsp;%, and an independently written tracer agrees with it to
+   0.4&nbsp;&sigma; where Mitsuba is 7&nbsp;&sigma; away. Treat a gap here as a
+   flag to investigate, not as a correction to apply.</p>
+
+  <h2>Ray paths</h2>
+  <button id="mr">Trace rays <span class="t">&lt;1 s</span></button>
+  <dl class="kv" id="rayout"><div><dt>not traced</dt><dd>&mdash;</dd></div></dl>
+  <p class="note">The actual transport, not a render: rays are cast at the
+   measured incidence, intersected against the same triangles, and scattered
+   from a Lambertian at each hit. <b>Green</b> escapes, <b>red</b> is absorbed;
+   brightness rises with bounce count. It uses its own scattering rule, so the
+   figures illustrate the mechanism rather than second-guess Cycles.</p>
+
+  <h2>Form &amp; head-on</h2>
+  <button id="mf">Measure form + head-on <span class="t">~60 s</span></button>
+  <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
+  <p class="note">Reduced fidelity: 6 stripe phases at 256 spp, not the report's
+   16 at 512. An estimate of the published number, not the number.</p>
+
+  <h2>Against the study</h2>
+  <div class="match" id="match"><span class="note">adjust a parameter&hellip;</span></div>
+
+  <h2>Export</h2>
+  <button id="stl">Download STL <span class="t">tileable</span></button>
+  <div class="err" id="err"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let FAM = null, MESH = null, LAST = null, busy = 0;
+
+function setBusy(n){ busy += n; $('#busy').classList.toggle('on', busy>0); }
+
+// ---------- parameter widgets, generated from the server's dataclass fields
+function sliders(host, fields, cls){
+  host.innerHTML = '';
+  if(!fields.length){ host.innerHTML = '<span class="note">no parameters</span>'; return; }
+  for(const f of fields){
+    if(f.name === 'depth' || f.name === 'backing') continue;   // owned above
+    const d = document.createElement('div'); d.className = 'sl';
+    if(f.kind === 'num'){
+      const dec = f.step < 0.05 ? 3 : (f.step < 1 ? 2 : 1);
+      d.innerHTML = `<span class="nm">${f.name} <b>${(+f.default).toFixed(dec)}</b></span>
+        <input type="range" class="${cls}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.default}">
+        <input type="number" step="${f.step}" value="${f.default}">`;
+      const [lab,rng,num] = [d.querySelector('b'), d.querySelector('input[type=range]'), d.querySelector('input[type=number]')];
+      const sync = v => { lab.textContent = (+v).toFixed(dec); rng.value = v; num.value = v; d.dataset.val = v; refresh(); };
+      rng.oninput = e => sync(e.target.value);
+      num.onchange = e => sync(e.target.value);
+      d.dataset.val = f.default;
+    } else if(f.kind === 'bool'){
+      d.innerHTML = `<span class="nm">${f.name}</span>
+        <input type="checkbox" ${f.default?'checked':''} style="justify-self:start">`;
+      const cb = d.querySelector('input');
+      cb.onchange = () => { d.dataset.val = cb.checked ? '1':'0'; refresh(); };
+      d.dataset.val = f.default ? '1':'0';
+    } else {
+      d.innerHTML = `<span class="nm">${f.name}</span><select style="grid-column:1/-1"></select>`;
+      const opts = OPTIONS[f.name] || [f.default];
+      const sel = d.querySelector('select');
+      sel.innerHTML = opts.map(o=>`<option ${o===f.default?'selected':''}>${o}</option>`).join('');
+      sel.onchange = () => { d.dataset.val = sel.value; refresh(); };
+      d.dataset.val = f.default;
+    }
+    d.dataset.name = f.name; d.dataset.kind = f.kind;
+    host.appendChild(d);
+  }
+}
+const OPTIONS = { azimuth_mode:['grid','parallel','random'], shape:['vee','u','asym'],
+                  lattice:['hex','square'] };
+
+function collect(host){
+  const o = {};
+  for(const d of host.children){
+    if(!d.dataset || !d.dataset.name) continue;
+    const k = d.dataset.kind, v = d.dataset.val;
+    o[d.dataset.name] = k === 'num' ? +v : (k === 'bool' ? v === '1' : v);
+  }
+  return o;
+}
+
+function spec(){
+  const floor = $('#floor').value;
+  const s = { top: $('#top').value, top_params: collect($('#tp')),
+              depth: +$('#depth').value, panel: +$('#panel').value,
+              margin_depths: 0.2 };
+  if(floor !== 'none'){ s.floor = floor; s.floor_params = collect($('#fp'));
+                        s.floor_depth = +$('#fdepth').value; }
+  else s.floor = 'none';
+  return s;
+}
+
+// ---------- geometry (instant)
+let pending = null;
+function refresh(){
+  clearTimeout(pending);
+  pending = setTimeout(async () => {
+    const s = spec(); LAST = s;
+    try{
+      const r = await fetch('/api/mesh', {method:'POST', body: JSON.stringify(s)});
+      if(!r.ok) throw new Error((await r.json()).error || r.status);
+      const d = JSON.parse(r.headers.get('X-Derived'));
+      if(d.invalid){
+        $('#derived').innerHTML =
+          `<div><dt>this combination has no geometry</dt><dd><span class="pill no">INVALID</span></dd></div>`;
+        $('#err').textContent = d.why;
+        $('#hud').textContent = 'invalid parameters — nothing to draw';
+        return;                                  // keep the last good mesh up
+      }
+      MESH = new Float32Array(await r.arrayBuffer());
+      upload(MESH); buildOverlay(SHOW_THETAS); draw();
+      showDerived(d);
+      $('#err').textContent = '';
+      matchStudy(s);
+    }catch(e){ $('#err').textContent = String(e).slice(0,400); }
+  }, 40);
+}
+
+function showDerived(d){
+  const rows = [
+    ['aspect ratio', d.aspect ? d.aspect.toFixed(2) : '—'],
+    ['exposed area', d.exposed_fraction_est != null ? (100*d.exposed_fraction_est).toFixed(2)+' %' : '—'],
+    ['min feature', d.min_feature_mm != null ? d.min_feature_mm.toFixed(3)+' mm' : '—'],
+    ['process', d.process || '—'],
+    ['triangles', (d.verts ? Math.round(MESH.length/18) : 0).toLocaleString()],
+    ['build', d.build_ms + ' ms'],
+  ];
+  const pill = d.buildable == null ? '<span class="pill wait">unknown</span>'
+    : (d.buildable ? '<span class="pill ok">BUILDABLE</span>'
+                   : '<span class="pill no">BELOW FLOOR</span>');
+  $('#derived').innerHTML = rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')
+    + `<div><dt>${d.buildable_note||''}</dt><dd>${pill}</dd></div>`;
+  $('#hud').textContent = `${$('#top').value}${LAST.floor!=='none' ? ' + '+LAST.floor : ''} · `
+    + `${LAST.depth} mm · drag to orbit, scroll to zoom`;
+}
+
+// ---------- measurement
+async function measure(thetas){
+  setBusy(1); $('#m1').disabled = $('#m5').disabled = true;
+  try{
+    const R = $('#renderer').value;
+    const r = await fetch('/api/measure', {method:'POST', body: JSON.stringify({
+      spec: LAST, thetas, renderer: R,
+      diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
+      coating: $('#coat').value, deep_coating: $('#deepcoat').value || null,
+      paint_depth: $('#deepcoat').value ? +$('#pd').value : null})});
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    SHOW_THETAS = thetas; buildOverlay(thetas); draw();
+    $('#il_th').textContent = thetas.length>1
+      ? '0\u00b0, \u00b120\u00b0, \u00b140\u00b0' : (thetas[0]+'\u00b0');
+    const vals = Object.entries(j.rho).map(([t,v])=>[+t,v]).sort((a,b)=>a[0]-b[0]);
+    const worst = Math.max(...vals.map(v=>v[1]));
+    const who = R==='cycles' ? 'Cycles' : (R==='mitsuba' ? 'Mitsuba' : 'both');
+    let extra = '';
+    if(j.diff){
+      const d = Math.max(...Object.values(j.diff).map(Math.abs));
+      extra = ` · Mitsuba vs Cycles worst ${(100*d).toFixed(1)} %`
+            + (d < 0.05 ? ' — agree' : ' — DISAGREE');
+    }
+    $('#rho').innerHTML = (100*worst).toFixed(5) + ' %'
+      + `<small>${who}${R!=='cycles'?' · Lambertian &rho;=0.01':''}`
+      + ` · worst of ${vals.length} angle${vals.length>1?'s':''} · ${j.seconds}s`
+      + ` · &theta;=0 is ${(100*(j.rho['0']??worst)).toFixed(5)} %${extra}</small>`;
+    chart(vals);
+  }catch(e){ $('#err').textContent = String(e).slice(0,600); }
+  finally{ setBusy(-1); $('#m1').disabled = $('#m5').disabled = false; }
+}
+
+function drawAxis(g, W, H){
+  // The measurement direction, drawn as an arrow leaving the panel normal.
+  // There is deliberately no lamp icon: `hemi_view` illuminates uniformly from
+  // the whole hemisphere and reads what leaves toward theta. Drawing a light
+  // at theta would be a picture of a different experiment.
+}
+function chart(vals){
+  const c = $('#chart'), dpr = devicePixelRatio||1;
+  c.width = c.clientWidth*dpr; c.height = 96*dpr;
+  const g = c.getContext('2d'); g.scale(dpr,dpr);
+  const W = c.clientWidth, H = 96, pad = 22;
+  g.clearRect(0,0,W,H);
+  if(!vals.length) return;
+  const mx = Math.max(...vals.map(v=>v[1]))*1.15 || 1;
+  g.strokeStyle='#1e262d'; g.beginPath(); g.moveTo(pad,H-16); g.lineTo(W-6,H-16); g.stroke();
+  const x = t => pad + (t+40)/80*(W-pad-10);
+  const y = v => (H-16) - v/mx*(H-26);
+  g.strokeStyle='#49c2ca'; g.lineWidth=2; g.beginPath();
+  vals.forEach(([t,v],i)=> i?g.lineTo(x(t),y(v)):g.moveTo(x(t),y(v))); g.stroke();
+  g.fillStyle='#49c2ca';
+  vals.forEach(([t,v])=>{ g.beginPath(); g.arc(x(t),y(v),3,0,7); g.fill(); });
+  g.fillStyle='#6b7883'; g.font='10px ui-monospace,Menlo,monospace';
+  [-40,-20,0,20,40].forEach(t=>g.fillText(t+'°', x(t)-8, H-4));
+}
+
+// ---------- does it agree with the published study?
+async function matchStudy(s){
+  try{
+    const r = await fetch('/api/published', {method:'POST', body: JSON.stringify(s)});
+    const n = (await r.json()).nearest;
+    if(!n){ $('#match').innerHTML = '<span class="note">nothing comparable</span>'; return; }
+    const pct = (100*n.match).toFixed(0);
+    $('#match').innerHTML =
+      `<div class="hd"><span class="nm">${n.design}</span>
+        <span class="pill ${n.exact?'ok':'wait'}">${n.exact?'EXACT':pct+'% match'}</span></div>
+       <dl class="kv">
+        <div><dt>published worst-&theta;</dt><dd>${(100*n.worst_rho).toFixed(5)} %</dd></div>
+        <div><dt>source</dt><dd>${n.source}</dd></div>
+        <div><dt>seeds</dt><dd>${n.n_seeds}</dd></div>
+       </dl>
+       <p class="note">Measure 5 angles and compare. A live number that differs
+        from the published one on identical parameters is a bug in one of them.</p>`;
+  }catch(e){}
+}
+
+// ---------- WebGL, flat-shaded, orbit
+const gl = $('#gl').getContext('webgl2', {antialias:true});
+const P = gl.createProgram();
+function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; }
+gl.attachShader(P, sh(gl.VERTEX_SHADER,`#version 300 es
+in vec3 p; in vec3 n; uniform mat4 mvp; uniform mat3 nm; out vec3 vn; out float vz;
+void main(){ vn = normalize(nm*n); gl_Position = mvp*vec4(p,1.); vz = gl_Position.z; }`));
+gl.attachShader(P, sh(gl.FRAGMENT_SHADER,`#version 300 es
+precision highp float; in vec3 vn; in float vz; out vec4 o;
+void main(){
+  vec3 L1 = normalize(vec3(.35,.75,.55)), L2 = normalize(vec3(-.5,.2,-.6));
+  float d = max(dot(vn,L1),0.)*.85 + max(dot(vn,L2),0.)*.25 + .16;
+  vec3 c = mix(vec3(.10,.12,.14), vec3(.80,.86,.90), clamp(d,0.,1.));
+  o = vec4(c,1.);
+}`));
+gl.linkProgram(P); gl.useProgram(P);
+// --- overlay: what the illumination actually is ---------------------------
+// A separate line program. `hemi_view` lights the panel from the WHOLE
+// hemisphere at once and reads what leaves toward theta, so the picture is a
+// dome of incoming rays plus one arrow for the view direction. Drawing a lamp
+// at theta would show a different experiment from the one being run.
+const LP = gl.createProgram();
+gl.attachShader(LP, sh(gl.VERTEX_SHADER,`#version 300 es
+in vec3 p; in vec3 c; uniform mat4 mvp; out vec3 vc;
+void main(){ vc=c; gl_Position = mvp*vec4(p,1.); }`));
+gl.attachShader(LP, sh(gl.FRAGMENT_SHADER,`#version 300 es
+precision highp float; in vec3 vc; out vec4 o; void main(){ o=vec4(vc,1.); }`));
+gl.linkProgram(LP);
+const LVAO = gl.createVertexArray(), LVBO = gl.createBuffer();
+gl.bindVertexArray(LVAO); gl.bindBuffer(gl.ARRAY_BUFFER, LVBO);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
+gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
+let NLINE = 0;
+function buildOverlay(thetas){
+  if(!LAST) return;
+  const R = RAD*1.15, cx = CEN[0], cz = CEN[2], v = [];
+  const push = (a,b,col)=>{ v.push(a[0],a[1],a[2],col[0],col[1],col[2],
+                                    b[0],b[1],b[2],col[0],col[1],col[2]); };
+  // the dome: uniform hemisphere, many faint rays all arriving at the face
+  const DOME=[0.30,0.36,0.40];
+  for(let ring=1; ring<=3; ring++){
+    const el = ring*22*Math.PI/180, n = 8*ring;
+    for(let i=0;i<n;i++){
+      const az = i/n*2*Math.PI;
+      const d = [Math.cos(el)*Math.cos(az), Math.sin(el), Math.cos(el)*Math.sin(az)];
+      push([cx+d[0]*R, d[1]*R, cz+d[2]*R],
+           [cx+d[0]*R*0.72, d[1]*R*0.72, cz+d[2]*R*0.72], DOME);
+    }
+  }
+  // the measured directions: theta in the YZ plane, the plane the camera tilts in
+  const COL=[0.29,0.76,0.79];
+  for(const th of (thetas&&thetas.length?thetas:[0])){
+    const t = th*Math.PI/180;
+    const d = [0, Math.cos(t), Math.sin(t)];
+    const tip=[cx, 0, cz], base=[cx+d[0]*R, d[1]*R, cz+d[2]*R];
+    push(base, tip, COL);
+    // arrowhead
+    const s2 = R*0.06;
+    push(tip, [tip[0], d[1]*s2*2.2, cz+d[2]*s2*2.2 - (th>=0?s2:-s2)], COL);
+    push(tip, [tip[0]+s2, d[1]*s2*2.2, cz+d[2]*s2*2.2], COL);
+  }
+  // the panel normal, for orientation
+  push([cx,0,cz],[cx, R*0.45, cz],[0.85,0.66,0.28]);
+
+  // TRACED RAY PATHS, appended to the same line buffer. Each path is a
+  // polyline in the mesh's own millimetre coordinates, so no transform is
+  // needed. Green means the ray got back out, red means it was absorbed; the
+  // segment brightens with depth so a ray still rattling at bounce ten reads
+  // differently from one that left immediately.
+  if(RAYS && RAYS.paths){
+    for(let k=0;k<RAYS.paths.length;k++){
+      const P = RAYS.paths[k], out = RAYS.escaped[k];
+      const n = P.length/3;
+      for(let i=0;i<n-1;i++){
+        const f = i/Math.max(n-1,1);
+        const col = out ? [0.18+0.62*f, 0.85, 0.35+0.3*f]
+                        : [0.90, 0.28+0.45*f, 0.20+0.25*f];
+        push([P[i*3],P[i*3+1],P[i*3+2]],
+             [P[(i+1)*3],P[(i+1)*3+1],P[(i+1)*3+2]], col);
+      }
+    }
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, LVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW);
+  NLINE = v.length/6;
+}
+let SHOW_THETAS = [0];
+let RAYS = null;
+
+const VAO = gl.createVertexArray(), VBO = gl.createBuffer();
+gl.bindVertexArray(VAO); gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
+gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
+gl.enable(gl.DEPTH_TEST); gl.clearColor(.039,.051,.059,1);
+let NTRI = 0, CEN=[30,-25,0], RAD=60;
+function upload(a){
+  gl.bindBuffer(gl.ARRAY_BUFFER, VBO); gl.bufferData(gl.ARRAY_BUFFER, a, gl.STATIC_DRAW);
+  NTRI = a.length/18;
+  let lo=[1e9,1e9,1e9], hi=[-1e9,-1e9,-1e9];
+  for(let i=0;i<a.length;i+=6) for(let k=0;k<3;k++){ lo[k]=Math.min(lo[k],a[i+k]); hi[k]=Math.max(hi[k],a[i+k]); }
+  CEN = lo.map((v,k)=>(v+hi[k])/2);
+  RAD = Math.max(...lo.map((v,k)=>hi[k]-v))*0.62 || 60;
+}
+let yaw=-0.72, pitch=0.46, dist=2.4, drag=null;
+const cv = $('#gl');
+cv.onpointerdown = e => { drag=[e.clientX,e.clientY]; cv.setPointerCapture(e.pointerId); };
+cv.onpointerup = () => drag=null;
+// 1.5533 rad is 89 degrees. Not 90: the view matrix takes its right vector
+// from cross(forward, [0,1,0]), which is zero when the forward vector IS the
+// up vector, and a top view would come out as a black screen rather than a
+// plan. One degree off is indistinguishable and always defined.
+const NADIR = 1.5533;
+cv.onpointermove = e => { if(!drag) return;
+  yaw += (e.clientX-drag[0])*.008;
+  pitch = Math.max(-NADIR,Math.min(NADIR,pitch+(e.clientY-drag[1])*.008));
+  setViewBtn(null); drag=[e.clientX,e.clientY]; draw(); };
+cv.onwheel = e => { e.preventDefault(); dist = Math.max(.6,Math.min(9,dist*(1+e.deltaY*.0012))); draw(); };
+
+// Named views. The panel face lies in XZ with depth running down -Y, so `top`
+// is the view the measurement takes: straight down the normal.
+const VIEWS = {home:[-0.72,0.46], top:[0,NADIR], bottom:[0,-NADIR],
+               left:[-Math.PI/2,0], right:[Math.PI/2,0], front:[0,0]};
+function setViewBtn(name){
+  document.querySelectorAll('#views button').forEach(b =>
+    b.classList.toggle('on', b.dataset.view === name));
+}
+function setView(name){
+  const v = VIEWS[name]; if(!v) return;
+  yaw = v[0]; pitch = v[1]; setViewBtn(name); draw();
+}
+document.querySelectorAll('#views button').forEach(b =>
+  b.onclick = () => setView(b.dataset.view));
+setViewBtn('home');
+// `a` and `b` are COLUMN-major (what WebGL wants with transpose=false), but
+// this loop indexes row-major. A column-major array of M is the row-major array
+// of M-transpose, so mul(a,b) returns the column-major array of B*A -- the
+// operands come out in the opposite order from how they read. Hence the call
+// below is mul(view, proj) to obtain proj*view, which looks backwards and is
+// not. Getting this wrong drew the whole panel outside the frustum: geometry
+// uploaded, no GL error, black screen.
+function mul(a,b){ const o=new Float32Array(16);
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i*4+k]*b[k*4+j];o[i*4+j]=s;} return o; }
+function draw(){
+  const w=cv.clientWidth,h=cv.clientHeight,dpr=devicePixelRatio||1;
+  cv.width=w*dpr; cv.height=h*dpr; gl.viewport(0,0,cv.width,cv.height);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  if(!NTRI) return;
+  const r=RAD*dist, ex=r*Math.cos(pitch)*Math.sin(yaw), ey=r*Math.sin(pitch), ez=r*Math.cos(pitch)*Math.cos(yaw);
+  const eye=[CEN[0]+ex,CEN[1]+ey,CEN[2]+ez];
+  const f=[CEN[0]-eye[0],CEN[1]-eye[1],CEN[2]-eye[2]];
+  const fl=Math.hypot(...f); f.forEach((v,i)=>f[i]=v/fl);
+  const up=[0,1,0];
+  let s=[f[1]*up[2]-f[2]*up[1], f[2]*up[0]-f[0]*up[2], f[0]*up[1]-f[1]*up[0]];
+  const sl=Math.hypot(...s)||1; s=s.map(v=>v/sl);
+  const u=[s[1]*f[2]-s[2]*f[1], s[2]*f[0]-s[0]*f[2], s[0]*f[1]-s[1]*f[0]];
+  const V=new Float32Array([s[0],u[0],-f[0],0, s[1],u[1],-f[1],0, s[2],u[2],-f[2],0,
+    -(s[0]*eye[0]+s[1]*eye[1]+s[2]*eye[2]), -(u[0]*eye[0]+u[1]*eye[1]+u[2]*eye[2]),
+     (f[0]*eye[0]+f[1]*eye[1]+f[2]*eye[2]), 1]);
+  // ORTHOGRAPHIC, ALWAYS. A perspective view of a lattice is a bad instrument:
+  // cells further from the camera subtend less angle, so wall thickness, pitch
+  // and depth all read differently across one panel and nothing can be
+  // compared by eye or measured off the screen. The half-height matches what
+  // the old 0.45 rad frustum showed at the centre of rotation, so the framing
+  // is unchanged; only the projection is.
+  const asp=w/h, H=r*Math.tan(.45/2), W=H*asp, n=-r*8, fa=r*8;
+  const Pm=new Float32Array([1/W,0,0,0, 0,1/H,0,0, 0,0,-2/(fa-n),0,
+    0,0,-(fa+n)/(fa-n),1]);
+  const MVP=mul(V,Pm);   // = Pm * V, see mul()
+  gl.uniformMatrix4fv(gl.getUniformLocation(P,'mvp'), false, MVP);
+  gl.uniformMatrix3fv(gl.getUniformLocation(P,'nm'), false, new Float32Array([1,0,0,0,1,0,0,0,1]));
+  gl.drawArrays(gl.TRIANGLES, 0, NTRI*3);
+  if(NLINE){
+    gl.useProgram(LP); gl.bindVertexArray(LVAO);
+    gl.uniformMatrix4fv(gl.getUniformLocation(LP,'mvp'), false, MVP);
+    gl.drawArrays(gl.LINES, 0, NLINE);
+    gl.useProgram(P); gl.bindVertexArray(VAO);
+  }
+}
+addEventListener('resize', draw);
+
+// ---------- boot
+(async () => {
+  FAM = await (await fetch('/api/families')).json();
+  const t = $('#top'), f = $('#floor');
+  // grouped, so a candidate is not offered on the same footing as a control
+  t.innerHTML = (FAM.groups||[['',Object.keys(FAM.top)]]).map(([g,ks]) =>
+    `<optgroup label="${g}">` + ks.map(k=>`<option ${k==='comb'?'selected':''}>${k}</option>`).join('') + '</optgroup>').join('');
+  f.innerHTML = Object.keys(FAM.floor).map(k=>`<option ${k==='pyramid'?'selected':''}>${k}</option>`).join('');
+  // ---- presets: open on something real, not on dataclass defaults
+  const PRE = (await (await fetch('/api/presets')).json()).presets;
+  const named = PRE.filter(p => p.headline)
+                   .sort((a,b) => a.headline.localeCompare(b.headline));
+  $('#preset').innerHTML = '<option value="">— pick a design —</option>' +
+    named.map((p,i)=>`<option value="${i}">${p.headline}  ·  ${(100*p.worst_rho).toFixed(4)}%</option>`).join('');
+  let loading = false;
+  $('#preset').onchange = e => {
+    const p = named[+e.target.value]; if(!p) return;
+    loading = true;
+    $('#top').value = p.spec.top; $('#floor').value = p.spec.floor;
+    rebuild(true);
+    for(const [host, src] of [['#tp', p.spec.top_params], ['#fp', p.spec.floor_params]]){
+      for(const d of $(host).children){
+        if(!d.dataset || !(d.dataset.name in (src||{}))) continue;
+        const v = src[d.dataset.name];
+        const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]'), b=d.querySelector('b');
+        if(r) r.value=v; if(n) n.value=v; if(b) b.textContent=(+v).toFixed(3);
+        const sel=d.querySelector('select'); if(sel) sel.value=v;
+        d.dataset.val = v;
+      }
+    }
+    const setTop=(id,lab,v)=>{ $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
+    setTop('depth','v_depth', p.spec.depth);
+    if(p.spec.floor!=='none') setTop('fdepth','v_fdepth', p.spec.floor_depth||3);
+    $('#presetnote').innerHTML = `<b style="color:var(--ink)">${p.design}</b> from
+      <code>${p.source}</code> · published worst-&theta; ${(100*p.worst_rho).toFixed(5)} %.
+      Measure and compare, or change anything.`;
+    loading = false;
+    refresh();
+  };
+
+  const rebuild = (quiet) => {
+    // A 1D extruded profile cannot take a floor layer -- geom_stack has no
+    // mesh builder for it. Picking one used to return an empty mesh with a
+    // KeyError for a reason, so the viewport just went blank. Offer 'none'
+    // only, and say why where the floor controls would have been.
+    const canStack = !FAM.stackable || FAM.stackable.includes(t.value);
+    f.disabled = !canStack;
+    if(!canStack && f.value !== 'none') f.value = 'none';
+    $('#floornote').textContent = canStack ? ''
+      : `${t.value} is a 1D extruded profile — no floor layer.`;
+    $('#floornote').style.display = canStack ? 'none' : '';
+    sliders($('#tp'), FAM.top[t.value], '');
+    sliders($('#fp'), FAM.floor[f.value], 'f');
+    const has = f.value !== 'none';
+    $('#fdwrap').style.display = has ? '' : 'none';
+    $('#floorh').style.display = has ? '' : 'none';
+    $('#fp').style.display = has ? '' : 'none';
+    if(!quiet) refresh();
+  };
+  // Changing the structure must reset the ENVELOPE too. `depth` and
+  // `floor_depth` live outside the per-structure slider block, so they used to
+  // survive a switch: load a 50 mm V-groove preset, pick `pyramid` floor, and
+  // the floor inherited 50 mm from the tube. Every control that belongs to the
+  // old structure goes back to that structure's own normal value.
+  const resetEnvelope = () => {
+    const d = (FAM.normal_depth||{})[t.value];
+    if(d != null){ $('#depth').value=d; $('#n_depth').value=d; $('#v_depth').textContent=(+d).toFixed(2); }
+    const fd = (FAM.floor_depth||{})[f.value];
+    if(fd != null){ $('#fdepth').value=fd; $('#n_fdepth').value=fd; $('#v_fdepth').textContent=(+fd).toFixed(2); }
+  };
+  t.onchange = () => { $('#preset').value=''; $('#presetnote').textContent=
+      'Loads the exact geometry behind a number in the reports. Then change anything.';
+      resetEnvelope(); rebuild(); };
+  f.onchange = () => { $('#preset').value=''; resetEnvelope(); rebuild(); };
+  for(const [id,lab] of [['panel','v_panel'],['depth','v_depth'],['fdepth','v_fdepth'],['df','v_df'],['rg','v_rg']]){
+    const r=$('#'+id), num=$('#n_'+id), L=$('#'+lab);
+    const sync = v => { r.value=v; if(num) num.value=v; L.textContent=(+v).toFixed(2); refresh(); };
+    r.oninput = e=>sync(e.target.value); if(num) num.onchange = e=>sync(e.target.value);
+  }
+  $('#mf').onclick = async () => {
+    const b = $('#mf'); b.disabled = true; setBusy(1);
+    $('#formout').innerHTML = '<div><dt>rendering&hellip;</dt><dd>~60 s</dd></div>';
+    try{
+      const R = $('#renderer').value;
+      const r = await fetch('/api/form', {method:'POST',
+        body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
+                              renderer: R})});
+      const j = await r.json();
+      if(j.error) throw new Error(j.error);
+      const num = v => v==null ? '\u2014' : (+v).toFixed(4);
+      if(j.cycles && j.mitsuba){
+        const d = j.diff || {};
+        const pc = v => v==null ? '\u2014'
+          : ((v>0?'+':'') + (100*v).toFixed(1) + ' %'
+             + (Math.abs(v)<0.05 ? '  agree' : '  DISAGREE'));
+        $('#formout').innerHTML =
+          `<div><dt>smear &mdash; Cycles</dt><dd>${num(j.cycles.smear)}</dd></div>
+           <div><dt>smear &mdash; Mitsuba</dt><dd>${num(j.mitsuba.smear)}</dd></div>
+           <div><dt>smear difference</dt><dd>${pc(d.smear)}</dd></div>
+           <div><dt>head-on &mdash; Cycles</dt><dd>${num(j.cycles.head_on)}</dd></div>
+           <div><dt>head-on &mdash; Mitsuba</dt><dd>${num(j.mitsuba.head_on)}</dd></div>
+           <div><dt>head-on difference</dt><dd>${pc(d.head_on)}</dd></div>
+           <div><dt>took</dt><dd>${j.seconds} s &middot; Lambertian &rho;=0.01</dd></div>`;
+      } else {
+        const who = R==='cycles' ? 'Cycles'
+                  : 'Mitsuba \u00b7 Lambertian \u03c1=0.01';
+        $('#formout').innerHTML =
+          `<div><dt>form destruction</dt><dd>${j.smear!=null?j.smear.toFixed(2)+'\u00d7':'\u2014'}</dd></div>
+           <div><dt>head-on brightness</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>
+           <div><dt>renderer</dt><dd>${who}</dd></div>
+           <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases</dd></div>`;
+      }
+    }catch(e){ $('#err').textContent = String(e).slice(0,600);
+               $('#formout').innerHTML = '<div><dt>failed</dt><dd>&mdash;</dd></div>'; }
+    finally{ b.disabled = false; setBusy(-1); }
+  };
+  // ---- coatings: a named product is one number, rho_dh at normal incidence
+  const CO = await (await fetch('/api/coatings')).json();
+  const opts = Object.entries(CO).map(([k,v]) =>
+    `<option value="${k}">${k}  ·  ${(100*v.rho0).toFixed(2)}%</option>`).join('');
+  $('#coat').innerHTML = opts;
+  $('#coat').value = 'musou_fit';
+  $('#deepcoat').innerHTML = '<option value="">— painted all the way down —</option>' + opts;
+  const coatNote = () => {
+    const a = CO[$('#coat').value], d = CO[$('#deepcoat').value];
+    const has = !!$('#deepcoat').value;
+    $('#pdwrap').style.display = has ? '' : 'none';
+    $('#coatnote').innerHTML = a.note + (d ? `<br><br><b>Below ${$('#pd').value} mm:</b> ${d.note}` : '');
+  };
+  $('#coat').onchange = coatNote;
+  $('#deepcoat').onchange = coatNote;
+  for(const [id,lab] of [['pd','v_pd']]){
+    const r=$('#'+id), n=$('#n_'+id), L=$('#'+lab);
+    const sync = v => { r.value=v; if(n) n.value=v; L.textContent=(+v).toFixed(1); coatNote(); };
+    r.oninput = e=>sync(e.target.value); if(n) n.onchange = e=>sync(e.target.value);
+  }
+  coatNote();
+
+  // WHAT EACH CHOICE ACTUALLY MEASURES. Cycles runs the fitted Musou coating,
+  // which is the material every published number used. Mitsuba has no identical
+  // construction for it -- the Cycles coating is a Fresnel node feeding a
+  // diffuse/glossy mix -- so anything Mitsuba measures here runs on a pure
+  // Lambertian, the one BRDF both codes share exactly. That is the honest
+  // comparison and it is NOT the published material; the note says so on screen
+  // rather than in a docstring nobody opens.
+  const RENDNOTE = {
+    cycles: 'The published path. Fitted Musou coating, Fresnel-weighted '
+      + 'diffuse/glossy mix. Every number in the reports came through here.',
+    mitsuba: 'An independent code on the same mesh, with a pure '
+      + '<b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> &mdash; not the fitted '
+      + 'coating, which has no identical construction in Mitsuba. Use it to '
+      + 'check transport and geometry, not absolute coating performance.',
+    both: 'Runs both codes on the same mesh with the same '
+      + '<b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> and reports the difference. '
+      + 'On comb 6.5/0.08 the three axes agree to &minus;4.3&nbsp;% (total), '
+      + '&minus;1.3&nbsp;% (smear) and &minus;0.1&nbsp;% (head-on).'
+  };
+  const rend = () => $('#renderer').value;
+  $('#renderer').onchange = () => {
+    $('#rendnote').innerHTML = RENDNOTE[rend()];
+    $('#rho').innerHTML = '&mdash;<small>not measured</small>';
+    $('#formout').innerHTML = '<div><dt>not measured</dt><dd>&mdash;</dd></div>';
+  };
+  $('#rendnote').innerHTML = RENDNOTE.cycles;
+  $('#mx').onclick = async () => {
+    const b = $('#mx'); b.disabled = true; setBusy(1);
+    $('#xout').innerHTML = '<div><dt>running both renderers</dt><dd>&hellip;</dd></div>';
+    try{
+      const r = await fetch('/api/crosscheck', {method:'POST',
+        body: JSON.stringify({spec: LAST, theta: 0, rho: 0.01, spp: 256})});
+      const j = await r.json();
+      if(j.error) throw new Error(j.error);
+      if(j.mitsuba && j.mitsuba.error) throw new Error(j.mitsuba.error);
+      const pc = v => v==null ? '\u2014' : (100*v).toFixed(5) + ' %';
+      const d = j.diff;
+      $('#xout').innerHTML = [
+        ['Cycles &mdash; reference', pc(j.cycles)],
+        ['Mitsuba ' + (j.mitsuba.version || ''), pc(j.mitsuba.rho_dh)],
+        ['gap', d == null ? '\u2014'
+           : (d>0?'+':'') + (100*d).toFixed(1) + ' %  \u00b7  '
+             + (Math.abs(d) < 0.05 ? 'agree' : 'investigate')],
+        ['triangles / took', (j.mitsuba.tris||'?') + ' \u00b7 ' + j.seconds + ' s'],
+      ].map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    }catch(e){ $('#xout').innerHTML =
+        `<div><dt>failed</dt><dd>${String(e).slice(0,300)}</dd></div>`; }
+    finally{ b.disabled = false; setBusy(-1); }
+  };
+  $('#mr').onclick = async () => {
+    const b=$('#mr'); b.disabled=true; setBusy(1);
+    try{
+      const th = SHOW_THETAS && SHOW_THETAS.length ? SHOW_THETAS[0] : 0;
+      const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
+        {spec: LAST, theta: th, n_rays: 140, max_bounces: 12, rho: 0.5})});
+      const j = await r.json();
+      if(j.error) throw new Error(j.error);
+      RAYS = j; buildOverlay(SHOW_THETAS); draw();
+      const s=j.stats;
+      $('#rayout').innerHTML =
+        `<div><dt>incidence</dt><dd>${s.theta}&deg;</dd></div>
+         <div><dt>rays</dt><dd>${s.rays} &middot; ${s.triangles.toLocaleString()} tri</dd></div>
+         <div><dt>mean bounces</dt><dd>${s.mean_bounces.toFixed(2)}</dd></div>
+         <div><dt>absorbed</dt><dd>${(100*s.absorbed_frac).toFixed(1)} %</dd></div>
+         <div><dt>escaped</dt><dd>${(100*s.escaped_frac).toFixed(1)} %</dd></div>
+         <div><dt>took</dt><dd>${j.seconds} s</dd></div>`;
+    }catch(e){ $('#rayout').innerHTML =
+      `<div><dt>failed</dt><dd>${String(e).slice(0,200)}</dd></div>`; }
+    finally{ b.disabled=false; setBusy(-1); }
+  };
+  $('#m1').onclick = () => measure([0]);
+  $('#m5').onclick = () => measure([0,-20,-40,20,40]);
+  $('#stl').onclick = async () => {
+    const r = await fetch('/api/stl', {method:'POST', body: JSON.stringify(LAST)});
+    const b = await r.blob(), a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = `${LAST.top}${LAST.floor!=='none'?'_'+LAST.floor:''}_d${LAST.depth}.stl`;
+    a.click();
+  };
+  rebuild();
+})();
+</script>

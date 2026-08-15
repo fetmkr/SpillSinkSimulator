@@ -78,6 +78,18 @@ def describe(p):
     if name == "Cone3DParams":
         import geom3d
         return geom3d.describe(p)
+    if name == "TopoParams":
+        import geom_topo
+        return geom_topo.describe(p)
+    if name == "CellParams":
+        import geom_cell
+        return geom_cell.describe(p)
+    if name == "StackParams":
+        import geom_stack
+        return geom_stack.describe(p)
+    # NOTE: this fallthrough is silent, and it is how a TopoParams run failed
+    # with "no attribute 'slat_len'" -- profile2d.describe was handed a params
+    # object from a different family. Any new family MUST be registered above.
     return profile2d.describe(p)
 
 
@@ -125,12 +137,269 @@ def make_glossy(name, rho, roughness):
     return m
 
 
+# --- the coating, fitted to a real measurement --------------------------------
+#
+# make_glossy has no Fresnel: its directional-hemispherical reflectance is flat
+# with angle (0.4953% head-on, 0.4521% at 80 deg for rho=0.005). Real black
+# coatings do the opposite -- they get worse toward grazing, steeply.
+#
+# Filip & Vavra 2026 (reference/2601.05094v1.pdf, Fig. 6, p.7) measured Musou
+# Black paint on a goniometer, 24488 samples, and report THR -- which is
+# defined by their eq. 1 as exactly the quantity hemi_view reads:
+#
+#     theta_i    0      15     30     45     60     75     80
+#     THR      1.00%  1.00%  1.03%  1.13%  1.43%  2.33%  3.18%
+#
+# So the coating we have been assuming is 2x optimistic head-on and about 7x
+# optimistic at 80 deg, with the angular trend running the wrong way.
+#
+# This model is a FIT to that curve, not a derivation. A bare dielectric over
+# an absorber would give ~4% at normal incidence; Musou Black reads 1.00%
+# because its own micro-roughness is already trapping light. Rather than invent
+# a mechanism, split the measurement into the two pieces that reproduce it:
+#
+#     rho_dh(theta) = rho_body  +  spec_scale * F(theta, IOR)
+#
+# a body term with no angular dependence, plus a Fresnel-shaped term scaled
+# down from a full dielectric. Fitting rho(0) = 1.00% and rho(80) = 3.18% with
+# IOR 1.5 gives rho_body = 0.758%, spec_scale = 0.0605 (6% of a full dielectric
+# lobe).
+#
+# MEASURED in Cycles on a genuinely flat plate (scripts/fit_coating.py), against
+# the five angles NOT used in the fit:
+#
+#     theta      0      15     30     45     60     75     80
+#     target   1.000  1.000  1.030  1.130  1.430  2.330  3.180  %
+#     Cycles   0.998  0.999  1.007  1.060  1.294  2.278  3.085  %
+#     residual -0.2   -0.1   -2.2   -6.2   -9.5   -2.2   -3.0   %
+#
+# Worst residual 9.5%, at 60 deg, and always on the optimistic side in the
+# 45-60 band. A parameter sweep found body=0.0082 gives a lower WORST residual
+# (6.1%) by spreading the error, but it costs +6% at normal incidence, which is
+# the angle every headline number is quoted at. Exact-at-normal is kept
+# deliberately; the mid-band bound is documented instead of hidden.
+#
+# For scale: this replaces a model that was 100% wrong at normal incidence and
+# 600% wrong at 80 deg, with the angular trend running the wrong way.
+#
+# DO NOT read the 9.5% as the accuracy of the coating model. The paper reports
+# BRDF "in relative units" and never states how THR is put on an absolute
+# scale; their own Vantablack reads 0.0023 against a 3.5e-4 spec, and their
+# Musou reads 0.0100 against a 6e-3 spec. An absolute uncertainty of order
+# 0.002 is 20% of the 1.00% headline. So the SHAPE of this curve is well
+# supported and the absolute level is +/-20%. The lock target below is our own
+# measured implementation, which is the right thing to guard against drift --
+# it is not a claim to have matched reality to four digits.
+#
+# The glossy lobe is white, so roughness redistributes the reflected light
+# without changing how much of it there is: rho_dh is roughness-independent
+# here and roughness controls only the SHAPE of the return, which is what form
+# destruction depends on. Sweep it per geometry -- the viper's scales got
+# DARKER when coated with Au-Pd (Mouchet 2024 p.8), so coating and geometry are
+# not separable.
+
+MUSOU_THR = {0: 0.0100, 15: 0.0100, 30: 0.0103, 45: 0.0113,
+             60: 0.0143, 75: 0.0233, 80: 0.0318}
+MUSOU_BODY = 0.00758
+MUSOU_SPEC_SCALE = 0.0605
+MUSOU_IOR = 1.5
+
+
+# The single most consequential UNMEASURED parameter in the project.
+#
+# The fit was made against a flat-plate rho_dh(theta) curve, and that curve
+# cannot distinguish a diffuse return from a specular one -- both integrate to
+# the same hemispherical total. The split was therefore chosen, not measured:
+# body 0.00758 of a total 0.00998 makes the coating 76% Lambertian at normal
+# incidence.
+#
+# That choice turns out to drive everything. Holding rho fixed and rendering
+# each design under a Lambertian vs a specular BSDF reproduces the ENTIRE
+# 2x-to-41x spread between designs; the Fresnel term itself contributes only
+# 1.23-1.50x and is nearly design-independent. Under a specular surface a
+# bounce on a flank sends light deeper; under a Lambertian one every square
+# millimetre of wall has a direct view of the sky and simply leaks.
+#
+# So this is swept as an axis rather than fixed. coating_split(d) returns the
+# (body, spec_scale) that give diffuse fraction d while keeping rho_dh(0) at
+# the measured flat-plate value -- the one thing that IS constrained.
+
+F0_IOR15 = 0.04                      # Fresnel reflectance at normal, n = 1.5
+MUSOU_RHO0 = 0.00998                 # measured flat-plate rho_dh(0)
+
+
+def coating_split(diffuse_frac, rho0=MUSOU_RHO0):
+    """(body, spec_scale) for a given diffuse fraction at fixed rho_dh(0)."""
+    d = min(1.0, max(0.0, diffuse_frac))
+    return d * rho0, (1.0 - d) * rho0 / F0_IOR15
+
+
+def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
+                     ior=MUSOU_IOR, deep_until=None, paint_fade=0.0):
+    """`make_coating`, but its two constants switch at a depth plane.
+
+    Musou Black and black anodising differ only in `body` and `spec_scale`, so
+    the tree does not need duplicating -- only those two scalars are made
+    position-dependent. The first attempt copied a whole finished node tree
+    twice and mixed the results; the copy dropped links and the panel rendered
+    at 54 % where its own material could not exceed 5, which is how the
+    approach was rejected.
+
+    `shallow` and `deep` are (body, spec_scale). The boundary is the plane
+    y = -paint_depth: paint above it, as-bought below.
+    """
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+
+    # fac = 1 below the paint line
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(geo.outputs["Position"], sep.inputs["Vector"])
+    # THE BOUNDARY IS A STEP UNLESS ASKED OTHERWISE, and a real one is not.
+    # Paint sprayed into a cell thins with depth and fades out; it does not
+    # stop on a plane. `paint_fade` is the width of that transition in mm,
+    # centred on `paint_depth`: 0 keeps the hard step, 6 means the film runs
+    # out linearly between 7 and 13 mm for a 10 mm nominal depth.
+    fade = abs(float(paint_fade or 0.0))
+    if fade > 1e-6:
+        below = nt.nodes.new("ShaderNodeMapRange")
+        below.inputs["From Min"].default_value = -abs(paint_depth) + fade / 2
+        below.inputs["From Max"].default_value = -abs(paint_depth) - fade / 2
+        below.inputs["To Min"].default_value = 0.0
+        below.inputs["To Max"].default_value = 1.0
+        below.clamp = True
+        nt.links.new(sep.outputs["Y"], below.inputs["Value"])
+    else:
+        below = nt.nodes.new("ShaderNodeMath")
+        below.operation = "LESS_THAN"
+        below.inputs[1].default_value = -abs(float(paint_depth))
+        nt.links.new(sep.outputs["Y"], below.inputs[0])
+    # A real panel is not one part. A bought honeycomb arrives anodised and a
+    # spray gun reaches a few mm in; the floor under it is a SEPARATE pressed
+    # sheet, painted flat before assembly and therefore black all over. So the
+    # as-bought finish occupies a BAND -- below the paint line but above the
+    # floor -- not everything below the paint line. Without `deep_until` the
+    # floor would inherit the tube's anodising, which is not a part anyone
+    # would build.
+    if deep_until is not None:
+        above_floor = nt.nodes.new("ShaderNodeMath")
+        above_floor.operation = "GREATER_THAN"
+        above_floor.inputs[1].default_value = -abs(float(deep_until))
+        nt.links.new(sep.outputs["Y"], above_floor.inputs[0])
+        band = nt.nodes.new("ShaderNodeMath")
+        band.operation = "MULTIPLY"
+        nt.links.new(below.outputs[0], band.inputs[0])
+        nt.links.new(above_floor.outputs["Value"], band.inputs[1])
+        below = band
+
+    def switch(v_shallow, v_deep):
+        n = nt.nodes.new("ShaderNodeMath")
+        n.operation = "MULTIPLY_ADD"          # deep*fac + shallow*(1-fac)
+        d = nt.nodes.new("ShaderNodeMath")
+        d.operation = "MULTIPLY"
+        d.inputs[1].default_value = float(v_deep) - float(v_shallow)
+        nt.links.new(below.outputs[0], d.inputs[0])
+        add = nt.nodes.new("ShaderNodeMath")
+        add.operation = "ADD"
+        add.inputs[1].default_value = float(v_shallow)
+        nt.links.new(d.outputs["Value"], add.inputs[0])
+        return add.outputs["Value"]
+
+    fac = below.outputs[0]
+    body_out = switch(shallow[0], deep[0])
+    spec_out = switch(shallow[1], deep[1])
+
+    fres = nt.nodes.new("ShaderNodeFresnel")
+    fres.inputs["IOR"].default_value = ior
+    scale = nt.nodes.new("ShaderNodeMath")
+    scale.operation = "MULTIPLY"
+    nt.links.new(fres.outputs["Fac"], scale.inputs[0])
+    nt.links.new(spec_out, scale.inputs[1])
+
+    diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
+    diff.inputs["Roughness"].default_value = 0.0
+    # Blender 5.x renamed CombineRGB to CombineColor; ask for whichever this
+    # build actually has rather than assuming.
+    rgb = nt.nodes.new("ShaderNodeCombineColor"
+                       if hasattr(bpy.types, "ShaderNodeCombineColor")
+                       else "ShaderNodeCombineRGB")
+    for i in range(3):
+        nt.links.new(body_out, rgb.inputs[i])
+    nt.links.new(rgb.outputs[0], diff.inputs["Color"])
+
+    spec = (nt.nodes.new("ShaderNodeBsdfAnisotropic")
+            if "ShaderNodeBsdfAnisotropic" in dir(bpy.types)
+            else nt.nodes.new("ShaderNodeBsdfGlossy"))
+    spec.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
+    spec.inputs["Roughness"].default_value = roughness
+
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(scale.outputs[0], mix.inputs["Fac"])
+    nt.links.new(diff.outputs[0], mix.inputs[1])
+    nt.links.new(spec.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs["Surface"])
+    return m
+
+
+def make_coating(name, roughness=0.30, body=MUSOU_BODY,
+                 spec_scale=MUSOU_SPEC_SCALE, ior=MUSOU_IOR):
+    """A dark coating whose reflectance rises toward grazing, as real ones do.
+
+    body        angle-independent part of rho_dh
+    spec_scale  fraction of a full dielectric Fresnel lobe to keep
+    ior         index used for the Fresnel curve shape
+    """
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+
+    fres = nt.nodes.new("ShaderNodeFresnel")
+    fres.inputs["IOR"].default_value = ior
+    scale = nt.nodes.new("ShaderNodeMath")
+    scale.operation = "MULTIPLY"
+    scale.inputs[1].default_value = spec_scale
+    nt.links.new(fres.outputs["Fac"], scale.inputs[0])
+
+    diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
+    diff.inputs["Color"].default_value = (body, body, body, 1.0)
+    diff.inputs["Roughness"].default_value = 0.0
+
+    spec = (nt.nodes.new("ShaderNodeBsdfAnisotropic")
+            if "ShaderNodeBsdfAnisotropic" in dir(bpy.types)
+            else nt.nodes.new("ShaderNodeBsdfGlossy"))
+    spec.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
+    spec.inputs["Roughness"].default_value = roughness
+
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(scale.outputs[0], mix.inputs["Fac"])
+    nt.links.new(diff.outputs[0], mix.inputs[1])
+    nt.links.new(spec.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs["Surface"])
+    return m
+
+
 # --------------------------------------------------------------------------
 # geometry
 # --------------------------------------------------------------------------
 
 def loops_to_object(loops, width, x0, name, material):
-    """Extrude a list of closed Y-Z loops along X into one object."""
+    """Extrude a list of closed Y-Z loops along X into one object.
+
+    `width` is the FULL extrusion length and `x0` its start. The 1D families
+    have `margin_depths` on their cross-section, which widens them in Z, and
+    nothing at all along X -- the extrusion has always run exactly face_w.
+    That was invisible for as long as the camera tilted only in the Z plane.
+    The moment `phi_deg` rotates a panel 90 degrees, the un-margined axis lands
+    in the tilt plane, the camera looks past the end of the panel, and a
+    V-groove reads 28 % against a 1.14 % flat plate -- 25x a black coating,
+    which is the signature of measuring the panel's own edge. Callers that
+    measure must pass an extrusion that overruns the window on both sides.
+    """
     mesh = bpy.data.meshes.new(name)
     bm = bmesh.new()
     for loop in loops:
@@ -161,15 +430,44 @@ def loops_to_object(loops, width, x0, name, material):
     return obj
 
 
-def mesh_to_object(verts, faces, name, material):
-    """Build an object from an explicit 3D mesh, for families that are not an
-    extruded cross-section."""
+def mesh_to_object(verts, faces, name, material, deep_material=None,
+                   paint_depth=None):
+    """Build an object from an explicit 3D mesh.
+
+    TWO FINISHES, SPLIT BY DEPTH. A panel is not painted uniformly. The
+    honeycomb arrives anodized because that is how it is sold, and a spray gun
+    reaches a few millimetres into a 6.5 mm cell, not 47. So the real part is
+    "as-bought everywhere, painted near the mouth" -- and this project's own
+    harness has always said the two regions want OPPOSITE things:
+
+        the entrance wants to be as black as possible, because one bounce off
+        a surface the observer can see preserves the beam's position;
+        the interior wants the opposite, because lateral spreading before exit
+        is what destroys form, and that needs light to survive several bounces.
+
+    `paint_depth` is how far the paint reaches below y = 0, in mm. Faces whose
+    lowest vertex sits within that band get `material`; everything deeper gets
+    `deep_material`. The test is on the face's LOWEST vertex, not its centroid:
+    a wall that straddles the boundary is only counted as painted if all of it
+    is inside the band, so the split never flatters the paint.
+    """
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata([(v[0], v[1], v[2]) for v in verts], [], faces)
     mesh.validate(verbose=False)
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     obj.data.materials.append(material)
+    if deep_material is not None and paint_depth is not None:
+        obj.data.materials.append(deep_material)
+        lim = -abs(float(paint_depth))
+        n_deep = 0
+        for poly in mesh.polygons:
+            lowest = min(mesh.vertices[i].co.y for i in poly.vertices)
+            if lowest < lim:
+                poly.material_index = 1
+                n_deep += 1
+        print("[COAT] %s: %d of %d faces below %.1f mm get the deep finish"
+              % (name, n_deep, len(mesh.polygons), abs(lim)), flush=True)
     bpy.context.collection.objects.link(obj)
     return obj
 
@@ -430,7 +728,24 @@ def build_scene(cfg):
     # two geometry families share this harness: "slat" (profile2d) attenuates,
     # "scatter" (profile_scatter) aims at destroying form instead
     fam = cfg.get("family", "slat")
-    if fam == "scatter":
+    # families that hand back an explicit 3D mesh instead of a cross-section to
+    # extrude. `mesh_fn` stays None for the extruded families.
+    mesh_fn = None
+    # A MESH BUILT BY THE CALLER, for geometry no family module produces. The
+    # half-lap notched blade array (`sweep_blade_notch`) is a variant of the
+    # shingle that `geom_topo` does not build, and measuring it through any
+    # other path would mean a different harness -- different control patch,
+    # different windows, different coating -- and therefore a number that
+    # cannot be put beside the published ones. `params` still describes the
+    # envelope so the windows and the control plate are placed exactly as
+    # usual; only the panel's triangles come from outside.
+    if cfg.get("prebuilt_mesh") is not None:
+        import geom_stack as ST
+        p = ST.StackParams(**cfg["params"])
+        _pv, _pf = cfg["prebuilt_mesh"]
+        mesh_fn = lambda _p, _v=_pv, _f=_pf: (_v, _f)          # noqa: E731
+        cs = None
+    elif fam == "scatter":
         import profile_scatter as PS
         p = PS.ScatterParams(**cfg["params"])
         cs = PS.build_cross_section(p)
@@ -441,6 +756,22 @@ def build_scene(cfg):
     elif fam == "cone3d":
         import geom3d as G3
         p = G3.Cone3DParams(**cfg["params"])
+        mesh_fn = G3.build_mesh
+        cs = None
+    elif fam == "topo":
+        import geom_topo as GT
+        p = GT.TopoParams(**cfg["params"])
+        mesh_fn = GT.build_mesh
+        cs = None
+    elif fam == "stack":
+        import geom_stack as ST
+        p = ST.StackParams(**cfg["params"])
+        mesh_fn = ST.build_mesh
+        cs = None
+    elif fam == "cell":
+        import geom_cell as GC
+        p = GC.CellParams(**cfg["params"])
+        mesh_fn = GC.build_mesh
         cs = None
     else:
         p = PanelParams(**cfg["params"])
@@ -464,19 +795,80 @@ def build_scene(cfg):
     m_slat_d = make_diffuse("coat_slat", rho_slat)
     m_chamber = make_diffuse("coat_chamber", rho_chamber)
     m_ctrl = make_diffuse("coat_control", rho_control)
-    m_s1 = m_slat_d if mat_mode == "all_diffuse" else make_glossy(
-        "coat_specular", rho_spec, rough)
+    if mat_mode == "all_diffuse":
+        m_s1 = m_slat_d
+    elif mat_mode == "coating":
+        # the Fresnel-bearing coating fitted to a real goniometer measurement.
+        # cfg["coating"] overrides the fit constants; defaults are the Musou
+        # Black fit in make_coating.
+        c = cfg.get("coating", {})
+        m_s1 = make_coating("coat_real",
+                            roughness=c.get("roughness", rough),
+                            body=c.get("body", MUSOU_BODY),
+                            spec_scale=c.get("spec_scale", MUSOU_SPEC_SCALE),
+                            ior=c.get("ior", MUSOU_IOR))
+        m_chamber = m_s1 if c.get("interior_too", True) else m_chamber
+    else:
+        m_s1 = make_glossy("coat_specular", rho_spec, rough)
 
     if cs is None:
-        import geom3d as G3
         from types import SimpleNamespace
-        v, f = G3.build_mesh(p)
-        mesh_to_object(v, f, "cones", m_s1)
+        v, f = mesh_fn(p)
+        # `paint_depth` opts a 3D family into the two-finish split. Absent, the
+        # whole mesh keeps one material and every earlier measurement is
+        # reproduced exactly.
+        pd = cfg.get("paint_depth")
+        if pd is not None:
+            cc = cfg.get("coating", {})
+            dp = cfg.get("deep_coating", {})
+            mat = make_depth_split(
+                "coat_split", pd,
+                (cc.get("body", MUSOU_BODY),
+                 cc.get("spec_scale", MUSOU_SPEC_SCALE)),
+                (dp.get("body", 0.05), dp.get("spec_scale", 0.05)),
+                roughness=cc.get("roughness", rough),
+                deep_until=cfg.get("deep_until"),
+                paint_fade=cfg.get("paint_fade", 0.0))
+        else:
+            mat = m_s1
+        mesh_to_object(v, f, "panel_mesh", mat)
         cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
     else:
-        loops_to_object(cs.stage1, p.face_w, 0.0, "slats", m_s1)
-        loops_to_object(cs.stage2, p.face_w, 0.0, "baffles", m_chamber)
-        loops_to_object(cs.shell, p.face_w, 0.0, "shell", m_chamber)
+        # Overrun the face along the extrusion axis by the same margin the
+        # cross-section already gets, so the panel is longer than the window
+        # from every azimuth. At phi = 0 this changes nothing measurable -- the
+        # extra length sits outside the frame -- and it is what makes any
+        # rotated measurement of a 1D family mean anything at all.
+        _ex = getattr(p, "margin_depths", 0.0) * getattr(p, "depth", 0.0)
+        _ex = max(_ex, getattr(p, "face_h", p.face_w) * 0.5)
+        loops_to_object(cs.stage1, p.face_w + 2 * _ex, -_ex, "slats", m_s1)
+        loops_to_object(cs.stage2, p.face_w + 2 * _ex, -_ex, "baffles",
+                        m_chamber)
+        loops_to_object(cs.shell, p.face_w + 2 * _ex, -_ex, "shell",
+                        m_chamber)
+
+    # --- azimuth of incidence ------------------------------------------
+    # The camera in `hemi_view` tilts in ONE plane, so every number this
+    # project has published is at a single azimuth. For an extruded V-groove or
+    # an all-parallel blade array that is not a property of the design, it is a
+    # property of which way it happened to be laid down -- and the brief says
+    # the beam direction is unknown. Rotating the PANEL about its own normal is
+    # equivalent to moving the source in azimuth and leaves the control plate,
+    # the camera and the measurement windows exactly where they were.
+    phi = float(cfg.get("phi_deg", 0.0) or 0.0)
+    if abs(phi) > 1e-9:
+        import math as _m
+        a = _m.radians(phi)
+        ca, sa = _m.cos(a), _m.sin(a)
+        cx, cz = p.face_w / 2.0, 0.0
+        for ob in bpy.data.objects:
+            if ob.type != "MESH" or ob.name.startswith("control"):
+                continue
+            for vt in ob.data.vertices:
+                x, z = vt.co.x - cx, vt.co.z - cz
+                vt.co.x = cx + x * ca - z * sa
+                vt.co.z = cz + x * sa + z * ca
+            ob.data.update()
 
     ctrl_x0 = p.face_w + GAP
     make_flat_plate(p, ctrl_x0, "control", m_ctrl)

@@ -57,6 +57,18 @@ class ScatterParams:
     width_mean: float = 80.0        # mouth width in Z; this sets the smear
     width_jitter: float = 0.25
     width_seed: int = 3
+    # Troughs generated this many depths past the face on each side. Without
+    # it a camera tilted to theta looking at depth D travels D/tan(90-theta)
+    # in Z before reaching the floor and runs off the end of the panel, reading
+    # world background as if it were geometry. `profile_ridge` found and fixed
+    # exactly this ("an impossible 27% at theta = 80") and the fix was never
+    # carried across to this module or to profile2d, so the trough and slat
+    # families have never been measurable at all. 0.0 reproduces the old
+    # behaviour for the picture paths; any measurement must set it.
+    margin_depths: float = 0.0
+
+    def span(self) -> float:
+        return self.face_h + 2.0 * self.margin_depths * self.depth
     depth_ratio: float = 1.5        # trough depth / mouth width
     shape: str = "vee"              # vee | u | asym
     asym: float = 0.35              # apex offset for shape="asym", -0.5..0.5
@@ -105,13 +117,14 @@ class ScatterParams:
 
 def width_sequence(p: ScatterParams) -> list[float]:
     """Irregular but exactly space-filling trough widths."""
-    n = max(2, int(round(p.face_h / p.width_mean)))
+    span = p.span()
+    n = max(2, int(round(span / p.width_mean)))
     if p.width_jitter <= 0.0:
-        return [p.face_h / n] * n
+        return [span / n] * n
     rng = _lcg(p.width_seed)
     raw = [1.0 + p.width_jitter * (2.0 * next(rng) - 1.0) for _ in range(n)]
     s = sum(raw)
-    return [r / s * p.face_h for r in raw]
+    return [r / s * span for r in raw]
 
 
 def trough_centerline(p: ScatterParams, z_top: float, w: float) -> list[Pt]:
@@ -155,7 +168,7 @@ def lip_centerlines(p: ScatterParams, z_top: float, w: float) -> list[list[Pt]]:
 def shell_centerline(p: ScatterParams) -> list[Pt]:
     """Back box behind the troughs, with the two rear corners chamfered."""
     d = p.trough_depth() + 8.0
-    z_hi, z_lo = p.face_h / 2.0 + 10.0, -p.face_h / 2.0 - 10.0
+    z_hi, z_lo = p.span() / 2.0 + 10.0, -p.span() / 2.0 - 10.0
     ch = 25.0
     return [(0.0, z_hi), (-(d - ch), z_hi), (-d, z_hi - ch),
             (-d, z_lo + ch), (-(d - ch), z_lo), (0.0, z_lo)]
@@ -180,7 +193,7 @@ def build_cross_section(p: ScatterParams) -> CrossSection:
             f"trough depth {p.trough_depth():.0f} mm exceeds the {p.depth:.0f} mm "
             "panel depth budget")
 
-    z = p.face_h / 2.0
+    z = p.span() / 2.0
     for w in width_sequence(p):
         cl = trough_centerline(p, z, w)
         cl = fillet_polyline(cl, max(R, 0.06 * w), p.arc_segments)

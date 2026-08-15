@@ -1,0 +1,303 @@
+<title>Three rankings that disagree — {{DATE}}</title>
+<style>
+:root{
+  --ground:#f5f6f7; --surface:#fff; --sunk:#eceff1; --shot:#e7ebed;
+  --ink:#101519; --ink-2:#48545e; --ink-3:#6f7d89;
+  --line:#dce1e5; --line-2:#c4ced4;
+  --dark:#0d6f79; --form:#a4691a; --peak:#5b4b9e; --no:#a3352a; --soft:#e3f0f1;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#080a0c; --surface:#11161a; --sunk:#0d1114; --shot:#0a0d0f;
+    --ink:#e5ebf0; --ink-2:#9daab5; --ink-3:#74828e;
+    --line:#1e262c; --line-2:#2e3841;
+    --dark:#49c2ca; --form:#dda647; --peak:#a394e8; --no:#e0705f; --soft:#0f2b2e;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#080a0c; --surface:#11161a; --sunk:#0d1114; --shot:#0a0d0f;
+  --ink:#e5ebf0; --ink-2:#9daab5; --ink-3:#74828e;
+  --line:#1e262c; --line-2:#2e3841;
+  --dark:#49c2ca; --form:#dda647; --peak:#a394e8; --no:#e0705f; --soft:#0f2b2e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:66ch}
+h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,4.4vw,50px);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(21px,2.4vw,28px);line-height:1.2}
+p{margin:0}
+code,.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.eyebrow{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dark)}
+header.top{border-bottom:1px solid var(--line);padding:56px 0 32px;
+  display:flex;flex-direction:column;gap:18px}
+.sub{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+section{padding-top:60px;display:flex;flex-direction:column;gap:20px}
+.lede{font-size:17px;color:var(--ink-2)}
+
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.phases div{padding:15px 17px;border-right:1px solid var(--line)}
+.phases div:last-child{border-right:0}
+.phases div.now{background:var(--soft)}
+.phases dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.phases b{display:block;font-size:15px;margin-bottom:4px}
+.phases p{font-size:12.5px;color:var(--ink-3);line-height:1.45}
+
+.levers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.levers div{padding:16px 18px;border-right:1px solid var(--line)}
+.levers div:last-child{border-right:0}
+.levers dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.levers dd{margin:0;font:650 26px/1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.levers .big{color:var(--dark)} .levers .small{color:var(--ink-3)}
+.levers p{font-size:12.5px;color:var(--ink-3);margin-top:6px;line-height:1.45}
+
+figure.chart{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);padding:16px;overflow-x:auto}
+figure.chart svg{width:100%;min-width:780px;height:auto;display:block}
+.grid{stroke:var(--line)} .unit{stroke:var(--ink-3);stroke-dasharray:3 3}
+.ax{fill:var(--ink-3);font:400 11px ui-monospace,Menlo,monospace}
+.colhead{fill:var(--ink-3);font:600 10px ui-monospace,Menlo,monospace;
+  letter-spacing:.13em}
+.ln{fill:none;stroke:var(--line-2);stroke-width:1.6}
+.ln-x{stroke:var(--form);stroke-width:2.4}
+.ln-no{stroke-dasharray:4 3;opacity:.5}
+.dot{fill:var(--ink-2)}
+.lb{fill:var(--ink-2);font:400 12px ui-monospace,Menlo,monospace}
+.rl{fill:none;stroke-width:2.2}
+.rflat{stroke:var(--ink-3);stroke-dasharray:5 3}
+text.rflat{fill:var(--ink-3);stroke:none}
+.r0{stroke:var(--dark)} text.r0{fill:var(--dark);stroke:none}
+.r1{stroke:var(--form)} text.r1{fill:var(--form);stroke:none}
+.r2{stroke:var(--no)}   text.r2{fill:var(--no);stroke:none}
+
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));
+  gap:14px}
+.spec{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.spec.no{border-color:var(--no)}
+.spec .shot{background-color:var(--shot);background-size:cover;
+  background-position:center;aspect-ratio:14/10}
+.spec figcaption{padding:12px 13px 14px;display:flex;flex-direction:column;gap:9px}
+.hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rk{font:650 12px/1.5 ui-monospace,Menlo,monospace;color:var(--surface);
+  background:var(--ink-2);border-radius:2px;padding:1px 7px;min-width:26px;
+  text-align:center}
+#darkness .rk{background:var(--dark)}
+#form .rk{background:var(--form)}
+#headon .rk{background:var(--peak)}
+.fam{font-size:14px;font-weight:650}
+.tag-no{font:600 9.5px/1.5 ui-monospace,Menlo,monospace;color:var(--surface);
+  background:var(--no);border-radius:2px;padding:1px 5px;letter-spacing:.05em}
+.spec .big{font:650 24px/1.1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:8px;
+  flex-wrap:wrap}
+.spec .big .sub{font:400 11px/1.3 ui-monospace,Menlo,monospace;
+  color:var(--ink-3)}
+.sp{font:400 11px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);
+  background:var(--sunk);border-radius:2px;padding:6px 8px}
+.kv{margin:0;display:flex;flex-direction:column;gap:2px;
+  font:400 11px/1.55 ui-monospace,Menlo,monospace}
+.kv div{display:flex;justify-content:space-between;gap:8px;
+  border-bottom:1px dotted var(--line);padding-bottom:1px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
+
+.note{border-left:2px solid var(--dark);background:var(--soft);
+  padding:14px 18px;border-radius:0 3px 3px 0;font-size:14.5px;color:var(--ink-2)}
+.note.warn{border-left-color:var(--no)}
+.note b{color:var(--ink)}
+.fixes{border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+.fix{padding:16px 18px;border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:5px}
+.fix:last-child{border-bottom:0}
+.fix h3{font-family:inherit;font-size:14.5px;font-weight:650}
+.fix p{font-size:14px;color:var(--ink-2)}
+.fix .how{font:400 12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink-3)}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+@media (max-width:700px){
+  .levers div,.phases div{border-right:0;border-bottom:1px solid var(--line)}
+}
+{{IMGCSS}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Optical anechoic panel · phase 2 · {{DATE}}</span>
+  <h1>Three rankings that disagree</h1>
+  <p class="sub">Hundreds of laser projectors converge in mid-air to form an
+  image. Every beam continues past it and lands on a wall, which paints a
+  sharp, legible copy of the artwork. A panel has <em>three</em> jobs, and they
+  are not the same job. Ranked on each separately, the same twelve designs come
+  out in different orders — and the one you can buy off the shelf cuts total
+  reflectance fivefold while leaving head-on brightness exactly where a bare
+  painted plate leaves it.</p>
+
+  <p class="note warn">Rebuilt 2026-08-14. The commercial-honeycomb builder
+  stepped its cell lattice along the wrong two axes: no cell shared an edge
+  with any neighbour and <b>30.1 % of the panel face was open channel straight
+  down to the flat backing slab</b>. Every honeycomb and every stacked number
+  on this page was re-measured on geometry that tessellates, and the bought
+  honeycomb moved from 2nd on total reflectance to {{COMB_RANK}}. Details in
+  <code>results/__void__README_lattice.md</code>; <code>geom_topo.
+  _assert_tessellates</code> now fails the build rather than shipping it.</p>
+
+  <dl class="phases">
+    <div><dt>phase 1 · done</dt><b>2D cross-sections</b>
+      <p>V-grooves and slats, extruded along one axis, anisotropic by
+      construction. It won on total reflectance and lost the whole point: the
+      line came back as a line.</p></div>
+    <div class="now"><dt>phase 2 · this report</dt><b>3D topologies</b>
+      <p>Cones, cell lattices, blade arrays, strut foams. Nine families, each
+      at the minimum feature its own manufacturing process delivers.</p></div>
+    <div><dt>phase 3 · next</dt><b>Layered and nested</b>
+      <p>Stacking two scales: fine honeycomb over coarse, blades beneath a
+      coarse cell, honeycomb over a cone field.</p></div>
+  </dl>
+
+  <dl class="levers">
+    <div><dt>a structure vs bare coating</dt><dd class="big">{{VSFLAT}}×</dd>
+      <p>{{FLATPCT}}% for a flat plate of the same coating, against
+      {{BEST_PCT}}% structured. Geometry is decisive.</p></div>
+    <div><dt>between the topologies</dt><dd class="small">1.6×</dd>
+      <p>Each at the feature its own process delivers. Which structure you pick
+      barely matters.</p></div>
+    <div><dt>coating diffuse fraction</dt><dd class="small">1.1–6.3×</dd>
+      <p>Unmeasured. Only 1.06–1.39× for the designs that would be built.</p></div>
+    <div><dt>coating specular roughness</dt><dd class="small">25×</dd>
+      <p>Unmeasured, and the biggest lever left — on head-on brightness.</p></div>
+  </dl>
+</header>
+
+<section>
+  <span class="eyebrow">Why three rankings</span>
+  <h2>Darkest, least legible, and dimmest to a viewer are three different panels</h2>
+  <p class="lede col">Each line is one design, traced across all three
+  rankings. Lines that move four places or more are drawn in amber; dashed
+  lines are designs that <strong>cannot be manufactured</strong> at the feature
+  size they were measured at, and are kept in view rather than deleted.</p>
+  <figure class="chart">{{SLOPE}}</figure>
+  <p class="note col"><b>The honeycomb is the clearest case, and it is the one
+  you can buy.</b> {{COMB_RANK}} of {{NCAND}} on total reflectance and <b>last
+  on both other axes</b>. Its smear is {{COMB_SMEAR}}× — the returned line comes back <em>narrower</em>
+  than on a flat wall — and its head-on brightness is <b>{{COMB_PEAK}}</b>
+  against a bare flat plate's <b>{{FLATPEAK}}</b>. On the axis a viewer actually experiences,
+  the structure does nothing at all. Vertical cell walls trap light but never
+  move it sideways, and head-on you are looking straight down each cell at the
+  flat backing slab beneath it — the tube is new, the surface at the end of it
+  is the flat plate again.</p>
+  <p class="note col"><b>Corrected 2026-08-14.</b> This paragraph previously
+  blamed the cell's flat <em>wall tops</em>. Phase 3 falsified that: replacing
+  only the cell FLOOR with a cone field, leaving the tops untouched, drops the
+  same honeycomb from {{COMB_PEAK}} to {{COMBCONE_PEAK}}. The tops were never the cause. See the
+  <a href="../2026-08-14/report.html">phase 3 report</a>.</p>
+</section>
+
+{{GALLERIES}}
+
+<section>
+  <span class="eyebrow">The bigger lever</span>
+  <h2>One unmeasured coating property moves the answer 25×</h2>
+  <p class="lede col">Head-on brightness against the coating's specular
+  roughness, everything else held. The dashed line is a bare flat plate of the
+  same coating. Note the log axis.</p>
+  <figure class="chart">{{ROUGH}}</figure>
+  <p class="note col">This project pins roughness at 0.30 everywhere on one
+  argument — that it is an interior optimum for <em>total reflectance</em>.
+  That argument is about a different quantity and has never been checked
+  against the other two axes. The flat-plate curve swings by a factor of 332
+  across the range, but that is the <em>reference</em> swinging, not a design:
+  the cone itself moves 25×. <b>For scale, the entire topology search spans
+  1.6×.</b></p>
+</section>
+
+<section>
+  <span class="eyebrow">Corrections</span>
+  <h2>What was wrong before this report</h2>
+  <div class="fixes">
+    <div class="fix">
+      <h3>The flat-plate baseline was a typed constant, wrong by 5.4×</h3>
+      <p>Every "structure buys N×" claim divided by 6.12%. No render in the
+      repository ever produced that number. Measured properly it is {{FLATPCT}}%, so
+      the structure buys about 5.3×, not 28×.</p>
+      <p class="how">It came from a bare single-sided plane: with no volume the
+      face normal is undetermined and the Fresnel term saturates. The giveaway
+      was 45° and 60° reading identical to four decimals — a constant, not
+      physics.</p>
+    </div>
+    <div class="fix">
+      <h3>The previous headline compared parts eight times apart</h3>
+      <p>One design used a 0.05 mm edge, the reference a 0.4 mm tip — in
+      families whose return is dominated by the exposed feature. Matched, the
+      ordering inverts and seven of nine families sit within 1.11×.</p>
+      <p class="how">Matching feature size alone is still wrong: it assumes a
+      common process. Bought honeycomb foil is 0.03–0.1 mm; a moulded cone tip
+      is 0.4 mm. Every family now sits at what its own process delivers.</p>
+    </div>
+    <div class="fix">
+      <h3>The blade array was measured as a wedge, not a sheet</h3>
+      <p>The spec said 0.1 mm laser-cut sheet. The rendered part was 0.1 mm at
+      the mouth thickening to 0.9 mm at the root. Re-measured at constant
+      thickness the smear drops from 4.5× to 3.44× — the taper was making a
+      quarter of it.</p>
+      <p class="how">The geometry builder's default taper was the
+      self-supporting direction for printing, left in place after the family
+      was reclassified as sheet metal.</p>
+    </div>
+    <div class="fix">
+      <h3>The honeycomb was an idealisation nobody sells</h3>
+      <p>It was built as a Voronoi tessellation of jittered points, so every
+      cell is a different shape. Real expanded honeycomb has identical cells,
+      double-thickness walls where the foil ribbons are bonded, and is periodic
+      by construction. Re-measured as the real product it reads {{COMB_PCT}}%.</p>
+      <p class="how">Being periodic collides with this project's own rule
+      against periodic arrays — a scanning beam over a regular lattice makes
+      regular bright spots. That is a real property of the bought option, not
+      something to design away.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Before anyone builds this</span>
+  <h2>What this does not settle</h2>
+  <p class="lede col"><b>Nothing here has been built or measured.</b> The two
+  coating properties that dominate all three rankings — the diffuse fraction
+  and the specular roughness — are inputs that were chosen, not measured, and a
+  flat plate's reflectance-versus-angle curve cannot constrain either. One
+  printed and measured coupon settles both.</p>
+  <p class="lede col">The closest published prior art (Kaster, <em>J. Appl.
+  Phys.</em> <b>138</b>, 174904, 2025, Carl Zeiss AG) is also simulation-only
+  and fixes the same coating split without sweeping it. A granted patent
+  (US 11,209,577 B2) covers slanted millimetre-scale macro structures in both
+  periodic and irregular arrangements, with hexagonal, triangular, square and
+  conical bases — while publishing no reflectance data at all.</p>
+</section>
+
+<footer>
+  <span>Generated {{DATE}} from <code>results/sweep_buildable.csv</code>,
+  <code>sweep_blade.csv</code>, <code>sweep_comb.csv</code> and
+  <code>form_buildable.json</code>. Total reflectance is the worst absolute
+  directional-hemispherical ρ<sub>dh</sub> over incidence 0°, ±20°, ±40° and
+  over three coating models, averaged across {{SEEDS}} geometry seeds. Form is
+  the rms width of the returned line against the flat control in the same
+  frame, averaged over 16 stripe phases spanning one pitch.</span>
+  <span>Baselines named throughout: a flat plate of the same coating reads
+  {{FLATPCT}}% on the same footing; a plain matte black wall reads 5%.</span>
+</footer>
+
+</div>

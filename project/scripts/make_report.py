@@ -118,7 +118,10 @@ def collect():
     if BEST["tag"] in r2:
         snap["curve"] = {str(t): v for t, v in sorted(r2[BEST["tag"]].items())}
 
-    fpath = os.path.join(RESULTS, "cone3d_mtf.json")
+    # RETIRED SOURCE. cone3d_mtf.json predates the last geometry change and
+    # core_frac is metrics/03, retired: its denominator shrinks with the thing
+    # it measures, so a more smeared design scores better. Left unread.
+    fpath = os.path.join(RESULTS, "__retired__cone3d_mtf.json")
     if os.path.exists(fpath):
         for c in json.load(open(fpath)):
             snap["form"][c["tag"]] = {
@@ -359,16 +362,18 @@ def draw(snap, note):
              fontweight="bold", va="top")
     y = 0.86
     for line in (
-        "the tip stops being the answer. shrinking it 16x moves head-on 16%, "
-        "against the 1D family where it was",
-        "   everything -- so a cone can be blunt and deep, which is what a "
-        "printer can actually make",
-        "aspect ratio A = depth / pitch takes over as the lever, and it is the "
-        "grazing arm that keeps wanting more",
-        "form is destroyed for the first time: core 0.11 at -40 deg against "
-        "0.99 for the groove, and 86x dimmer with it",
-        "head-on is still core 1.000 for every geometry tried. observer and "
-        "beam collinear, one bounce, no displacement.",
+        "WITHDRAWN 2026-08-11 -- this report generator is superseded by "
+        "scripts/report_compare.py and must not be run",
+        "   for a client. Two claims below were hard-coded here and both were "
+        "later measured to be wrong:",
+        "   'the tip stops mattering, 16x moves it 16%' -- measured on the "
+        "round-1 geometry that had base gaps. At d30/p7.5",
+        "   the cone tip r0.2 -> r0.8 costs 4.6x, scaling like r. And 'core "
+        "0.11 vs 0.99' came from two designs that were",
+        "   on no page and did not match each other; core_frac itself is "
+        "RETIRED (metrics/03) because it improves when the",
+        "   smear runs off the measurement window. Use report_compare.py, "
+        "which is gated on scripts/lock.py.",
     ):
         ax3.text(0.01, y, line, fontsize=8.8, family="monospace")
         y -= 0.093

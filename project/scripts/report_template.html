@@ -1,0 +1,371 @@
+<title>Panel geometry search — {{DATE}}</title>
+<style>
+:root{
+  --ground:#f4f6f7; --surface:#ffffff; --sunk:#eceff1;
+  --ink:#0f1519; --ink-2:#47535d; --ink-3:#6e7c88;
+  --line:#dbe1e5; --line-2:#c6cfd5;
+  --accent:#0d6f79; --accent-soft:#e2f0f1;
+  --spec:#3a63c0; --diff:#a9700f;
+  --win:#0d6f79;
+  --shot-bg:#e7ebed;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#080a0c; --surface:#11161a; --sunk:#0d1114;
+    --ink:#e4ebf0; --ink-2:#9dabb6; --ink-3:#74838f;
+    --line:#1e262c; --line-2:#2d3841;
+    --accent:#49c2ca; --accent-soft:#0f2b2e;
+    --spec:#7ea3f2; --diff:#dda647;
+    --win:#49c2ca;
+    --shot-bg:#0a0d0f;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#080a0c; --surface:#11161a; --sunk:#0d1114;
+  --ink:#e4ebf0; --ink-2:#9dabb6; --ink-3:#74838f;
+  --line:#1e262c; --line-2:#2d3841;
+  --accent:#49c2ca; --accent-soft:#0f2b2e;
+  --spec:#7ea3f2; --diff:#dda647;
+  --win:#49c2ca;
+  --shot-bg:#0a0d0f;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:66ch}
+
+h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,4.4vw,50px);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(21px,2.4vw,27px);line-height:1.2;letter-spacing:-.01em}
+h3{font-size:17px;line-height:1.3}
+p{margin:0}
+b,strong{font-weight:650}
+a{color:var(--accent)}
+code,.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+
+.eyebrow{font:600 11px/1 ui-monospace,"SF Mono",Menlo,monospace;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+
+header.top{border-bottom:1px solid var(--line);padding:56px 0 32px;
+  display:flex;flex-direction:column;gap:18px}
+.sub{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+
+.stats{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);
+  border-radius:3px;background:var(--surface);overflow:hidden;margin-top:6px}
+.stats div{flex:1 1 150px;padding:14px 18px;border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats dt{font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+.stats dd{margin:0;font:600 21px/1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.stats .u{font-size:12px;font-weight:400;color:var(--ink-3);margin-left:2px}
+
+section{padding-top:56px;display:flex;flex-direction:column;gap:20px}
+.lede{font-size:17px;color:var(--ink-2)}
+
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:0;
+  border:1px solid var(--line-2);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.hero .shot{background:var(--shot-bg);aspect-ratio:14/10}
+.hero .shot img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .body{padding:26px 28px;display:flex;flex-direction:column;gap:14px;
+  justify-content:center}
+.hero .big{font:650 40px/1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums;color:var(--win)}
+.hero ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:15px}
+.hero li{margin:3px 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));
+  gap:14px}
+.spec{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.spec .shot{background:var(--shot-bg);aspect-ratio:14/10}
+.spec .shot img{width:100%;height:100%;object-fit:cover;display:block}
+.spec figcaption{padding:12px 13px 13px;display:flex;flex-direction:column;
+  gap:8px}
+.spec-head{display:flex;align-items:baseline;gap:8px}
+.rk{font:650 11px/1.45 ui-monospace,Menlo,monospace;color:var(--surface);
+  background:var(--ink-2);border-radius:2px;padding:2px 6px;min-width:22px;
+  text-align:center}
+.spec:first-child .rk{background:var(--win)}
+.fam{font-size:13px;font-weight:600}
+.score{display:flex;align-items:baseline;gap:8px}
+.score b{font:650 19px/1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.rel{font:400 11px/1 ui-monospace,Menlo,monospace;color:var(--ink-3)}
+.kv{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;
+  font:400 11.5px/1.5 ui-monospace,Menlo,monospace}
+.kv div{display:flex;justify-content:space-between;gap:6px;
+  border-bottom:1px dotted var(--line);padding-bottom:1px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.prm{font:400 11.5px/1.5 ui-monospace,Menlo,monospace;color:var(--ink-2)}
+.tag{font:400 10px/1.4 ui-monospace,Menlo,monospace;color:var(--ink-3);
+  word-break:break-all}
+
+figure.chart{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);padding:18px 18px 8px;overflow-x:auto}
+figure.chart svg{width:100%;min-width:600px;height:auto;display:block}
+.grid{stroke:var(--line)}
+.axis{stroke:var(--line-2)}
+.ax{fill:var(--ink-3);font:400 11px ui-monospace,Menlo,monospace}
+.spec-p,.diff-p{fill:none;stroke-width:2}
+path.spec{fill:none;stroke:var(--spec);stroke-width:2.2}
+path.diff{fill:none;stroke:var(--diff);stroke-width:2.2}
+circle.spec-d{fill:var(--spec)}
+circle.diff-d{fill:var(--diff)}
+.mark{stroke:var(--accent);stroke-width:1;stroke-dasharray:3 3}
+.mark-t{fill:var(--accent);font:600 11px ui-monospace,Menlo,monospace}
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13.5px;color:var(--ink-2);
+  padding:2px 2px 10px}
+.legend i{display:inline-block;width:22px;height:2.5px;vertical-align:middle;
+  margin-right:7px;border-radius:2px}
+
+.tbl{border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+td.num{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+td.nm{font-weight:600;white-space:nowrap}
+td.nt{color:var(--ink-2);font-size:13px;min-width:280px}
+tbody tr:first-child td.nm{color:var(--win)}
+
+.note{border-left:2px solid var(--accent);background:var(--accent-soft);
+  padding:14px 18px;border-radius:0 3px 3px 0;font-size:14.5px;
+  color:var(--ink-2)}
+.note b{color:var(--ink)}
+.fixes{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);
+  border-radius:3px;background:var(--surface)}
+.fix{padding:16px 18px;border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:5px}
+.fix:last-child{border-bottom:0}
+.fix h3{font-family:inherit;font-size:14.5px;font-weight:650}
+.fix p{font-size:14px;color:var(--ink-2)}
+.fix .how{font:400 12px/1.5 ui-monospace,Menlo,monospace;color:var(--ink-3)}
+
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr}
+  .stats div{flex:1 1 50%;border-bottom:1px solid var(--line)}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Optical anechoic panel · geometry search</span>
+  <h1>Nine ways to stop a wall from repeating the artwork</h1>
+  <p class="sub">Hundreds of laser projectors converge in mid-air to form an
+  image. Every beam continues past it and lands on a wall, which paints a sharp,
+  legible copy of the artwork. This is a search for a panel surface that sends
+  as little of that back as possible — run across nine geometry families, none
+  of which is the V-groove or the cone the project had been building.</p>
+  <dl class="stats">
+    <div><dt>designs scored</dt><dd>{{SCORED}}</dd></div>
+    <div><dt>best reflectance</dt><dd>{{WIN_PCT}}<span class="u">%</span></dd></div>
+    <div><dt>vs same coating, flat</dt><dd>{{WIN_VS_FLAT}}<span class="u">× darker</span></dd></div>
+    <div><dt>vs plain black wall</dt><dd>{{WIN_VS_WALL}}<span class="u">× darker</span></dd></div>
+  </dl>
+</header>
+
+<section>
+  <span class="eyebrow">The answer</span>
+  <h2>Overlapping inclined plates, tilted 6° off the panel normal</h2>
+  <p class="lede col">Ranked on the worst reflectance across incidence angles
+  0°, ±20° and ±40°, <em>and</em> across all three coating models — so a design
+  only places if it holds up whether the real coating turns out to scatter
+  specularly or diffusely. That split is still unmeasured, and it is the single
+  most consequential unknown in the project.</p>
+
+  <div class="hero">
+    <div class="shot"><img src="" alt="" id="winshot"></div>
+    <div class="body">
+      <span class="eyebrow">Rank 1 · shingle</span>
+      <div class="big">{{WIN_PCT}}%</div>
+      <ul>
+        <li><b>{{WIN_VS_FLAT}}×</b> darker than a flat plate of the same coating</li>
+        <li><b>{{WIN_VS_CONE}}%</b> better than the best cone, re-measured in the same frame at {{CONE_PCT}}%</li>
+        <li>Plates knife-edged at the mouth, 0.05&nbsp;mm; overlap 1.15; pitch 7.5&nbsp;mm, depth 80&nbsp;mm</li>
+      </ul>
+      <p class="tag mono">{{WIN_TAG}}</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Every design, ranked</span>
+  <h2>Top ten, then the best of every other family</h2>
+  <p class="lede col">The top ten are all shingles, which would make a poor
+  comparison sheet on its own — so the best member of each remaining family is
+  appended. Renders are framed views of the tile, built with a small margin;
+  every optical number comes from the measurement build, never from these.</p>
+  <div class="grid">
+{{CARDS}}
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The mechanism</span>
+  <h2>The two coating models want opposite tilts</h2>
+  <p class="lede col">Under a purely specular coating an inclined plate
+  redirects the bounce, and steeper is better all the way to about 12°. Under a
+  purely diffuse one there is no bounce to redirect — every square millimetre of
+  wall has a direct view of the sky and simply leaks — so shallow is better. The
+  design that survives both is set by <em>where the curves cross</em>, not by
+  either one's own optimum.</p>
+  <figure class="chart">
+    <div class="legend">
+      <span><i style="background:var(--spec)"></i>fully specular coating</span>
+      <span><i style="background:var(--diff)"></i>fully diffuse coating</span>
+      <span><i style="background:var(--accent)"></i>score = the worse of the two</span>
+    </div>
+    {{CHART}}
+  </figure>
+  <p class="note col"><b>This replaced an earlier wrong conclusion.</b> The
+  first pass reported that shallower tilt was monotonically better and
+  recommended pushing below 5°. The geometry builder was clamping tilt to a 5°
+  floor, so tilts of 1°, 2° and 3° all built the same shape and returned
+  identical numbers to five decimal places. Those 450 rows were voided and
+  re-measured.</p>
+</section>
+
+<section>
+  <span class="eyebrow">What died</span>
+  <h2>Exposed area no longer predicts anything</h2>
+  <p class="lede col">Every design decision in this project until now rested on
+  one rule: the head-on return is the exposed tip area and essentially nothing
+  else. It was verified across 24 combinations — under the old, Fresnel-free
+  material model. Against the fitted coating it does not hold. Across these nine
+  families the exposed area spans <b>{{AREA_SPAN}}×</b> while the score spans
+  only <b>{{SCORE_SPAN}}×</b>, and they do not even rank in the same order.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr>
+        <th>family</th><th class="num">best score</th>
+        <th class="num">vs flat</th><th class="num">exposed area</th>
+        <th>what it is</th>
+      </tr></thead>
+      <tbody>
+{{FAMROWS}}
+      </tbody>
+    </table>
+  </div>
+  <p class="note col">The nested cell exposes <b>21.3%</b> of its area and
+  scores within 3.5% of the cone, which exposes <b>1.0%</b>. The strut lattice
+  exposes 8.6% and is the worst thing here. If area still drove the answer,
+  neither could be true. <b>“Shrink the tip” is no longer the primary design
+  move</b> — and that argument was the whole reason this project moved from
+  V-grooves to cones.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Corrections</span>
+  <h2>Four defects found during this run</h2>
+  <p class="lede col">Recorded because each one first presented as an
+  interesting result. Three were caught by looking at a picture or at a number
+  that was too round; one was found by a check built specifically to try to
+  falsify a claim.</p>
+  <div class="fixes">
+    <div class="fix">
+      <h3>The honeycomb was not a honeycomb</h3>
+      <p>Hexagons were drawn around jittered centres, but a hexagon only tiles
+      the plane on an exact lattice. The cells stopped sharing edges: walls
+      doubled up, gaps opened between them, and the wall-sharing de-duplication
+      was silently defeated.</p>
+      <p class="how">Caught in the 3D render, invisible in the CSV. Rebuilt as a
+      Voronoi tessellation of the same points.</p>
+    </div>
+    <div class="fix">
+      <h3>The flat control plate was embedded inside the panel</h3>
+      <p>The control sits 100 mm to the side, but the panel field runs 255 mm.
+      The control has been standing inside the geometry it is supposed to be
+      compared against, for every 3D family, from the beginning.</p>
+      <p class="how">Invisible while cone tips covered 0.26% of it; a wall
+      network covering 13% made it read 0.0423 instead of 0.0500. Absolute
+      reflectances were measured to be unaffected; ratios against the control
+      are not.</p>
+    </div>
+    <div class="fix">
+      <h3>A 5° clamp ate an entire experiment</h3>
+      <p>Tilts of 1°, 2° and 3° all clamped to 5° and returned bit-identical
+      results, which read as a plateau and produced a wrong recommendation to
+      push the tilt lower.</p>
+      <p class="how">The give-away was three different inputs agreeing to five
+      decimal places. 450 rows voided and re-run.</p>
+    </div>
+    <div class="fix">
+      <h3>Leaning cells cannot lean independently</h3>
+      <p>Two neighbouring cells cannot tilt their shared wall in two different
+      directions. The first attempt dropped 77% of the walls. Displacing the
+      Voronoi seed points with depth along a smooth direction field keeps the
+      tessellation exact; where adjacency still changes, the wall is built
+      anyway rather than skipped.</p>
+      <p class="how">Overlap is absorbed by the union; a gap is not. That
+      asymmetry was learned from an earlier bug that presented as “regular
+      arrays are 8× darker”.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Before this is built</span>
+  <h2>What this does not settle</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>open item</th><th>why it matters</th></tr></thead>
+      <tbody>
+      <tr><td class="nm">The coating's diffuse fraction</td>
+        <td class="nt">Unmeasured, and it moves designs by up to 41× and inverts
+        the ranking. Every score here is the worse of two extremes precisely
+        because of it. Only a printed and measured coupon settles it.</td></tr>
+      <tr><td class="nm">Form, not just brightness</td>
+        <td class="nt">The stated first priority is destroying the <em>shape</em>
+        of what returns, so the wall reads as texture rather than as letters.
+        This run ranks on total reflectance only. The form metric that folds
+        brightness and blur together is defined but not yet trustworthy.</td></tr>
+      <tr><td class="nm">Printability of the winner</td>
+        <td class="nt">A 0.05 mm knife edge is an eighth of one nozzle width.
+        The rank-7 design uses 0.02 mm. These are optics probes, not buildable
+        parts; the printable edge is 0.4 mm and has been measured in the same
+        series.</td></tr>
+      <tr><td class="nm">Depth 80 mm</td>
+        <td class="nt">Inside the 30–100 mm envelope, but at the deep end, and
+        depth 100 was measured slightly worse at one pitch — so the depth
+        optimum is real rather than “more is better”.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <span>Generated {{DATE}} from <code>results/sweep_topo.csv</code> —
+  {{SCORED}} fully scored designs, each measured at five incidence angles under
+  three coating models.</span>
+  <span>Reflectance is absolute directional-hemispherical ρ<sub>dh</sub>, the
+  same quantity a goniometer reports. Baselines named throughout: a flat plate
+  of the same coating reads 0.998%; a plain matte black wall reads 5%.</span>
+</footer>
+
+</div>
+
+<script>
+  // the hero image is the same asset as card #1; copy it rather than
+  // embedding four megabytes of the same JPEG twice
+  document.getElementById('winshot').src =
+    document.querySelector('.spec .shot img').src;
+  document.getElementById('winshot').alt =
+    document.querySelector('.spec .shot img').alt;
+</script>

@@ -1,0 +1,90 @@
+[
+  {
+    "design": "groove d50/p13",
+    "mean_bounces": 11.48,
+    "median_bounces": 12.0,
+    "mean_angle": 44.94203408488009,
+    "median_angle": 51.678136208223435,
+    "pct_over_70": 16.942508710801395,
+    "median_disp_mm": 6.035781996843272,
+    "n_bounce_samples": 4592,
+    "theta": 0.0
+  },
+  {
+    "design": "groove d30/p7.5",
+    "mean_bounces": 11.565,
+    "median_bounces": 13.0,
+    "mean_angle": 44.98672211459234,
+    "median_angle": 42.051931087459366,
+    "pct_over_70": 16.38564634673584,
+    "median_disp_mm": 0.3933661234206757,
+    "n_bounce_samples": 4626,
+    "theta": 0.0
+  },
+  {
+    "design": "cone d30/p7.5",
+    "mean_bounces": 8.991666666666667,
+    "median_bounces": 9.0,
+    "mean_angle": 52.57028749647029,
+    "median_angle": 55.27685774509226,
+    "pct_over_70": 26.969416126042635,
+    "median_disp_mm": 2.8124456279160723,
+    "n_bounce_samples": 1079,
+    "theta": 0.0
+  },
+  {
+    "design": "cone d30/p3.75",
+    "mean_bounces": 19.766666666666666,
+    "median_bounces": 20.0,
+    "mean_angle": 54.28813486915028,
+    "median_angle": 57.13698821476845,
+    "pct_over_70": 29.258010118043842,
+    "median_disp_mm": 1.8317466814992536,
+    "n_bounce_samples": 2372,
+    "theta": 0.0
+  },
+  {
+    "design": "groove d50/p13",
+    "mean_bounces": 6.55,
+    "median_bounces": 7.0,
+    "mean_angle": 25.0170181970731,
+    "median_angle": 27.629767967122646,
+    "pct_over_70": 0.07633587786259542,
+    "median_disp_mm": 8.869558289900498,
+    "n_bounce_samples": 2620,
+    "theta": -40.0
+  },
+  {
+    "design": "groove d30/p7.5",
+    "mean_bounces": 6.9925,
+    "median_bounces": 7.0,
+    "mean_angle": 25.029235069427795,
+    "median_angle": 25.346965433992516,
+    "pct_over_70": 0.07150518412584912,
+    "median_disp_mm": 2.600993739767135,
+    "n_bounce_samples": 2797,
+    "theta": -40.0
+  },
+  {
+    "design": "cone d30/p7.5",
+    "mean_bounces": 6.008333333333334,
+    "median_bounces": 6.0,
+    "mean_angle": 44.54275758875042,
+    "median_angle": 44.63689348823929,
+    "pct_over_70": 9.57004160887656,
+    "median_disp_mm": 12.622762707239144,
+    "n_bounce_samples": 721,
+    "theta": -40.0
+  },
+  {
+    "design": "cone d30/p3.75",
+    "mean_bounces": 12.233333333333333,
+    "median_bounces": 12.0,
+    "mean_angle": 44.28389031614183,
+    "median_angle": 45.18650686770491,
+    "pct_over_70": 9.196185286103542,
+    "median_disp_mm": 11.495094110789982,
+    "n_bounce_samples": 1468,
+    "theta": -40.0
+  }
+]

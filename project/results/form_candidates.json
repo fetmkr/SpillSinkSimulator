@@ -1,0 +1,991 @@
+[
+ {
+  "tag": "B_CELLNEST_p1100_s23",
+  "family": "cell",
+  "topology": "c_nested",
+  "process": "print",
+  "pitch": 11.0,
+  "rho": 0.002028003102168441,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "pitch": 11.0,
+   "seed": 23,
+   "variant": "nested",
+   "wall_bot": 0.1,
+   "wall_top": 0.1
+  }
+ },
+ {
+  "tag": "B_CELLSQUA_p0650_s23",
+  "family": "cell",
+  "topology": "c_square",
+  "process": "print",
+  "pitch": 6.5,
+  "rho": 0.0020865192636847496,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "variant": "square",
+   "wall_bot": 0.1,
+   "wall_top": 0.1
+  }
+ },
+ {
+  "tag": "BL_FLAT_t100_p0550_a02_grid_s23",
+  "family": "topo",
+  "topology": "shingle",
+  "process": "print",
+  "pitch": 5.5,
+  "rho": 0.002120325341820717,
+  "params": {
+   "azimuth_jitter": 180.0,
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.15,
+   "plate_t_bot": 0.1,
+   "plate_t_top": 0.1,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle",
+   "azimuth_mode": "grid"
+  }
+ },
+ {
+  "tag": "B_CELLREEN_p0650_s23",
+  "family": "cell",
+  "topology": "c_reentrant",
+  "process": "print",
+  "pitch": 6.5,
+  "rho": 0.002143888734281063,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "variant": "reentrant",
+   "wall_bot": 0.1,
+   "wall_top": 0.1
+  }
+ },
+ {
+  "tag": "B_HONE_p0650_f080_s23",
+  "family": "topo",
+  "topology": "honeycomb",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.002150733722373843,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "topology": "honeycomb",
+   "wall_bot": 0.08,
+   "wall_top": 0.08
+  }
+ },
+ {
+  "tag": "B_CONE_p0550_s23",
+  "family": "cone3d",
+  "topology": "cone",
+  "process": "mould",
+  "pitch": 5.5,
+  "rho": 0.0021548415534198284,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "depth_jitter": 0.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "height_seg": 12,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "profile_power": 1.0,
+   "radial_seg": 24,
+   "seed": 23,
+   "tip_radius": 0.2
+  }
+ },
+ {
+  "tag": "B_HONE_p0847_f080_s23",
+  "family": "topo",
+  "topology": "honeycomb",
+  "process": "expanded foil",
+  "pitch": 8.47,
+  "rho": 0.002169701736420393,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 8.47,
+   "seed": 23,
+   "topology": "honeycomb",
+   "wall_bot": 0.08,
+   "wall_top": 0.08
+  }
+ },
+ {
+  "tag": "B_CELLMIXE_p0650_s23",
+  "family": "cell",
+  "topology": "c_mixed",
+  "process": "print",
+  "pitch": 6.5,
+  "rho": 0.0021740857046097517,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "variant": "mixed",
+   "wall_bot": 0.1,
+   "wall_top": 0.1
+  }
+ },
+ {
+  "tag": "B_CELLTRIA_p0650_s23",
+  "family": "cell",
+  "topology": "c_triangle",
+  "process": "print",
+  "pitch": 6.5,
+  "rho": 0.0023474181070923805,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "variant": "triangle",
+   "wall_bot": 0.1,
+   "wall_top": 0.1
+  }
+ },
+ {
+  "tag": "B_SLNT_p0520_f040_ln30_s23",
+  "family": "topo",
+  "topology": "slant",
+  "process": "expanded foil",
+  "pitch": 5.2,
+  "rho": 0.002849620534107089,
+  "params": {
+   "backing": 2.0,
+   "cell_lean_deg": 30.0,
+   "cell_lean_domain": 16.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.2,
+   "seed": 23,
+   "topology": "honeycomb",
+   "wall_bot": 0.04,
+   "wall_top": 0.04
+  }
+ },
+ {
+  "tag": "BL_FLAT_t100_p0550_a02_para_s23",
+  "family": "topo",
+  "topology": "shingle",
+  "process": "sheet",
+  "pitch": 5.5,
+  "rho": 0.002838974352926016,
+  "params": {
+   "azimuth_jitter": 0.0,
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.15,
+   "plate_t_bot": 0.1,
+   "plate_t_top": 0.1,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle",
+   "azimuth_mode": "parallel"
+  }
+ },
+ {
+  "tag": "CB_p0520_f040_x10_s23",
+  "family": "topo",
+  "topology": "comb",
+  "process": "expanded foil",
+  "pitch": 5.2,
+  "rho": 0.002092,
+  "params": {
+   "topology": "comb",
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 50.0,
+   "margin_depths": 2.0,
+   "backing": 2.0,
+   "seed": 23,
+   "jitter": 0.0,
+   "pitch": 5.2,
+   "wall_top": 0.04,
+   "wall_bot": 0.04,
+   "comb_expand": 1.0
+  }
+ },
+ {
+  "tag": "ST_comb-cone_50_s23",
+  "family": "stack",
+  "topology": "comb/cone",
+  "process": "stack",
+  "pitch": 6.5,
+  "rho": 0.0022,
+  "params": {
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "margin_depths": 2.0,
+   "backing": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 25.0,
+   "top_params": {
+    "pitch": 6.5,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "jitter": 0.0
+   },
+   "bot": "cone",
+   "bot_depth": 25.0,
+   "bot_params": {
+    "pitch": 5.5,
+    "tip_radius": 0.2,
+    "jitter": 0.3,
+    "radial_seg": 24,
+    "height_seg": 12,
+    "depth_jitter": 0.0,
+    "profile_power": 1.0
+   }
+  }
+ },
+ {
+  "tag": "ST_cone-comb_50_s23",
+  "family": "stack",
+  "topology": "cone/comb",
+  "process": "stack",
+  "pitch": 6.5,
+  "rho": 0.0022,
+  "params": {
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "margin_depths": 2.0,
+   "backing": 2.0,
+   "seed": 23,
+   "top": "cone",
+   "top_depth": 25.0,
+   "top_params": {
+    "pitch": 5.5,
+    "tip_radius": 0.2,
+    "jitter": 0.3,
+    "radial_seg": 24,
+    "height_seg": 12,
+    "depth_jitter": 0.0,
+    "profile_power": 1.0
+   },
+   "bot": "comb",
+   "bot_depth": 25.0,
+   "bot_params": {
+    "pitch": 6.5,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "ST_shin-comb_50_s23",
+  "family": "stack",
+  "topology": "shingle/comb",
+  "process": "stack",
+  "pitch": 6.5,
+  "rho": 0.0022,
+  "params": {
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "margin_depths": 2.0,
+   "backing": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 25.0,
+   "top_params": {
+    "pitch": 5.5,
+    "plate_t_top": 0.1,
+    "plate_t_bot": 0.1,
+    "tilt_deg": 2.0,
+    "tilt_jitter": 0.0,
+    "azimuth_mode": "grid",
+    "jitter": 0.3
+   },
+   "bot": "comb",
+   "bot_depth": 25.0,
+   "bot_params": {
+    "pitch": 6.5,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "ST_comb-comb_50_s23",
+  "family": "stack",
+  "topology": "comb/comb",
+  "process": "stack",
+  "pitch": 6.5,
+  "rho": 0.0012485610786825418,
+  "params": {
+   "backing": 2.0,
+   "bot": "comb",
+   "bot_depth": 25.0,
+   "bot_params": {
+    "jitter": 0.0,
+    "pitch": 3.17,
+    "wall_bot": 0.04,
+    "wall_top": 0.04
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 25.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_p650f080_flat_d00_s23",
+  "family": "topo",
+  "topology": "comb/flat",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.002209368161857128,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.0,
+   "margin_depths": 2.0,
+   "pitch": 6.5,
+   "seed": 23,
+   "topology": "comb",
+   "wall_bot": 0.08,
+   "wall_top": 0.08
+  }
+ },
+ {
+  "tag": "FL_p520f050_flat_d00_s23",
+  "family": "topo",
+  "topology": "comb/flat",
+  "process": "expanded foil",
+  "pitch": 5.2,
+  "rho": 0.0021417769603431225,
+  "params": {
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.0,
+   "margin_depths": 2.0,
+   "pitch": 5.2,
+   "seed": 23,
+   "topology": "comb",
+   "wall_bot": 0.05,
+   "wall_top": 0.05
+  }
+ },
+ {
+  "tag": "FL_p650f080_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "comb/pyramid",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.0022289426997303963,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 47.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_p520f050_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "comb/pyramid",
+  "process": "expanded foil",
+  "pitch": 5.2,
+  "rho": 0.0021751467138528824,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 47.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 5.2,
+    "wall_bot": 0.05,
+    "wall_top": 0.05
+   }
+  }
+ },
+ {
+  "tag": "FL_p650f080_pyramid_d20_s23",
+  "family": "stack",
+  "topology": "comb/pyramid",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.002189651830121875,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 2.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 48.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_p650f080_cone_d30_s23",
+  "family": "stack",
+  "topology": "comb/cone",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.002228889847174287,
+  "params": {
+   "backing": 2.0,
+   "bot": "cone",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "depth_jitter": 0.0,
+    "height_seg": 6,
+    "jitter": 0.3,
+    "pitch": 2.0,
+    "profile_power": 1.0,
+    "radial_seg": 16,
+    "tip_radius": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 47.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_p650f080_wave_d30_s23",
+  "family": "stack",
+  "topology": "comb/wave",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.0022289936896413565,
+  "params": {
+   "backing": 2.0,
+   "bot": "wave",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 47.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_p650f080_gap_d30_s23",
+  "family": "stack",
+  "topology": "comb/gap",
+  "process": "expanded foil",
+  "pitch": 6.5,
+  "rho": 0.0022289941553026438,
+  "params": {
+   "backing": 2.0,
+   "bot": "gap",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "comb",
+   "top_depth": 47.0,
+   "top_params": {
+    "jitter": 0.0,
+    "pitch": 6.5,
+    "wall_bot": 0.08,
+    "wall_top": 0.08
+   }
+  }
+ },
+ {
+  "tag": "FL_bl050o115_flat_d00_s23",
+  "family": "topo",
+  "topology": "shingle/flat",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.001857689581811428,
+  "params": {
+   "azimuth_mode": "grid",
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.15,
+   "plate_t_bot": 0.05,
+   "plate_t_top": 0.05,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle"
+  }
+ },
+ {
+  "tag": "FL_bl050o115_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.0018418713007122278,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.15,
+    "plate_t_bot": 0.05,
+    "plate_t_top": 0.05,
+    "tilt_deg": 2.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "FL_bl050o145_flat_d00_s23",
+  "family": "topo",
+  "topology": "shingle/flat",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.001886378857307136,
+  "params": {
+   "azimuth_mode": "grid",
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.45,
+   "plate_t_bot": 0.05,
+   "plate_t_top": 0.05,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle"
+  }
+ },
+ {
+  "tag": "FL_bl050o145_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.001856938237324357,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.45,
+    "plate_t_bot": 0.05,
+    "plate_t_top": 0.05,
+    "tilt_deg": 2.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "FL_bl100o115_flat_d00_s23",
+  "family": "topo",
+  "topology": "shingle/flat",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.0019525536336004734,
+  "params": {
+   "azimuth_mode": "grid",
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.15,
+   "plate_t_bot": 0.1,
+   "plate_t_top": 0.1,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle"
+  }
+ },
+ {
+  "tag": "FL_bl100o115_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.001926046097651124,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.15,
+    "plate_t_bot": 0.1,
+    "plate_t_top": 0.1,
+    "tilt_deg": 2.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "FL_bl100o145_flat_d00_s23",
+  "family": "topo",
+  "topology": "shingle/flat",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.002001597546041012,
+  "params": {
+   "azimuth_mode": "grid",
+   "backing": 2.0,
+   "depth": 50.0,
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "jitter": 0.3,
+   "margin_depths": 2.0,
+   "pitch": 5.5,
+   "plate_over": 1.45,
+   "plate_t_bot": 0.1,
+   "plate_t_top": 0.1,
+   "seed": 23,
+   "tilt_deg": 2.0,
+   "tilt_jitter": 0.0,
+   "topology": "shingle"
+  }
+ },
+ {
+  "tag": "FL_bl100o145_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.0019633634947240353,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.45,
+    "plate_t_bot": 0.1,
+    "plate_t_top": 0.1,
+    "tilt_deg": 2.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "CF_cone_pyramid_d30_s23",
+  "family": "stack",
+  "topology": "cone/pyramid",
+  "process": "press",
+  "pitch": 5.5,
+  "rho": 0.0021938285790383816,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "cone",
+   "top_depth": 47.0,
+   "top_params": {
+    "depth_jitter": 0.0,
+    "height_seg": 12,
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "profile_power": 1.0,
+    "radial_seg": 24,
+    "tip_radius": 0.2
+   }
+  }
+ },
+ {
+  "tag": "BH_p055_t00_grid_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.0016958742635324597,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.15,
+    "plate_t_bot": 0.05,
+    "plate_t_top": 0.05,
+    "tilt_deg": 0.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "BH_p055_t05_grid_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.002085351850837469,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.15,
+    "plate_t_bot": 0.05,
+    "plate_t_top": 0.05,
+    "tilt_deg": 5.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ },
+ {
+  "tag": "BH_p055_t10_grid_s23",
+  "family": "stack",
+  "topology": "shingle/pyramid",
+  "process": "sheet, grid",
+  "pitch": 5.5,
+  "rho": 0.002491679508239031,
+  "params": {
+   "backing": 2.0,
+   "bot": "pyramid",
+   "bot_depth": 3.0,
+   "bot_params": {
+    "margin_depth_ref": 50.0,
+    "pitch": 2.0,
+    "tip_flat": 0.1
+   },
+   "face_h": 60.0,
+   "face_w": 60.0,
+   "margin_depths": 2.0,
+   "seed": 23,
+   "top": "shingle",
+   "top_depth": 47.0,
+   "top_params": {
+    "azimuth_mode": "grid",
+    "jitter": 0.3,
+    "pitch": 5.5,
+    "plate_over": 1.15,
+    "plate_t_bot": 0.05,
+    "plate_t_top": 0.05,
+    "tilt_deg": 10.0,
+    "tilt_jitter": 0.0
+   }
+  }
+ }
+]

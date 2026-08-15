@@ -82,6 +82,22 @@ CASES = {
                           valley_round=0.0, margin_depths=6.5)),
 }
 
+# The MATERIAL model check, separate from the geometry lock above. The Fresnel
+# coating in blender_render is a fit to a published goniometer measurement of
+# Musou Black (Filip & Vavra 2026, Fig. 6; see reference/SUMMARY.md), and the
+# whole point of it is the angular trend -- reflectance rising toward grazing,
+# which the old material got backwards. A flat plate of it must reproduce that
+# curve, or every absolute number and every grazing claim is wrong again.
+MATERIAL_CHECK = {
+    "params": dict(depth=0.001, pitch_mean=50.0, tip_width=50.0,
+                   tip_round=False, pitch_jitter=0.0, arc_segments=4,
+                   valley_round=0.0, margin_depths=6.5),
+    # measured, not the paper target: this locks OUR implementation against
+    # drift. The residuals against the paper are documented in blender_render.
+    "expect": {"0.0": 0.009982, "-45.0": 0.010597, "-80.0": 0.030847},
+    "tol": 0.03,
+}
+
 # the diffuse reference plate that sits beside every panel in every frame. It
 # is 0.05 by construction, so if it ever reads otherwise the measurement chain
 # has moved and nothing else in the lock means anything. It was already being
@@ -113,6 +129,37 @@ def measure(name, seed):
 
 def run_all(seed=0):
     return {name: measure(name, seed) for name in CASES}
+
+
+def material_check(seed=0):
+    """Re-measure the Fresnel coating on a flat plate. Returns a list of
+    failures, empty if the material model still reproduces its fit."""
+    cfg = {"tag": "lock_material", "family": "ridge", "out_dir": RENDERS,
+           "results_dir": os.path.join(RENDERS, "json"),
+           "samples": 512, "res_x": 900, "res_y": 420, "gpu": True,
+           "cycles_seed": seed, "material_mode": "coating",
+           "rho_control": 0.05, "params": MATERIAL_CHECK["params"],
+           "renders": [{"mode": "hemi_view", "theta": float(t)}
+                       for t in MATERIAL_CHECK["expect"]]}
+    res = BR.run(cfg)
+    bad = []
+    print("\n%-22s %6s %10s %10s %8s"
+          % ("material model", "theta", "locked", "now", "drift"))
+    for rec in res["modes"].values():
+        key = str(rec["theta"])
+        exp = MATERIAL_CHECK["expect"].get(key)
+        if exp is None:
+            continue
+        got = rec["panel"]["mean"]
+        drift = (got - exp) / exp
+        ok = abs(drift) <= MATERIAL_CHECK["tol"]
+        if not ok:
+            bad.append("%s: %.6f -> %.6f (%+.1f%%)" % (key, exp, got,
+                                                       drift * 100))
+        print("%-22s %6s %10.4f %10.4f %+7.1f%%  %s"
+              % ("flat plate, coating", key, exp * 100, got * 100,
+                 drift * 100, "ok" if ok else "*** DRIFT ***"))
+    return bad
 
 
 def control_problems(cur):
@@ -190,6 +237,7 @@ def main():
             print("%-22s %6s %10.4f %10.4f %+7.1f%%  %s"
                   % (name, th, a * 100, b * 100, drift * 100,
                      "ok" if ok else "*** DRIFT ***"))
+    mat_bad = material_check()
     ctrl_bad = control_problems(cur)
     for msg in ctrl_bad:
         print("[CONTROL] *** %s" % msg)
@@ -198,6 +246,12 @@ def main():
         print("\nThe 0.05 diffuse reference plate did not read 0.05. The\n"
               "measurement chain itself has moved, so no other number in this\n"
               "run means anything. Fix this before looking at the drifts above.")
+        sys.exit(1)
+    if mat_bad:
+        print("\nThe coating no longer reproduces the goniometer measurement\n"
+              "it was fitted to:\n  " + "\n  ".join(mat_bad) +
+              "\nEvery absolute reflectance and every grazing claim depends on\n"
+              "that fit. Re-run scripts/fit_coating.py before reporting.")
         sys.exit(1)
     if bad:
         print("\n%d locked value(s) moved. Either the change was intended --"

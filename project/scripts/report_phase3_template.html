@@ -1,0 +1,274 @@
+<title>Phase 3 — which layer owns which axis</title>
+<style>
+:root{
+  --ground:#f5f6f7; --surface:#fff; --sunk:#eceff1; --shot:#e7ebed;
+  --ink:#101519; --ink-2:#48545e; --ink-3:#6f7d89;
+  --line:#dce1e5; --line-2:#c4ced4;
+  --a1:#0d6f79; --a2:#a4691a; --a3:#5b4b9e; --no:#a3352a; --soft:#e3f0f1;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#080a0c; --surface:#11161a; --sunk:#0d1114; --shot:#0a0d0f;
+  --ink:#e5ebf0; --ink-2:#9daab5; --ink-3:#74828e;
+  --line:#1e262c; --line-2:#2e3841;
+  --a1:#49c2ca; --a2:#dda647; --a3:#a394e8; --no:#e0705f; --soft:#0f2b2e;}}
+:root[data-theme="dark"]{
+  --ground:#080a0c; --surface:#11161a; --sunk:#0d1114; --shot:#0a0d0f;
+  --ink:#e5ebf0; --ink-2:#9daab5; --ink-3:#74828e;
+  --line:#1e262c; --line-2:#2e3841;
+  --a1:#49c2ca; --a2:#dda647; --a3:#a394e8; --no:#e0705f; --soft:#0f2b2e;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:66ch}
+h1,h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,4.4vw,50px);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(21px,2.4vw,28px);line-height:1.2}
+h3{font:650 14.5px/1.3 -apple-system,sans-serif;margin:0}
+p{margin:0}
+code{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.eyebrow{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--a1)}
+header.top{border-bottom:1px solid var(--line);padding:56px 0 32px;
+  display:flex;flex-direction:column;gap:18px}
+.sub{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+section{padding-top:58px;display:flex;flex-direction:column;gap:20px}
+.lede{font-size:17px;color:var(--ink-2)}
+
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.phases div{padding:15px 17px;border-right:1px solid var(--line)}
+.phases div:last-child{border-right:0}
+.phases div.now{background:var(--soft)}
+.phases dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.phases b{display:block;font-size:15px;margin-bottom:4px}
+.phases p{font-size:12.5px;color:var(--ink-3);line-height:1.45}
+
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.verdict div{padding:18px 20px;border-right:1px solid var(--line)}
+.verdict div:last-child{border-right:0}
+.verdict dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.verdict b{display:block;font:650 19px/1.25 -apple-system,sans-serif;
+  margin-bottom:6px}
+.verdict p{font-size:13px;color:var(--ink-2);line-height:1.5}
+.v1 b{color:var(--a2)} .v2 b{color:var(--a3)} .v3 b{color:var(--no)}
+
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px}
+.spec{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.spec.stack{border-color:var(--a3)}
+.spec .shot{background-color:var(--shot);background-size:cover;
+  background-position:center;aspect-ratio:14/10}
+.spec figcaption{padding:13px 14px 15px;display:flex;flex-direction:column;
+  gap:10px}
+.hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kind{font:650 9.5px/1.5 ui-monospace,Menlo,monospace;color:var(--surface);
+  background:var(--ink-3);border-radius:2px;padding:1px 6px;letter-spacing:.07em}
+.spec.stack .kind{background:var(--a3)}
+.fam{font-size:15px;font-weight:650}
+.nt{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.ax{margin:0;display:flex;flex-direction:column;gap:7px}
+.ax > div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;
+  align-items:baseline}
+.ax dt{font:600 9.5px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+.ax dd{margin:0;font:650 15px/1.2 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums;text-align:right}
+.ax dd .s{font:400 10px/1 ui-monospace,Menlo,monospace;color:var(--ink-3);
+  display:block;margin-top:2px}
+.bar{grid-column:1/-1;display:block;height:8px;background:var(--sunk);
+  border-radius:2px;overflow:hidden;margin-top:2px}
+.bar i{display:block;height:100%;background:var(--a1)}
+.ax > div:nth-child(2) .bar i{background:var(--a2)}
+.ax > div:nth-child(3) .bar i{background:var(--a3)}
+.seeds{font:400 10.5px/1 ui-monospace,Menlo,monospace;color:var(--ink-3)}
+.nb{font:600 11.5px/1.45 -apple-system,sans-serif;color:var(--no);
+  border:1px solid var(--no);border-radius:2px;padding:6px 9px}
+
+.note{border-left:2px solid var(--a1);background:var(--soft);padding:14px 18px;
+  border-radius:0 3px 3px 0;font-size:14.5px;color:var(--ink-2)}
+.note.warn{border-left-color:var(--no)}
+.note b{color:var(--ink)}
+.tbl{border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+td.num{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+td.nm{font-weight:600;white-space:nowrap}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+@media (max-width:700px){.verdict div,.phases div{border-right:0;
+  border-bottom:1px solid var(--line)}}
+{{IMGCSS}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Optical anechoic panel · phase 3 · {{DATE}}</span>
+  <h1>Two structures in series: which layer owns which axis</h1>
+  <p class="sub">Phase 2 ended with no single geometry good at all three jobs.
+  The bought honeycomb swallows the most light and is last at destroying shape
+  and last at dimming the view. The cone owns both of those and is mid-table on
+  total. So: stack them, and see whether two scales in series beat one. The
+  envelope stays at 50 mm and is <em>split</em> between the layers, so nothing
+  here wins by being twice as thick.</p>
+  <p class="note warn">This page was rebuilt on 2026-08-14 after a geometry
+  defect was found by eye in its own gallery: the commercial-honeycomb builder
+  stepped its lattice along the wrong two axes, so no cell shared an edge with
+  any neighbour and <b>30.1 % of the panel face was open channel straight down
+  to the flat backing slab</b>. Every honeycomb and every stacked number was
+  re-measured on geometry that tessellates. One headline reversed; the two
+  findings below survived, and one of them gained a control it did not have.</p>
+
+  <dl class="phases">
+    <div><dt>phase 1</dt><b>2D cross-sections</b>
+      <p>V-grooves and slats, extruded along one axis. The line came back as a
+      line.</p></div>
+    <div><dt>phase 2</dt><b>3D topologies</b>
+      <p>Nine families on three axes, each at the feature its own process
+      delivers. No family led all three.</p></div>
+    <div class="now"><dt>phase 3 · this report</dt><b>Layered pairs</b>
+      <p>Honeycomb, cones and blades stacked two at a time, within the same
+      50 mm.</p></div>
+  </dl>
+</header>
+
+<section>
+  <span class="eyebrow">The answer</span>
+  <h2>Stacking wins narrowly on one axis, and shows what each layer controls
+  on the other two</h2>
+  <dl class="verdict">
+    <div class="v1"><dt>the top layer decides</dt><b>Form destruction</b>
+      <p>Honeycomb on top: {{HCCONE_SMEAR}}× smear, the same as honeycomb alone
+      ({{HC_SMEAR}}×). Cones on top: {{CONECOMB_SMEAR}}×, the same as cones
+      alone ({{CONE_SMEAR}}×). Whether light walks sideways is settled by the
+      first surface it meets; the layer beneath never gets a say.</p></div>
+    <div class="v2"><dt>the bottom layer decides</dt><b>Head-on brightness</b>
+      <p>Honeycomb alone reads {{HC_PEAK}}. Put a cone field under the same
+      honeycomb and it reads <b>{{HCCONE_PEAK}}</b> — better by
+      <b>{{HC_GAIN}}×</b>, with the top layer untouched.</p></div>
+    <div class="v3"><dt>only for like on like</dt><b>Total reflectance</b>
+      <p>Best stack <b>{{BEST_STACK}}%</b> ({{BEST_STACK_NAME}}) against
+      {{BEST_SINGLE}}% for the best single layer — {{STACK_MARGIN}}% better,
+      and only because both its layers are honeycomb. Every stack that mixes
+      two <em>different</em> families loses.</p></div>
+  </dl>
+  <p class="note col"><b>A prediction was written before the render, and it was
+  half wrong — which is the useful half.</b> The stack module's docstring
+  predicted that only the top layer is exposed head-on, so honeycomb-over-cone
+  should inherit the honeycomb's head-on failure. Form behaved exactly that
+  way. Head-on did not: it improved {{HC_GAIN}}-fold. <b>So the honeycomb's
+  head-on brightness never came from its wall tops.</b> It came from the flat
+  backing slab at the bottom of every cell, seen straight down the tube.</p>
+  <p class="note col"><b>The control that settles it, and it only exists
+  because of the rebuild.</b> Honeycomb over a <em>finer honeycomb</em> keeps
+  the tube and keeps a flat floor at the end of it, and reads
+  <b>{{CC_PEAK}}</b> head-on — identical to honeycomb alone ({{HC_PEAK}}).
+  Honeycomb over cones keeps the same tube and replaces only the floor, and
+  reads <b>{{HCCONE_PEAK}}</b>. Same top layer in all three, same cell mouth,
+  same wall tops; the only thing that moved is what sits at the bottom, and it
+  moved the number {{HC_GAIN}}×. The explanation published in the phase 2
+  report — that the flat wall tops face the viewer like a flat plate — is
+  wrong.</p>
+</section>
+
+<section>
+  <span class="eyebrow">All six, all three axes</span>
+  <h2>Three single layers, three stacks</h2>
+  <p class="lede col">Bars are logarithmic and oriented so that <em>longer is
+  better</em> on every axis. Total reflectance is the worst case over incidence
+  0°, ±20°, ±40° and over three coating models. Smear is the width of a
+  returned 2 mm line against a flat wall, averaged over 16 stripe phases.
+  Head-on brightness is measured against a plain matte black wall; a bare flat
+  plate of the same coating reads {{FLATPEAK}}.</p>
+  <div class="grid-cards">
+{{CARDS}}
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Why splitting the depth hurts</span>
+  <h2>Aspect ratio does not survive being cut in half</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>cone's share of the 50 mm</th><th class="num">cone depth</th>
+        <th class="num">aspect ratio</th><th class="num">total reflectance</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">100% (single layer)</td><td class="num">50 mm</td><td class="num">9.1</td><td class="num">0.2170%</td></tr>
+        <tr><td class="nm">75%</td><td class="num">37.5 mm</td><td class="num">6.8</td><td class="num">0.2380%</td></tr>
+        <tr><td class="nm">50%</td><td class="num">25 mm</td><td class="num">4.5</td><td class="num">0.2709%</td></tr>
+        <tr><td class="nm">25%</td><td class="num">12.5 mm</td><td class="num">2.3</td><td class="num">0.4268%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note col">The honeycomb underneath does not recover what the
+  shortened cone lets out. Running the same split the other way barely moves at
+  all — honeycomb on top stays inside {{COMBTOP_RANGE}}% across all three splits — because a honeycomb is a light <em>trap</em>, and a trap already
+  deep enough gains nothing from more depth. <b>For a cone, depth inside one
+  continuous cavity is not interchangeable with the same depth divided between
+  two.</b> That is why every mixed stack loses, and why the one stack that wins
+  is two honeycombs: neither layer had depth it could not spare.</p>
+</section>
+
+<section>
+  <span class="eyebrow">What to do with this</span>
+  <h2>If a panel has to be good at more than one thing</h2>
+  <p class="lede col">There is still no design that leads all three. Cones over
+  honeycomb takes head-on outright — <b>{{CONECOMB_PEAK}}</b>, the lowest
+  anywhere in the study, with {{CONECOMB_SMEAR}}× smear — and pays
+  {{CONECOMB_TOTAL}}% against {{CONE_TOTAL}}% for a cone that keeps the whole
+  50 mm, <b>{{CONECOMB_COST}}% worse</b> and last on this page. Honeycomb over
+  finer honeycomb takes total outright at {{CC_TOTAL}}% and is last on the
+  other two ({{CC_SMEAR}}× smear, {{CC_PEAK}} head-on). The axes still pull
+  against each other; phase 3 only made the pull legible.</p>
+  <p class="note warn col"><b>And the two designs leading total reflectance
+  cannot be handled.</b> Both use 0.04 mm foil, below the 0.05 mm floor set for
+  a panel that survives being carried and mounted. Applying that floor, the
+  darkest buildable design in the whole study is <b>{{BEST_OK_NAME}}</b> at
+  {{BEST_OK}}% ({{BEST_OK_PROC}}) — a blade array, not a honeycomb and not a
+  stack.</p>
+  <p class="lede col">Whether that is a bad trade depends on something nobody
+  has decided: whether the wall is judged by an instrument or by a person.
+  Total reflectance is what an integrating sphere reads. Head-on brightness is
+  what the audience sees. <b>They are different numbers, and this phase pulled
+  them {{HC_GAIN}}× apart on one geometry</b> — so the question has to be
+  answered before a panel is chosen, not after.</p>
+  <p class="lede col">On the evidence here the honest recommendation is still
+  <b>not</b> a stack. It is the single cone layer: {{CONE_PEAK}} head-on and
+  {{CONE_SMEAR}}× smear at {{CONE_TOTAL}}%, buildable at a 0.4 mm moulded tip,
+  better than every stack on two axes at once. What phase 3 bought is not a
+  design — it is the explanation, and the explanation says where the next
+  effort goes: <b>the floor of the cavity, not its walls.</b> Nothing measured
+  so far rules out keeping a full-depth 50 mm honeycomb and shaping only the
+  last 2–3 mm of each cell, which would take the honeycomb's total and the
+  cone's head-on at the same time. That is phase 4.</p>
+  <p class="note warn col"><b>Nothing here has been built or measured.</b> Two
+  coating properties that were chosen rather than measured — the diffuse
+  fraction and the specular roughness — set the absolute level of every number
+  on this page. One printed coupon on a goniometer settles both, and would also
+  test the mechanism this phase just corrected.</p>
+</section>
+
+<footer>
+  <span>Generated {{DATE}} from <code>results/sweep_stack.csv</code>,
+  <code>sweep_comb.csv</code>, <code>sweep_blade.csv</code>,
+  <code>sweep_buildable.csv</code> and <code>form_buildable.json</code>.
+  Every number is read from a measurement row at build time.</span>
+  <span>Baselines: a flat plate of the same coating reads {{FLATPCT}}% on the
+  same footing; a plain matte black wall reads 5%.</span>
+</footer>
+
+</div>

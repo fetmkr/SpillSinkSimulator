@@ -1,0 +1,395 @@
+<title>Phase 4 — the last three millimetres</title>
+<style>
+:root{
+  --ground:#f4f5f6; --surface:#fff; --sunk:#eaedef; --shot:#e6eaec;
+  --ink:#0f1418; --ink-2:#46525c; --ink-3:#6d7b87;
+  --line:#dbe0e4; --line-2:#c2ccd3;
+  --a1:#0c6b75; --a2:#9f6417; --a3:#57479a; --no:#9f3327;
+  --buy:#0c6b75; --make:#9f6417; --soft:#e1eff0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#07090b; --surface:#10151a; --sunk:#0c1013; --shot:#090c0e;
+  --ink:#e4eaef; --ink-2:#9ba9b4; --ink-3:#73818d;
+  --line:#1d252b; --line-2:#2d3740;
+  --a1:#46bfc8; --a2:#d9a344; --a3:#a090e6; --no:#de6e5d;
+  --buy:#46bfc8; --make:#d9a344; --soft:#0e2a2d;}}
+:root[data-theme="dark"]{
+  --ground:#07090b; --surface:#10151a; --sunk:#0c1013; --shot:#090c0e;
+  --ink:#e4eaef; --ink-2:#9ba9b4; --ink-3:#73818d;
+  --line:#1d252b; --line-2:#2d3740;
+  --a1:#46bfc8; --a2:#d9a344; --a3:#a090e6; --no:#de6e5d;
+  --buy:#46bfc8; --make:#d9a344; --soft:#0e2a2d;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:66ch}
+h1,h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,4.6vw,52px);line-height:1.06;letter-spacing:-.016em}
+h2{font-size:clamp(21px,2.4vw,29px);line-height:1.2}
+p{margin:0}
+code{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.eyebrow{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--a1)}
+header.top{border-bottom:1px solid var(--line);padding:56px 0 32px;
+  display:flex;flex-direction:column;gap:18px}
+.sub{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+section{padding-top:62px;display:flex;flex-direction:column;gap:20px}
+.lede{font-size:17px;color:var(--ink-2)}
+
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.phases div{padding:14px 16px;border-right:1px solid var(--line)}
+.phases div:last-child{border-right:0}
+.phases div.now{background:var(--soft)}
+.phases dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.phases b{display:block;font-size:15px;margin-bottom:4px}
+.phases p{font-size:12.5px;color:var(--ink-3);line-height:1.45}
+
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background:var(--surface)}
+.verdict div{padding:18px 20px;border-right:1px solid var(--line)}
+.verdict div:last-child{border-right:0}
+.verdict dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.verdict b{display:block;font:650 20px/1.2 -apple-system,sans-serif;
+  margin-bottom:6px}
+.verdict p{font-size:13px;color:var(--ink-2);line-height:1.5}
+.v1 b{color:var(--a1)} .v2 b{color:var(--a2)} .v3 b{color:var(--no)}
+
+.tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:14px}
+.track{border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.track.buy{border-left:3px solid var(--buy)}
+.track.make{border-left:3px solid var(--make)}
+.track dt{font:600 10px/1.35 ui-monospace,Menlo,monospace;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3)}
+.track b{font-size:17px;font-weight:650}
+.track .n{font:650 27px/1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.track.buy .n{color:var(--buy)} .track.make .n{color:var(--make)}
+.track p{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.track ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-3);
+  line-height:1.6}
+
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
+  gap:13px}
+.grid-cards.big{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.spec{margin:0;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.spec.bought{border-top:3px solid var(--buy)}
+.spec.made{border-top:3px solid var(--make)}
+.spec .shot{background-color:var(--shot);background-size:cover;
+  background-position:center;aspect-ratio:14/10}
+.spec figcaption{padding:11px 12px 13px;display:flex;flex-direction:column;
+  gap:8px}
+.hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rk{font:650 11.5px/1.5 ui-monospace,Menlo,monospace;color:var(--surface);
+  background:var(--ink-2);border-radius:2px;padding:1px 7px;min-width:25px;
+  text-align:center}
+#th0 .rk{background:var(--a1)} #total .rk{background:var(--a3)}
+#formrank .rk{background:var(--a2)} #peakrank .rk{background:var(--no)}
+.fam{font-size:13.5px;font-weight:650}
+.sp{font:400 10.5px/1.5 ui-monospace,Menlo,monospace;color:var(--ink);
+  background:var(--sunk);border-radius:2px;padding:5px 7px}
+.spec .big{font:650 23px/1.1 ui-monospace,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.nt{font-size:12px;color:var(--ink-2);line-height:1.5}
+.kv{margin:0;display:flex;flex-direction:column;gap:2px;
+  font:400 10.5px/1.6 ui-monospace,Menlo,monospace}
+.kv div{display:flex;justify-content:space-between;gap:8px;
+  border-bottom:1px dotted var(--line);padding-bottom:1px}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0;font-variant-numeric:tabular-nums}
+
+.note{border-left:2px solid var(--a1);background:var(--soft);padding:14px 18px;
+  border-radius:0 3px 3px 0;font-size:14.5px;color:var(--ink-2)}
+.note.warn{border-left-color:var(--no)}
+.note b{color:var(--ink)}
+.tbl{border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+td.num{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+td.nm{font-weight:600;white-space:nowrap}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+@media (max-width:700px){.verdict div,.phases div{border-right:0;
+  border-bottom:1px solid var(--line)}}
+{{IMGCSS}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Optical anechoic panel &middot; phase 4 &middot; {{DATE}}</span>
+  <h1>The last three millimetres</h1>
+  <p class="sub">Phase 3 found that a honeycomb panel is bright head-on for one
+  reason: every cell is a tube pointing at the viewer with a flat slab at the
+  end of it. It fixed that by spending half the 50 mm envelope on a cone field,
+  which worked and cost total reflectance. Phase 4 asks the obvious next
+  question — <em>how little of the envelope does the floor actually need?</em>
+  The answer is two or three millimetres out of fifty, and the best floor is the
+  cheapest one to make.</p>
+
+  <dl class="phases">
+    <div><dt>phase 1</dt><b>2D cross-sections</b>
+      <p>V-grooves and slats. The line came back as a line.</p></div>
+    <div><dt>phase 2</dt><b>3D topologies</b>
+      <p>Nine families, three axes. No family led all three.</p></div>
+    <div><dt>phase 3</dt><b>Layered pairs</b>
+      <p>Top layer owns form, bottom layer owns head-on.</p></div>
+    <div class="now"><dt>phase 4 &middot; this report</dt><b>Shaped floors</b>
+      <p>{{NDESIGN}} designs: {{NTUBE}} tubes &times; four floors &times; three
+      depths, all inside the same 50 mm.</p></div>
+  </dl>
+</header>
+
+<section>
+  <span class="eyebrow">The answer</span>
+  <h2>Shape, not distance — and 2 mm is enough</h2>
+  <dl class="verdict">
+    <div class="v1"><dt>the floor works</dt><b>{{BEST_TH0_GAIN}}&times; darker head-on</b>
+      <p>A flat-floored bought honeycomb returns {{FLAT_TH0}}% at normal
+      incidence. <b>The same tube</b> on a pressed pyramid sheet returns
+      <b>{{SAMETUBE_PYR}}%</b>. Nothing about the cell, the walls or the mouth
+      changed. The lowest anywhere in the study is {{BEST_TH0}}%, on the finer
+      5.2&nbsp;mm foil.</p></div>
+    <div class="v2"><dt>and it is free</dt><b>2 mm of 50</b>
+      <p>{{PYR2}}% at 2 mm, {{PYR3}}% at 3 mm, {{PYR5}}% at 5 mm — the shallowest
+      floor tried already has it. Phase 3 spent 25 mm to buy the same effect
+      and lost total reflectance doing it.</p></div>
+    <div class="v3"><dt>the control that matters</dt><b>Air gap does nothing</b>
+      <p>Move the slab back 3 mm and leave it flat: {{GAP_TH0}}%, or
+      {{GAP_GAIN}}&times; — no change at all. Distance is not the mechanism.
+      A ray that meets a flat surface square-on comes straight back whether it
+      travelled 47 mm or 50 to get there.</p></div>
+  </dl>
+  <p class="note col"><b>The prediction was written before the render and it
+  held.</b> <code>sweep_floor.py</code> recorded three expectations: head-on
+  collapses at the shallowest floor, worst-case total barely moves, and form
+  does not improve at all. All three came out. The one that would have falsified
+  phase 3's mechanism — head-on scaling with floor depth, meaning the floor was
+  just a short cone — did not happen.</p>
+</section>
+
+<section id="mech">
+  <span class="eyebrow">Gallery 1 of 5 &middot; the mechanism</span>
+  <h2>Five floors under the same bought honeycomb</h2>
+  <p class="lede col">Same tube, same cell, same foil, same 50 mm. Only what
+  sits at the bottom changes. Ranked by how much darker the panel is at normal
+  incidence than the flat-floored control.</p>
+  <p class="note col"><b>Every picture on this page is a cutaway.</b> These
+  designs are a 45–48 mm tube over a 2–5 mm floor, and photographed honestly all
+  {{NDESIGN}} of them look like the same black holes — the floor is fifteen cell
+  diameters down and invisible. So each render shortens the tube to {{CUT}} mm
+  and leaves the floor at full size. <b>No number on this page comes from these
+  images</b>; they all come from the full-depth sweep.</p>
+  <div class="grid-cards big">
+{{G_MECH}}
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Buy it or build it</span>
+  <h2>Two tracks, and they do not want the same thing</h2>
+  <div class="tracks">
+    <dl class="track buy"><dt>bought</dt>
+      <b>{{BOUGHT_NAME}}</b>
+      <span class="n">{{BOUGHT_TH0}}%</span>
+      <p>Expanded aluminium honeycomb is a catalogue item. The floor is a
+      pressed sheet. Two flat parts, laid one behind the other — nothing is
+      aligned cell-to-cell, nothing is welded, nothing is assembled by hand.</p>
+      <ul>
+        <li>darkest head-on of anything measured</li>
+        <li>form destruction {{SMEAR_p650f080_pyramid}}&times; — it does not
+            destroy shape, and no floor can change that</li>
+      </ul>
+    </dl>
+    <dl class="track make"><dt>made</dt>
+      <b>{{MADE_NAME}}</b>
+      <span class="n">{{MADE_TH0}}%</span>
+      <p>Blades are laser-cut, notched and slotted together like an egg crate.
+      More work, and the only track that destroys the shape of what returns.</p>
+      <ul>
+        <li>form destruction {{SMEAR_bl050o115_pyramid}}&times;</li>
+        <li>head-on brightness {{PEAK_bl050o115_pyramid}} against
+            {{PEAK_bl050o115_flat}} on a flat floor</li>
+      </ul>
+    </dl>
+  </div>
+  <p class="note col"><b>A phase 2 note is confirmed, not overturned.</b>
+  <code>sweep_topo.py</code> recorded that blade overlap 1.15 beat 1.45
+  everywhere, measured at 30 mm depth. An accidental run here at 1.45 looked
+  1.65&times; darker and appeared to contradict it — but that compared two
+  different sweeps. Measured side by side at 50 mm, <b>1.15 wins on all four
+  numbers</b>: 0.1861% against 0.1887% worst-case, 0.05383% against 0.05713%
+  head-on, 3.96&times; against 3.54&times; on form, 0.092 against 0.098 to the
+  eye. The wider blade is not better; the earlier comparison was.</p>
+  <p class="note col">Phase 3 proved form destruction is set by the layer the
+  light meets <em>first</em>. A honeycomb tube smears a returned line by
+  {{SMEAR_p650f080_flat}}&times; — that is, not at all — and <b>no floor can
+  ever fix that</b>, because the floor is the last thing the light meets, not
+  the first. <b>So the bought track can win two axes and never the third.</b>
+  If a legible reflection of the artwork is unacceptable, the blade array is the
+  only track on the table, and phase 4's contribution there is fixing its
+  head-on brightness for the price of a pressed sheet.</p>
+</section>
+
+<section id="th0">
+  <span class="eyebrow">Gallery 2 of 5 &middot; ranking</span>
+  <h2>Darkest at normal incidence, all {{NDESIGN}} designs</h2>
+  <p class="lede col">Reflectance at normal incidence, worst case over the three
+  coating models, averaged over three geometry seeds. This is the axis a floor
+  exists to move.</p>
+  <p class="note warn col"><b>This is not head-on brightness, and the heading
+  used to say it was.</b> Total reflectance counts every photon that comes back;
+  head-on brightness counts only the ones aimed at an eye. They can disagree by
+  a factor of twenty-four: a cone array returns 0.180 % at normal incidence —
+  about what a flat-floored honeycomb returns — while its head-on peak is 0.068
+  against the honeycomb's 1.634, because the cone spreads what it returns.
+  Gallery 5 is the one a viewer experiences.</p>
+  <div class="grid-cards">
+{{G_TH0}}
+  </div>
+</section>
+
+<section id="total">
+  <span class="eyebrow">Gallery 3 of 5 &middot; ranking</span>
+  <h2>Darkest overall, worst case across &plusmn;40&deg;</h2>
+  <p class="lede col">The same designs scored the way phases 2 and 3 scored
+  everything: the worst reflectance over incidence 0&deg;, &plusmn;20&deg; and
+  &plusmn;40&deg;. <b>The order is almost unrelated to the one above</b>, because
+  at 40&deg; a ray never reaches the floor — it is absorbed on the way down. That
+  is the good news: the floor costs nothing on this axis.</p>
+  <div class="grid-cards">
+{{G_TOTAL}}
+  </div>
+</section>
+
+<section id="formrank">
+  <span class="eyebrow">Gallery 4 of 5 &middot; ranking</span>
+  <h2>Most shape destroyed</h2>
+  <p class="lede col">How much wider a returned 2 mm line comes back than it
+  would from a flat wall, averaged over sixteen stripe positions at
+  &plusmn;40&deg;. Measured on {{NMEAS}} designs — this render costs forty-eight
+  frames each, so it was run on the controls and the winners rather than on all
+  {{NDESIGN}}.</p>
+  <div class="grid-cards">
+{{G_FORM}}
+  </div>
+</section>
+
+<section id="peakrank">
+  <span class="eyebrow">Gallery 5 of 5 &middot; ranking</span>
+  <h2>Dimmest to a person standing in front</h2>
+  <p class="lede col">Peak radiance straight back at the viewer, against a plain
+  matte black wall. Not the same measurement as gallery 2 and not predictable
+  from it: total reflectance counts every photon, this counts only the ones
+  aimed at an eye.</p>
+  <div class="grid-cards">
+{{G_PEAK}}
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The one real trade-off</span>
+  <h2>Blade tilt splits the three axes against each other</h2>
+  <p class="lede col">Everything else on this page was free: the floor moved
+  normal-incidence reflectance and left worst-case total and form untouched, its
+  pitch barely mattered, its apex flat cost 1.4 % at a manufacturable 0.1 mm.
+  Tilt is different. On the leading design — 0.05 mm blades, 5.5 mm slotted
+  grid, 47 mm, over a 3 mm pyramid floor — the three axes want three different
+  answers.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>blade tilt</th><th class="num">total, worst &plusmn;40&deg;</th>
+        <th class="num">normal incidence</th><th class="num">form destruction</th>
+        <th class="num">head-on brightness</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">0&deg; — upright</td><td class="num"><b>0.1727%</b></td>
+          <td class="num"><b>0.01668%</b></td><td class="num"><b>1.13&times;</b></td>
+          <td class="num">0.119</td></tr>
+        <tr><td class="nm">2&deg; — the incumbent</td><td class="num">0.1861%</td>
+          <td class="num">0.05383%</td><td class="num">3.96&times;</td>
+          <td class="num">0.092</td></tr>
+        <tr><td class="nm">5&deg;</td><td class="num">0.2103%</td>
+          <td class="num">0.06256%</td><td class="num"><b>4.00&times;</b></td>
+          <td class="num">0.053</td></tr>
+        <tr><td class="nm">10&deg;</td><td class="num">0.2519%</td>
+          <td class="num">0.10438%</td><td class="num">3.58&times;</td>
+          <td class="num"><b>0.039</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note col"><b>Upright blades are the darkest panel in the study and
+  destroy nothing.</b> At 0&deg; the blades form parallel slots; light rattles up
+  and down between them and leaves the way it came. 1.13&times; smear is the
+  honeycomb's failure reached from the other direction — dark, and a legible
+  reflection. A design chosen on total reflectance alone lands exactly here,
+  which is what makes the three-axis scoring worth its cost.</p>
+  <p class="lede col">So the recommendation does not move: <b>2&deg;</b> leads
+  total by 13 % and gives up 1 % of form. But if what the client judges is the
+  view rather than an instrument, <b>5&deg;</b> is the better buy — 1.7&times;
+  dimmer to the eye, marginally better on form, 13 % worse on total.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Where it stands</span>
+  <h2>What phase 4 settles, and what it does not</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>evidence</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">Does a shaped floor fix head-on?</td>
+          <td>Yes, {{BEST_TH0_GAIN}}&times;</td>
+          <td class="num">{{FLAT_TH0}}% &rarr; {{BEST_TH0}}%</td></tr>
+        <tr><td class="nm">How deep does it need to be?</td>
+          <td>2 mm of 50</td><td class="num">{{PYR2}} / {{PYR3}} / {{PYR5}}%</td></tr>
+        <tr><td class="nm">Shape, or just distance?</td>
+          <td>Shape. A gap does nothing.</td>
+          <td class="num">{{GAP_TH0}}%, {{GAP_GAIN}}&times;</td></tr>
+        <tr><td class="nm">Which floor?</td>
+          <td>Pressed pyramids — the cheapest</td>
+          <td class="num">beats cones and egg-carton</td></tr>
+        <tr><td class="nm">Does it cost total reflectance?</td>
+          <td>No</td><td class="num">worst-&plusmn;40&deg; unchanged</td></tr>
+        <tr><td class="nm">Can the bought track destroy form?</td>
+          <td><b>No, and it never can</b></td>
+          <td class="num">{{SMEAR_p650f080_pyramid}}&times;</td></tr>
+        <tr><td class="nm">Has any of this been built?</td>
+          <td><b>No</b></td><td class="num">simulation only</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note warn col"><b>The same two unmeasured coating properties still
+  set the absolute level of every number here.</b> The diffuse fraction and the
+  specular roughness were chosen, not measured, and phase 2 showed the head-on
+  figure moving 332&times; across the plausible roughness range. Phase 4's
+  <em>ratios</em> are robust — every design on this page shares one coating, so
+  a wrong coating moves them all together — but the absolute percentages are
+  not. One printed coupon on a goniometer closes that, and it is now the only
+  thing between this study and a specification.</p>
+</section>
+
+<footer>
+  <span>Generated {{DATE}} from <code>results/sweep_floor.csv</code>
+  ({{NDESIGN}} designs &times; 3 coating models &times; 3 seeds &times; 5
+  incidence angles) and <code>results/form_buildable.json</code>. Every number
+  is read from a measurement row at build time.</span>
+  <span>Geometry: <code>scripts/geom_floor.py</code>,
+  <code>scripts/geom_stack.py</code>. Sweep:
+  <code>scripts/sweep_floor.py</code>, which carries the pre-registered
+  prediction in its docstring, unedited.</span>
+</footer>
+
+</div>

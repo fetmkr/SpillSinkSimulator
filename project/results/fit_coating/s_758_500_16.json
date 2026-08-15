@@ -1,0 +1,270 @@
+{
+  "tag": "s_758_500_16",
+  "params": {
+    "face_w": 100.0,
+    "face_h": 100.0,
+    "depth": 0.001,
+    "pitch_mean": 50.0,
+    "tip_width": 50.0,
+    "tip_round": false,
+    "pitch_jitter": 0.0,
+    "arc_segments": 4,
+    "valley_round": 0.0,
+    "margin_depths": 6.5
+  },
+  "derived": {
+    "family": "ridge",
+    "depth_mm": 0.001,
+    "pitch_mean_mm": 50.0,
+    "pitch_jitter": 0.0,
+    "tip_width_mm": 50.0,
+    "tip_fraction": 1.0,
+    "half_angle_deg": 89.99770816882071,
+    "est_bounces": 0.5000127327196765,
+    "tilt_deg": 0.0,
+    "tilt_jitter": 0.0,
+    "valley_round_mm": 0.0,
+    "margin_depths": 6.5,
+    "predicted_return_rho05": 0.63
+  },
+  "warnings": [
+    "half angle 90.0 deg gives only 0.5 bounces; the groove is too open to trap",
+    "tip takes 100.0% of the face; the head-on exposed ridge is the dominant return path"
+  ],
+  "material_mode": "coating",
+  "rho_diffuse": 0.05,
+  "rho_slat": 0.05,
+  "rho_chamber": 0.05,
+  "rho_control": 0.05,
+  "rho_specular": 0.05,
+  "spec_roughness": 0.05,
+  "samples": 512,
+  "n_slats": 1,
+  "n_baffles": 0,
+  "modes": {
+    "s_758_500_16__hemi_view_th-00.0": {
+      "theta": -0.0,
+      "panel": {
+        "mean": 0.010221975855529308,
+        "p50": 0.010224825702607632,
+        "p99": 0.010245509445667267,
+        "max": 0.010245627723634243,
+        "px": 20709
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 20709
+      },
+      "ratio_mean": 0.20444035182381273,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-00.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-00.0.png",
+      "px_panel": [
+        655.8830916881561,
+        832.3537230491638,
+        151.17608606815338,
+        268.82315039634705
+      ],
+      "px_ctrl": [
+        67.64781922101974,
+        244.1184103488922,
+        151.17608606815338,
+        268.82315039634705
+      ]
+    },
+    "s_758_500_16__hemi_view_th-15.0": {
+      "theta": -15.0,
+      "panel": {
+        "mean": 0.010226741433143616,
+        "p50": 0.010229764506220818,
+        "p99": 0.010250463150441647,
+        "max": 0.010250602848827839,
+        "px": 20001
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 20001
+      },
+      "ratio_mean": 0.20453564852609415,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-15.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-15.0.png",
+      "px_panel": [
+        655.8830916881561,
+        832.3536694049835,
+        153.18085491657257,
+        266.81915760040283
+      ],
+      "px_ctrl": [
+        67.64777898788452,
+        244.1183567047119,
+        153.18084239959717,
+        266.81915760040283
+      ]
+    },
+    "s_758_500_16__hemi_view_th-30.0": {
+      "theta": -30.0,
+      "panel": {
+        "mean": 0.010306774638593197,
+        "p50": 0.010311325080692768,
+        "p99": 0.01033264771103859,
+        "max": 0.010332699865102768,
+        "px": 17877
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 17877
+      },
+      "ratio_mean": 0.2061363344096486,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-30.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-30.0.png",
+      "px_panel": [
+        655.8830380439758,
+        832.3536157608032,
+        159.05698657035828,
+        260.94231247901917
+      ],
+      "px_ctrl": [
+        67.64773204922676,
+        244.11832988262177,
+        159.05696153640747,
+        260.94228744506836
+      ]
+    },
+    "s_758_500_16__hemi_view_th-45.0": {
+      "theta": -45.0,
+      "panel": {
+        "mean": 0.010778617113828659,
+        "p50": 0.010778747498989105,
+        "p99": 0.010812795720994473,
+        "max": 0.010813011787831783,
+        "px": 14691
+      },
+      "control": {
+        "mean": 0.04999978840351105,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 14691
+      },
+      "ratio_mean": 0.21557325456744875,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-45.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-45.0.png",
+      "px_panel": [
+        655.8828771114349,
+        832.3534548282623,
+        168.40550243854523,
+        251.59453511238098
+      ],
+      "px_ctrl": [
+        67.64759793877602,
+        244.11819577217102,
+        168.40546488761902,
+        251.59448504447937
+      ]
+    },
+    "s_758_500_16__hemi_view_th-60.0": {
+      "theta": -60.0,
+      "panel": {
+        "mean": 0.012804582715034485,
+        "p50": 0.012806098908185959,
+        "p99": 0.01286255195736885,
+        "max": 0.01287005003541708,
+        "px": 10443
+      },
+      "control": {
+        "mean": 0.04999979957938194,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 10443
+      },
+      "ratio_mean": 0.2560926808257571,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-60.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-60.0.png",
+      "px_panel": [
+        655.8827698230743,
+        832.3533475399017,
+        180.58862507343292,
+        239.41213846206665
+      ],
+      "px_ctrl": [
+        67.64746382832527,
+        244.11806166172028,
+        180.5885750055313,
+        239.41208839416504
+      ]
+    },
+    "s_758_500_16__hemi_view_th-75.0": {
+      "theta": -75.0,
+      "panel": {
+        "mean": 0.020954741165041924,
+        "p50": 0.020955750718712807,
+        "p99": 0.02105141244828701,
+        "max": 0.02109559066593647,
+        "px": 5487
+      },
+      "control": {
+        "mean": 0.049999795854091644,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 5487
+      },
+      "ratio_mean": 0.4190965344376927,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-75.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-75.0.png",
+      "px_panel": [
+        655.8825552463531,
+        832.3531866073608,
+        194.77627873420715,
+        225.22557377815247
+      ],
+      "px_ctrl": [
+        67.64728277921677,
+        244.11787390708923,
+        194.77622866630554,
+        225.22552371025085
+      ]
+    },
+    "s_758_500_16__hemi_view_th-80.0": {
+      "theta": -80.0,
+      "panel": {
+        "mean": 0.02750321850180626,
+        "p50": 0.027502113953232765,
+        "p99": 0.027647266164422035,
+        "max": 0.027683092281222343,
+        "px": 3717
+      },
+      "control": {
+        "mean": 0.04999978840351105,
+        "p50": 0.049999792128801346,
+        "p99": 0.049999792128801346,
+        "max": 0.049999792128801346,
+        "px": 3717
+      },
+      "ratio_mean": 0.5500666978797644,
+      "exr": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-80.0.exr",
+      "png": "/Users/hojunsong/Desktop/SpillSinkSimulator/project/renders/fit_coating/s_758_500_16__hemi_view_th-80.0.png",
+      "px_panel": [
+        655.8825016021729,
+        832.3530793190002,
+        199.78649854660034,
+        220.21570444107056
+      ],
+      "px_ctrl": [
+        67.64719560742378,
+        244.1177934408188,
+        199.78644847869873,
+        220.21565437316895
+      ]
+    }
+  }
+}

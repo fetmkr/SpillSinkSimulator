@@ -20,3 +20,18 @@ __pycache__/
 .claude/scheduled_tasks.lock
 # Local marker for "the claims were reviewed at this state" — per-machine
 project/results/.reviewed
+
+# Report galleries — the frames a report was built FROM. The report HTML embeds
+# every image it shows as base64 (78 of them, 6.1 MB, in the 2026-08-15 one), so
+# it renders standalone from a fresh clone and these directories are referenced
+# by nothing. 725 MB of full-resolution PNG/JPG for four reports, all of it
+# regenerable by re-running the sweep that made it. Same reasoning as
+# project/renders/ above.
+project/report/*/shots/
+project/report/*/top/
+project/report/*/web/
+
+# Watchdog and sweep logs: a record of when things ran on one machine, not
+# project content. The findings they led to are in project/results/*.md.
+project/logs/
+project/results/WATCHDOG.*

@@ -478,6 +478,51 @@ Renders are gitignored (5.7 GB, regenerable). Every extracted number is in
 
 ---
 
+## 11a. THE RULE THAT WAS BROKEN FOUR TIMES IN TWO DAYS — read before sweeping
+
+**Validate BEFORE you measure, not after. A sweep you have not earned the right
+to run is worse than no sweep, because it produces a ranking someone will act
+on.**
+
+On 2026-08-12/13 four separate conclusions were published and then withdrawn.
+Not one was overturned by new physics. All four were setup errors that a check
+costing minutes would have caught before the sweep that cost hours:
+
+| withdrawn claim | what was actually wrong |
+|---|---|
+| "shingle beats the cone by 29%" | compared a 0.05 mm edge against a 0.4 mm tip — 8x mismatch, in families whose return is dominated by the exposed feature |
+| "a structure buys 28-30x" | the flat-plate denominator was a constant somebody typed. No measurement was ever taken at that value. The true figure is 5.3x |
+| "the blade array smears 4.5x" | the spec sheet said 0.1 mm sheet; the measured part was a wedge 0.1 mm at the mouth and **0.9 mm at the root**. Real value 3.44x |
+| "the coating's diffuse fraction moves designs 41x" | misread a table whose title says it compares the OLD material model to the new one. The real lever is 6.3x worst case, 1.06-1.39x for the designs actually proposed |
+
+Each was found by someone else — an adversarial reviewer, a questioning agent,
+or the user asking "is that really Musou Black?" — after the number had already
+been reported.
+
+**The gate, to be passed before any sweep whose output will be ranked:**
+
+1. **Does a control reproduce a known answer?** A flat plate of the coating must
+   reproduce the published curve. A rho=0 panel must read exactly 0. The 0.05
+   control must read 0.05000. `scripts/fit_coating.py` does the first.
+2. **Is every baseline a measurement?** A number used as a denominator must
+   trace to a render, with the config that produced it. Never a constant.
+3. **Are the things being compared matched on feature size AND process?** Both,
+   not either. Matching feature alone assumes a common process and penalises
+   whichever family does not need it.
+4. **Is the geometry being measured the geometry in the document?** Diff the
+   `params_json` against the spec sheet, field by field. `plate_t_bot` was 0.9
+   in every blade measurement while the spec said 0.1, for two days.
+5. **Does every quoted ratio name its baseline in the same sentence?**
+
+`scripts/gate.py` and `scripts/lock.py` exist for exactly this and were not used
+once during those two days.
+
+**Agents are cheap; use them BEFORE, not after.** A questioning agent found
+three of the four errors above in fifteen minutes, run after the fact. A
+watchdog agent that only checks whether processes are alive finds none of them —
+process health and result correctness are different jobs and need different
+agents.
+
 ## 11. Working conventions
 
 - Draw the geometry (cross-section + 2D ray trace) before rendering it; both
@@ -525,3 +570,174 @@ Renders 081-084 are the geometry actually measured/exported (081/082 the
 tip-0.2 grooves, 083/084 the cones exactly as export_cone.py writes the STL,
 tileable, backing 3, depth_jitter 0). Report: report/2026-08-11/*_compare.png
 via scripts/report_compare.py.
+
+---
+
+# 2026-08-11 late — READ THIS FIRST. Most of what is above is superseded.
+
+Three things were overturned today. A new session that skips this will repeat
+the errors, because the superseded claims are stated confidently above.
+
+## 1. The material model was wrong, and the FIX is only half-constrained
+
+`make_glossy(rho, roughness)` has no Fresnel: its rho_dh is flat with angle
+(0.4953% head-on, 0.4521% at 80 deg for rho=0.005). Real black coatings do the
+opposite. Filip & Vavra 2026 (reference/2601.05094v1.pdf, Fig. 6; full notes in
+reference/SUMMARY.md) measured Musou Black on a goniometer and report THR --
+the same quantity hemi_view reads:
+
+    theta   0     15    30    45    60    75    80
+    THR   1.00  1.00  1.03  1.13  1.43  2.33  3.18  %
+
+So we were 2x optimistic head-on and ~7x at 80 deg, with the angular trend
+running the WRONG WAY. `make_coating()` is a fit to that curve, validated by
+scripts/fit_coating.py and guarded by lock.py's material_check.
+
+**But the fit constrains only rho_dh(theta) of a FLAT PLATE, and that curve
+cannot distinguish diffuse from specular.** The 76%-Lambertian split in the fit
+was CHOSEN, not measured -- and it turns out to drive everything (see 2). Treat
+the paper as ±20% on absolute level: it is a preprint, reports BRDF "in
+relative units", its own Vantablack reads 6.6x above spec, and its text
+contradicts its own TIS figure. Trust the SHAPE, not the digits.
+
+## 2. The mechanism: it is ONE bounce, and diffuse-vs-specular is everything
+
+Switching to the Fresnel coating made designs worse by 2.0x (flat plate), 6.5x
+and 8.8x (grooves), 14.5x and 41x (cones). **Three wrong explanations were
+offered before the right one; do not add a fourth without measuring.**
+
+Measured decomposition (doubling rho under a specular material):
+
+    D/A = 2.000 +/- 0.008 for EVERY design, cones included.
+
+The return is **one-bounce in every geometry**. There is no multi-bounce
+population. Bounce statistics from scripts/ray_census.py describe rays carrying
+0.002% of the escaping energy -- 99.9%+ of what returns is the n=1 tip hit.
+**Do not use bounce counts as a search objective.**
+
+The whole 2x-to-41x spread is diffuse-vs-specular at fixed rho. Under a
+specular BSDF a flank bounce sends light deeper; under a Lambertian one every
+mm^2 of wall has a direct view of the sky and simply leaks. Cone p3.75 is hurt
+less than p7.5 because it is a NARROWER cavity (aspect 8 vs 4) and traps
+diffuse light better -- classic cavity behaviour, not bounce count.
+
+**Consequence: the diffuse fraction of the coating is the single most
+consequential unmeasured parameter in the project.** `BR.coating_split(d)`
+sweeps it at fixed measured rho_dh(0). Only a printed coupon settles it.
+
+## 3. Reflectance is NOT invariant to the coating change
+
+metrics/01 used to say "linear in rho, so a change of coating rescales every
+design equally". True for the old flat-rho material, FALSE for the Fresnel one.
+Design-to-design spread collapses from 5.0x to 1.65x at theta=0 and **the
+ranking inverts** -- the recommended cone d30/p7.5 goes from best to worst.
+**Every past comparison must be RE-RUN, not rescaled.**
+
+## Geometry facts learned today
+
+- `geom3d` now takes a cavity profile: `cavity_radius(f, power, bulge, lip)`.
+  power 0.5 paraboloid / 1.0 cone / 2.0 needle; `bulge` widens monotonically
+  and CANNOT make an undercut (verified, min dr = 0 over the whole grid);
+  `lip` adds a Gaussian overhang that can.
+- **`height_seg=3` does not resolve the profile.** At power 0.15 the answer
+  moves 50.6x between hseg 3 and 12. Use hseg >= 12 and power >= 0.5. A whole
+  sweep (1031 rows) was voided over this -- results/__void__sweep_shapes_hseg3.csv.
+- **Cells seal.** Once the pillar radius reaches the hex circumradius
+  pitch/sqrt(3), neighbours meet and everything below is not a cavity. A plain
+  cone at pitch 7.5 seals at 72% of nominal depth: "depth 30" was never 30 mm
+  of cavity. `geom3d.seal_fraction()` records it.
+- `spec_roughness` moves CAVITY rho_dh by 32% (0.05 vs 0.30) even though it is
+  irrelevant on a flat plate. Pin it explicitly in every config.
+
+## Metrics now live in metrics/ — read metrics/README.md
+
+Numbered like profiles/. 03 core_frac is RETIRED (its denominator shrinks with
+the thing it measures). 04 peak_radiance is defined but its first results were
+a stripe-phase artifact: a 1D groove's peak spans 214x depending on whether the
+stripe lands on a ridge or in a valley, and form_mtf samples only 3 phases.
+Needs N>=12 phases and mm_per_px <= tip/4 before it is quotable.
+
+## Machinery that now exists
+
+- `scripts/lock.py` freezes the reported designs AND the material model, 20s.
+  `scripts/gate.py` makes report generation a precondition on it passing.
+- `.claude/agents/optics-reviewer.md` + `scripts/review_needed.py`.
+- `scripts/make_report.py` is DISARMED -- it hard-coded two withdrawn claims.
+  Use `scripts/report_compare.py`, which is gated.
+
+---
+
+# 2026-08-11 23:xx — the exposed-area law is DEAD, and the search left the
+# cone/V-groove families for the first time
+
+## 1. The law that drove every design decision does not survive the coating fix
+
+Full write-up and method: `results/FINDINGS_topo_smoke.md`.
+
+    reflectance(head-on)  ~=  exposed_fraction x rho
+
+was established on the 1D ridge family across 24 combinations, and it is the
+entire argument for going 3D: a point exposes pi r^2 / cell where a line
+exposes 2r / pitch, which at pitch 7.5 is 0.258% against 10.667% -- **41x**.
+
+A hex-wall honeycomb was built as a NEGATIVE CONTROL, expected to lose by that
+41x. Measured, same frame, re-measured cone reference, fitted coating:
+
+| topology | exposed area | worst rho | rho at theta=0 |
+|---|---|---|---|
+| cone p7.5 d30 r0.2 | 0.258 % | 0.00286 | 0.00233 |
+| **honeycomb p7.5 d30 w0.4** | **10.667 %** | **0.00373** | **0.00352** |
+| shingle p7.5 d30 tilt60 | 1.116 % | 0.00725 | 0.00606 |
+| truss p7.5 d30 L5 r0.35 | 1.580 % | 0.01832 | 0.00957 |
+
+**1.51x head-on, not 41x. The prediction is off by a factor of 27.**
+
+Not a render defect: the cone was re-measured in the same frame, both use the
+same mesh path / margin / slab / coating instance, and neither exceeds the flat
+plate of its own coating at any theta.
+
+**Consequence: "shrink the tip" is no longer the primary design move**, and the
+1D->3D argument in `geom3d.py`'s module docstring is an argument about area,
+which has just been shown not to be the lever. Cavity-lattice topologies are
+back on the table -- and they have an advantage no pillar array can have:
+**they never seal.** A cone at pitch 7.5 stops being a cavity at 72.2% of its
+nominal depth; a hex cell with vertical walls is 30 mm of cavity at depth 30.
+
+## 2. From the sweep_shapes analysis (`results/analysis_shapes.md`)
+
+Three findings that change how results are read, all with numbers in that file:
+
+- **`seal_frac` is not an independent variable at all.** Pitch cancels exactly
+  from `seal_fraction`'s criterion, so it is a deterministic function of
+  (power, bulge, lip) and identical across all four pitches. Any "seal_frac
+  effect" is a relabelling of those three knobs.
+- **The real predictor is `usable aspect = seal_frac x depth / pitch`**:
+  Spearman -0.876, log-log slope -1.15, **R^2 = 0.73** over 192 designs. Nominal
+  depth only reaches -0.488. **A depth-50 design at bulge 0.35 + lip 0.35 has
+  8.3 mm of cavity -- less than a depth-20 design at bulge 0 + lip 0.** Any plot
+  against `depth` is a plot against a mislabelled axis.
+- **The "worst of three materials" rule is in practice a SPECULAR-ONLY rule.**
+  `coating_split(0.0)` has a grazing ceiling of 24.95%; `coating_split(1.0)` is
+  Lambertian at 0.998%. Splitting at fixed rho_dh(0) pins them where they agree
+  and lets them diverge 25x elsewhere, so d00 sets the combined score for
+  170 of 196 designs. Quote the ceilings whenever that rule is quoted.
+
+Also open, and worth one run each before any small difference is quoted: a
+**systematic -0.85% +theta/-theta asymmetry in a zero-tilt configuration** (all
+three materials biased the same way, so not noise -- suspected lattice-sampling
+at pitch 11 / face 60), and the fact that the **top of the ranking is a 1.4%
+statistical tie** against a 1.28% measurement floor.
+
+## 3. New machinery
+
+| file | does |
+|---|---|
+| `geom_topo.py` | family 6: `shingle` / `truss` / `honeycomb`. First non-pillar, non-extruded topologies |
+| `sweep_topo.py` | their sweep. Scoring IDENTICAL to `sweep_shapes.py` on purpose; every row carries `params_json` so one row rebuilds its design exactly |
+| `results/FINDINGS_topo_smoke.md` | the falsification above |
+| `results/analysis_shapes.md` | full adversarial analysis of `sweep_shapes.csv` |
+
+`blender_render.build_scene` now dispatches families through a `mesh_fn`
+variable rather than hard-coding `geom3d`. **`describe()`'s fallthrough to
+`profile2d.describe` is silent** -- an unregistered family fails later with a
+confusing `no attribute 'slat_len'`. Register any new family in BOTH places.

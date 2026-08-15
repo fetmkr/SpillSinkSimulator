@@ -114,6 +114,12 @@ class Cone3DParams:
     # (0.0046 -> 0.0183%). Position jitter alone already breaks periodicity,
     # and this keeps the measured geometry identical to the exported one.
     depth_jitter: float = 0.0
+    # cavity cross-section, see cavity_radius(). 1.0 / 0.0 is the plain cone
+    # every result before 2026-08-11 used.
+    profile_power: float = 1.0
+    profile_bulge: float = 0.0
+    profile_lip: float = 0.0
+    profile_lip_at: float = 0.25
     tilt_deg: float = 0.0          # lean the cones, bird-of-paradise style
     tilt_jitter: float = 0.0
 
@@ -198,12 +204,83 @@ def centres(p: Cone3DParams) -> list[tuple[float, float]]:
     return out
 
 
-def _cone_verts(verts, faces, cx, cz, H, R, r_tip, shift, n, m, y_top=0.0):
-    """One closed cone, appended in place. `y_top` sinks the apex."""
+# --- the cavity profile ------------------------------------------------------
+#
+# The pillars interpenetrate and their union is the solid, so the CAVITY is the
+# space between them. Which means the pillar's radius-versus-depth curve is the
+# only thing that distinguishes a cone from a paraboloid, a tube, a needle or an
+# undercut cell -- everything else (layout, jitter, tiling, backing slab,
+# manifoldness) is already handled and shape-independent.
+#
+#     r(f) = f ** power,  then bulged:  r += bulge * sin(pi f) * (1 - r)
+#
+# with f = 0 at the tip and 1 at the base. Two knobs cover the whole library:
+#
+#     power 1.0            straight cone (what every result so far used)
+#     power 0.5            paraboloid -- blunt near the tip, the profile the
+#                          moth-eye survey found lowest of cone/parab/Gaussian
+#                          (sub-wavelength there, so this is worth TESTING at mm
+#                          scale, not assuming)
+#     power 2.0            needle -- slim near the tip, fat only at the base
+#     power 0.15           near-cylindrical tube: an axial ray misses the walls
+#                          and strikes the floor near NORMAL incidence, which is
+#                          the cheapest angle under Fresnel. Opposite profile to
+#                          the V/cone family.
+#     bulge > 0            barrel: the pillar overhangs just below the tip, so a
+#                          ray striking near the tip is deflected INWARD instead
+#                          of back out. Not printable face-up without support --
+#                          deliberately not a constraint during exploration.
+#
+# Both are continuous, so a sweep can walk between shapes instead of choosing
+# from a menu of hand-written mesh scripts.
+
+def cavity_radius(f, power=1.0, bulge=0.0, lip=0.0, lip_at=0.25,
+                  lip_width=0.12):
+    """Pillar radius fraction at depth fraction f. 0 at the tip, 1 at the base.
+
+    `bulge` widens the pillar smoothly and is MONOTONE -- verified over the
+    whole (power, bulge) grid, min dr = 0.000000. It therefore cannot make an
+    undercut, and the comment that once claimed it did was wrong.
+
+    `lip` is what actually makes one: a localised Gaussian bump at `lip_at`
+    that the profile then falls back from, so dr < 0 just below it. That is a
+    real overhang -- the pillar is wider near the tip than beneath it, and a
+    ray striking the lip is deflected INWARD rather than back out. Not
+    printable face-up without support; deliberately not fenced off, because
+    exploration is not manufacturing.
+    """
+    r = f ** max(1e-3, power)
+    if bulge:
+        r = r + bulge * math.sin(math.pi * f) * (1.0 - r)
+    if lip:
+        r = r + lip * math.exp(-((f - lip_at) / max(1e-3, lip_width)) ** 2)
+    return min(1.0, max(0.0, r))
+
+
+def seal_fraction(power, bulge, lip, pitch, overlap=1.6, n=4000):
+    """Depth fraction at which neighbouring pillars close the cell off.
+
+    Once the pillar radius reaches the hex circumradius pitch/sqrt(3), the
+    three neighbours meet and everything below is not an optical cavity at all.
+    A plain cone at pitch 7.5 seals at 72% of its nominal depth -- so "depth 30"
+    has never meant 30 mm of usable cavity.
+    """
+    R = overlap * pitch / 2.0
+    rc = pitch / math.sqrt(3.0)
+    for k in range(1, n + 1):
+        f = k / n
+        if cavity_radius(f, power, bulge, lip) * R >= rc:
+            return f
+    return 1.0
+
+
+def _cone_verts(verts, faces, cx, cz, H, R, r_tip, shift, n, m, y_top=0.0,
+                power=1.0, bulge=0.0, lip=0.0, lip_at=0.25):
+    """One closed pillar, appended in place. `y_top` sinks the apex."""
     base0 = len(verts)
     for k in range(m + 1):
         f = k / m
-        r = r_tip + (R - r_tip) * f
+        r = r_tip + (R - r_tip) * cavity_radius(f, power, bulge, lip, lip_at)
         y = y_top - H * f
         for i in range(n):
             a = 2.0 * math.pi * i / n
@@ -258,7 +335,9 @@ def build_mesh(p: Cone3DParams):
         # the base slides, which is what the bird-of-paradise barbule does
         shift = H * math.tan(tilt)
 
-        _cone_verts(verts, faces, cx, cz, H, R, p.tip_radius, shift, n, m)
+        _cone_verts(verts, faces, cx, cz, H, R, p.tip_radius, shift, n, m,
+                    power=p.profile_power, bulge=p.profile_bulge,
+                    lip=p.profile_lip, lip_at=p.profile_lip_at)
 
     # secondary array, dropped into the valleys and deliberately shorter so
     # its tips sit in the shadow of the primary ones

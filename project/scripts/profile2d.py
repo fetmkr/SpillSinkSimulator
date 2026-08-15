@@ -76,6 +76,12 @@ class PanelParams:
     pitch_mean: float = 20.0
     pitch_jitter: float = 0.25   # 0 = uniform, 0.25 = +/-25%
     pitch_seed: int = 1
+    # See profile_scatter.margin_depths -- same defect, same fix. 0.0 keeps the
+    # picture paths unchanged; a measurement must set it.
+    margin_depths: float = 0.0
+
+    def span(self) -> float:
+        return self.face_h + 2.0 * self.margin_depths * self.depth
     slat_recess: float = 0.0     # how far behind the face plane the tips sit
     slat_deg_jitter: float = 0.0
     # Irregular pitch converts a regular stripe pattern into noise. This is the
@@ -207,13 +213,13 @@ def pitch_sequence(p: PanelParams) -> list[float]:
     Irregular spacing turns a regular stripe pattern into noise the eye reads
     as texture -- but it must still tile the panel height exactly.
     """
-    n = max(2, int(round(p.face_h / p.pitch_mean)))
+    n = max(2, int(round(p.span() / p.pitch_mean)))
     if p.pitch_jitter <= 0.0:
-        return [p.face_h / n] * n
+        return [p.span() / n] * n
     rng = _lcg(p.pitch_seed)
     raw = [1.0 + p.pitch_jitter * (2.0 * next(rng) - 1.0) for _ in range(n)]
     s = sum(raw)
-    return [r / s * p.face_h for r in raw]
+    return [r / s * p.span() for r in raw]
 
 
 # --------------------------------------------------------------------------
@@ -351,7 +357,7 @@ def slat_centerlines(p: PanelParams) -> list[list[Pt]]:
     carrier strip or slotted into the side rails, both of which keep uniform
     thickness and need no inaccessible inward folds.
     """
-    z_hi = p.face_h / 2.0
+    z_hi = p.span() / 2.0
     out = []
     z = z_hi
     jrng = _lcg(p.pitch_seed * 31 + 5)
@@ -382,7 +388,7 @@ def _tile_pitches(p: PanelParams) -> list[float]:
     seq = pitch_sequence(p)
     out, total = [], 0.0
     i = 0
-    while total < p.face_h - 1e-9:
+    while total < p.span() - 1e-9:
         h = seq[i % len(seq)]
         out.append(h)
         total += h
@@ -401,7 +407,7 @@ def shell_centerline(p: PanelParams) -> list[Pt]:
     The chamfers exist because a 90 degree interior corner acts as a corner
     cube and retroreflects toward the source; every corner here is obtuse.
     """
-    z_hi = p.face_h / 2.0
+    z_hi = p.span() / 2.0
     z_lo = -z_hi
     d0 = p.slat_zone_depth()
     D = p.depth
@@ -496,7 +502,7 @@ def baffle_centerlines(p: PanelParams, report: list | None = None) -> list[list[
 
     rng = _lcg(p.baffle_seed)
 
-    z_hi = p.face_h / 2.0 + p.flare
+    z_hi = p.span() / 2.0 + p.flare
     z_lo = -z_hi
     out = []
     for k in range(p.baffle_rows):
