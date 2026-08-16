@@ -1,6 +1,6 @@
 # Phase 8.2b — the 35-degree build, measured; the top strip found
 
-2026-08-17. Data: `sweep_phase82b.csv` (20 rows), `form_phase82b.json`.
+2026-08-17. Data: `sweep_phase82b.csv` (25 rows; the last 5 are the 8.2c chained lip runs), `form_phase82b.json`.
 Predictions pre-registered in `scripts/sweep_phase82b.py`. Anchor
 P5_j00 d100@−40 = 0.13392 % — equals the book.
 
@@ -16,7 +16,7 @@ quantities moved in ways the arithmetic did not predict.
 | P2 hemi θ−20 | 1.0 ± 0.3 % | 2.006 % | MISS ×2 (under-edge back-face path dominates) |
 | P2 hemi θ−40 | 1.2–2.0 % | 1.996 % | HELD (at band edge) |
 | P3 hemi θ +20/+40/+50/+70 | < 0.05 % | 0.001 / 0.000 / 0.000 / 0.000 % | HELD |
-| P4 danger spike at θ−70 | ratio > 100 | **0.000** (and ≤ 0.001 everywhere scanned, −75…+70) | MISS — the spike VANISHED from the window; see below |
+| P4 danger spike at θ−70 | ratio > 100 | **0.000** (and ≤ 0.001 % reflectance everywhere scanned, −75…+70) | MISS — the spike VANISHED from the window; see below |
 | P5 form head-on (beam 7.5 mm) | < 0.001 | 0.0000015 | HELD |
 | P5 smear | not gradeable (zero return), pre-registered | NaN | as registered |
 | P6 system θ0 / +20 / +40 | 0.55±0.25 / 0.15±0.08 / 0.05±0.04 % | **0.030 / 0.038 / 0.005 %** | θ0 MISS ×18 GOOD direction; +20/+40 HELD |
@@ -71,6 +71,21 @@ z +22 to +79.5, idealised black; the real lip is tile-clad):
 The lip closes the strip in the render, not just in the window
 statistics. With it the unit has no residual exit, no danger direction,
 and the shelf drops to optional.
+
+## Addendum 2026-08-17 — the safety claim holds at EVERY azimuth (analytic)
+
+The danger scan ran in the elevation plane only. The generalization is
+two lines of algebra, so it is recorded as a proof, not a render: the
+hopper's normal is n = (0, cos t, -sin t) with n_z < 0. For any beam
+from above (propagation d with d_z < 0) hitting the front face
+(d.n < 0), the reflection r = d - 2(d.n)n has
+
+    r_z = d_z + 2(d.n) sin t  <  d_z  <  0.
+
+Every reflection is STEEPER-downward than its beam, at every azimuth.
+A level (or upward) sightline can never receive a specular residual
+from any physically possible beam, on-axis or off. The elevation-plane
+scan was therefore the complete test, not a slice of it.
 
 ## Honest scope
 

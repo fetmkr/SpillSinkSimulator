@@ -58,8 +58,8 @@ tips anymore.
 
 | θ | final sample (worst mats) | flat plate | advantage |
 |---|---|---|---|
-| 50° | 0.18410 % | 1.43890 % | 7.8× |
-| 60° | 0.19205 % | 2.22580 % | 11.6× |
+| 50° | 0.18413 % | 1.43894 % | 7.8× |
+| 60° | 0.19210 % | 2.22578 % | 11.6× |
 | 70° | 0.19805 % | 4.26796 % | 21.6× |
 
 - P1 (smooth degradation, 0.30/0.45/0.75 bands): the pyramid did BETTER

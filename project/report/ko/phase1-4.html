@@ -1,0 +1,101 @@
+<title>Spill Sink 연구 한글판 — Phase 1-4 요약</title>
+<style>
+:root{--bg:#f4f2ec;--card:#fbfaf7;--ink:#1c1b18;--ink2:#5c594f;--line:#d8d4c8;
+  --acc:#b34700;--ok:#2c6e49;--mono:ui-monospace,'SF Mono',Menlo,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]){
+  --bg:#171613;--card:#1f1e1a;--ink:#e8e5dd;--ink2:#a39f92;--line:#37342c;
+  --acc:#ff8c42;--ok:#7fc8a0}}
+:root[data-theme=dark]{--bg:#171613;--card:#1f1e1a;--ink:#e8e5dd;
+  --ink2:#a39f92;--line:#37342c;--acc:#ff8c42;--ok:#7fc8a0}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--ink);
+  font:16px/1.75 'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  margin:0;padding:0 18px}
+main{max-width:46rem;margin:0 auto;padding:3rem 0 5rem}
+h1{font-size:1.8rem;line-height:1.3;margin:.2rem 0 0}
+h2{font-size:1.12rem;margin:2.6rem 0 .6rem;border-bottom:1px solid var(--line);
+  padding-bottom:.35rem}
+.kicker{font:700 .72rem var(--mono);letter-spacing:.18em;color:var(--acc)}
+.lede{color:var(--ink2);font-size:1.02rem}
+table{border-collapse:collapse;width:100%;margin:1rem 0;
+  font:.84rem var(--mono);font-variant-numeric:tabular-nums}
+th{font-weight:600;text-align:left;color:var(--ink2);
+  border-bottom:1px solid var(--ink2)}
+td,th{padding:.45rem .6rem .45rem 0}
+td{border-bottom:1px solid var(--line)}
+tr.win td{color:var(--ok);font-weight:600}
+.note{font-size:.85rem;color:var(--ink2)}
+code{font:.85em var(--mono)}
+figure{margin:1.2rem 0 0}
+figure img{width:100%;border:1px solid var(--line);border-radius:6px}
+figcaption{font-size:.85rem;color:var(--ink2);margin-top:.4rem}
+.warn{color:var(--acc)}
+</style>
+<main>
+<!--title:Spill Sink 연구 한글판 — Phase 1-4 요약-->
+<div class="kicker">Spill Sink · 한글판 · Phase 1-4 요약</div>
+<h1>Phase 1-4 — 벽을 없애는 연구가 피라미드에 도착하기까지</h1>
+<p class="lede">레이저 프로젝터가 공중에 상을 그리면, 상을 지나친 빔이
+벽에 맺힙니다. 이 연구는 그 맺힌 상을 없애는 벽을 만드는 일입니다.
+Phase 1-4는 온갖 구조를 시험하다가 결국 피라미드 밭 하나로 수렴한
+과정입니다. 이 페이지는 당시 일일 보고서(2026-08-11~15)를 그대로
+번역하지 않고 요약합니다. 당시 숫자 일부가 나중에 철회되었기 때문입니다.
+철회 내역은 아래에 그대로 밝힙니다.</p>
+
+<h2>평가 축 세 개가 여기서 정해졌습니다</h2>
+<p>벽을 하나의 숫자로 평가하면 틀립니다. 이 연구는 세 축을 항상 같이 봅니다.</p>
+<table>
+<tr><th>축</th><th>뜻</th><th>방향</th></tr>
+<tr><td>반사 총량</td><td>들어간 빛 중 되돌아 나오는 비율. 최악 재질과 최악 각도 기준</td><td>작을수록 좋음</td></tr>
+<tr><td>모양 뭉개기</td><td>맺힌 상이 글씨로 읽히는가, 뭉개지는가. 빔폭을 항상 같이 표기</td><td>클수록 좋음</td></tr>
+<tr><td>정면 반짝임</td><td>정면에서 볼 때 밝은 점이 되쏘이는 정도</td><td>작을수록 좋음</td></tr>
+</table>
+
+<h2>시험한 구조들</h2>
+<p>날(블레이드) 배열, 상용 벌집(허니컴), 고깔(콘) 밭, 그리고 이것들을
+위아래로 겹친 구조(스택), 벌집 아래에 모양 낸 바닥을 까는 구조까지
+시험했습니다. Phase 2가 남긴 그림은 이랬습니다. 벌집은 총량 2등이지만
+모양과 정면에서 꼴찌였고, 고깔은 모양과 정면 1등이지만 총량 5등이었습니다.
+어느 한 구조도 세 축을 다 잡지 못했습니다.</p>
+
+<h2>Phase 3의 법칙: 위층이 두 축을 가진다</h2>
+<p>겹친 구조를 재기 전에 예측을 먼저 적었습니다. 정면에서 보이는 건
+맨 위층뿐이니, 위층이 정면 축을 결정할 것이라고요. 측정이 그 예측을
+확인했습니다. 벌집을 고깔 위에 올리면 벌집의 정면 실패를 물려받고,
+고깔을 위에 올리면 고깔의 장점을 물려받았습니다. 결론은 "겹치기가
+통한다"가 아니라 <b>"위층이 세 축 중 두 축을 결정한다"</b>였습니다.</p>
+<p>Phase 4는 그 논리를 뒤집어 물었습니다. 벌집 바닥에 모양을 내면
+얼마나 얕아도 되는가. 답은 3~5mm면 충분하다였고, 이때 시험한 바닥 모양
+중 하나가 뾰족한 피라미드 밭이었습니다.</p>
+
+<h2>철회의 기록 — 이 연구가 믿을 만한 이유</h2>
+<p>Phase 1-4의 숫자 중 세 건이 틀렸고, 셋 다 공개적으로 고쳤습니다.</p>
+<table>
+<tr><th>결함</th><th>내용</th><th>영향</th></tr>
+<tr><td>평판 기준값</td><td>"평판은 6.12%를 되쏜다"는 분모가 측정 파일 없이
+쓰이고 있었습니다. 외부 검증 질문(QUESTIONS.md)이 잡아냈고, 실측으로
+1.14%가 맞는 값이 되었습니다</td><td>모든 "몇 배 어둡다" 배수가
+줄었습니다</td></tr>
+<tr><td>벌집 격자 결함</td><td>벌집 생성기가 격자를 잘못 밟아 판 면적의
+30%가 뚫린 채 측정됐습니다. 사용자가 보고서 사진에서 눈으로
+잡아냈습니다</td><td>벌집 관련 수치 전부 재측정</td></tr>
+<tr><td>뒤집힌 면(감김)</td><td>고깔, 비늘, 피라미드 세 가족의 면이
+안팎이 뒤집힌 채 만들어졌고, 광택 재질에서 숫자가 절반쯤
+달라졌습니다</td><td>재측정 후 순위가 바뀌어 피라미드가 선두로
+올라왔습니다</td></tr>
+</table>
+<p class="note">이 세 번의 사고가 지금의 절차를 만들었습니다. 측정 전에
+예측을 등록하고, 스윕 전에 8가지 검사를 통과하고, 기하를 렌더로 먼저
+눈으로 보고, 발표 전에 기존 값과 교차 대조합니다.</p>
+
+<h2>Phase 4가 끝났을 때의 그림</h2>
+<p>감김을 고치고 다시 재보니, 바닥 역할이나 하던 뾰족 피라미드 밭이
+아무것도 앞에 세우지 않은 맨몸으로 세 축 전부 선두였습니다. 그래서
+Phase 5는 "피라미드만 단독으로 세운다"는 하나의 질문에 집중합니다.
+그 뒤 이야기는 Phase 5 한글판에 있습니다.</p>
+
+<p class="note">원본 기록: 일일 보고서 report/2026-08-11~15,
+FINDINGS_phase3_stack.md, FINDINGS_winding.md, QUESTIONS.md,
+CORRECTIONS.html. 이 페이지는 요약이며, 개별 숫자의 근거는 위 기록에
+있습니다.</p>
+
+</main>

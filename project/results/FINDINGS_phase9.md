@@ -1,6 +1,6 @@
 # Phase 9.1 — the two answers that price 100 m² of panel
 
-2026-08-16. Data: `sweep_phase9.csv` (75 rows), `form_phase9.json`.
+2026-08-16 (amended 08-17: paint pricing; audit label fix). Data: `sweep_phase9.csv` (75 rows), `form_phase9.json`.
 Predictions pre-registered in `scripts/sweep_phase9.py`. Trigger: the
 user needs ~100 units of 1 m². Questions: (a) does an extruded groove
 survive its azimuth hole (unlocks endless rolls), (b) does bare black

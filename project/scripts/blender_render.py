@@ -836,6 +836,19 @@ def build_scene(cfg):
         p = GC.CellParams(**cfg["params"])
         mesh_fn = GC.build_mesh
         cs = None
+    elif fam == "corner":
+        # Phase 9.c: a wall panel meeting a floor panel at a 90-degree
+        # inside corner -- the junction the venue photo shows spill on.
+        # The wall field is the normal floor-family build; the floor is
+        # a second field rotated tips-up and run toward the camera.
+        # Windows stay on the wall plane; observers must sit ABOVE the
+        # corner (theta >= +20) so the floor's far end face projects
+        # outside the window -- enforced in run() callers, recorded in
+        # the sweep. cfg["corner"] = {"floor_len": mm, "smooth": bool}.
+        import geom_floor as GF
+        p = GF.FloorParams(**cfg["params"])
+        mesh_fn = None
+        cs = None
     elif fam == "arplate":
         # Phase 8: tilted AR window over an absorbing void. `cfg["params"]`
         # is a FloorParams ENVELOPE (face_w/face_h place the windows and
@@ -882,7 +895,36 @@ def build_scene(cfg):
     else:
         m_s1 = make_glossy("coat_specular", rho_spec, rough)
 
-    if fam == "arplate":
+    if fam == "corner":
+        from types import SimpleNamespace
+        import geom_floor as GF
+        cn = cfg.get("corner", {})
+        flen = float(cn.get("floor_len", 300.0))
+        wall_prm = dict(cfg["params"])
+        floor_prm = dict(cfg["params"], face_h=flen)
+        if cn.get("smooth"):
+            # the smooth-Musou control: same envelopes, texture removed.
+            # pitch stays FINE (4) so the lattice overshoot stays at the
+            # textured case's ~8 mm -- pitch 50 overshot 100 mm into the
+            # control plate's region (caught in preview, control 0.031).
+            for d in (wall_prm, floor_prm):
+                d.update(depth=0.001, tip_flat=0.0)
+        wv, wf = GF.build_mesh(GF.FloorParams(**wall_prm))
+        mesh_to_object(wv, wf, "corner_wall", m_s1)
+        fv, ff = GF.build_mesh(GF.FloorParams(**floor_prm))
+        # NOTE: a wall-wall VERTICAL corner needs no scene of its own.
+        # Under the isotropic world, rotating the whole wall-floor
+        # corner about the VIEW axis maps it onto the vertical corner
+        # with identical rho_dh -- the 9.c numbers cover it by symmetry
+        # (recorded in FINDINGS_phase9c.md). A draft "vertical" build
+        # was removed here: it left a 60 mm gap at the junction and the
+        # elevation-tilt camera cannot frame that corner anyway.
+        # wall-floor corner: rotate +90 about x (tips point up +z),
+        # slide so the field runs from the corner line toward the camera
+        fv = [(x, -z + flen / 2.0, y) for (x, y, z) in fv]
+        mesh_to_object(fv, ff, "corner_floor", m_s1)
+        cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
+    elif fam == "arplate":
         from types import SimpleNamespace
         ar = cfg.get("ar", {})
         R = float(ar.get("r_surface", 0.01))
@@ -1039,6 +1081,11 @@ def build_scene(cfg):
     # equivalent to moving the source in azimuth and leaves the control plate,
     # the camera and the measurement windows exactly where they were.
     phi = float(cfg.get("phi_deg", 0.0) or 0.0)
+    if abs(phi) > 1e-9 and fam == "arplate":
+        # the lip, room floor and hopper are gravity-defined; rotating
+        # them about the panel normal builds a scene that cannot exist.
+        raise ValueError("phi rotation is not defined for the arplate "
+                         "family (audit 2026-08-17)")
     if abs(phi) > 1e-9:
         import math as _m
         a = _m.radians(phi)
@@ -1105,9 +1152,16 @@ def run(cfg):
         "rho_slat": cfg.get("rho_slat", cfg.get("rho_diffuse", 0.05)),
         "rho_chamber": cfg.get("rho_chamber", cfg.get("rho_diffuse", 0.05)),
         "rho_control": cfg.get("rho_control", 0.05),
-        "rho_specular": cfg.get("rho_specular", 0.05),
+        "rho_specular": cfg.get("rho_specular",
+                                cfg.get("rho_slat",
+                                        cfg.get("rho_diffuse", 0.05))),
         "spec_roughness": cfg.get("spec_roughness", 0.05),
         "samples": cfg.get("samples", 512),
+        "cycles_seed": cfg.get("cycles_seed", SEED),
+        "phi_deg": cfg.get("phi_deg", 0.0),
+        "coating": cfg.get("coating"),
+        "ar": cfg.get("ar"),
+        "paint_depth": cfg.get("paint_depth"),
         "n_slats": len(cs.stage1),
         "n_baffles": len(cs.stage2),
         "modes": {},
@@ -1151,9 +1205,13 @@ def run(cfg):
         s_ctrl = window_stats(arr, px_ctrl)
         ratio = s_panel["mean"] / s_ctrl["mean"] if s_ctrl["mean"] > 1e-12 else float("nan")
 
+        drift = (mode == "hemi_view"
+                 and abs(s_ctrl["mean"] - cfg.get("rho_control", 0.05))
+                 > 2e-3)
         rec = {"theta": theta, "panel": s_panel, "control": s_ctrl,
                "ratio_mean": ratio, "exr": exr, "png": png,
-               "px_panel": px_panel, "px_ctrl": px_ctrl}
+               "px_panel": px_panel, "px_ctrl": px_ctrl,
+               "control_drift": bool(drift)}
         results["modes"][name] = rec
 
         # the Lambertian control must read rho at every theta in hemi_view;

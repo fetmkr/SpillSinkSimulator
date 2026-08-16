@@ -165,11 +165,14 @@ def run():
     report["lambertian"] = {
         "rho": RHO,
         "reads": a["mean"],
-        "expect_index": 0.0389,
+        # corrected 2026-08-17: a Lambertian plate under uniform L0 reads
+        # rho itself (blender_render.py hemi docstring); the old 0.0389
+        # double-counted the cosine integral.
+        "expect_index": 0.05,
         "flat_vs_flat_ratio": ratio,
         "pass": abs(ratio - 1.0) < 5e-3,
     }
-    print("[V2] lambertian rho=%.3f reads %.6f (brief: 0.0389)   "
+    print("[V2] lambertian rho=%.3f reads %.6f (expect: rho itself)   "
           "flat/flat ratio %.5f   pass=%s"
           % (RHO, a["mean"], ratio, report["lambertian"]["pass"]))
 

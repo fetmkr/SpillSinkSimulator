@@ -1,6 +1,6 @@
 # Phase 8.3 — the audience metric: turn-on curve and the dark-floor rule
 
-2026-08-17. Data: `sweep_phase83.csv` (13 rows). Predictions and two
+2026-08-17. Data: `sweep_phase83.csv` (14 rows; the voided v3 −16/−20 rows remain in the file, superseded by v3d). Predictions and two
 amended rig registrations recorded in `scripts/sweep_phase83.py`.
 Gate passed. Anchor P5_j00 d100@−40 = 0.13392 % — equals the book.
 

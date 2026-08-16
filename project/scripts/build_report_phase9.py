@@ -275,7 +275,8 @@ gradings in <code>results/FINDINGS_phase92.md</code>):</p>
 <p><b>The two axes weight depth in OPPOSITE directions.</b> Totals are
 earned at the top: at oblique incidence the flank shadows the cell, so
 lit area and sky view concentrate near the tips &mdash; 25&#8202;% of
-the paint bought 68&#8202;% of the totals gap. Head-on is earned
+the paint closed 84&#8202;% of the bare-to-full-Musou gap
+(0.907 to 0.290 against a floor of 0.177). Head-on is earned
 everywhere, which means mostly at the bottom: at normal incidence
 nothing shadows, the beam lights the whole face down to the valley, the
 camera sees all of it, and the return is area-weighted &mdash; painting
@@ -299,12 +300,68 @@ in <code>results/FINDINGS_phase94.md</code>): totals land at
 7.5&#8202;mm beam: indistinguishable from a bare flat plate</b>, the
 9.2 area law verbatim (the camera-facing area of a pillar field IS its
 flat floor; the pyramid&rsquo;s sloped bases leave no flat area at
-all). The registered replacement rule failed on both counts. One door
-stays open and is named: real fibers tilt and entangle, hiding the
-floor &mdash; not representable by vertical pillars, and exactly what
-the few-thousand-won flocking coupon measures.</p>
+all). The registered replacement rule failed on both counts. The named
+door &mdash; real fibers tilt and entangle, hiding the floor &mdash;
+was then closed by measurement (9.4b, <code>sweep_phase94b.py</code> /
+<code>FINDINGS_phase94b.md</code>): shearing every fiber by
+15/30/45&deg; in seeded random azimuths hides the floor completely,
+and head-on improves only from 1.00 to <b>0.634</b> at lean 30
+(beam 7.5&#8202;mm) while totals worsen to 1.83&ndash;2.50&#8202;% &mdash;
+tilted Lambertian faces glow where the floor used to stare. Within any
+Lambertian model flocking fails the replacement rule at every measured
+geometry. What remains is fiber-scale physics no such model carries
+(specular fiber sides, sub-beam self-shadowing) &mdash; exactly what
+the few-thousand-won coupon measures.</p>
 <figure><img src="%%FOREST%%"
  alt="Pyramid vs fiber forest at normal incidence"></figure>
+
+<h2>9.c &mdash; the wall-floor corner: no special treatment needed</h2>
+<p>The venue photo shows spill along wall-floor junctions, and the
+Phase-7 law says smooth concave corners retroreflect. Measured
+(predictions in <code>scripts/sweep_phase9c.py</code>, gradings in
+<code>results/FINDINGS_phase9c.md</code>): a corner of two pyramid
+panels reads <b>0.84&times; of its own wall</b> (0.146 vs
+0.175&#8202;% worst over two coatings and +20/+40&deg;) &mdash; the
+junction is DARKER than the open wall, because each face blocks half
+the other&rsquo;s sky and the texture eats both legs of any pair path.
+Even the smooth-Musou corner reads 0.519&#8202;%, under half a flat
+wall: the retro disease belongs to high-reflectance folds, not to
+Musou-coated room corners. The registered rule passes: <b>panels
+simply butt at 90&deg;</b> &mdash; no cove strips, no fillets. Vertical
+wall-wall junctions are covered verbatim by an exact symmetry (rotating
+the scene about the view axis under the isotropic world leaves every
+&rho; unchanged; FINDINGS_phase9c addendum).</p>
+<figure><img src="%%CORNER%%"
+ alt="Wall-floor corner measurement"></figure>
+
+<h2>9.d &mdash; from reflectance to visibility (analysis)</h2>
+<p>Treatment dims a scanned trace by exactly
+&rho;<sub>current</sub>/&rho;<sub>new</sub> &mdash; everything else
+cancels. Against a white wall the Musou pyramid buys
+&times;271&ndash;452, the bare tier &times;88, the window unit
+&times;2,100+; the floor under all of it is the haze&rsquo;s own
+volumetric glow, which no wall can undercut. Whether the bare tier
+suffices on side walls reduces to ONE measurable number &mdash; the
+current trace-to-ambient pixel ratio from an underexposed spill-map
+frame &mdash; and the protocol now collects it
+(<code>results/FINDINGS_phase9d.md</code>).</p>
+
+<h2>9.f &mdash; the walkable grate floor: conditional, not shipped</h2>
+<p>The venue floor needs a WALKABLE absorber. A load-bearing grate over
+a pyramid pit measured 0.376&#8202;% (5 angles) / 0.802&#8202;%
+(grazing 50&ndash;70&deg;) at bar 3&#8202;mm &times; depth 40; thinner
+and deeper (1.5 &times; 60) improved to 0.318 / 0.489&#8202;% but still
+missed the registered grazing bar (&le;&#8202;0.45&#8202;%) by
+9&#8202;% &mdash; at floor-grazing angles the beam hits the vertical
+bars nearly face-on, the louver lesson softened by Musou. Verdict per
+the registered rule: <b>not shipped as specced</b>; it remains the best
+walkable option measured (2.9&ndash;8.7&times; better than a flat
+Musou floor at 70&deg;, ~10&times; better than dark carpet) and stays
+available where ~0.5&#8202;% grazing is acceptable. Primary floor plan
+unchanged: clip the scan&rsquo;s lower bound, dark covering underfoot,
+pyramid tiles where nobody walks. Never use this grate on a wall (the
+9.2 area law: 15&#8202;% flat bar land). Details:
+<code>results/FINDINGS_phase9f.md</code>.</p>
 
 <h2>The manufacturing decision as it now stands</h2>
 <p><b>Mold casting is the default</b>: SLA positive master &rarr;
@@ -337,6 +394,7 @@ primed urethane, and measure one black-urethane coupon&rsquo;s &rho;.</p>
         rows92 += ("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
                    % (label, area, pc(tw), ho))
     html = html.replace("%%ROWS92%%", rows92)
+    html = html.replace("%%CORNER%%", b64("corner.png"))
     html = html.replace("%%FOREST%%", b64("forest.png"))
     html = html.replace("%%FRONTSPRAY%%", b64("frontspray.png"))
     html = html.replace("%%TIPLINE%%", b64("tipline.png"))

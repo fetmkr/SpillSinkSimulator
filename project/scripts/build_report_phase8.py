@@ -286,8 +286,11 @@ above-horizon observers %%HI%%, danger scan &minus;75&deg;&hellip;
 7.5&#8202;mm, and the full system with the pyramid trap reads
 %%SYS%% &mdash; under the 0.05&#8202;% audience-visible target 8.1
 registered, and below the pyramid wall's own 0.177&#8202;%. The
-built-in shelf drops to OPTIONAL. Sightlines rising from the floor
-(&minus;20/&minus;40&deg;) still see ~2&#8202;%: mount the unit at or
+built-in shelf drops to OPTIONAL. An algebraic corollary
+(FINDINGS_phase82b addendum) extends the safety claim to EVERY azimuth:
+the hopper&rsquo;s reflection is always steeper-downward than its beam,
+so no off-axis level viewer exists either. Sightlines rising from the
+floor (&minus;20/&minus;40&deg;) still see ~2&#8202;%: mount the unit at or
 above eye level, or accept that the floor sees a mirror. Parts stay
 commodity: frame-shop museum glass (gravity-held, lifts out), MDF box,
 nine 200&times;200 tiles, tile-clad lip. Still owed: the vendor

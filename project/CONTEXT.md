@@ -6,6 +6,74 @@ full 3D geometry.
 
 ---
 
+## 0. STATE AS OF 2026-08-17 — the simulation study is CLOSED. Read this first.
+
+Phases 5-9 ran to completion after this brief was first written. Everything
+below section 1 remains valid history; this section is the current truth.
+
+**The product.** Pyramid field, pitch 4 / depth 20 / tip <= 0.15 mm, 22 mm
+panel, valleys sharp (< R0.1). Universal cut-anywhere tile exported
+(`export/pyr_universal_p4_d20_t010_200x200.stl`, manifold-verified). Its own
+measured envelope: total 0.177 % (phi 0) / 0.295 % (worst over theta <= 70 x
+phi x roughness 0.30); smear 1.42 at beam 7 mm; head-on 0.040 (beam 7/10 mm);
+tip ladder 0.1/0.2/0.4 -> 0.032/0.052/0.107; azimuth hole x1.4 at phi 30;
+grazing 50-70 deg barely degrades (0.184-0.198 vs flat 1.44-4.27).
+
+**Manufacturing (phase 9).** Mold casting is the default: SLA positive master
+-> platinum silicone mold (peeled off, a consumable) -> soft urethane; foamed
+PU for the 100-panel run; row-strip assembly measured free to +-0.2 mm.
+Injection rejected (valley radius + demolding). Extrusion rejected as default
+(a tip LINE pays 40x the flat land of a tip POINT: head-on 0.894 vs 0.040).
+Two-tier paint: Musou only on audience-critical zones (paint area is x10 the
+wall area; full coverage would cost 50-100M KRW); bare black urethane
+elsewhere obeys total = 0.18 x rho(material) (measured linear; the same 0.18
+reproduces the Musou panel from its ~1 % coating). Tops-only paint fails
+(totals are top-weighted, head-on is area/bottom-weighted -- the axes invert
+depth). Flocking fails in any Lambertian model (vertical AND tilted fibers);
+one physical coupon could still surprise. Corners need nothing: two panels
+butting at 90 deg read 0.84x of the open wall (mutual shading).
+
+**The window (phase 8).** Museum-glass hopper, tilt 35, rim lip over the top
+quarter, pyramid trap behind: level observer 0.000 %, danger scan empty
+-75..+70, system 0.005-0.038 % at every deployment angle, head-on 1.5e-6 at
+beam 7.5 mm. Mounting rule became a floor rule: ~1 m of dark floor in front,
+no bright props in the strip. Remaining gates are physical: vendor R(35 deg)
+curve and the one-week dust coupon.
+
+**Verification state.** Every sweep pre-registered predictions and passed the
+8-check gate; anchors reproduce to all digits everywhere (P5_j00 d100@-40 =
+0.13392 %); seed noise measured under +-0.5 % relative (phase 9.s); the
+composed-mesh double-floor artifact proven optically inert (9.v, 0.01 %
+worst); two independent audit agents re-derived the harness math and traced
+every FINDINGS number to its CSV (no blockers; small fixes applied and
+logged). Exports repaired to single manifold solids; universal tile volume
+reproduces 353,500 mm^3 exactly. The live sim_server was restarted onto
+the audited code (2026-08-17) and validated against the book over the
+API: final sample reads 0.17668 % at -40 AND 0.19805 % at -70 to all
+digits -- the steep-angle margin fix is confirmed live (the old 2.0
+margin would have leaked background at -70).
+
+**Machinery added since phase 4** (all in scripts/): floor-family kinds
+`pillars` (+lean), arplate (AR glass + void + lip + room floor), `corner`
+scene; make_ar_glass; paint_depth split rides form_buildable; gate check 8
+robust to non-coating sweeps; clean_solid()/orient repair in sweep_phase9v;
+stack_frames.py (modulated-beam coupon protocol, verified on synthetic data).
+
+**Reports.** English: report/phase{5..9}/report.html. Korean editions:
+report/ko/phase{1-4,5..9}.html + report/ko/protocol.html (the physical
+measurement protocol). All published as claude.ai artifacts; URLs in the
+session log. FINDINGS_phase{5x,6x,7x,82*,83,9,92,94,94b,9c,9d,9s,9v}.md hold
+every grading.
+
+**What is left is physical, in order:** (1) spill-map photos incl. one
+underexposed + one haze-only frame (decides zone allocation AND whether the
+bare tier suffices -- FINDINGS_phase9d.md), (2) black-urethane rho coupon,
+(3) Musou coverage per liter, (4) museum-glass R(theta) + dust week,
+(5) optional flocking coupon. The pipeline check: cast one tile, magnify
+tips/valleys, bend-test the paint film.
+
+---
+
 ## 1. The problem, and the priority order
 
 Hundreds of synchronised laser projectors converge in mid-air to form a

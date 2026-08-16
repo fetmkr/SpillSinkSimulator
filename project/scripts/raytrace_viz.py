@@ -140,12 +140,23 @@ def _lcg(seed):
 
 
 def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
-          n_rays=120, max_bounces=12, rho=0.5, seed=23):
+          n_rays=120, max_bounces=12, rho=0.5, seed=23, mode="diffuse"):
     """Cast `n_rays` at incidence theta and walk each until it leaves or dies.
 
-    Returns {"paths": [[x,y,z], ...], "depths": [...], "escaped": [...],
-             "stats": {...}} in the same millimetre coordinates the viewport
-    already draws the mesh in.
+    2026-08-17 upgrade toward optical-tool behaviour:
+    - `mode` = "diffuse" (cosine-weighted Lambertian scatter, the transport
+      picture) or "specular" (mirror bounces, the mechanism picture that the
+      report figures use -- deterministic ladders).
+    - ENERGY IS TRACKED ANALYTICALLY, no Russian roulette: every bounce
+      multiplies the ray's weight by `rho`, and the mean weight carried OUT
+      by escaping rays is an unbiased estimate of the panel's reflectance at
+      this incidence. The UI shows it next to the Cycles measurement -- an
+      independent cross-check in one click. A ray is retired as "trapped"
+      when it exhausts max_bounces (weight <= rho^max_bounces).
+
+    Returns {"paths": [...], "depths": [...], "escaped": [...],
+             "weights": [...], "stats": {..., "hist": [...],
+             "rho_est": float}} in mesh millimetre coordinates.
     """
     tris = _tris(verts, faces)
     grid = Grid(tris)
@@ -157,7 +168,7 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
     d0 = (-math.sin(th) * math.sin(ph), -math.cos(th), -math.sin(th) *
           math.cos(ph))
 
-    paths, depths, escaped = [], [], []
+    paths, depths, escaped, weights = [], [], [], []
     total_b, n_absorbed = 0, 0
     # THE INCOMING BEAM HAS TO BE VISIBLE. Starting 1 mm above the panel drew
     # the arriving ray as a stub the panel itself hid; the picture then showed
@@ -192,6 +203,7 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
         d = list(d0)
         pts = [list(o)]
         alive = True
+        w = 1.0
         b = 0
         while b <= max_bounces:
             best, bi = span, None
@@ -207,46 +219,68 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
             o = [o[0] + d[0] * best, o[1] + d[1] * best, o[2] + d[2] * best]
             pts.append(list(o))
             b += 1
-            if next(rng) > rho:            # absorbed
-                alive = False
-                n_absorbed += 1
-                break
+            w *= rho
             n = tris[bi][3]
             nl = math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2) or 1.0
             n = (n[0] / nl, n[1] / nl, n[2] / nl)
             if n[0] * d[0] + n[1] * d[1] + n[2] * d[2] > 0:
                 n = (-n[0], -n[1], -n[2])
-            # cosine-weighted hemisphere about n
-            u1, u2 = next(rng), next(rng)
-            r = math.sqrt(u1)
-            a = 2.0 * math.pi * u2
-            tx, ty, tz = (1.0, 0.0, 0.0) if abs(n[0]) < 0.9 else (0.0, 1.0, 0.0)
-            bx = n[1] * tz - n[2] * ty
-            by = n[2] * tx - n[0] * tz
-            bz = n[0] * ty - n[1] * tx
-            bl = math.sqrt(bx * bx + by * by + bz * bz) or 1.0
-            bx, by, bz = bx / bl, by / bl, bz / bl
-            cx = n[1] * bz - n[2] * by
-            cy = n[2] * bx - n[0] * bz
-            cz = n[0] * by - n[1] * bx
-            sx = r * math.cos(a)
-            sy = r * math.sin(a)
-            sz = math.sqrt(max(0.0, 1.0 - u1))
-            d = [sx * bx + sy * cx + sz * n[0],
-                 sx * by + sy * cy + sz * n[1],
-                 sx * bz + sy * cz + sz * n[2]]
+            if mode == "specular":
+                dd = d[0] * n[0] + d[1] * n[1] + d[2] * n[2]
+                d = [d[0] - 2 * dd * n[0], d[1] - 2 * dd * n[1],
+                     d[2] - 2 * dd * n[2]]
+            else:
+                # cosine-weighted hemisphere about n
+                u1, u2 = next(rng), next(rng)
+                r = math.sqrt(u1)
+                a = 2.0 * math.pi * u2
+                tx, ty, tz = ((1.0, 0.0, 0.0) if abs(n[0]) < 0.9
+                              else (0.0, 1.0, 0.0))
+                bx = n[1] * tz - n[2] * ty
+                by = n[2] * tx - n[0] * tz
+                bz = n[0] * ty - n[1] * tx
+                bl = math.sqrt(bx * bx + by * by + bz * bz) or 1.0
+                bx, by, bz = bx / bl, by / bl, bz / bl
+                cx = n[1] * bz - n[2] * by
+                cy = n[2] * bx - n[0] * bz
+                cz = n[0] * by - n[1] * bx
+                sx = r * math.cos(a)
+                sy = r * math.sin(a)
+                sz = math.sqrt(max(0.0, 1.0 - u1))
+                d = [sx * bx + sy * cx + sz * n[0],
+                     sx * by + sy * cy + sz * n[1],
+                     sx * bz + sy * cz + sz * n[2]]
             o = [o[0] + n[0] * 1e-4, o[1] + n[1] * 1e-4, o[2] + n[2] * 1e-4]
+        else:
+            # bounce budget exhausted while still inside: trapped
+            alive = False
+            n_absorbed += 1
         total_b += b
         paths.append([c for p in pts for c in p])
         depths.append(b)
         escaped.append(1 if alive else 0)
+        weights.append(w)
 
     n = max(len(depths), 1)
+    hist = [0] * (max_bounces + 1)
+    for dpt in depths:
+        hist[min(dpt, max_bounces)] += 1
+    # rays that never touched the panel are GEOMETRY MISSES (edge of the
+    # trimmed mesh at oblique incidence), not reflectance -- excluding them
+    # keeps rho_est honest. Found when 3.5 % edge misses at theta 40 carried
+    # weight 1.0 and swamped a 1e-19 specular estimate.
+    hits = [i for i, dpt in enumerate(depths) if dpt > 0]
+    nh = max(len(hits), 1)
+    rho_est = sum(weights[i] for i in hits if escaped[i]) / nh
+    n_missed = n - len(hits)
     return {"paths": paths, "depths": depths, "escaped": escaped,
+            "weights": weights,
             "stats": {"rays": len(depths),
                       "mean_bounces": total_b / n,
                       "absorbed_frac": n_absorbed / n,
                       "escaped_frac": sum(escaped) / n,
                       "max_bounces": max_bounces, "rho": rho,
+                      "mode": mode, "hist": hist, "rho_est": rho_est,
+                      "missed": n_missed,
                       "theta": theta_deg,
                       "triangles": len(tris)}}

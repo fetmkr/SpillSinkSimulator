@@ -874,6 +874,9 @@ def _t(msg):
     print("[SIM] %s" % msg, flush=True)
 
 
+AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
+# background past the panel above ~69 deg; lock/sweeps use 6.5 and are safe.
+
 def measure(spec, thetas, diffuse_frac, roughness, samples,
             coating="musou_fit", deep_coating=None, paint_depth=None,
             deep_until=None, paint_fade=0.0):
@@ -886,7 +889,10 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     # background otherwise and the number is quietly wrong.
     # The mesh is NOT built here: BR.run builds its own scene from `params`.
     # Building it twice cost a full extra copy of a 200k-vert mesh per click.
-    m = dict(spec, margin_depths=2.0)
+    # 2026-08-17 audit: margin 2.0 leaks background past the panel above
+    # ~69 deg; widen to the lock-grade 6.5 when any requested angle is steep.
+    steep = any(abs(float(t)) > AUDIT_THETA_LIMIT for t in thetas)
+    m = dict(spec, margin_depths=6.5 if steep else 2.0)
     _t("measure: build ok")
     prm = _render_params(m)
     cfg = {"tag": "sim_%d" % int(time.time() * 1000),
@@ -1565,6 +1571,7 @@ class H(BaseHTTPRequestHandler):
                                n_rays=int(req.get("n_rays", 120)),
                                max_bounces=int(req.get("max_bounces", 12)),
                                rho=float(req.get("rho", 0.5)),
+                               mode=str(req.get("mode", "diffuse")),
                                seed=int(req.get("seed", 23)))
                 out["seconds"] = round(time.perf_counter() - t0, 2)
                 return self._send(200, json.dumps(out))

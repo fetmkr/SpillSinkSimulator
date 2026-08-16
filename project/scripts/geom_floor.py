@@ -100,6 +100,11 @@ class FloorParams:
     # "overlap is free, the union is the geometry" convention geom_topo's
     # blades use. NOT kernel-clean by construction; measured, documented.
     valley_round: float = 0.0
+    # Phase 9.4b: fiber LEAN for the flock stand-in ("pillars" kind
+    # only). Each pillar is sheared so its top translates by
+    # depth*tan(lean) in a per-pillar seeded random azimuth -- real flock
+    # fibers tilt and overlap, hiding the floor from a head-on viewer.
+    pillar_lean: float = 0.0         # degrees from vertical
     # `row_offset` is strip-assembly tolerance (mm): the field is built as
     # one-row strips (cut along valley planes) and glued; adjacent strips
     # sit at alternating +offset/2 / -offset/2 in y -- the deterministic
@@ -206,19 +211,33 @@ def _build_pillars(p: FloorParams):
     invariant, so the sweep runs a scaled-up lattice and says so.
     The pillar bottoms coincide with the slab top; Phase 9.v measured
     coincident interior planes to be optically inert (0.01 % worst).
+
+    `pillar_lean` (9.4b) shears each prism: the top translates by
+    depth*tan(lean) in a per-pillar seeded azimuth. Side faces stay
+    planar (parallelograms); tops stay at y = 0; overlap between leaning
+    fibers is fine -- the union is the geometry, as everywhere.
     """
+    import math as _m
     verts, faces = [], []
     t = max(0.05, min(p.tip_flat, p.pitch * 0.98)) / 2.0
+    sh = p.depth * _m.tan(_m.radians(max(0.0, min(p.pillar_lean, 80.0))))
+    x = (p.seed * 1103515245 + 12345) & 0x7FFFFFFF
+    def rng():
+        nonlocal x
+        x = (x * 1103515245 + 12345) & 0x7FFFFFFF
+        return x / 2147483648.0
     for cx, cz in _lattice(p):
+        ang = 2.0 * _m.pi * rng()
+        dx, dz = sh * _m.cos(ang), sh * _m.sin(ang)
         b = len(verts)
         verts += [(cx - t, -p.depth, cz - t),
                   (cx + t, -p.depth, cz - t),
                   (cx + t, -p.depth, cz + t),
                   (cx - t, -p.depth, cz + t),
-                  (cx - t, 0.0, cz - t),
-                  (cx + t, 0.0, cz - t),
-                  (cx + t, 0.0, cz + t),
-                  (cx - t, 0.0, cz + t)]
+                  (cx - t + dx, 0.0, cz - t + dz),
+                  (cx + t + dx, 0.0, cz - t + dz),
+                  (cx + t + dx, 0.0, cz + t + dz),
+                  (cx - t + dx, 0.0, cz + t + dz)]
         faces.append((b + 4, b + 5, b + 6, b + 7))          # top
         for i in range(4):
             j = (i + 1) % 4

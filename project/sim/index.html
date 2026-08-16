@@ -100,6 +100,20 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
   background:var(--sunk);color:var(--ink2);cursor:pointer}
 #views button:hover{color:#fff;border-color:var(--a);background:rgba(255,77,0,.25)}
 #views button.on{color:#fff;background:var(--a);border-color:var(--a)}
+/* three-axis dashboard (2026-08-17 right-panel rework) */
+#axes{border:1px solid var(--line2);border-radius:6px;background:var(--sunk);
+  padding:9px 10px;display:flex;flex-direction:column;gap:6px}
+#axes .ax{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline}
+#axes .ax .nm{font-size:11px;color:var(--ink2)}
+#axes .ax .val{font:600 15px/1.1 ui-monospace,Menlo,monospace}
+#axes .ax .sub{grid-column:1/-1;font-size:10px;color:var(--ink3)}
+#axes .ax.ok .val{color:#2c6e49}
+#axes .ax.warn .val{color:#b34700}
+details.why{border-left:2px solid var(--line2);padding-left:8px}
+details.why summary{cursor:pointer;font-size:10.5px;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.06em}
+details.why p{margin:.4em 0 0}
+.tools h2{margin-top:4px}
 #busy{position:absolute;right:12px;top:10px;font:600 10px/1 ui-monospace,Menlo,monospace;
   color:var(--a);letter-spacing:.1em;opacity:0;transition:opacity .15s}
 #busy.on{opacity:1}
@@ -180,69 +194,148 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 </div>
 
 <div class="col right">
-  <h2>Renderer</h2>
+  <h2>세 축 한눈에 <span style="color:var(--ink3)">study targets in gray</span></h2>
+  <div id="axes">
+    <div class="ax" id="ax_total"><span class="nm">반사 총량 total worst-&rho; &darr;</span>
+      <span class="val">&mdash;</span>
+      <span class="sub">target: final sample 0.177&#8202;% &middot; flat Musou 1.14&#8202;%</span></div>
+    <div class="ax" id="ax_smear"><span class="nm">모양 뭉개기 smear &uarr; <i id="ax_beam1"></i></span>
+      <span class="val">&mdash;</span>
+      <span class="sub">target: 1.42 at beam 7&#8202;mm (final sample)</span></div>
+    <div class="ax" id="ax_head"><span class="nm">정면 반짝임 head-on &darr; <i id="ax_beam2"></i></span>
+      <span class="val">&mdash;</span>
+      <span class="sub">target: 0.040 (beam 7/10&#8202;mm) &middot; tip ladder 0.1/0.2/0.4 &rarr; 0.032/0.052/0.107</span></div>
+  </div>
+
+  <h2>Measure</h2>
+  <button class="go" id="m1">Total &theta;=0 <span class="t">0.6 s</span></button>
+  <button class="go" id="m5">Total, 5 angles <span class="t">2 s</span></button>
+  <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
+  <canvas id="chart"></canvas>
+
+  <div class="row"><label for="beamw">beam width at wall, mm</label>
+   <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
+    style="width:5.5em"></div>
+  <button id="mf" class="go">Form + head-on <span class="t">~60 s</span></button>
+  <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
+  <details class="why"><summary>why beam width matters</summary>
+  <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
+   (phase 5.5), so the probe beam is a first-class input. 7.5 is the
+   deployment default; set 2.0 only to reproduce legacy numbers. Real beam =
+   aperture + divergence &times; distance; e.g. LaserCube Ultra (4&#8202;mm,
+   1&#8202;mrad) reads &asymp;9&#8202;mm at 5&#8202;m.</p>
+  <p class="note">Reduced fidelity: 6 stripe phases at 256 spp, not the
+   report's 16 at 512. An estimate of the published number, not the
+   number.</p></details>
+
+  <h2>Against the study</h2>
+  <div class="match" id="match"><span class="note">adjust a parameter&hellip;</span></div>
+
+  <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
+  <dl class="kv" id="derived"></dl>
+
+  <div class="tools">
+  <h2>Tools</h2>
   <div class="row"><select id="renderer">
     <option value="cycles">Cycles &mdash; the published path</option>
     <option value="mitsuba">Mitsuba 3.9.1 &mdash; independent code</option>
     <option value="both">Both &mdash; cross-check, all three axes</option>
   </select></div>
   <p class="note" id="rendnote"></p>
-
-  <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
-  <dl class="kv" id="derived"></dl>
-
-  <h2>Total reflectance</h2>
-  <button class="go" id="m1">Measure &theta;=0 <span class="t">0.6 s</span></button>
-  <button class="go" id="m5">Measure 5 angles <span class="t">2 s</span></button>
-  <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
-  <canvas id="chart"></canvas>
-
-  <h2>Second renderer</h2>
   <button id="mx">Cross-check in Mitsuba <span class="t">~40 s</span></button>
   <dl class="kv" id="xout"><div><dt>not cross-checked</dt><dd>&mdash;</dd></div></dl>
+  <details class="why"><summary>what the cross-check means</summary>
   <p class="note">One click, both codes, same mesh, same
    <b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> &mdash; not the fitted coating,
-   which has no identical construction in Mitsuba. Separate from the Renderer
-   selector above: this always runs the pair and reports the gap, whatever the
-   selector is set to.<br><br>
+   which has no identical construction in Mitsuba.
    <b>Cycles is the reference, not the other way round.</b> It reproduces the
    integrating-sphere closed form to 0.27&nbsp;%, a thin-wall canyon to
    0.00&nbsp;%, and an independently written tracer agrees with it to
-   0.4&nbsp;&sigma; where Mitsuba is 7&nbsp;&sigma; away. Treat a gap here as a
-   flag to investigate, not as a correction to apply.</p>
+   0.4&nbsp;&sigma; where Mitsuba is 7&nbsp;&sigma; away. Treat a gap as a
+   flag to investigate, not a correction to apply.</p></details>
 
-  <h2>Ray paths</h2>
+  <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+    <label>angle <input type="number" id="ray_th" value="40" min="-70" max="70"
+      step="5" style="width:4.5em"></label>
+    <label>rays <input type="number" id="ray_n" value="200" min="20" max="800"
+      step="20" style="width:4.5em"></label>
+    <select id="ray_mode">
+      <option value="specular">specular &mdash; mirror ladders</option>
+      <option value="diffuse">diffuse &mdash; Monte Carlo</option>
+    </select>
+    <select id="ray_rho">
+      <option value="0.01">Musou &rho; 1%</option>
+      <option value="0.05" selected>bare black &rho; 5%</option>
+      <option value="0.5">demo &rho; 50%</option>
+    </select>
+  </div>
   <button id="mr">Trace rays <span class="t">&lt;1 s</span></button>
   <dl class="kv" id="rayout"><div><dt>not traced</dt><dd>&mdash;</dd></div></dl>
+  <div id="rayhist" style="display:flex;align-items:flex-end;gap:1px;height:34px"></div>
+  <p class="note" style="margin:.2rem 0 0"><b style="color:#2c6e49">green</b>
+   = escapes &middot; <b style="color:#b34700">red</b> = trapped &middot;
+   brightness rises with bounce depth &middot; bars = bounce histogram</p>
+  <details class="why"><summary>what the trace shows</summary>
   <p class="note">The actual transport, not a render: rays are cast at the
    measured incidence, intersected against the same triangles, and scattered
-   from a Lambertian at each hit. <b>Green</b> escapes, <b>red</b> is absorbed;
-   brightness rises with bounce count. It uses its own scattering rule, so the
-   figures illustrate the mechanism rather than second-guess Cycles.</p>
+   from a Lambertian at each hit. <b>Green</b> escapes, <b>red</b> is
+   absorbed; brightness rises with bounce count. It uses its own scattering
+   rule, so the figures illustrate the mechanism rather than second-guess
+   Cycles.</p></details>
 
-  <h2>Form &amp; head-on</h2>
-  <div class="row"><label for="beamw">beam width at wall, mm</label>
-   <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
-    style="width:5.5em"></div>
-  <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
-   (phase 5.5), so the probe beam is a first-class input. 7.5 is the deployment default; set 2.0 only to reproduce legacy numbers. Real beam = aperture + divergence &times;
-   distance; e.g. LaserCube Ultra (4&#8202;mm, 1&#8202;mrad) reads
-   &asymp;9&#8202;mm at 5&#8202;m.</p>
-  <button id="mf">Measure form + head-on <span class="t">~60 s</span></button>
-  <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
-  <p class="note">Reduced fidelity: 6 stripe phases at 256 spp, not the report's
-   16 at 512. An estimate of the published number, not the number.</p>
-
-  <h2>Against the study</h2>
-  <div class="match" id="match"><span class="note">adjust a parameter&hellip;</span></div>
-
-  <h2>Export</h2>
   <button id="stl">Download STL <span class="t">tileable</span></button>
   <div class="err" id="err"></div>
+  </div>
 </div>
 
 <script>
 const $ = s => document.querySelector(s);
+
+// ---------- three-axis dashboard: mirrors #rho and #formout whenever the
+// existing measurement code updates them; zero coupling to that code.
+function axSet(id, txt, good){
+  const ax = $(id); if(!ax) return;
+  const v = ax.querySelector('.val');
+  if(v.innerHTML !== txt) v.innerHTML = txt;   // no-op writes: the observer
+  ax.classList.toggle('ok', good === true);    // must never see its own echo
+  ax.classList.toggle('warn', good === false);
+}
+function axRefresh(){
+  const bw = $('#beamw') ? $('#beamw').value : '?';
+  const b1 = $('#ax_beam1'), b2 = $('#ax_beam2');
+  if(b1) b1.textContent = '(beam ' + bw + ' mm)';
+  if(b2) b2.textContent = '(beam ' + bw + ' mm)';
+  const rho = $('#rho');
+  if(rho){
+    const t = rho.childNodes[0] ? rho.childNodes[0].textContent.trim() : '';
+    const m = t.match(/([\d.]+)\s*%/);
+    if(m) axSet('#ax_total', t, parseFloat(m[1]) <= 0.20);
+  }
+  const fo = $('#formout');
+  if(fo){
+    let smear = null, head = null;
+    fo.querySelectorAll('div').forEach(d => {
+      const k = (d.querySelector('dt')||{}).textContent || '';
+      const v = (d.querySelector('dd')||{}).textContent || '';
+      if(/smear|form destruction/i.test(k)) smear = v;
+      if(/head/i.test(k)) head = v;
+    });
+    if(smear) axSet('#ax_smear', smear, parseFloat(smear) >= 1.0);
+    if(head) axSet('#ax_head', head, parseFloat(head) <= 0.06);
+  }
+}
+// observe ONLY the two source panels -- watching the whole document made
+// axRefresh react to its own dashboard writes (infinite loop, page froze)
+window.addEventListener('load', () => {
+  for(const sel of ['#rho', '#formout']){
+    const n = $(sel);
+    if(n) new MutationObserver(axRefresh).observe(n,
+      {subtree:true, childList:true, characterData:true});
+  }
+});
+document.addEventListener('input', e => {
+  if(e.target && e.target.id === 'beamw') axRefresh(); });
+setTimeout(axRefresh, 500);
 let FAM = null, MESH = null, LAST = null, busy = 0;
 
 function setBusy(n){ busy += n; $('#busy').classList.toggle('on', busy>0); }
@@ -801,20 +894,35 @@ addEventListener('resize', draw);
   $('#mr').onclick = async () => {
     const b=$('#mr'); b.disabled=true; setBusy(1);
     try{
-      const th = SHOW_THETAS && SHOW_THETAS.length ? SHOW_THETAS[0] : 0;
+      const th = +$('#ray_th').value || 0;
+      const mode = $('#ray_mode').value;
+      const rho = +$('#ray_rho').value;
+      const nr = Math.min(800, Math.max(20, +$('#ray_n').value || 200));
+      const mb = mode === 'specular' ? 40 : 24;
       const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
-        {spec: LAST, theta: th, n_rays: 140, max_bounces: 12, rho: 0.5})});
+        {spec: LAST, theta: th, n_rays: nr, max_bounces: mb, rho, mode})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
       RAYS = j; buildOverlay(SHOW_THETAS); draw();
       const s=j.stats;
+      const est = s.rho_est >= 1e-4 ? (100*s.rho_est).toFixed(3)+' %'
+                : s.rho_est > 0 ? s.rho_est.toExponential(1) : '~0';
       $('#rayout').innerHTML =
-        `<div><dt>incidence</dt><dd>${s.theta}&deg;</dd></div>
-         <div><dt>rays</dt><dd>${s.rays} &middot; ${s.triangles.toLocaleString()} tri</dd></div>
+        `<div><dt>incidence &middot; mode</dt><dd>${s.theta}&deg; &middot; ${s.mode} &middot; &rho; ${100*s.rho}%</dd></div>
+         <div><dt>rays</dt><dd>${s.rays}${s.missed?` (${s.missed} missed the panel)`:''} &middot; ${s.triangles.toLocaleString()} tri</dd></div>
          <div><dt>mean bounces</dt><dd>${s.mean_bounces.toFixed(2)}</dd></div>
-         <div><dt>absorbed</dt><dd>${(100*s.absorbed_frac).toFixed(1)} %</dd></div>
-         <div><dt>escaped</dt><dd>${(100*s.escaped_frac).toFixed(1)} %</dd></div>
+         <div><dt>trapped at ${s.max_bounces}</dt><dd>${(100*s.absorbed_frac).toFixed(1)} %</dd></div>
+         <div><dt><b>traced reflectance</b></dt><dd><b>${est}</b></dd></div>
          <div><dt>took</dt><dd>${j.seconds} s</dd></div>`;
+      const H = $('#rayhist'); H.innerHTML = '';
+      const mx = Math.max(...s.hist, 1);
+      s.hist.forEach((c,i) => {
+        const d = document.createElement('div');
+        d.style.cssText = `flex:1;background:${c?'var(--acc)':'var(--line)'};`+
+          `height:${Math.max(2, 32*c/mx)}px`;
+        d.title = `${i} bounce${i===1?'':'s'}: ${c} rays`;
+        H.appendChild(d);
+      });
     }catch(e){ $('#rayout').innerHTML =
       `<div><dt>failed</dt><dd>${String(e).slice(0,200)}</dd></div>`; }
     finally{ b.disabled=false; setBusy(-1); }

@@ -104,6 +104,18 @@ winding, and the figure. Outcomes:
 - Unpredicted-but-measured rows (R 0.5/2 % at θ +20/+40) stay in the
   CSV unbanded; they follow the same mirror-shadow pattern as R 1 %.
 
+## Harness-audit note (2026-08-17, core-harness audit)
+
+The measurement window sits on the wall plane; at POSITIVE theta the
+receding plate covers a shrinking fraction of it (tilt 25: full to
++29 deg, 0.65 at +40, none past +54). The +40/+50 "trap seen through
+the glass" rows are therefore DILUTED by the black void behind the
+uncovered strip — the true per-aperture through-glass signal is up to
+~3x the printed row. The direction is favorable (the printed numbers
+overstate nothing a viewer would see; the window samples what a viewer
+of the wall aperture samples), and every negative-theta and danger-scan
+claim has full coverage. Recorded, not re-run.
+
 ## Model limits (named, not hidden)
 
 - R constant over angle: real AR rises toward grazing → coupon.
