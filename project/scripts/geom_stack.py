@@ -188,7 +188,10 @@ def build_mesh(p: StackParams):
     for i in range(4):
         j = (i + 1) % 4
         faces.append((b + i, b + 4 + i, b + 4 + j, b + j))
-    return verts, faces
+    # oriented exit like every other builder; the hand-made slab above was the
+    # one inward-wound component in an otherwise correct stack
+    import geom_kit as _GK
+    return _GK.orient_outward(verts, faces)
 
 
 def describe(p: StackParams) -> dict:

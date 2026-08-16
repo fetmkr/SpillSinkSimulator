@@ -68,7 +68,11 @@ CAND = os.path.join(RESULTS, "form_candidates.json")
 
 SAMPLES = 512
 RES_X, RES_Y = 1400, 620
-STRIPE_W = 2.0
+# Default probe = the DEPLOYMENT beam (user 2026-08-16: "빔 2mm 쓰지마.
+# 기본을 5-10mm"). 7.5 mm is the midpoint of the expected 5-10 mm at the
+# wall (LaserCube Ultra MK2, 3-6 m throw). Historical numbers were taken
+# at 2.0; any comparison against them must set STRIPE_W explicitly.
+STRIPE_W = 7.5
 SPREAD_DEG = 0.05
 THETAS = (-40.0, 0.0, 40.0)
 N_PHASE = 16                     # stripe positions across one pitch
@@ -89,12 +93,30 @@ def run_case(entry):
     prm = entry["params"]
     pitch = float(entry["pitch"])
 
+    # Roughness is an entry-level knob (phase 5.6 sweeps it); every caller
+    # that omits it gets the historical 0.30 and reproduces old numbers.
+    # `phi` rotates the PANEL about its normal (phase 5.9) — the stripe, the
+    # control and the windows stay fixed, so this is beam azimuth. Callers
+    # that omit it get the historical phi = 0. Note the phase walk still
+    # steps world-z by pitch/N_PHASE; at phi != 0 the pattern period along
+    # world z stretches by 1/cos(phi), so the walk under-covers one period
+    # by that factor — acceptable for phi <= 30 (13 %), recorded here.
+    rough = float(entry.get("roughness", 0.30))
     cfg = {"tag": tag, "out_dir": OUT, "results_dir": OUT,
            "samples": SAMPLES, "res_x": RES_X, "res_y": RES_Y, "gpu": True,
-           "spec_roughness": 0.30, "params": prm, "renders": [],
+           "spec_roughness": rough, "params": prm, "renders": [],
            "material_mode": "coating"}
+    if entry.get("phi"):
+        cfg["phi_deg"] = float(entry["phi"])
+    # Phase 8: the AR window family reads its plate/void spec from cfg["ar"]
+    if entry.get("ar") is not None:
+        cfg["ar"] = entry["ar"]
+    # Phase 9.2: partial paint -- coating above the depth plane, bare below
+    if entry.get("paint_depth") is not None:
+        cfg["paint_depth"] = float(entry["paint_depth"])
+        cfg["deep_coating"] = entry.get("deep_coating", {})
     body, spec = BR.coating_split(0.76)          # the fitted nominal split
-    cfg["coating"] = {"body": body, "spec_scale": spec, "roughness": 0.30}
+    cfg["coating"] = {"body": body, "spec_scale": spec, "roughness": rough}
     cfg.update({k: v for k, v in COAT.items() if k not in ("spec_roughness",)})
     cfg["family"] = family
     # A CROSS-CHECK NEEDS THE SAME MATERIAL IN BOTH CODES. The fitted coating is
@@ -117,6 +139,19 @@ def run_case(entry):
     mm_per_px = ortho / RES_X
     BR.configure_cycles(SAMPLES, True)
     w_panel, w_ctrl = BR.measurement_windows(p, ctrl_x0, None)
+    # ADAPTIVE WINDOW (user 2026-08-16: "측정창 키워"). The phase walk spans
+    # one pitch; if the default 30 % z-inset leaves a window smaller than
+    # pitch + stripe, the stripe exits the window at extreme phases and the
+    # peak ratio divides zero by zero (the Phase 7 box read NaN). Open the
+    # inset just enough, floor at 5 % of the face.
+    need = pitch + 2.0 * STRIPE_W
+    have = w_panel[3] - w_panel[2]
+    if have < need:
+        dz = max(0.05 * p.face_h, (p.face_h - need) / 2.0)
+        w_panel = (w_panel[0], w_panel[1],
+                   -p.face_h / 2 + dz, p.face_h / 2 - dz)
+        w_ctrl = (w_ctrl[0], w_ctrl[1],
+                  -p.face_h / 2 + dz, p.face_h / 2 - dz)
 
     out = {"tag": tag, "topology": entry["topology"],
            "process": entry["process"], "pitch": pitch,

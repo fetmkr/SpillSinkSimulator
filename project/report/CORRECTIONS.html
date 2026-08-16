@@ -165,6 +165,33 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
   </table>
 </section>
 
+<section>
+  <div class="hd"><span class="tag">15 Aug</span><h2>Winding: three families were built inside-out</h2>
+  </div>
+  <table>
+    <tr><th>claimed</th><th>correction</th></tr>
+    <tr>
+      <td>Every family's mesh is a valid opaque solid; cross-family
+        rankings compare like with like.</td>
+      <td class="y">The <b>cone, the blade array and the solid pyramid were
+        wound inside-out</b> (normals facing into the material) for the whole
+        life of the project. Diffuse rows are winding-invariant and did not
+        move; specular rows were inflated — up to
+        <span class="num was">+89%</span> on a cone d00 row. Of 2,531 published
+        designs, 773 had their worst-ρ set by a specular row.
+        <span class="why">Re-measured with oriented geometry
+        (<code>sweep_rewind.csv</code>): the cone, blade stack, comb and
+        honeycomb headline figures stand unchanged (their worst was
+        diffuse-set; the 13-Aug ranking's one affected entry moves −0.6%,
+        within noise). The anechoic additions moved: sharp pyramid
+        0.182→<b>0.134%</b>, truncated pyramid 0.460→<b>0.172%</b> — the
+        truncated pyramid rises from last place to second. Every builder now
+        exits through <code>geom_kit.orient_outward</code>, and an inward-wound
+        component is a named mesh-check failure. Form/head-on numbers for the
+        affected families carry a ~15% bias and are being re-measured.</span></td></tr>
+  </table>
+</section>
+
 <div class="two">
   <div class="root">
     <h2 style="margin-bottom:7px">What caused them</h2>
@@ -181,6 +208,10 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
       <li><b>Extruded families had no margin along the extrusion axis</b> —
         they were measuring their own edge. Affects phase 1 only; no 3-D family
         uses that path.</li>
+      <li><b>Winding was never checked.</b> Closure, area and volume magnitude
+        all pass on an inside-out solid; only a specular coating can see the
+        difference, and no check looked. Found by insisting a hole-free shell
+        must equal the solid it replaces — under every coating.</li>
     </ol>
   </div>
   <div class="root">
@@ -197,6 +228,11 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
         build error.</li>
       <li><b>Header guard</b> — appending to a CSV whose header differs from the
         writer's fields refuses to run.</li>
+      <li><b>Oriented exits + mesh check</b> — every geometry builder passes
+        through per-component signed-volume correction, and
+        <code>mesh_check</code> fails on inverted components, coincident
+        faces, holes and degenerate faces. A convex-body equal-radiance test
+        pins the diffuse pipeline to an exact invariant.</li>
     </ol>
   </div>
 </div>

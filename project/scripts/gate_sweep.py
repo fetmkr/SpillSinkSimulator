@@ -327,6 +327,13 @@ def check_cross_sweep_agreement():
         rows = list(csv.DictReader(open(path)))
         if not rows or "params_json" not in rows[0]:
             return {}
+        # Sweeps that measure a non-coating material (phase 8's AR glass has
+        # no diffuse_frac axis) cannot form the 3-mat x 5-theta identity this
+        # check compares; skip the FILE, not the check. Their anchors are
+        # verified against the book by the sweep itself and recorded in the
+        # FINDINGS (phase 8.2: P5_j00 d100@-40 0.13390 vs 0.13392).
+        if "diffuse_frac" not in rows[0]:
+            return {}
         # MEASUREMENT CONDITIONS, not geometry. `params_json` carries the
         # shape; the coating roughness and the azimuth of incidence live in
         # their own columns and change the answer just as much. Leaving them

@@ -56,10 +56,11 @@ def main():
     elif op == "form_lambert":
         out = S.form_lambert(req["spec"], req.get("rho", 0.01),
                              req.get("n_phase", 6), req.get("samples", 256),
-                             tuple(req.get("thetas", (-40.0, 40.0, 0.0))))
+                             tuple(req.get("thetas", (-40.0, 40.0, 0.0))),
+                             beam_w=req.get("beam_w"))
     elif op == "form":
         out = S.form(req["spec"], req.get("thetas"), req.get("n_phase"),
-                     req.get("samples"))
+                     req.get("samples"), beam_w=req.get("beam_w"))
     else:
         out = {"error": "no such op: %s" % op}
 

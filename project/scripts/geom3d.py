@@ -388,6 +388,8 @@ def build_mesh(p: Cone3DParams):
         j = (i + 1) % 4
         faces.append((m0 + i, m0 + 4 + i, m0 + 4 + j, m0 + j))
 
+    import geom_kit as _GK
+    verts, faces = _GK.orient_outward(verts, faces)
     return verts, faces
 
 

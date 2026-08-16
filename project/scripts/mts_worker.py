@@ -47,6 +47,10 @@ def main():
         # The other two axes, in the second code. See `mts_form` for why the
         # stripe is a collimated source through a slit and not an area lamp.
         import mts_form as MF
+        # Beam width at the wall is a first-class knob (phase 5.5); both
+        # renderers must read the SAME value or the cross-check compares
+        # different experiments.
+        MF.STRIPE_W = float(req.get("beam_w", 2.0))
         ply_f = os.path.join(out, "panel_form.ply")
         nv_f, nt_f = write_ply(ply_f, v, f)
         face_f = float(prm.get("face_w", 60.0))

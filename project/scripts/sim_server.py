@@ -113,7 +113,12 @@ def in_blender(op, **req):
               "lambert": lambda: measure_lambert(
                   req["spec"], req["theta"], req["rho"], req["samples"]),
               "form": lambda: form(req["spec"], req.get("thetas"),
-                                   req.get("n_phase"), req.get("samples"))}[op]
+                                   req.get("n_phase"), req.get("samples"),
+                                   req.get("beam_w")),
+              "form_lambert": lambda: form_lambert(
+                  req["spec"], req.get("rho", 0.01),
+                  req.get("n_phase", 6), req.get("samples", 256),
+                  beam_w=req.get("beam_w"))}[op]
         val = on_main(fn)
         return {"rho": val} if op in ("measure", "lambert") else val
 
@@ -172,6 +177,8 @@ RENDER_LOCK = threading.Lock()
 # `scripts/audit_normal.py` compares this table against params_json and fails
 # if they ever diverge again.
 NORMAL = {
+    "pyramid":  dict(pitch=5.5, tip_flat=0.0, apex_jitter=0.0, tip_drop=0.0,
+                     depth=50.0),
     "comb":     dict(pitch=6.5, wall_top=0.08, wall_bot=0.08, comb_expand=1.0,
                      jitter=0.0, depth=50.0),
     "shingle":  dict(pitch=5.5, plate_t_top=0.05, plate_t_bot=0.05,
@@ -202,7 +209,7 @@ NORMAL = {
 # tilted camera reads world background). Offering a control that cannot be
 # measured as if it were a candidate is worse than not offering it.
 GROUPS = [
-    ("Candidates", ["comb", "shingle", "cone"]),
+    ("Candidates", ["pyramid", "comb", "shingle", "cone"]),
     ("Reference and controls", ["honeycomb", "vgroove", "square", "triangle",
                                 "mixed", "reentrant", "nested"]),
 ]
@@ -211,6 +218,10 @@ RETIRED = {"truss": "last on every axis in phase 2",
            "trough": "phase 1 dead end; no margin parameter, not measurable"}
 
 FAMILIES = {
+    # Phase 5 champion: the standalone sharp pyramid (geom_floor at full
+    # depth). Registered here so depth-vs-pitch and jitter questions can be
+    # asked live instead of via a sweep script.
+    "pyramid":  ("geom_floor", "FloorParams",  {"kind": "pyramid"}),
     "cone":     ("geom3d",     "Cone3DParams", {}),
     "comb":     ("geom_topo",  "TopoParams",   {"topology": "comb"}),
     "honeycomb": ("geom_topo", "TopoParams",   {"topology": "honeycomb"}),
@@ -937,7 +948,8 @@ def _render_family(spec):
         return "stack"
     return {"cone": "cone3d", "comb": "topo", "honeycomb": "topo",
             "shingle": "topo", "truss": "topo", "vgroove": "ridge",
-            "slat": "slat", "trough": "scatter"}.get(spec["top"], "cell")
+            "slat": "slat", "trough": "scatter",
+            "pyramid": "floor"}.get(spec["top"], "cell")
 
 
 def _render_params(spec):
@@ -967,7 +979,7 @@ def _render_params(spec):
 
 # --- form destruction and head-on brightness --------------------------------
 
-def form(spec, thetas=None, n_phase=None, samples=None):
+def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -999,14 +1011,18 @@ def form(spec, thetas=None, n_phase=None, samples=None):
              "family": _render_family(m), "topology": topo,
              "process": min_feature(spec)[1] or "unknown",
              "params": prm, "pitch": pitch}
-    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES)
+    # The probe beam width at the wall. Phase 5.4/5.5 showed smear depends on
+    # beam/pitch, so this is a first-class knob, not a protocol constant. The
+    # default stays the historical 2.0 so old numbers keep reproducing.
+    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W)
     FB.N_PHASE = int(n_phase or 6)
     FB.THETAS = tuple(thetas or (-40.0, 40.0, 0.0))
     FB.SAMPLES = int(samples or 256)
+    FB.STRIPE_W = float(beam_w or 7.5)
     try:
         rec = FB.run_case(entry)
     finally:
-        FB.N_PHASE, FB.THETAS, FB.SAMPLES = old
+        FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W = old
     t = rec.get("thetas", {})
     a, b = t.get("-40"), t.get("+40")
     smear = (0.5 * (a["rms_mm"] / a["rms_control_mm"]
@@ -1015,11 +1031,12 @@ def form(spec, thetas=None, n_phase=None, samples=None):
     return {"smear": smear,
             "peak": (t.get("+0") or {}).get("peak_ratio_mean"),
             "n_phase": FB.N_PHASE if False else int(n_phase or 6),
-            "samples": int(samples or 256), "reduced": True}
+            "samples": int(samples or 256),
+            "beam_w": float(beam_w or 7.5), "reduced": True}
 
 
 def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
-                 thetas=(-40.0, 40.0, 0.0)):
+                 thetas=(-40.0, 40.0, 0.0), beam_w=None):
     """The form axes in Cycles with a PURE LAMBERTIAN, for the cross-check.
 
     `form` runs the fitted coating and is the published path. This runs the
@@ -1039,14 +1056,15 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
              "process": min_feature(spec)[1] or "unknown",
              "params": prm, "pitch": pitch, "rho": float(rho),
              "rho_control": 0.05}
-    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES)
+    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W)
     FB.N_PHASE = int(n_phase)
     FB.THETAS = tuple(thetas)
     FB.SAMPLES = int(samples)
+    FB.STRIPE_W = float(beam_w or 7.5)
     try:
         rec = FB.run_case(entry)
     finally:
-        FB.N_PHASE, FB.THETAS, FB.SAMPLES = old
+        FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W = old
     t = rec.get("thetas", {})
     a, b, z = t.get("-40"), t.get("+40"), t.get("+0")
     return {"smear": (0.5 * (a["rms_mm"] / a["rms_control_mm"]
@@ -1056,13 +1074,14 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
             "thetas": t}
 
 
-def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256):
+def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None):
     """The same, in Mitsuba, as a subprocess."""
     return _mts(dict(_mts_req(spec, rho=rho), op="form",
                      pitch=(spec.get("top_params") or {}).get("pitch")
                      or (spec.get("top_params") or {}).get("pitch_mean")
                      or 6.5,
-                     n_phase=int(n_phase), spp=int(spp)))
+                     n_phase=int(n_phase), spp=int(spp),
+                     beam_w=float(beam_w or 2.0)))
 
 
 def _mts_req(spec, rho=0.01, theta=0.0, spp=256):
@@ -1480,7 +1499,8 @@ class H(BaseHTTPRequestHandler):
                     rho0 = float(req.get("lambert_rho", 0.01))
                     m = form_mitsuba(req["spec"], rho0,
                                      int(req.get("n_phase") or 6),
-                                     int(req.get("samples") or 256))
+                                     int(req.get("samples") or 256),
+                                     beam_w=req.get("beam_w"))
                     if "error" in m:
                         return self._send(200, json.dumps(m))
                     out = {"renderer": rend, "lambert_rho": rho0,
@@ -1491,7 +1511,8 @@ class H(BaseHTTPRequestHandler):
                         c = in_blender("form_lambert", spec=req["spec"],
                                        rho=rho0,
                                        n_phase=int(req.get("n_phase") or 6),
-                                       samples=int(req.get("samples") or 256))
+                                       samples=int(req.get("samples") or 256),
+                                       beam_w=req.get("beam_w"))
                         if "error" in c:
                             return self._send(200, json.dumps(c))
                         out["cycles"] = {"smear": c["smear"],
@@ -1503,7 +1524,8 @@ class H(BaseHTTPRequestHandler):
                     return self._send(200, json.dumps(out))
                 out = in_blender("form", spec=req["spec"], thetas=None,
                                  n_phase=req.get("n_phase"),
-                                 samples=req.get("samples"))
+                                 samples=req.get("samples"),
+                                 beam_w=req.get("beam_w"))
                 if "error" in out:
                     return self._send(200, json.dumps(out))
                 out["seconds"] = round(time.perf_counter() - t0, 1)

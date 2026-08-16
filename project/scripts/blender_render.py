@@ -87,6 +87,12 @@ def describe(p):
     if name == "StackParams":
         import geom_stack
         return geom_stack.describe(p)
+    if name == "FloorParams":
+        import geom_floor
+        return geom_floor.describe(p)
+    if name == "PerfParams":
+        import geom_perf
+        return geom_perf.describe(p)
     # NOTE: this fallthrough is silent, and it is how a TopoParams run failed
     # with "no attribute 'slat_len'" -- profile2d.describe was handed a params
     # object from a different family. Any new family MUST be registered above.
@@ -134,6 +140,43 @@ def make_glossy(name, rho, roughness):
     bsdf.inputs["Color"].default_value = (rho, rho, rho, 1.0)
     bsdf.inputs["Roughness"].default_value = roughness
     nt.links.new(bsdf.outputs[0], out.inputs["Surface"])
+    return m
+
+
+def make_ar_glass(name, r_surface, roughness=0.02):
+    """Idealised AR-coated glass for the Phase 8 window: each SURFACE
+    reflects `r_surface` into the specular lobe and transmits the rest.
+    The plate mesh is a closed slab, so a through ray crosses two
+    surfaces and the plate's specular return is ~2R, which is the "R per
+    surface" the vendor curves quote.
+
+    Deliberate simplifications, all recorded in the sweep:
+    - R is CONSTANT over angle. Real AR coatings hold R only inside
+      their design cone and rise steeply toward grazing; that curve is
+      exactly what the physical coupon must supply (report 8.1 marks the
+      vendor numbers 추측-class). Simulating an invented curve would
+      dress up a guess as transport.
+    - No refraction offset (Transparent BSDF, not Refraction): a 2 mm
+      plate displaces a 40-degree ray by ~1 mm laterally, irrelevant at
+      every distance in the scene, and skipping the index keeps R the
+      only free parameter.
+    - No absorption: low-iron glass loses well under 1 %/pass, invisible
+      beside R and the trap.
+    """
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    gl = nt.nodes.new("ShaderNodeBsdfGlossy")
+    gl.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
+    gl.inputs["Roughness"].default_value = roughness
+    mix.inputs["Fac"].default_value = r_surface
+    nt.links.new(tr.outputs[0], mix.inputs[1])
+    nt.links.new(gl.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs["Surface"])
     return m
 
 
@@ -769,6 +812,20 @@ def build_scene(cfg):
         p = GT.TopoParams(**cfg["params"])
         mesh_fn = GT.build_mesh
         cs = None
+    elif fam == "perf":
+        import geom_perf as GP
+        p = GP.PerfParams(**cfg["params"])
+        mesh_fn = GP.build_mesh
+        cs = None
+    elif fam == "floor":
+        # `geom_floor` was written as the BOTTOM of a stack, but the shapes it
+        # builds -- pyramid, wave -- are the RF absorber families in their own
+        # right, and measuring them at full depth as a top surface needs no new
+        # module, only this entry.
+        import geom_floor as GF
+        p = GF.FloorParams(**cfg["params"])
+        mesh_fn = GF.build_mesh
+        cs = None
     elif fam == "stack":
         import geom_stack as ST
         p = ST.StackParams(**cfg["params"])
@@ -778,6 +835,14 @@ def build_scene(cfg):
         import geom_cell as GC
         p = GC.CellParams(**cfg["params"])
         mesh_fn = GC.build_mesh
+        cs = None
+    elif fam == "arplate":
+        # Phase 8: tilted AR window over an absorbing void. `cfg["params"]`
+        # is a FloorParams ENVELOPE (face_w/face_h place the windows and
+        # the control); the plate and box are built below, not by geom_floor.
+        import geom_floor as GF
+        p = GF.FloorParams(**cfg["params"])
+        mesh_fn = None
         cs = None
     else:
         p = PanelParams(**cfg["params"])
@@ -817,7 +882,119 @@ def build_scene(cfg):
     else:
         m_s1 = make_glossy("coat_specular", rho_spec, rough)
 
-    if cs is None:
+    if fam == "arplate":
+        from types import SimpleNamespace
+        ar = cfg.get("ar", {})
+        R = float(ar.get("r_surface", 0.01))
+        tilt = math.radians(float(ar.get("tilt_deg", 25.0)))
+        t_pl = float(ar.get("thickness", 2.0))
+        # The plate is LONGER than the face so its tilted projection still
+        # covers the measurement window (face_h * 1.18 covers tilt 25).
+        Hp = float(ar.get("plate_h", p.face_h * 1.18))
+        # 90 clears the plate's swung-back bottom edge (-50 at tilt 25 on a
+        # 118 plate) with room for the trap field in front of the back wall
+        D = float(ar.get("void_depth", 90.0))
+        m_ar = make_ar_glass("ar_glass", R,
+                             float(ar.get("ar_roughness", 0.02)))
+        m_void = make_diffuse("void_black", float(ar.get("void_rho", 0.0)))
+        xm = 6.0
+        x0v, x1v = -xm, p.face_w + xm
+
+        # The plate hinges at its TOP edge (kept at the wall plane); the
+        # BOTTOM edge swings back into the void -- a hopper, not a leaning
+        # mirror -- so the glass faces DOWN by `tilt`. Sign chased twice
+        # and finally pinned by a preview RENDER, not by intuition: rotate
+        # about x by alpha maps the normal (0,1,0) to (0,cos a,sin a), so
+        # top-back (a=+25) faces the CEILING and throws a +40 beam back
+        # into the room near-horizontal (the preview measured exactly
+        # that); bottom-back (a=-25) faces down, and a beam from
+        # elevation +theta reflects to -(theta + 2*tilt): beam 0 lands in
+        # a trough at the wall base, beam +40 goes straight down and dies
+        # inside the box. The only beam a level observer could catch
+        # mirrored must rise from 2*tilt BELOW the horizon -- the floor.
+        # Bonus: the exposed face points downward, so it sheds dust; the
+        # up-facing side is sealed inside the void (coupon still owed).
+        def pl(zp, yp):
+            z = Hp / 2.0 - (Hp / 2.0 - zp) * math.cos(tilt) \
+                - yp * math.sin(tilt)
+            y = -(Hp / 2.0 - zp) * math.sin(tilt) + yp * math.cos(tilt)
+            return y, z
+        pv, pf = [], []
+        for yp in (0.0, -t_pl):
+            for zp in (Hp / 2.0, -Hp / 2.0):
+                y, z = pl(zp, yp)
+                pv.append((x0v, y, z))
+                pv.append((x1v, y, z))
+        # Consistent OUTWARD winding, face by face (the audit found the
+        # first draft mixed 3 in / 3 out; cross-products checked by hand:
+        # front +y, back -y, top +z, bottom -z, sides +-x, all before the
+        # orientation-preserving rotation). Measured A/B: see FINDINGS 8.2.
+        pf = [(0, 1, 3, 2), (6, 7, 5, 4), (4, 5, 1, 0),
+              (2, 3, 7, 6), (0, 2, 6, 4), (5, 7, 3, 1)]
+        mesh_to_object(pv, pf, "ar_plate", m_ar)
+
+        # the void: an open box behind the wall plane. rho defaults to 0 --
+        # an IDEALISED interior; anything the observer sees past the plate
+        # edges reads black, which is the concept's own claim (hidden void)
+        # and is flagged as idealised in the sweep notes.
+        zb = Hp / 2.0 + 2.0
+        xb0, xb1 = x0v - 2.0, x1v + 2.0
+        bv = []
+        for y in (0.0, -D):
+            for z in (zb, -zb):
+                bv.append((xb0, y, z))
+                bv.append((xb1, y, z))
+        bf = [(4, 5, 7, 6),                     # back wall y=-D
+              (0, 1, 5, 4), (2, 3, 7, 6),      # top / bottom
+              (0, 2, 6, 4), (1, 3, 7, 5)]      # sides
+        mesh_to_object(bv, bf, "ar_void", m_void)
+
+        # 8.2b found everything dangerous retreats to a TOP STRIP of the
+        # glass (the only region whose mirror path clears the sill). The
+        # buildable unit closes it with a rim lip: an opaque cover in the
+        # wall plane from the box top down to `lip_to`. Idealised black
+        # here (the real lip is tile-clad), consistent with the void.
+        # Phase 8.3: a Lambertian floor plane in FRONT of the unit, at
+        # the sill level, standing in for the real room floor that a
+        # below-horizon sightline actually sees mirrored (the uniform
+        # white world is the worst case; this is the deployed case).
+        # v2 after a VOID first attempt: an infinite sill-level floor
+        # OCCLUDES a below-horizon camera (it measured the floor's own
+        # rho and drifted the control). A 300 mm STRIP limited to the
+        # panel's own x-range is the mirrored scene without blocking
+        # either the camera (clears down to about -15 deg at the 3 m
+        # camera distance) or the control plate's sky.
+        if ar.get("room_floor") is not None:
+            # v3: the floor sits BELOW the unit (a wall-mounted box), at
+            # `floor_drop` under the sill, running `floor_len` forward.
+            # v2's sill-level 300 strip let the mirror see white world
+            # past its far edge from -12 on; dropping the floor lets it
+            # run long without occluding the 3 m camera.
+            m_floor = make_diffuse("room_floor",
+                                   float(ar["room_floor"]))
+            fz = -zb - float(ar.get("floor_drop", 220.0))
+            fl = float(ar.get("floor_len", 1000.0))
+            fv = [(x0v - 10, -0.5, fz), (x1v + 10, -0.5, fz),
+                  (x0v - 10, fl, fz), (x1v + 10, fl, fz)]
+            mesh_to_object(fv, [(0, 1, 3, 2)], "room_floor", m_floor)
+
+        if ar.get("lip_to") is not None:
+            lz = float(ar["lip_to"])
+            lv = [(x0v, -0.5, zb), (x1v, -0.5, zb),
+                  (x0v, -0.5, lz), (x1v, -0.5, lz)]
+            mesh_to_object(lv, [(0, 1, 3, 2)], "ar_lip", m_void)
+
+        # system runs put the final-sample pyramid field at the back of the
+        # void as the real trap; its tips face the room at y = -(D - 22).
+        if ar.get("backing") == "pyramid":
+            tv, tf = GF.build_mesh(p)
+            off = -(D - 24.0)        # tips at -(D-24) = -66, base -88,
+            tv = [(x, y + off, z) for (x, y, z) in tv]   # 2 mm off the wall
+            m_trap = make_coating("coat_trap", roughness=0.30)
+            mesh_to_object(tv, tf, "ar_trap", m_trap)
+
+        cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
+    elif cs is None:
         from types import SimpleNamespace
         v, f = mesh_fn(p)
         # `paint_depth` opts a 3D family into the two-finish split. Absent, the

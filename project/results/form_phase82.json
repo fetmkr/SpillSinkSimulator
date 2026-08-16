@@ -1,0 +1,52 @@
+{
+ "P82_form_R10": {
+  "tag": "P82_form_R10",
+  "topology": "arplate",
+  "process": "glass",
+  "pitch": 4.0,
+  "mm_per_px": 0.21857142857142858,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": 1.8638366074940405,
+    "rms_control_mm": 2.8355185714712,
+    "peak_ratio_mean": 0.000400124722771586,
+    "peak_ratio_sd": 5.995153176677528e-07,
+    "peak_ratio_max": 0.0004019752144219084,
+    "peak_ratio_span": 1.0068233764701395,
+    "rms_sd_mm": 0.19182718843858101,
+    "mtf_10mm": 0.4448883727882995,
+    "mtf_20mm": 0.8340282938218109,
+    "mtf_40mm": 0.9565998212031553
+   },
+   "+0": {
+    "rms_mm": 2.5265664688678746,
+    "rms_control_mm": 2.173395472135427,
+    "peak_ratio_mean": 2.316154383668709e-06,
+    "peak_ratio_sd": 2.508476870700967e-07,
+    "peak_ratio_max": 2.6564434771061114e-06,
+    "peak_ratio_span": 1.4868026937253502,
+    "rms_sd_mm": 0.23427446087773915,
+    "mtf_10mm": 0.19331898778108422,
+    "mtf_20mm": 0.7139710253333728,
+    "mtf_40mm": 0.9215471979343295
+   },
+   "+40": {
+    "rms_mm": NaN,
+    "rms_control_mm": 2.835518160523867,
+    "peak_ratio_mean": 0.0,
+    "peak_ratio_sd": 0.0,
+    "peak_ratio_max": 0.0,
+    "peak_ratio_span": 0.0,
+    "rms_sd_mm": NaN,
+    "mtf_10mm": NaN,
+    "mtf_20mm": NaN,
+    "mtf_40mm": NaN
+   }
+  },
+  "smear": NaN,
+  "head_on": 2.316154383668709e-06,
+  "span_0": 1.4868026937253502,
+  "stripe_w": 7.5
+ }
+}

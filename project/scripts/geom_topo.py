@@ -852,6 +852,8 @@ def _build_comb(p: TopoParams):
                 horiz = abs(B[0] - A[0]) < abs(B[1] - A[1])
                 wall(A, B, (t2 if horiz else t1), (b2 if horiz else b1))
     _backing(verts, faces, p, -p.depth)
+    import geom_kit as _GK
+    verts, faces = _GK.orient_outward(verts, faces)
     return verts, faces
 
 
@@ -870,7 +872,12 @@ def build_mesh(p: TopoParams):
     except KeyError:
         raise ValueError("unknown topology %r; have %s"
                          % (p.topology, sorted(_BUILDERS)))
-    return fn(p)
+    verts, faces = fn(p)
+    # EVERY topology through one exit, oriented. The shingle came out wound
+    # inward while the comb came out outward, and a glossy coating reads the
+    # two windings ~50 % apart; see geom_kit.orient_outward.
+    import geom_kit as _GK
+    return _GK.orient_outward(verts, faces)
 
 
 def describe(p: TopoParams) -> dict:

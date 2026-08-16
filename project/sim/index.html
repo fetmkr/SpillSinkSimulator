@@ -221,6 +221,13 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
    figures illustrate the mechanism rather than second-guess Cycles.</p>
 
   <h2>Form &amp; head-on</h2>
+  <div class="row"><label for="beamw">beam width at wall, mm</label>
+   <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
+    style="width:5.5em"></div>
+  <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
+   (phase 5.5), so the probe beam is a first-class input. 7.5 is the deployment default; set 2.0 only to reproduce legacy numbers. Real beam = aperture + divergence &times;
+   distance; e.g. LaserCube Ultra (4&#8202;mm, 1&#8202;mrad) reads
+   &asymp;9&#8202;mm at 5&#8202;m.</p>
   <button id="mf">Measure form + head-on <span class="t">~60 s</span></button>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <p class="note">Reduced fidelity: 6 stripe phases at 256 spp, not the report's
@@ -686,9 +693,10 @@ addEventListener('resize', draw);
     $('#formout').innerHTML = '<div><dt>rendering&hellip;</dt><dd>~60 s</dd></div>';
     try{
       const R = $('#renderer').value;
+      const BW = parseFloat($('#beamw').value) || 7.5;
       const r = await fetch('/api/form', {method:'POST',
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
-                              renderer: R})});
+                              beam_w: BW, renderer: R})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
       const num = v => v==null ? '\u2014' : (+v).toFixed(4);
@@ -712,6 +720,7 @@ addEventListener('resize', draw);
           `<div><dt>form destruction</dt><dd>${j.smear!=null?j.smear.toFixed(2)+'\u00d7':'\u2014'}</dd></div>
            <div><dt>head-on brightness</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>
            <div><dt>renderer</dt><dd>${who}</dd></div>
+           <div><dt>beam</dt><dd>${(j.beam_w||BW).toFixed(1)} mm</dd></div>
            <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases</dd></div>`;
       }
     }catch(e){ $('#err').textContent = String(e).slice(0,600);

@@ -1,0 +1,52 @@
+{
+ "P82b_t35_form": {
+  "tag": "P82b_t35_form",
+  "topology": "arplate",
+  "process": "glass",
+  "pitch": 4.0,
+  "mm_per_px": 0.21857142857142858,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": NaN,
+    "rms_control_mm": 2.8355185738569366,
+    "peak_ratio_mean": 0.0,
+    "peak_ratio_sd": 0.0,
+    "peak_ratio_max": 0.0,
+    "peak_ratio_span": 0.0,
+    "rms_sd_mm": NaN,
+    "mtf_10mm": NaN,
+    "mtf_20mm": NaN,
+    "mtf_40mm": NaN
+   },
+   "+0": {
+    "rms_mm": 3.0445851788381026,
+    "rms_control_mm": 2.173395471481305,
+    "peak_ratio_mean": 1.5309637262491267e-06,
+    "peak_ratio_sd": 8.164380248132338e-08,
+    "peak_ratio_max": 1.5985439964587242e-06,
+    "peak_ratio_span": 1.1258435908319187,
+    "rms_sd_mm": 0.46879690533398866,
+    "mtf_10mm": 0.13424910077984759,
+    "mtf_20mm": 0.6115379332505223,
+    "mtf_40mm": 0.8879397598222125
+   },
+   "+40": {
+    "rms_mm": NaN,
+    "rms_control_mm": 2.8355181621264873,
+    "peak_ratio_mean": 0.0,
+    "peak_ratio_sd": 0.0,
+    "peak_ratio_max": 0.0,
+    "peak_ratio_span": 0.0,
+    "rms_sd_mm": NaN,
+    "mtf_10mm": NaN,
+    "mtf_20mm": NaN,
+    "mtf_40mm": NaN
+   }
+  },
+  "smear": NaN,
+  "head_on": 1.5309637262491267e-06,
+  "span_0": 1.1258435908319187,
+  "stripe_w": 7.5
+ }
+}

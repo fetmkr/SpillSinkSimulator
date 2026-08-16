@@ -839,6 +839,8 @@ def _build_nested(p: CellParams):
                     _wall(verts, faces, a, b, y_top, -p.depth,
                           p.nest_wall_top, p.nest_wall_bot)
     _backing(verts, faces, p, -p.depth)
+    import geom_kit as _GK
+    verts, faces = _GK.orient_outward(verts, faces)
     return verts, faces
 
 
@@ -862,7 +864,10 @@ def build_mesh(p: CellParams):
     except KeyError:
         raise ValueError("unknown variant %r; have %s"
                          % (p.variant, sorted(_BUILDERS)))
-    return fn(p)
+    verts, faces = fn(p)
+    # every variant through one oriented exit; see geom_kit.orient_outward
+    import geom_kit as _GK
+    return _GK.orient_outward(verts, faces)
 
 
 def cell_count(p: CellParams) -> int:

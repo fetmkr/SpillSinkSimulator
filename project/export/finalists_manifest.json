@@ -1,0 +1,255 @@
+{
+ "pyr_p2_d18_t005": {
+  "file": "pyr_p2_d18_t005.stl",
+  "tris": 13884,
+  "bounds_mm": [
+   [
+    -2.0,
+    -20.0,
+    -32.0
+   ],
+   [
+    66.0,
+    -0.0,
+    36.0
+   ]
+  ],
+  "volume_mm3": 36646.94,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "kind": "pyramid",
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 18.0,
+   "pitch": 2.0,
+   "tip_flat": 0.05,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "floor"
+ },
+ "pyr_p4_d36_t010": {
+  "file": "pyr_p4_d36_t010.stl",
+  "tris": 4344,
+  "bounds_mm": [
+   [
+    -4.0,
+    -38.0,
+    -34.0
+   ],
+   [
+    72.0,
+    -0.0,
+    42.0
+   ]
+  ],
+  "volume_mm3": 80336.12,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "kind": "pyramid",
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 36.0,
+   "pitch": 4.0,
+   "tip_flat": 0.1,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "floor"
+ },
+ "cone_p2_d18_r003": {
+  "file": "cone_p2_d18_r003.stl",
+  "tris": 755052,
+  "bounds_mm": [
+   [
+    -5.144749601159594,
+    -19.681818181818183,
+    -33.6
+   ],
+   [
+    65.14254352335936,
+    0.0,
+    33.6
+   ]
+  ],
+  "volume_mm3": 68452.18,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 18.181818181818183,
+   "pitch": 2.0,
+   "tip_radius": 0.03,
+   "jitter": 0.3,
+   "depth_jitter": 0.0,
+   "profile_power": 1.0,
+   "radial_seg": 24,
+   "height_seg": 12,
+   "seed": 23,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "cone3d"
+ },
+ "cone_p4_d36_r006": {
+  "file": "cone_p4_d36_r006.stl",
+  "tris": 219660,
+  "bounds_mm": [
+   [
+    -9.90625337972597,
+    -37.86363636363637,
+    -37.2
+   ],
+   [
+    70.17348732453468,
+    0.0,
+    37.2
+   ]
+  ],
+  "volume_mm3": 149358.44,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 36.36363636363637,
+   "pitch": 4.0,
+   "tip_radius": 0.06,
+   "jitter": 0.3,
+   "depth_jitter": 0.0,
+   "profile_power": 1.0,
+   "radial_seg": 24,
+   "height_seg": 12,
+   "seed": 23,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "cone3d"
+ },
+ "pyr_p4_d20_t010_116x116": {
+  "file": "pyr_p4_d20_t010_116x116.stl",
+  "tris": 10324,
+  "bounds_mm": [
+   [
+    -4.0,
+    -22.0,
+    -54.0
+   ],
+   [
+    112.0,
+    -0.0,
+    62.0
+   ]
+  ],
+  "volume_mm3": 118917.0,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "kind": "pyramid",
+   "face_w": 100.0,
+   "face_h": 100.0,
+   "depth": 20.0,
+   "pitch": 4.0,
+   "tip_flat": 0.1,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "floor",
+  "note": "2026-08-17: internal double floor removed (field base + slab top were coincident at y=-20); rebuilt as ONE welded manifold solid, 0 open edges | 2026-08-17: internal double floor removed (field base and slab top were coincident at y=-20), slab re-tessellated to the 4 mm grid, winding made coherent by edge propagation; ONE manifold solid, 0 open edges. Universal tile volume reproduces the original 353,500 exactly."
+ },
+ "pyr_p4_d20_t010_76x76": {
+  "file": "pyr_p4_d20_t010_76x76.stl",
+  "tris": 4484,
+  "bounds_mm": [
+   [
+    -4.0,
+    -22.0,
+    -34.0
+   ],
+   [
+    72.0,
+    -0.0,
+    42.0
+   ]
+  ],
+  "volume_mm3": 51045.0,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "kind": "pyramid",
+   "face_w": 60.0,
+   "face_h": 60.0,
+   "depth": 20.0,
+   "pitch": 4.0,
+   "tip_flat": 0.1,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "floor",
+  "note": "2026-08-17: internal double floor removed (field base + slab top were coincident at y=-20); rebuilt as ONE welded manifold solid, 0 open edges | 2026-08-17: internal double floor removed (field base and slab top were coincident at y=-20), slab re-tessellated to the 4 mm grid, winding made coherent by edge propagation; ONE manifold solid, 0 open edges. Universal tile volume reproduces the original 353,500 exactly."
+ },
+ "pyr_p4_d20_t040_116x116": {
+  "file": "pyr_p4_d20_t040_116x116.stl",
+  "tris": 10324,
+  "bounds_mm": [
+   [
+    -4.0,
+    -22.0,
+    -54.0
+   ],
+   [
+    112.0,
+    -0.0,
+    62.0
+   ]
+  ],
+  "volume_mm3": 126486.0,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "kind": "pyramid",
+   "face_w": 100.0,
+   "face_h": 100.0,
+   "depth": 20.0,
+   "pitch": 4.0,
+   "tip_flat": 0.4,
+   "margin_depths": 0.0,
+   "backing": 2.0
+  },
+  "family": "floor",
+  "note": "2026-08-17: internal double floor removed (field base + slab top were coincident at y=-20); rebuilt as ONE welded manifold solid, 0 open edges | 2026-08-17: internal double floor removed (field base and slab top were coincident at y=-20), slab re-tessellated to the 4 mm grid, winding made coherent by edge propagation; ONE manifold solid, 0 open edges. Universal tile volume reproduces the original 353,500 exactly."
+ },
+ "pyr_universal_200x200": {
+  "file": "pyr_universal_p4_d20_t010_200x200.stl",
+  "tris": 30400,
+  "bounds_mm": [
+   [
+    0.0,
+    -22.0,
+    -100.0
+   ],
+   [
+    200.0,
+    0.0,
+    100.0
+   ]
+  ],
+  "volume_mm3": 353500.0,
+  "roundtrip_ok": true,
+  "mesh_clean": true,
+  "params": {
+   "face": 200.0,
+   "pitch": 4.0,
+   "depth": 20.0,
+   "tip": 0.1,
+   "backing": 2.0,
+   "rimless": true,
+   "note": "valley-terminated edges; cut on any valley line"
+  },
+  "family": "universal_tile",
+  "note": "2026-08-17: internal double floor removed (field base and slab top were coincident at y=-20), slab re-tessellated to the 4 mm grid, winding made coherent by edge propagation; ONE manifold solid, 0 open edges. Universal tile volume reproduces the original 353,500 exactly."
+ }
+}

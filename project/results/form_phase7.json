@@ -1,0 +1,204 @@
+{
+ "P7_box_flat": {
+  "tag": "P7_box_flat",
+  "topology": "box",
+  "process": "assembly",
+  "pitch": 110.0,
+  "mm_per_px": 0.4225714285714286,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": 0.9789572531895417,
+    "rms_control_mm": 0.787112750372074,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 3.623465308812897,
+    "mtf_10mm": 0.8848354564643232,
+    "mtf_20mm": 0.9657339029375259,
+    "mtf_40mm": 0.9908414546456622
+   },
+   "+0": {
+    "rms_mm": 0.6422286690710818,
+    "rms_control_mm": 0.6188104965519162,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 1.9343839123144073,
+    "mtf_10mm": 0.9263164276631611,
+    "mtf_20mm": 0.9784400969587496,
+    "mtf_40mm": 0.9945178325828131
+   },
+   "+40": {
+    "rms_mm": 0.9806411205689414,
+    "rms_control_mm": 0.7871118829846001,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 3.625788382369552,
+    "mtf_10mm": 0.8848881567798313,
+    "mtf_20mm": 0.965776993118361,
+    "mtf_40mm": 0.9908999942176495
+   }
+  },
+  "smear": 1.244802255767325,
+  "head_on": NaN,
+  "span_0": NaN,
+  "winding": "out"
+ },
+ "P7_box_taper": {
+  "tag": "P7_box_taper",
+  "topology": "box",
+  "process": "assembly",
+  "pitch": 110.0,
+  "mm_per_px": 0.4225714285714286,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": 13.458518784007031,
+    "rms_control_mm": 0.7873196479558915,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 7.613480026763749,
+    "mtf_10mm": 0.26039969684637415,
+    "mtf_20mm": 0.3151790038093809,
+    "mtf_40mm": 0.37901249495178696
+   },
+   "+0": {
+    "rms_mm": 0.8703760949569732,
+    "rms_control_mm": 0.6182543677155513,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 4.91634946806617,
+    "mtf_10mm": 0.9237580927752733,
+    "mtf_20mm": 0.9767664853513078,
+    "mtf_40mm": 0.9934683909136413
+   },
+   "+40": {
+    "rms_mm": 8.856075342406662,
+    "rms_control_mm": 0.787319058139154,
+    "peak_ratio_mean": NaN,
+    "peak_ratio_sd": NaN,
+    "peak_ratio_max": NaN,
+    "peak_ratio_span": NaN,
+    "rms_sd_mm": 5.969543437034903,
+    "mtf_10mm": 0.39172153964039097,
+    "mtf_20mm": 0.5623637343656589,
+    "mtf_40mm": 0.573902697093918
+   }
+  },
+  "smear": 14.171245960163798,
+  "head_on": NaN,
+  "span_0": NaN,
+  "winding": "out"
+ },
+ "P7_box_flat_b75": {
+  "tag": "P7_box_flat",
+  "topology": "box",
+  "process": "assembly",
+  "pitch": 110.0,
+  "mm_per_px": 0.4225714285714286,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": 2.9136984167746762,
+    "rms_control_mm": 2.8414193575448183,
+    "peak_ratio_mean": 0.014858189603248945,
+    "peak_ratio_sd": 0.006576088806283462,
+    "peak_ratio_max": 0.032443812112593826,
+    "peak_ratio_span": 4.724798692775253,
+    "rms_sd_mm": 0.09273335976382813,
+    "mtf_10mm": 0.05696059710763049,
+    "mtf_20mm": 0.62325319437784,
+    "mtf_40mm": 0.895263318553342
+   },
+   "+0": {
+    "rms_mm": 2.16759092330134,
+    "rms_control_mm": 2.1809612042604885,
+    "peak_ratio_mean": 0.16776074427730026,
+    "peak_ratio_sd": 0.057987538143993364,
+    "peak_ratio_max": 0.33441798319359706,
+    "peak_ratio_span": 3.413896115473485,
+    "rms_sd_mm": 0.0388211749750923,
+    "mtf_10mm": 0.32349197940794405,
+    "mtf_20mm": 0.7650285105376071,
+    "mtf_40mm": 0.9376040602153504
+   },
+   "+40": {
+    "rms_mm": 2.929402404373861,
+    "rms_control_mm": 2.8414181723157235,
+    "peak_ratio_mean": 0.014856878453795831,
+    "peak_ratio_sd": 0.006574531811025322,
+    "peak_ratio_max": 0.032444342185797295,
+    "peak_ratio_span": 4.725186321254121,
+    "rms_sd_mm": 0.0834114705136773,
+    "mtf_10mm": 0.056957846459630444,
+    "mtf_20mm": 0.6232194010040442,
+    "mtf_40mm": 0.8952291877737049
+   }
+  },
+  "smear": 1.0282012803852676,
+  "head_on": 0.16776074427730026,
+  "span_0": 3.413896115473485,
+  "stripe_w": 7.5,
+  "winding": "out"
+ },
+ "P7_box_taper_b75": {
+  "tag": "P7_box_taper",
+  "topology": "box",
+  "process": "assembly",
+  "pitch": 110.0,
+  "mm_per_px": 0.4225714285714286,
+  "n_phase": 16,
+  "thetas": {
+   "-40": {
+    "rms_mm": 15.671309215582836,
+    "rms_control_mm": 2.8413447870238815,
+    "peak_ratio_mean": 0.0027827588709528938,
+    "peak_ratio_sd": 0.0014294675828869343,
+    "peak_ratio_max": 0.00718849417459817,
+    "peak_ratio_span": 6.109454096576894,
+    "rms_sd_mm": 7.913248086923025,
+    "mtf_10mm": 0.032450140494874935,
+    "mtf_20mm": 0.231619320396031,
+    "mtf_40mm": 0.27018535736444615
+   },
+   "+0": {
+    "rms_mm": 2.2536986150439655,
+    "rms_control_mm": 2.180988611956835,
+    "peak_ratio_mean": 0.05870199706392471,
+    "peak_ratio_sd": 0.011915046078302122,
+    "peak_ratio_max": 0.09584413173327168,
+    "peak_ratio_span": 2.1330415772139344,
+    "rms_sd_mm": 0.06263003902014784,
+    "mtf_10mm": 0.32211286388427385,
+    "mtf_20mm": 0.7631778366151944,
+    "mtf_40mm": 0.9364583064049116
+   },
+   "+40": {
+    "rms_mm": 10.516572632729845,
+    "rms_control_mm": 2.841343663624587,
+    "peak_ratio_mean": 0.002834087547535261,
+    "peak_ratio_sd": 0.0014778149436569623,
+    "peak_ratio_max": 0.007103472666337396,
+    "peak_ratio_span": 6.062206130112292,
+    "rms_sd_mm": 4.92668689664756,
+    "mtf_10mm": 0.02577893993350405,
+    "mtf_20mm": 0.3464122676415937,
+    "mtf_40mm": 0.48818844334319783
+   }
+  },
+  "smear": 4.608361175650194,
+  "head_on": 0.05870199706392471,
+  "span_0": 2.1330415772139344,
+  "stripe_w": 7.5,
+  "winding": "out"
+ }
+}
