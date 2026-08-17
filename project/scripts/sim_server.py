@@ -197,6 +197,7 @@ NORMAL = {
     "reentrant": dict(pitch=6.5, wall_top=0.1, wall_bot=0.1, lean_deg=6.0,
                       depth=50.0),
     "nested":   dict(pitch=11.0, wall_top=0.1, wall_bot=0.1, depth=50.0),
+    "flat":     dict(depth=10.0),
     "pyramid":  dict(pitch=2.0, tip_flat=0.1, depth=3.0),
     "wave":     dict(pitch=2.0, depth=3.0),
     "gap":      dict(depth=3.0),
@@ -209,7 +210,7 @@ NORMAL = {
 # tilted camera reads world background). Offering a control that cannot be
 # measured as if it were a candidate is worse than not offering it.
 GROUPS = [
-    ("Candidates", ["pyramid", "comb", "shingle", "cone"]),
+    ("Candidates", ["pyramid", "comb", "shingle", "cone", "flat"]),
     ("Reference and controls", ["honeycomb", "vgroove", "square", "triangle",
                                 "mixed", "reentrant", "nested"]),
 ]
@@ -233,6 +234,14 @@ FAMILIES = {
     "reentrant": ("geom_cell", "CellParams",   {"variant": "reentrant"}),
     "nested":   ("geom_cell",  "CellParams",   {"variant": "nested"}),
     "vgroove":  ("profile_ridge", "RidgeParams", {}),
+    # Flat plate: the reference every ratio divides by. geom_floor's "gap"
+    # kind is already exactly this -- nothing but the smooth slab, built for
+    # the zero-cost control -- and being a real 3D mesh the Mitsuba
+    # cross-check works too. Two earlier attempts LOOKED wrong on screen
+    # (2026-08-17): profile_ridge with tip_width == pitch extruded into
+    # broken overlapping chunks, and pyramid with tip_flat == pitch kept
+    # hairline grooves between the tiles. No parameters of its own.
+    "flat":     ("geom_floor", "FloorParams", {"kind": "gap"}),
     "slat":     ("profile2d",  "PanelParams",  {}),
     "trough":   ("profile_scatter", "ScatterParams", {}),
 }
@@ -636,7 +645,10 @@ def clip_to_panel(verts, faces, face_w, face_h):
         if len(ys) == 2:
             slab = (min(ys), max(ys))
             verts, faces = verts[:-8], faces[:-6]
-    if not verts or not faces:
+    # A mesh that was NOTHING BUT the slab (the flat plate / gap control) is
+    # not empty -- the slab gets rebuilt to panel size at the end like anyone
+    # else's. Early-returning here made `flat` "produce no geometry at all".
+    if (not verts or not faces) and slab is None:
         return [], []
 
     # THE ORIGIN IS THE DESIGN'S, NOT THE MESH'S EXTREME VERTEX. Every family
@@ -954,7 +966,7 @@ def _render_family(spec):
         return "stack"
     return {"cone": "cone3d", "comb": "topo", "honeycomb": "topo",
             "shingle": "topo", "truss": "topo", "vgroove": "ridge",
-            "slat": "slat", "trough": "scatter",
+            "flat": "floor", "slat": "slat", "trough": "scatter",
             "pyramid": "floor"}.get(spec["top"], "cell")
 
 
