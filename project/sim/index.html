@@ -36,8 +36,9 @@ h2{font:700 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
 #brand small{margin-left:auto;color:var(--ink3);font-weight:400;
   letter-spacing:.1em}
 label{display:block;font-size:11.5px;color:var(--ink2)}
-select,input[type=number]{width:100%;background:var(--sunk);color:var(--ink);
-  border:1px solid var(--line2);border-radius:3px;padding:6px 7px;font:inherit}
+select,input[type=number],input[type=text]{width:100%;background:var(--sunk);
+  color:var(--ink);border:1px solid var(--line2);border-radius:3px;
+  padding:6px 7px;font:inherit}
 select:focus,input:focus{outline:1px solid var(--a)}
 .row{display:flex;flex-direction:column;gap:3px}
 .sl{display:grid;grid-template-columns:1fr 60px;gap:6px;align-items:center}
@@ -140,6 +141,13 @@ details.why p{margin:.4em 0 0}
   <div class="row"><select id="preset"></select>
     <p class="note" id="presetnote">Loads the exact geometry behind a number in
       the reports. Then change anything.</p></div>
+  <div class="row" style="display:grid;grid-template-columns:1fr auto auto;gap:6px">
+    <input type="text" id="dname" placeholder="name this design">
+    <button id="dsave" style="width:auto">Save</button>
+    <button id="dboot" style="width:auto"
+      title="load the current design at start-up">Default</button>
+  </div>
+  <p class="note" id="dnote" style="display:none"></p>
 
   <h2>Structure</h2>
   <div class="row"><label>Top layer</label><select id="top"></select></div>
@@ -148,8 +156,10 @@ details.why p{margin:.4em 0 0}
 
   <div class="grp">
     <div class="sl"><span class="nm">panel size <b id="v_panel">100.0</b> mm sq</span>
-      <input type="range" id="panel" min="20" max="200" step="10" value="100">
-      <input type="number" id="n_panel" step="10" value="100"></div>
+      <!-- step 1, not 10: a range input SNAPS to its step, so a typed 116
+           silently measured as 120 while the label said 116 (2026-08-17) -->
+      <input type="range" id="panel" min="20" max="200" step="1" value="100">
+      <input type="number" id="n_panel" step="1" value="100"></div>
     <div class="sl"><span class="nm">envelope depth <b id="v_depth">50.0</b></span>
       <input type="range" id="depth" min="10" max="80" step="1" value="50">
       <input type="number" id="n_depth" step="1" value="50"></div>
@@ -239,13 +249,13 @@ details.why p{margin:.4em 0 0}
   <p class="note" style="margin:0">Lights the panel from the whole sky at
    once and reads how much comes back at 0&deg;/&plusmn;20&deg;/&plusmn;40&deg;.
    Worst angle fills <b>반사 총량</b>.</p>
+  <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
+  <canvas id="chart"></canvas>
+
   <button id="mf" class="go">Render &middot; form + head-on <span class="t">~60 s</span></button>
   <p class="note" style="margin:0">Shines a stripe beam of the width above and
    reads how much the pattern smears sideways (<b>모양 뭉개기</b>) and how much
    fires straight back at the source (<b>정면 반짝임</b>).</p>
-
-  <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
-  <canvas id="chart"></canvas>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <details class="why"><summary>why beam width matters</summary>
   <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
@@ -520,6 +530,8 @@ function drawAxis(g, W, H){
 }
 function chart(vals){
   const c = $('#chart'), dpr = devicePixelRatio||1;
+  // an empty 96 px canvas is not a chart, it is a hole in the layout
+  c.style.display = vals.length ? 'block' : 'none';
   c.width = c.clientWidth*dpr; c.height = 96*dpr;
   const g = c.getContext('2d'); g.scale(dpr,dpr);
   const W = c.clientWidth, H = 96, pad = 22;
@@ -853,15 +865,30 @@ addEventListener('resize', draw);
   const PRE = (await (await fetch('/api/presets')).json()).presets;
   const named = PRE.filter(p => p.headline)
                    .sort((a,b) => a.headline.localeCompare(b.headline));
-  $('#preset').innerHTML = '<option value="">— pick a design —</option>' +
-    named.map((p,i)=>`<option value="${i}">${p.headline}  ·  ${(100*p.worst_rho).toFixed(4)}%</option>`).join('');
+  // USER DESIGNS live in this browser (localStorage): the current sliders can
+  // be saved under a name, listed beside the published presets, and one exact
+  // spec can be marked as what the page boots into.
+  const LS_D = 'sim_user_designs', LS_BOOT = 'sim_boot_design';
+  const userD = () => { try{ return JSON.parse(localStorage.getItem(LS_D)) || {}; }
+                        catch(e){ return {}; } };
+  const fillPresets = () => {
+    const mine = Object.keys(userD()).sort();
+    $('#preset').innerHTML = '<option value="">— pick a design —</option>'
+      + (mine.length ? '<optgroup label="my designs">'
+          + mine.map(n=>`<option value="u:${n}">${n}</option>`).join('')
+          + '</optgroup>' : '')
+      + '<optgroup label="published">'
+      + named.map((p,i)=>`<option value="p:${i}">${p.headline}  ·  ${(100*p.worst_rho).toFixed(4)}%</option>`).join('')
+      + '</optgroup>';
+  };
+  fillPresets();
   let loading = false;
-  $('#preset').onchange = e => {
-    const p = named[+e.target.value]; if(!p) return;
+  const setTop=(id,lab,v)=>{ $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
+  const applySpec = sp => {
     loading = true;
-    $('#top').value = p.spec.top; $('#floor').value = p.spec.floor;
+    $('#top').value = sp.top; $('#floor').value = sp.floor || 'none';
     rebuild(true);
-    for(const [host, src] of [['#tp', p.spec.top_params], ['#fp', p.spec.floor_params]]){
+    for(const [host, src] of [['#tp', sp.top_params], ['#fp', sp.floor_params]]){
       for(const d of $(host).children){
         if(!d.dataset || !(d.dataset.name in (src||{}))) continue;
         const v = src[d.dataset.name];
@@ -871,14 +898,39 @@ addEventListener('resize', draw);
         d.dataset.val = v;
       }
     }
-    const setTop=(id,lab,v)=>{ $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
-    setTop('depth','v_depth', p.spec.depth);
-    if(p.spec.floor!=='none') setTop('fdepth','v_fdepth', p.spec.floor_depth||3);
+    if(sp.panel != null) setTop('panel','v_panel', sp.panel);
+    setTop('depth','v_depth', sp.depth);
+    if(sp.floor && sp.floor!=='none') setTop('fdepth','v_fdepth', sp.floor_depth||3);
+    loading = false;
+    refresh();
+  };
+  $('#preset').onchange = e => {
+    const val = e.target.value;
+    if(val.startsWith('u:')){
+      const n = val.slice(2), sp = userD()[n]; if(!sp) return;
+      applySpec(sp);
+      $('#presetnote').innerHTML =
+        `<b style="color:var(--ink)">${n}</b> &middot; your saved design.`;
+      return;
+    }
+    const p = named[+val.slice(2)]; if(!p) return;
+    applySpec(p.spec);
     $('#presetnote').innerHTML = `<b style="color:var(--ink)">${p.design}</b> from
       <code>${p.source}</code> · published worst-&theta; ${(100*p.worst_rho).toFixed(5)} %.
       Measure and compare, or change anything.`;
-    loading = false;
-    refresh();
+  };
+  const dnote = m => { const n=$('#dnote'); n.textContent=m; n.style.display=''; };
+  $('#dsave').onclick = () => {
+    const name = ($('#dname').value||'').trim();
+    if(!name){ dnote('give the design a name first'); return; }
+    const d = userD(); d[name] = spec();
+    localStorage.setItem(LS_D, JSON.stringify(d));
+    fillPresets(); $('#preset').value = 'u:'+name;
+    dnote('saved "'+name+'" — it is in the design list now');
+  };
+  $('#dboot').onclick = () => {
+    localStorage.setItem(LS_BOOT, JSON.stringify(spec()));
+    dnote('this exact design now loads at start-up');
   };
 
   const rebuild = (quiet) => {
@@ -1091,5 +1143,10 @@ addEventListener('resize', draw);
     a.click();
   };
   rebuild();
+  // boot into the user's chosen default design, if one was saved
+  try{
+    const bs = JSON.parse(localStorage.getItem(LS_BOOT) || 'null');
+    if(bs && FAM.top[bs.top]) applySpec(bs);
+  }catch(e){}
 })();
 </script>

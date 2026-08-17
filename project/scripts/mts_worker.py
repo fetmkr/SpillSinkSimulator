@@ -37,6 +37,23 @@ def main():
     elif fam == "cell":
         import geom_cell as M
         v, f = M.build_mesh(M.CellParams(**prm))
+    elif fam == "floor":
+        # the standalone pyramid/wave/gap family -- the same dataclass the
+        # Cycles path builds from. It was missing from this dispatch, so a
+        # pyramid cross-check died inside TopoParams with a TypeError about
+        # 'kind' (2026-08-17).
+        import geom_floor as M
+        v, f = M.build_mesh(M.FloorParams(**prm))
+    elif fam in ("ridge", "slat", "scatter"):
+        # 1D cross-section families are extruded to a mesh by the Blender-side
+        # server; there is no shared mesh builder here. Say so instead of
+        # crashing in the wrong dataclass.
+        sys.stdout.write("\n@@RESULT@@" + json.dumps(
+            {"error": "family %r is a 1D extruded profile with no Mitsuba "
+                      "builder; cross-check a 3D family, or use Cycles"
+                      % fam}) + "\n")
+        sys.stdout.flush()
+        return
     else:
         import geom_topo as M
         v, f = M.build_mesh(M.TopoParams(**prm))
