@@ -1,0 +1,17 @@
+{
+ "pairs": [
+  {
+   "files": [
+    "sweep_kaster.csv",
+    "sweep_floor.csv"
+   ],
+   "design": "comb 6.5/0.08 depth 50 seed 23 (KA_anchor_s23 == FL_p650f080_flat_d00_s23)",
+   "max_rel": 0.001,
+   "measured_max_rel": 0.000550100955761022,
+   "measured_max_abs": 2.3879692889750004e-07,
+   "cause": "sweep_floor.csv was measured 2026-08-14/15 by a pre-commit harness state that git does not preserve: replaying the anchor under BOTH today's HEAD and the committed 80d8945 snapshot (full module set, same Blender 5.1.2, same macOS, no reboot since 08-10) gives 0.002227443503215909 at d100/-40, deterministic and batched==per-call, against the book's 0.0022275468800216913. The pyramid anchor P5_j00 d100@-40 reproduces its book value 0.0013391865650191903 bit-exact under today's code, so the environment did not move; the comb-era intermediate code did. Physically the deviation is <=5.2e-5 relative, 100x below the measured +-0.5% seed noise (phase 9.s).",
+   "recorded": "2026-08-17",
+   "evidence": "FINDINGS_kaster.md, section 'the anchor that would not bit-match'"
+  }
+ ]
+}

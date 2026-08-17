@@ -488,6 +488,21 @@ viper's Au-Pd coating, from a different animal.
 **THE CLOSEST PRIOR ART IN THE FOLDER, AND IT WAS NOT KNOWN TO THIS PROJECT
 UNTIL 2026-08-12.** Found while checking whether our result is publishable.
 
+> **READ IN FULL 2026-08-17 — this section's caveats are now resolved; the
+> current statement of record is `results/FINDINGS_kaster.md`.** The short
+> version: his tools are ANSYS SpaceClaim + SPEOS `[확인 p.11]`; his material
+> is 5 % reflectance split 85 % Lambertian / 15 % Gaussian (FWHM 25°)
+> `[확인 p.7]`; and his specimens carry a deliberate **planar cap layer** —
+> a plane cut through a 30.6 %-dense solid, so ~30.6 % of his frontal area
+> is flat land `[확인 p.2, p.7]`. Rebuilt in our harness at his material and
+> AOI set: a 30.6 %-land pyramid analog reads 0.33–0.40x the flat plate
+> where our 0.06 %-land product reads 0.08–0.17x — **most of the gap between
+> his 0.65x and our 0.19x is his cap**, i.e. the tip law applied to his own
+> geometry. The 3.7x-better-than-prior-art framing below should therefore be
+> read as "uncapped vs capped", not as a contradiction; the residual
+> 1.4–1.8x is bounded and has three recorded candidate causes
+> (`FINDINGS_kaster.md` §4).
+
 J. Appl. Phys. **138**(17), 174904, 7 Nov 2025 · preprint arXiv:2507.05152,
 7 Jul 2025 · Special Topic on Mechanical Metamaterials
 `[확인: arxiv.org/abs/2507.05152, pubs.aip.org]`

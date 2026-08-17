@@ -53,6 +53,20 @@ API: final sample reads 0.17668 % at -40 AND 0.19805 % at -70 to all
 digits -- the steep-angle margin fix is confirmed live (the old 2.0
 margin would have leaked background at -70).
 
+**Prior art reconciled (2026-08-17).** Kaster 2025 (arXiv:2507.05152) read
+in full and reproduced: his "average intensity ratio < 0.65" vs our ~0.19x
+same-coating claim is mostly his own 30.6 % planar cap layer -- at his
+material (rho 5 %, d85) and AOI set, a 30.6 %-land pyramid analog reads
+0.33-0.40x flat while our 0.06 %-land product reads 0.08-0.17x
+(FINDINGS_kaster.md, sweep_kaster.csv, fig_kaster.png; QUESTIONS.md Q19-4
+answered). Side discoveries, both handled: margin_depths 6.5 at depth 20
+overruns the control zone (voided first run kept as
+__void__sweep_kaster_margin65.csv; use 4.5 at depth 20); and NO current
+sweep can bit-match pre-80d8945 comb-family rows -- those CSVs were
+measured by pre-commit harness bytes git never kept (bounded 5.5e-4
+relative, 10x under seed noise; results/anchor_deviations.json + gate
+check 8's documented-deviation path record it, silent drift still fails).
+
 **Machinery added since phase 4** (all in scripts/): floor-family kinds
 `pillars` (+lean), arplate (AR glass + void + lip + room floor), `corner`
 scene; make_ar_glass; paint_depth split rides form_buildable; gate check 8
