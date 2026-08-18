@@ -1,0 +1,821 @@
+<meta charset="utf-8">
+<title>빛이 사라지는 벽</title>
+<style>
+/* 시뮬레이터와 같은 계기판 시각 체계. 밝은 종이 하나로 확정한 단일 테마 —
+   배경과 글색을 전부 명시해 어느 환경에서도 같은 판으로 보이게 한다. */
+:root{
+  --bg:#dedbd4; --paper:#efede8; --sunk:#f7f6f2; --line:#c8c4bb; --line2:#b3aea3;
+  --ink:#16181a; --ink2:#4c5054; --ink3:#84878b;
+  --a:#ff4d00; --ok:#1f7a44; --no:#c0341c; --screen:#101215;
+}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);margin:0;
+  font:400 16px/1.85 "Helvetica Neue",Helvetica,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 80px}
+.mono{font-family:Menlo,ui-monospace,monospace}
+
+/* ---- 머리 ---- */
+header{padding:64px 0 0}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.brandrow img{height:40px;display:block}
+.brandrow .co{font:700 12px/1 Menlo,monospace;letter-spacing:.18em;color:var(--ink2)}
+h1{font-size:44px;line-height:1.2;letter-spacing:-0.02em;margin:0 0 14px;text-wrap:balance}
+.deck{font-size:19px;line-height:1.75;color:var(--ink2);max-width:44em;margin:0 0 26px}
+.meta{font:400 12px/1.6 Menlo,monospace;color:var(--ink3);letter-spacing:.04em;
+  border-top:3px solid var(--a);padding-top:12px;display:flex;gap:18px;flex-wrap:wrap}
+
+/* ---- 차례 ---- */
+nav{background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:22px 26px;margin:40px 0}
+nav .t{font:700 11px/1 Menlo,monospace;letter-spacing:.2em;color:var(--ink3);margin-bottom:14px}
+nav ol{margin:0;padding-left:1.3em;columns:2;column-gap:36px;font-size:14.5px;line-height:2.1}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line2)}
+nav a:hover{color:var(--a);border-color:var(--a)}
+@media (max-width:640px){nav ol{columns:1}}
+
+/* ---- 본문 뼈대 ---- */
+section{margin-top:72px}
+.eyebrow{font:700 11px/1 Menlo,monospace;letter-spacing:.22em;color:var(--a);
+  text-transform:uppercase;margin-bottom:10px}
+h2{font-size:30px;line-height:1.3;letter-spacing:-0.01em;margin:0 0 6px;text-wrap:balance}
+h3{font-size:19px;margin:36px 0 8px}
+p{margin:14px 0;max-width:44em}
+.lead{font-size:17.5px;color:var(--ink2)}
+strong{font-weight:700}
+em{font-style:normal;background:linear-gradient(transparent 62%, #ffd9c7 62%)}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+
+/* ---- 그림 ---- */
+figure{margin:26px 0}
+figure img{width:100%;display:block;border:1px solid var(--line);border-radius:4px;background:#fff}
+figure.dark img{background:var(--screen)}
+figcaption{font:400 12.5px/1.7 Menlo,monospace;color:var(--ink3);margin-top:8px}
+figcaption b{color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid2 figure,.grid3 figure{margin:0}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.figblock{margin:26px 0}
+.figblock>figcaption{margin-top:10px}
+
+/* ---- 숫자 카드 ---- */
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:26px 0}
+@media (max-width:640px){.cards{grid-template-columns:1fr}}
+.card{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.card .k{font-size:13px;color:var(--ink3)}
+.card .v{font:600 26px/1.3 Menlo,monospace;margin:6px 0 4px}
+.card .s{font-size:12px;color:var(--ink3);line-height:1.6}
+
+/* ---- 표 ---- */
+.tblwrap{overflow-x:auto;margin:22px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.7}
+th{font:700 11.5px/1.5 Menlo,monospace;letter-spacing:.05em;color:var(--ink3);
+  text-align:left;border-bottom:2px solid var(--line2);padding:8px 12px 8px 0;
+  white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:9px 12px 9px 0;vertical-align:top}
+td.n{font-family:Menlo,monospace;font-size:13px;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:2px solid var(--line2)}
+
+/* ---- 말풍선/틀 ---- */
+.box{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--a);
+  border-radius:4px;padding:16px 20px;margin:24px 0;max-width:none}
+.box.g{border-left-color:var(--ok)}
+.box p{margin:8px 0}
+.box .bt{font:700 11px/1 Menlo,monospace;letter-spacing:.16em;color:var(--ink3);
+  margin-bottom:6px}
+.qa{margin:20px 0}
+.qa .q{font-weight:700}
+.qa .a{color:var(--ink2)}
+
+/* ---- 실수 카드 ---- */
+.mistake{background:var(--sunk);border:1px solid var(--line);border-radius:6px;
+  padding:18px 20px;margin:16px 0}
+.mistake .no{font:700 11px/1 Menlo,monospace;color:var(--no);letter-spacing:.14em}
+.mistake h4{margin:8px 0 6px;font-size:16.5px}
+.mistake p{margin:6px 0;font-size:14.5px;color:var(--ink2)}
+.mistake .fix{color:var(--ink)}
+.mistake .fix b{color:var(--ok)}
+
+/* ---- 용어 사전 ---- */
+dl.gloss{margin:26px 0}
+dl.gloss dt{font-weight:700;margin-top:18px}
+dl.gloss dt .en{font:400 12px/1 Menlo,monospace;color:var(--ink3);margin-left:8px}
+dl.gloss dd{margin:4px 0 0;color:var(--ink2);max-width:44em}
+
+/* ---- 참고문헌 ---- */
+ol.refs{padding-left:1.4em;font-size:14.5px;line-height:1.9}
+ol.refs li{margin:12px 0}
+ol.refs .mono{font-size:12.5px;color:var(--ink3)}
+
+/* ---- 푸터 ---- */
+footer{margin-top:90px;border-top:1px solid var(--line2);padding-top:18px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font:400 12px/1.6 Menlo,monospace;color:var(--ink3)}
+footer .co{display:flex;align-items:center;gap:8px;color:var(--ink)}
+footer img{height:26px}
+a{color:inherit}
+.small{font-size:13px;color:var(--ink3)}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="brandrow">{{IMG:sim/fetm_logo_600.png|FETM 로고}}<span class="co">FETM.KR</span></div>
+  <h1>빛이 사라지는 벽</h1>
+  <p class="deck">레이저 프로젝터 수백 대가 허공에 그림을 그리는 공간이 있습니다.
+  그림을 그린 빛줄기는 거기서 멈추지 않고 계속 날아가 벽에 부딪힙니다.
+  그 벽이 빛을 되돌려주면 관객은 벽에 새겨진 낙서를 봅니다.
+  이 보고서는 그 낙서를 지우기 위해 벽을 다시 발명한 기록입니다.
+  두 달 넘게 매일 이어진 아홉 단계의 연구, 2,500개가 넘는 설계와 수만 번의 측정, 스스로 잡아낸 열 번의 큰 실수,
+  그리고 그 모든 것을 담은 시뮬레이터까지의 여정입니다.</p>
+  <div class="meta">
+    <span>SPILL SINK PANEL — 개발 여정 보고서</span>
+    <span>2026 · PHASE 1–9</span>
+    <span>fetm.kr</span>
+  </div>
+</header>
+
+<figure class="dark figblock">
+  {{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/shot_home.png|최종 사양 피라미드 판(간격 4mm, 깊이 22mm, 팁 0.4mm)의 3D 모습}}
+  <figcaption><b>최종 제품의 모습.</b> 간격 4mm 피라미드가 116mm 판을 빈틈없이 채웁니다.
+  측정에 쓰인 지오메트리를 시뮬레이터에서 그대로 촬영했습니다.</figcaption>
+</figure>
+
+<nav>
+  <div class="t">차례</div>
+  <ol>
+    <li><a href="#s1">문제 정의</a></li>
+    <li><a href="#s2">측정 기준 — 세 개의 축</a></li>
+    <li><a href="#s3">홈 구조 — 첫 시도와 한계</a></li>
+    <li><a href="#s4">3차원 구조 — 콘, 그리고 측정 오류 셋</a></li>
+    <li><a href="#s5">도료 모델 교정</a></li>
+    <li><a href="#s6">아홉 구조 비교</a></li>
+    <li><a href="#s7">2층 쌓기와 바닥 처리</a></li>
+    <li><a href="#s8">면 방향 버그 수정 — 피라미드가 1위로</a></li>
+    <li><a href="#s9">피라미드 정밀 검증</a></li>
+    <li><a href="#s10">최종 사양 확정 — 간격 4 · 깊이 22 · 팁 0.4</a></li>
+    <li><a href="#s11">오목 상자 검토 — 전부 탈락</a></li>
+    <li><a href="#s12">창 장치 — 기울인 무반사 유리</a></li>
+    <li><a href="#s13">양산 검토 — 재료 · 도장 · 비용</a></li>
+    <li><a href="#s14">교차 검증</a></li>
+    <li><a href="#s15">실수와 교훈 열 가지</a></li>
+    <li><a href="#s16">시뮬레이터</a></li>
+    <li><a href="#s17">남은 실물 측정</a></li>
+    <li><a href="#s18">용어 사전</a></li>
+    <li><a href="#s19">참고 문헌</a></li>
+  </ol>
+</nav>
+
+<section id="s1">
+  <div class="eyebrow">01 · 들어가며</div>
+  <h2>문제 정의 — 벽에 새겨지는 레이저 낙서</h2>
+  <p class="lead">먼저 무슨 일이 벌어지는지부터 그려 보겠습니다.</p>
+  <p>공연장 안에 옅은 연무를 채우고, 레이저 프로젝터 수백 대를 한 점에 모읍니다.
+  빛줄기들이 공중에서 만나는 자리에 글자와 그림이 떠오릅니다.
+  연무 속 작은 입자들이 빛을 아주 조금씩 흩어 주기 때문에 우리 눈에 보이는 것입니다.</p>
+  <p>문제는 그다음입니다. 빛은 그림을 그린 자리에서 멈추지 않습니다.
+  줄기의 거의 전부가 그대로 계속 날아가서 결국 벽에 부딪힙니다.
+  허공의 그림은 연무가 흩어 준 몇 퍼센트로 은은하게 빛나는데,
+  벽에는 줄기의 온 힘이 그대로 닿습니다.
+  그래서 벽에는 허공의 그림보다 훨씬 선명한 복사본이 생깁니다.
+  관객이 작품 대신 벽의 낙서를 보게 되는 것입니다.</p>
+  <p>빛줄기를 중간에 끌 수는 없습니다. 날아가는 빛줄기 자체가 작품이기 때문입니다.
+  남는 답은 하나입니다. <strong>빛이 벽에서 사라져야 합니다.</strong></p>
+  <p>실제 장비 기준으로 벽에 닿는 빔 굵기는 7~14mm입니다.
+  (레이저큐브 울트라 7.5W MK2 기준. 구경 4mm에 퍼짐 1mrad라서,
+  3m 거리 벽에서는 약 7mm, 10m에서는 약 14mm가 됩니다.)
+  이 굵기 이야기는 뒤에서 여러 번 다시 나옵니다.</p>
+  <div class="box">
+    <div class="bt">이 보고서를 읽는 법</div>
+    <p>각 장은 같은 틀로 진행됩니다. <strong>무엇을 물었나 → 무엇을 해봤나 →
+    무엇을 알게 됐나 → 무엇을 결정했나.</strong>
+    낯선 말이 나오면 맨 뒤의 <a href="#s18">용어 사전</a>을 펴 보세요.
+    그리고 이 연구의 버릇 하나를 미리 말씀드립니다.
+    우리는 <em>측정을 돌리기 전에 예측을 먼저 적어 두고, 틀리면 틀렸다고 기록</em>했습니다.
+    그래서 이 보고서에는 "우리가 틀렸다"는 문장이 자주 나옵니다.
+    그 문장들이 이 연구의 가장 값진 부분입니다.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="eyebrow">02 · 측정</div>
+  <h2>측정 기준 — 세 개의 축</h2>
+  <p class="lead">좋은 벽을 고르려면 "좋다"를 재는 방법부터 정해야 합니다.</p>
+  <p>처음의 순진한 측정은 크게 실패했습니다. 정면에서 빛을 쏘고 정면에서 카메라로 읽었더니,
+  어떤 각도에서는 46,000이라는 말도 안 되는 값이 나오고 바로 옆 각도에서는 0에 가까운 값이 나왔습니다.
+  각도가 조금만 달라져도 결과가 널뛰면 측정이라고 부를 수 없습니다.</p>
+  <p>그래서 측정 장치를 다시 설계했습니다. 하늘 전체(반구)를 균일하게 밝혀 놓고,
+  카메라를 원하는 각도로 기울여 판을 읽습니다.
+  빛은 왕복 경로가 같다는 물리 원리 덕분에, 이렇게 읽은 값은
+  "그 각도로 들어온 빛이 어느 방향으로 나가든 그 전부"와 같아집니다.
+  검증도 통과했습니다. 반사율 0인 판은 정확히 0으로 읽히고(측정에 바닥 잡음이 없다는 뜻),
+  반사율 5%짜리 기준 판은 어느 각도에서나 5.0000%로 읽힙니다.</p>
+  <p>그리고 축을 하나가 아니라 셋으로 정했습니다.
+  한 숫자만 보면 반드시 속기 때문입니다.
+  실제로 시판 알루미늄 벌집은 반사 총량을 5분의 1로 줄여 주지만,
+  나머지 두 축에서는 <em>맨 평판과 완전히 똑같습니다.</em>
+  총량만 보고 골랐다면 틀린 벽을 골랐을 것입니다.</p>
+  <div class="cards">
+    <div class="card"><div class="k">축 1 · 반사 총량</div><div class="v">얼마나 돌아오나</div>
+      <div class="s">들어간 빛 중 몇 퍼센트가 방으로 되돌아오는지.
+      가장 나쁜 재질과 가장 나쁜 각도 기준으로 적습니다.</div></div>
+    <div class="card"><div class="k">축 2 · 모양 뭉개기</div><div class="v">그림이 남나</div>
+      <div class="s">돌아온 빛이 원래의 선 모양을 유지하는지, 뿌옇게 번지는지.
+      같은 도료의 평판과 비교한 배율로 적습니다. 클수록 좋습니다.</div></div>
+    <div class="card"><div class="k">축 3 · 정면 반짝임</div><div class="v">정통으로 되쏘나</div>
+      <div class="s">광원 쪽으로 정통으로 되쏘아지는 가장 밝은 점.
+      평평한 무광 판을 1로 놓은 비율입니다. 작을수록 좋습니다.</div></div>
+  </div>
+  <p>여기에 재현성 규율을 더했습니다. 같은 설계는 몇 달 뒤에 다시 재도
+  마지막 자리까지 같은 값이 나와야 합니다.
+  실제로 기준 설계 하나는 연구 내내 여섯 개의 서로 다른 측정 파일에서
+  <span class="mono">0.215484%</span>로, 끝자리 하나 다르지 않게 재현됐습니다.
+  이 규율 덕분에 나중에 큰 버그를 잡을 수 있었습니다.</p>
+</section>
+
+<section id="s3">
+  <div class="eyebrow">03 · 초기 탐색</div>
+  <h2>홈 구조 — 첫 시도와 한계</h2>
+  <p class="lead">첫 후보는 단순했습니다. 판에 깊은 홈을 파자.</p>
+  <p>단면 하나를 그려서 한 방향으로 쭉 늘인 구조들을 다섯 종류 시험했습니다.
+  기울인 날개(슬랫), 열린 골, 깊고 뾰족한 V홈, 접힌 미로, 그리고 옆면에 톱니를 새긴 변형까지.
+  이 시기에 지금도 쓰는 법칙 몇 개를 얻었습니다.
+  <strong>깊이 나누기 간격이 2를 넘으면 ±40도 안에서 어둡고, 6을 넘으면 모든 각도에서 어둡다.</strong>
+  그리고 되돌아오는 빛의 대부분은 여러 번 튕긴 빛이 아니라 <em>딱 한 번 맞고 나온 빛</em>이라는 사실도
+  이때 처음 측정됐습니다.</p>
+  <p>가장 좋은 V홈은 정면 기준으로 평판의 200분의 1까지 어두워졌습니다. 숫자만 보면 성공 같았습니다.
+  그런데 첫째 축이 아니라 둘째 축이 문제였습니다.
+  홈과 나란한 방향으로 들어온 선은 <em>선 그대로</em> 돌아왔습니다.
+  한 방향으로 늘인 구조는 자기 축 방향으로는 아무 구조도 없기 때문입니다.
+  모양 뭉개기 점수는 어느 각도에서도 거의 0이었습니다.</p>
+  <div class="box">
+    <div class="bt">이 단계의 결정</div>
+    <p>가장 중요한 임무(그림 지우기)를 홈으로는 이룰 수 없다.
+    <strong>3차원으로 간다.</strong></p>
+  </div>
+  <figure class="figblock">
+    {{IMG:results/cone_vs_ridge.png|3D 콘 배열과 1D V홈의 각도별 반사 비교 차트}}
+    <figcaption><b>홈이냐 콘이냐.</b> 나중에 조건을 공정하게 맞추고 다시 잰 비교.
+    3차원 콘이 정면 반짝임에서 5배 어둡고, 모양은 4배 넓게 뭉갭니다.</figcaption>
+  </figure>
+</section>
+
+<section id="s4">
+  <div class="eyebrow">04 · 초기 탐색</div>
+  <h2>3차원 구조 — 콘, 그리고 측정 오류 셋</h2>
+  <p class="lead">콘(원뿔) 벌판은 첫날부터 강력했습니다. 그리고 첫날부터 세 번이나 속을 뻔했습니다.</p>
+  <p><strong>함정 하나, 27% 사건.</strong> 첫 3D 측정에서 반사율 27%라는 값이 나왔습니다.
+  도료 자체 반사율의 55배라서 물리적으로 불가능한 숫자입니다.
+  범인은 측정 여백이었습니다. 카메라를 눕혀서 보면 시선이 판 밖까지 뻗는데,
+  판이 그만큼 크지 않아서 <em>판 뒤의 배경 세상</em>을 읽고 있었던 것입니다.
+  이날 이전의 눕힌 각도 측정값은 전부 폐기했습니다.</p>
+  <p><strong>함정 둘, 8배의 착시.</strong> "가지런한 배열이 흐트린 배열보다 8배 어둡다"는 결과가 나왔습니다.
+  물리가 아니라 틈이었습니다. 콘을 흐트리자 이웃끼리 만나지 못해 바닥 판이 드러났고,
+  그 틈이 밝기를 6.7배 부풀리고 있었습니다. 틈을 막자 결론 하나가 통째로 철회됐습니다.</p>
+  <p><strong>함정 셋, 66배 반짝임.</strong> 어떤 각도에서만 66배로 번쩍이는 판이 있었습니다.
+  둥근 팁을 6개의 평면으로 근사해 만든 각진 면들이 특정 각도에서 거울처럼 정렬한 것입니다.
+  곡면을 더 잘게 쪼개자 사라졌습니다.</p>
+  <p>함정을 다 걷어내고 나서도 교훈이 하나 더 남았습니다.
+  "3D가 1D보다 5배 좋다"던 첫 비교는 <em>팁 조건이 24배나 다른 불공정한 시합</em>이었습니다.
+  조건을 맞추자 격차는 2.9배로 줄었습니다. 여전히 3D의 승리지만, 폭은 처음 주장의 절반 근처였습니다.</p>
+</section>
+
+<section id="s5">
+  <div class="eyebrow">05 · 재료 모델</div>
+  <h2>도료 모델 교정 — 순위까지 바뀌다</h2>
+  <p class="lead">구조를 아무리 잘 골라도, 도료를 잘못 알고 있으면 전부 헛일입니다. 그 일이 실제로 일어났습니다.</p>
+  <p>우리가 쓰던 검정 도료 모델은 "어느 각도에서나 반사율이 같다"고 가정하고 있었습니다.
+  그런데 체코 과학원 연구진이 실제 무소 블랙을 정밀 측정한 논문(참고 문헌 1)을 보면,
+  정면에서 1%인 반사율이 80도 눕힌 각도에서는 3.2%까지 오릅니다.
+  우리 모델은 정면에서 2배 낙관적이었고, 눕힌 각도에서는 7배 낙관적이었으며,
+  심지어 각도에 따라 변하는 방향 자체가 반대였습니다.</p>
+  <p>측정된 곡선으로 도료 모델을 갈아끼우자 세상이 뒤집혔습니다.
+  평판은 2배 나빠지는데 콘은 최대 41배 나빠졌고, <em>후보들의 순위가 뒤바뀌었습니다.</em>
+  그때까지 1등이던 설계가 꼴찌가 됐습니다.
+  과거의 모든 비교를 배율만 고쳐서 재활용할 수도 없었습니다. 전부 다시 측정했습니다.</p>
+  <div class="box">
+    <div class="bt">이 밤이 남긴 것</div>
+    <p>이날 밤에 검사 장치를 만들었습니다. 발표하는 모든 숫자를
+    근거 파일과 자동으로 대조하는 검사입니다. 철회된 주장을 담고 있던
+    자동 보고서 기능은 아예 꺼 버렸습니다.
+    <strong>근거 파일을 대지 못하는 숫자는 보고서에 싣지 않습니다.</strong></p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="eyebrow">06 · PHASE 2</div>
+  <h2>아홉 구조 비교 — 실제 공정 치수로</h2>
+  <p class="lead">그다음 질문은 이것이었습니다. 세상의 어떤 구조든, 실제로 만들 수 있는 치수로 세우면 누가 이기는가.</p>
+  <p>아홉 가지 구조 계열을 한 무대에 올렸습니다.
+  단, 각 계열은 "그 계열을 실제로 만드는 공정이 낼 수 있는 치수"로 세웠습니다.
+  시판 벌집은 공급사 규격표의 셀과 박 두께로, 판금 기와는 0.1mm 철판으로,
+  성형 콘은 0.4mm 팁으로 세웠습니다. 총 180개 설계, 약 만 2천 번의 측정입니다.</p>
+  <div class="grid3 figblock">
+    <figure class="dark">{{IMG:report/2026-08-12/web/13_CELL_NEST_p1100_d50_ln00.jpg|둥지형 셀 구조 렌더}}<figcaption>둥지형 셀 — 어둡기 1등, 그러나</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/11_HONE_p0750_d50_wt005_wb005_ln00.jpg|벌집 구조 렌더}}<figcaption>벌집 — 사서 쓸 수 있는 후보</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/12_CONE_p0375_d30.jpg|콘 배열 렌더}}<figcaption>콘 벌판 — 세 축이 고루 좋은 후보</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/10_SHIN_p0550_d80_t04_o114_k050.jpg|기와(슁글) 구조 렌더}}<figcaption>기와 — 판금으로 접는 후보</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/18_TRUS_p0550_d30_L3_r060_k2.jpg|트러스 구조 렌더}}<figcaption>트러스 — 눕힌 각도에서 오히려 밝아짐</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-13/web/ST_cone-comb_50.jpg|콘과 벌집 2층 구조 렌더}}<figcaption>2층 쌓기 — 다음 장의 주인공</figcaption></figure>
+  </div>
+  <p>결과에서 가장 중요한 것은 개별 순위가 아니라 <em>격차가 어디서 나느냐</em>였습니다.</p>
+  <div class="cards">
+    <div class="card"><div class="k">구조가 있다 vs 없다</div><div class="v">30배</div>
+      <div class="s">같은 도료의 맨 평판 대비, 구조를 세우는 것 자체의 효과</div></div>
+    <div class="card"><div class="k">구조끼리의 차이</div><div class="v">1.6배</div>
+      <div class="s">아홉 계열 사이의 전체 격차. 어느 구조냐는 거의 안 중요합니다</div></div>
+    <div class="card"><div class="k">도료의 미지수</div><div class="v">그보다 큼</div>
+      <div class="s">아직 실측 안 된 도료 성질 두 개의 영향이 위 두 격차보다 컸습니다</div></div>
+  </div>
+  <p>그리고 어둡기 1등이던 둥지형 셀은 여기서 탈락했습니다.
+  수치 표에는 아무 문제가 없었습니다.
+  <em>렌더를 띄워 눈으로 보고 나서야</em>, 벽 두께 0.1mm에 깊이 50mm짜리,
+  즉 종잇장을 500배 높이로 세운 만들 수 없는 물건임이 드러났습니다.
+  "자동 탐색은 허용해 준 범위의 끝값으로 몰려간다"는 교훈을 여기서 얻었고,
+  이후로 모든 우승 후보는 반드시 렌더로 먼저 확인했습니다.</p>
+</section>
+
+<section id="s7">
+  <div class="eyebrow">07 · PHASE 3–4</div>
+  <h2>2층 쌓기와 바닥 처리</h2>
+  <p class="lead">두 층을 쌓으면 두 장점을 다 가질 수 있을까. 실험해 보니 답은 더 단순했습니다.</p>
+  <p>모양을 부수는 층을 위에, 정면 반짝임을 죽이는 층을 아래에 쌓아 봤습니다.
+  결과는 두 개의 법칙으로 정리됩니다.
+  <strong>모양은 위층이 정한다. 정면 반짝임은 아래층이 정한다.</strong>
+  네 쌍의 조합 모두에서 예외 없이 성립했습니다.</p>
+  <p>이 법칙 덕에 벌집의 진짜 범인이 드러났습니다.
+  벌집의 정면 반짝임이 나쁜 이유는 벽 꼭대기가 아니라,
+  <em>셀이라는 관 끝에 놓인 평평한 바닥</em>이었습니다.
+  바닥만 콘으로 바꾸자 밝기의 92%가 사라졌습니다.</p>
+  <p>그럼 바닥을 얼마나 손대야 할까요. 놀랄 만큼 조금이면 됩니다.
+  깊이 50mm짜리 벌집에서 <strong>마지막 2~3mm만 피라미드 모양으로 눌러 주면 5배 어두워집니다.</strong>
+  같은 자리에 3mm의 빈 공기층을 넣는 대조 실험은 아무 효과가 없었습니다.
+  거리가 아니라 모양이 효과를 낸다는 증거입니다.
+  팁의 평평한 부분이 넓을수록 그 면적에 정비례해 밝아집니다.
+  팁 0.1mm는 사실상 공짜지만, 0.4mm에서는 총량이 18% 늘어납니다.</p>
+  <p>이 단계에도 사건이 있었습니다. 벌집을 만드는 코드가 육각형을 잘못 이어 붙여서,
+  판 면적의 30%가 바닥까지 뻥 뚫린 통로였던 것입니다.
+  수치 파일은 멀쩡해 보였고, 렌더도 얼핏 벌집처럼 보였습니다.
+  <em>보고서 갤러리를 훑던 사람의 눈</em>이 잡아냈습니다.
+  고치고 나자 결론 하나가 뒤집혔습니다(쌓기가 총량에서 근소하게 이기는 조합이 하나 있었습니다).
+  이후로 "벌집은 반드시 빈틈없이 이어 붙는다"를 코드가 스스로 검사합니다.</p>
+</section>
+
+<section id="s8">
+  <div class="eyebrow">08 · 정정</div>
+  <h2>면 방향 버그 수정 — 피라미드가 1위로</h2>
+  <p class="lead">이 연구에서 가장 큰 단일 정정이 이날 있었습니다. 세 계열의 구조가, 처음부터 안팎이 뒤집힌 채로 지어져 있었습니다.</p>
+  <p>발단은 사소해 보이는 불일치였습니다. 구멍 없는 껍데기 구조는 속이 꽉 찬 구조와
+  같은 값이 나와야 하는데, 34%나 달랐습니다.
+  그럴듯한 가설 일곱 개를 하나씩 실험으로 지워 나갔습니다.
+  겹친 면 때문인가, 깔때기 방향인가, 미세 틈인가, 이중 벽인가, 좌표 오차인가,
+  그래픽카드 문제인가, 속면에 빛이 닿는 건가. 전부 아니었습니다.
+  마지막에 남은 것은 <strong>면의 방향</strong>이었습니다.
+  3D 모델의 모든 면에는 겉과 속이 있는데, 세 계열(콘, 기와, 피라미드)의 면이
+  전부 속을 바깥으로 향한 채 만들어져 있었던 것입니다.
+  렌더러는 잘못이 없었습니다. 뒤집힌 모델을 만들어 놓고 계산기를 탓할 뻔했습니다.</p>
+  <p>바로잡고 전부 다시 재자, 그동안 억울하게 저평가돼 있던 후보가 드러났습니다.</p>
+  <div class="tblwrap"><table>
+    <tr><th>설계</th><th>정정 전</th><th>정정 후</th><th>변화</th></tr>
+    <tr><td>뾰족 피라미드</td><td class="n">0.182 %</td><td class="n">0.134 %</td><td>26% 어두워짐 — <strong>전체 1위로</strong></td></tr>
+    <tr><td>뭉툭 피라미드</td><td class="n">0.460 %</td><td class="n">0.172 %</td><td>63% 어두워짐 — 꼴찌에서 2위로</td></tr>
+    <tr><td>콘 (기준)</td><td class="n">0.215 %</td><td class="n">0.215 %</td><td>변화 없음</td></tr>
+  </table></div>
+  <p>피라미드의 우위는 16%에서 38%로 벌어졌고,
+  눌러서 한 번에 찍는 한 겹 피라미드가 두 겹짜리 조립품을 세 축 모두에서 이겼습니다.
+  이날 이후 모든 구조 생성 코드는 출구에서 면 방향을 스스로 검사합니다.
+  같은 실수는 두 번 일어날 수 없습니다.</p>
+  <div class="grid2 figblock">
+    <figure class="dark">{{IMG:report/phase5/img/hero_periodic.png|가지런한 피라미드 벌판 렌더}}<figcaption>가지런한 피라미드 벌판</figcaption></figure>
+    <figure class="dark">{{IMG:report/phase5/img/hero_jitter.png|꼭짓점을 흐트린 피라미드 벌판 렌더}}<figcaption>꼭짓점을 흐트린 판 — 측정해 보니 오히려 손해였습니다</figcaption></figure>
+  </div>
+</section>
+
+<section id="s9">
+  <div class="eyebrow">09 · PHASE 5</div>
+  <h2>피라미드 정밀 검증 — 소단계 13종</h2>
+  <p class="lead">이제 주인공은 정해졌습니다. 열세 개의 소단계로 나눠 피라미드를 사방에서 검증했습니다.</p>
+
+  <h3>흐트려야 하나? — 아니오</h3>
+  <p>"규칙적인 배열은 번쩍인다"는 걱정은 처음의 홈 구조에서 온 것이었습니다.
+  홈은 빔이 닿는 위치에 따라 밝기가 214배까지 널뛰지만, 피라미드 벌판은 1.01배밖에 안 흔들립니다.
+  사방이 막힌 셀은 그 자체로 균일합니다. 꼭짓점을 흐트리면 오히려 최대 24% 손해였습니다.
+  <strong>결정: 가지런하게 만든다. 금형 하나면 된다.</strong></p>
+
+  <h3>얼마나 깊게? — 가파름이 전부다</h3>
+  <p>깊이와 간격을 따로 바꿔 봐도, 결과는 "깊이 나누기 간격" 하나로 겹쳐졌습니다.
+  가파를수록 어둡고, 시험한 범위 끝까지 곡선이 계속 내려갑니다.
+  어디서 멈출지는 광학이 아니라 금형 비용의 문제가 됐습니다.</p>
+  <figure class="figblock">
+    {{IMG:results/pitch_choice.png|간격과 깊이에 따른 반사율 스윕 차트 4종}}
+    <figcaption><b>간격을 고르는 근거.</b> 왼쪽 위: 각도별 반사율(간격 3~20mm).
+    ±40도만 보면 순위가 이렇지만, 스치는 각도까지 세면 순위가 뒤집힙니다.
+    이런 그림 수백 장이 이 보고서의 문장 하나하나를 받치고 있습니다.</figcaption>
+  </figure>
+
+  <h3>RF 무향실 흉내는? — 함정</h3>
+  <p>전파 무향실은 큰 피라미드와 작은 피라미드를 섞습니다. 사진이 멋있어서 따라 하고 싶어집니다.
+  하지만 그쪽은 전파의 파장 대역을 넓히려는 설계이고, 우리 문제는 광선 광학입니다.
+  측정 결과 섞은 벌판은 28~40% 나빴습니다. 예측대로였습니다.
+  <em>사진이 인상적이라는 이유로 무늬를 베끼면 안 됩니다.</em></p>
+  <figure class="figblock dark">
+    {{IMG:report/phase5/img/grid_mix.png|크고 작은 피라미드를 섞은 벌판의 위와 옆 모습}}
+    <figcaption><b>섞은 벌판.</b> 무향실 사진을 닮았지만 우리 문제에서는 순수한 손해였습니다.</figcaption>
+  </figure>
+
+  <h3>빔 굵기가 판정을 바꾼다</h3>
+  <p>모양 뭉개기 점수는 "빔 대비 셀 크기"에 달려 있었습니다.
+  간격 10mm짜리 큰 피라미드는 총량에서는 훌륭하지만,
+  실제 7~14mm 빔 앞에서는 <em>평판보다도 좁은 선</em>을 돌려줍니다.
+  선을 갈기갈기 찢으려면 <strong>셀이 빔보다 잘아야 합니다.</strong>
+  이 발견 뒤로 빔 굵기는 상수가 아니라 정식 입력값이 됐고,
+  시뮬레이터에도 그렇게 들어가 있습니다.</p>
+
+  <h3>몰랐던 축 — 방위각의 구멍</h3>
+  <p>그때까지 모든 측정은 판의 정면 평면에서만 이루어졌습니다.
+  판을 제자리에서 빙글 돌려 가며 재자 구멍이 드러났습니다.
+  피라미드는 30도쯤 돌아 들어오는 빛에 74%나 더 밝아집니다.
+  이 발견으로 "최악값"의 정의가 바뀌었고,
+  회전 대칭이라 구멍이 없는 콘과의 승부는 <em>사전에 등록해 둔 판정 규칙으로 무승부</em>가 났습니다.
+  승부는 실제 설치 조건에서 갈렸습니다.
+  콘의 장점(모양 뭉개기 우위)은 실제 빔 굵기에서 사라지는 반면,
+  피라미드의 장점(정면 반짝임 우위)은 빔 굵기와 방향 어느 쪽에도 흔들리지 않았습니다.</p>
+
+  <h3>도료가 쥐고 있는 숫자</h3>
+  <p>마지막 소단계에서는 겸손해질 수밖에 없었습니다. 도료의 표면 거칠기(아직 실측 못 한 값)에 따라
+  "평판보다 N배 어둡다"의 N이 3에서 11.6 사이를 오갑니다.
+  설계의 우열은 흔들리지 않지만, 광고 문구의 숫자는 도료 쿠폰 하나를 실측하기 전까지
+  정직하게 "3~5배"라고만 말할 수 있습니다. 그렇게 적었습니다.</p>
+</section>
+
+<section id="s10">
+  <div class="eyebrow">10 · PHASE 6</div>
+  <h2>최종 사양 확정 — 간격 4 · 깊이 22 · 팁 0.4</h2>
+  <p class="lead">챔피언은 간격 2mm의 바늘처럼 가는 벌판이었지만, 그 금형은 파기가 너무 어렵습니다. 쉽게 만들 수 있는 급을 따로 재봤습니다.</p>
+  <p>결론은 <strong>간격 4mm, 깊이 20mm, 팁 0.1mm</strong>. 가파름은 5로 낮아졌지만
+  세 축 성적은 챔피언과 거의 같고, 팁 요구치는 4배 느슨해서 눌러 찍을 수 있습니다.
+  이 설계가 연구의 표준 샘플이 됐습니다.</p>
+  <p>발주 사양은 여기서 한 번 더 손봤습니다. 깊이는 20에서 <strong>22mm</strong>로
+  키워 여유를 더했고, 팁은 0.1에서 <strong>0.4mm</strong>로 풀어 금형 수명과 가공
+  여유를 샀습니다. 대가는 정직하게 적습니다. 정면 반짝임이 0.040에서 0.173으로
+  4배쯤 오릅니다. 그래도 평평한 무광 판의 6분의 1 수준입니다.
+  반사 총량은 4%만 오르고, 모양 뭉개기는 오히려 조금 좋아집니다.
+  아래 세 축 카드가 이 발주 사양의 실측값입니다.</p>
+  <div class="cards">
+    <div class="card"><div class="k">반사 총량</div><div class="v">0.185 %</div>
+      <div class="s">평판 무소 1.14%의 6분의 1 · 세 평면 최악값(θ40, φ45) 실측</div></div>
+    <div class="card"><div class="k">모양 뭉개기</div><div class="v">1.53×</div>
+      <div class="s">실제 빔 7.5mm · 최악 평면(φ45) 기준. 정면 평면에서는 2.22배</div></div>
+    <div class="card"><div class="k">정면 반짝임</div><div class="v">0.173</div>
+      <div class="s">평평한 무광 판의 6분의 1 · 빔 7.5mm</div></div>
+  </div>
+  <div class="figblock">
+    <figure>{{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/blueprint_p4d22t04.png|발주 사양 설계도: 단면과 팁 상세}}
+    <figcaption><b>발주 사양 설계도.</b> 간격 4, 깊이 22, 팁 0.4, 등판 2,
+    총 두께 24mm. 골짜기는 라운드 없이 날카롭게 유지합니다.</figcaption></figure>
+  </div>
+  <div class="grid2 figblock">
+    <figure class="dark">{{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/shot_front.png|발주 사양 지오메트리의 정면 모습}}<figcaption>발주 사양 지오메트리 — 정면에서 본 모습</figcaption></figure>
+    <figure>{{IMG:report/phase6/img/tip_ladder.png|팁 0.1, 0.2, 0.4mm 사다리 그림}}<figcaption>팁 사다리 — 0.1/0.2/0.4의 정면 반짝임 0.032/0.052/0.107 (빔 2mm). 발주 사양은 금형 여유를 위해 0.4를 골랐습니다</figcaption></figure>
+  </div>
+  <p>판정 두 개로 이 설계의 방향이 정해졌습니다.
+  첫째, <strong>골짜기 라운드는 금지.</strong> 골짜기에 반지름 0.1mm의 둥근 살만 남아도
+  정면 반짝임이 허용치의 2배를 넘습니다. 오목한 홈통이 빛을 광원 쪽으로 모아 쏘기 때문입니다.
+  이 판정 하나로 공정이 갈렸습니다. 표준 사출은 탈락(날카로운 계곡을 못 지킴),
+  실리콘 몰드 주조나 줄 단위 조립이 답입니다.
+  둘째, <strong>스치는 각도에서 오히려 강합니다.</strong>
+  70도로 스치면 평판 무소는 4.3%까지 밝아지는데 최종 샘플은 0.198%에 머뭅니다.
+  격차 21.6배. 프로젝터가 벽을 스치는 구석까지 <em>같은 판 한 종류로 다 덮을 수 있다</em>는 뜻입니다.</p>
+  <figure class="figblock">
+    {{IMG:report/phase6/img/rays_flat_vs_pyramid.png|평판과 피라미드에서의 광선 경로 비교}}
+    <figcaption><b>왜 이기는가.</b> 평판은 한 번 맞고 전부 돌려보냅니다.
+    피라미드 골짜기에서는 평균 9번 튕기는데, 한 번 튕길 때마다 1%만 살아남으니
+    돌아나올 즈음엔 사실상 아무것도 남지 않습니다.</figcaption>
+  </figure>
+</section>
+
+<section id="s11">
+  <div class="eyebrow">11 · PHASE 7</div>
+  <h2>오목 상자 검토 — 다섯 번 측정, 전부 탈락</h2>
+  <p class="lead">벽 뒤에 공간이 있다면, 움푹 파인 상자가 평판보다 낫지 않을까. 다섯 번 지어서 다섯 번 다 졌습니다.</p>
+  <p>민무늬 상자, 벽을 지그재그로 접은 상자, 루버 모양으로 접은 상자, 아코디언 상자,
+  그리고 판 자체로 사방을 두른 상자까지. 진짜 지오메트리로 짓고 재자
+  전부 평판 한 장에 졌습니다. 어떤 것은 <em>맨 평판보다도</em> 밝았습니다.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase7/img/wall_textures.png|세 가지 판금 접기 벽과 각각의 실패 이유}}<figcaption>1mm 판금으로 접어 본 세 가지 벽 — 셋 다 탈락</figcaption></figure>
+    <figure>{{IMG:report/phase7/img/rays_failures.png|지그재그 벽과 미늘 접기가 빛을 되쏘는 경로}}<figcaption>실패의 광선 경로 — 마주 보는 접힘은 유턴 거울이 됩니다</figcaption></figure>
+  </div>
+  <p>대신 값진 법칙 세 개를 얻었습니다.
+  <strong>빛을 마주 보는 오목한 직각 모서리는 재귀 반사경이다.</strong>
+  <strong>어떤 면의 정면도 빛이 들어오는 원뿔 안을 향하면 안 된다.</strong>
+  <strong>흡수 무늬는 가늘고 거의 수직인 면이어야 하는데, 1mm 판금은 그렇게 접히지 않는다.</strong>
+  결론은 시원했습니다. 벽 뒤 공간의 가장 좋은 용도는 상자가 아니라 <em>거리</em>입니다.
+  판을 뒤로 물리면 됩니다. <strong>평평한 만능 판이 곧 제품입니다.</strong></p>
+</section>
+
+<section id="s12">
+  <div class="eyebrow">12 · PHASE 8</div>
+  <h2>창 장치 — 기울인 무반사 유리</h2>
+  <p class="lead">프로젝터 바로 맞은편, 빛이 가장 세게 꽂히는 자리에는 다른 발상이 필요했습니다. 흡수하지 말고 통과시키자.</p>
+  <p>액자용 무반사 유리(표면당 반사 1% 이하)를 위쪽 경첩으로 35도 기울여 답니다.
+  들어온 빛의 99%는 유리를 통과해 아래의 피라미드 함정으로 떨어지고,
+  1%의 반사는 <em>항상 바닥 쪽으로</em> 꺾입니다.
+  기울인 면의 수학 덕분에, 위에서 오는 어떤 빛도 수평보다 위로는 반사될 수 없음을
+  스캔이 아니라 증명으로 확인했습니다. 관객의 눈높이는 안전합니다.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase8/img/concept.png|기울인 무반사 유리와 뒤편 피라미드 함정의 개념도}}<figcaption>개념 — 유리는 통과시키고, 피라미드는 흡수합니다</figcaption></figure>
+    <figure>{{IMG:report/phase8/img/raypaths.png|여러 각도의 빛이 창 장치에서 꺾여 내려가는 경로}}<figcaption>어떤 각도로 와도 반사는 바닥으로 갑니다</figcaption></figure>
+  </div>
+  <p>측정 중에 위험한 예외를 하나 찾았습니다.
+  25도 기울임에서는 정확히 한 각도(광원에서 50도 아래)로만 3만 배 밝게 되쏘는 지점이 있었는데,
+  폭이 5도밖에 안 되는 아주 좁은 봉우리였습니다.
+  35도로 키우자 스파이크는 측정 범위 전체에서 사라졌습니다.
+  대신 렌더 화면에 유리 <em>맨 윗단</em>의 반짝임 띠가 나타났고,
+  윗단 25%를 덮개 립으로 가리는 설계 변경으로 그것도 지웠습니다.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase8/img/device.png|측정에 쓰인 창 장치 도면과 값 요약}}<figcaption>측정된 그대로의 장치 도면 — 35도, 윗단 립 포함</figcaption></figure>
+    <figure>{{IMG:report/phase8/img/audience.png|관객 시선 각도에 따른 밝기 곡선}}<figcaption>관객 곡선 — 어두운 바닥이면 시선 16도 아래까지 벽보다 어둡습니다</figcaption></figure>
+  </div>
+  <p>최종 성적: 관객 눈높이 기준 0.005~0.038%.
+  피라미드 벽 자체보다도 5~35배 어둡습니다.
+  설치 규칙은 하나로 줄었습니다. <strong>장치 앞 1m를 어두운 바닥으로 유지할 것.</strong>
+  그 띠 안에 밝은 물체만 세우지 않으면 이 장치가 관객 눈에 띌 일은 없습니다.</p>
+</section>
+
+<section id="s13">
+  <div class="eyebrow">13 · PHASE 9</div>
+  <h2>양산 검토 — 재료, 도장, 비용</h2>
+  <p class="lead">마지막 관문은 광학이 아니라 공장입니다. 100제곱미터를 실제로 덮으려면 무엇으로, 얼마에 만들 수 있는가.</p>
+
+  <h3>왜 값싼 압출로는 안 되는가 — 40배 법칙</h3>
+  <p>공장 입장에서 가장 반가운 답은 홈 무늬를 롤로 뽑는 압출입니다.
+  재보니 그 길은 막혀 있었습니다. 피라미드의 팁은 <em>점</em>이라 판 면적의 0.06%지만,
+  홈의 팁은 <em>선</em>이라 2.5%입니다.
+  정면 반짝임은 팁 면적을 따라가니, 같은 팁 폭이라도 홈이 점보다 40배 밝습니다.
+  실측 정면 반짝임: 피라미드 0.040, 홈 0.894. 게다가 압출 금형은 팁부터 닳아 뭉툭해집니다.
+  <strong>이것이 피라미드가 이기는 깊은 이유입니다.</strong></p>
+  <figure class="figblock">
+    {{IMG:report/phase9/img/tipline.png|피라미드의 점 팁과 압출 홈의 선 팁 비교}}
+    <figcaption><b>점이냐 선이냐.</b> 위에서 내려다보면 차이가 한눈에 보입니다.</figcaption>
+  </figure>
+
+  <h3>0.18 법칙 — 도료 하나로 전체를 예측한다</h3>
+  <p>맨 재료(도장 없는 검정 우레탄)로 판을 뽑으면 어떻게 될까요.
+  재료 반사율이 얼마든, 이 구조에 올리면 총량은 그 <strong>0.18배</strong>가 됩니다.
+  재료 4%, 5%, 8%짜리 세 점이 정확히 한 직선에 앉았고,
+  무소 1%짜리 실측값 0.177%도 같은 계수로 설명됩니다.
+  덕분에 도료 견적이 산수가 됐습니다.
+  경사면 때문에 벽 100제곱미터의 실제 도장 면적은 1,000제곱미터입니다.
+  전면 무소 도장은 도료값만 5천만~1억 원.
+  관객에게 중요한 구역 10~20%만 무소로 칠하고 나머지는 맨 검정 우레탄으로 두면
+  5백만~2천만 원으로 내려옵니다. 맨 구역도 평판 흰 벽보다 33~88배 어둡습니다.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase9/img/rule018.png|재료 반사율과 판 총량의 직선 관계}}<figcaption>0.18 법칙 — 세 점이 한 직선에</figcaption></figure>
+    <figure>{{IMG:report/phase9/img/corner.png|두 판을 직각으로 맞댄 모서리 측정}}<figcaption>모서리 — 맞대기만 하면 됩니다. 오히려 벽보다 어둡습니다</figcaption></figure>
+  </div>
+
+  <h3>지름길 두 개는 재보고 접었다</h3>
+  <p><strong>팁만 앞에서 뿌리는 도장(도료비 16분의 1)</strong>은 총량은 벌지만
+  정면 반짝임을 전혀 못 건드립니다. 두 축이 깊이를 반대로 무겁게 치기 때문입니다.
+  총량은 꼭대기 부분에서 대부분 정해지고, 정면 반짝임은 바닥까지 포함한 전체 면적에서 나오기 때문입니다. 탈락.
+  <strong>식모지(섬유를 심은 종이)</strong>는 어느 기울기로 심어도 정면 반짝임이
+  기준의 6~9배라서 탈락. 섬유 사이로 내려다보이는 바닥이 평판처럼 빛나기 때문입니다.
+  둘 다 가능성을 숫자로 확인하고 접었기에, 견적서에서 정직하게 뺄 수 있었습니다.</p>
+  <figure class="figblock">
+    {{IMG:report/phase9/img/frontspray.png|앞에서 뿌린 도장이 정면 빛을 못 잡는 이유}}
+    <figcaption><b>팁만 칠하면 안 되는 이유.</b> 비스듬한 빛은 꼭대기만 맞지만,
+    정면 빛은 골짜기 바닥까지 내려가고, 카메라는 그 바닥을 전부 봅니다.</figcaption>
+  </figure>
+
+  <h3>확정된 생산 방식</h3>
+  <div class="box g">
+    <div class="bt">생산 사양 요약</div>
+    <p>3D 프린트 원판 → 백금 실리콘 몰드(소모품, 30~50벌 수명) → 발포 우레탄 주조.
+    판당 무게 약 0.6~1kg. 100장에 몰드 3~4벌.
+    표준 사출은 광학적으로 탈락(골짜기 라운드), 압출은 기본 판으로 탈락(40배 법칙).
+    도장은 2단: 관객 임계 구역만 무소, 나머지는 카본블랙 원착 그대로.
+    모서리는 그냥 직각으로 맞댑니다. 덧댐 몰딩도 둥근 마감도 별도 규칙도 필요 없습니다.</p>
+  </div>
+</section>
+
+
+<section id="s14">
+  <div class="eyebrow">14 · 검증</div>
+  <h2>교차 검증 — 독립 렌더러와 선행 논문</h2>
+  <p class="lead">모든 숫자가 하나의 렌더러에서 나왔다면, 그 렌더러가 틀렸을 때 전부 무너집니다. 그래서 남이 만든 계산기를 빌려 왔습니다.</p>
+  <p>세 겹으로 검증했습니다.
+  첫째, <strong>독립 렌더러.</strong> 완전히 다른 연구용 렌더러(미츠바)로 같은 구조를 재서
+  대표 설계들이 4% 안에서 일치함을 확인했습니다.
+  둘째, <strong>손으로 푸는 답.</strong> 적분구와 골짜기처럼 답이 공식으로 나오는 장치를 지어서
+  두 렌더러를 채점했습니다. 우리 렌더러는 0.3% 안에서 정답을 맞혔고,
+  상대는 특정 구조에서 2% 이상 어긋났습니다.
+  셋째, <strong>제3의 심판.</strong> 아예 별도로 짠 순수 파이썬 추적기가
+  우리 렌더러의 손을 들어 줬습니다. 발표된 숫자는 전부 우리 렌더러의 것입니다.</p>
+  <p>그리고 문헌과도 대조했습니다. 가장 가까운 선행 연구는 자이스(Zeiss) 소속 연구자의
+  2025년 논문입니다(참고 문헌 2). 그쪽은 "평판의 0.65배"를 보고했는데 우리는 0.19배를 주장하니,
+  3배가 넘는 간극입니다. 논문 전문을 읽고 그의 조건을 그대로 재현해 보니 답이 나왔습니다.
+  그의 시편은 윗면의 30.6%가 평평한 덮개 층입니다.
+  우리 판의 평평한 면적은 0.06%입니다.
+  우리 판의 덮개 비율을 그의 값대로 맞춰 주면 우리 수치도 0.33~0.40배로 올라갑니다.
+  <em>간극의 대부분은 그의 덮개였습니다.</em> 남는 1.4~1.8배의 차이는
+  원인 후보 세 개와 함께 미해결로 정직하게 기록해 두었습니다.</p>
+  <figure class="figblock">
+    {{IMG:results/fig_kaster.png|평판, 우리 피라미드, 덮개층을 흉내 낸 판의 광선 비교}}
+    <figcaption><b>선행 연구 재현.</b> 왼쪽부터 평판, 우리 피라미드(평평한 면적 0.06%),
+    그리고 선행 연구의 덮개층을 흉내 낸 판(30.6%). 같은 재료, 같은 각도 조건입니다.</figcaption>
+  </figure>
+  <figure class="figblock dark">
+    {{IMG:results/sheet_candidates.png|각도별로 평판과 판 위의 레이저 선을 나란히 찍은 비교 사진}}
+    <figcaption><b>눈으로 보는 판정.</b> 각 칸의 왼쪽이 평판, 오른쪽이 우리 판.
+    같은 노출로 찍은 레이저 선입니다. 숫자가 아니라 화면으로도 차이가 보입니다.</figcaption>
+  </figure>
+  <p>마지막 겹은 재현성입니다. 기준 설계의 값
+  <span class="mono">0.0013391865650191903</span>은 연구 내내 몇 번을 다시 재도
+  비트 하나 다르지 않게 나옵니다. 단 한 건, 초기 코드로 잰 옛 값과 0.055% 어긋나는
+  쌍이 있는데, 덮지 않고 편차 목록에 등재해서 검사가 그 한도 안에서만 통과시키게 했습니다.
+  기록 없이 슬그머니 달라진 값은 지금도 검사를 통과하지 못합니다.</p>
+</section>
+
+<section id="s15">
+  <div class="eyebrow">15 · 기록</div>
+  <h2>실수와 교훈 열 가지</h2>
+  <p class="lead">이 연구의 신뢰는 맞힌 예측이 아니라 잡아낸 실수에서 나옵니다. 큰 것 열 개를 골라 그대로 보여 드립니다.</p>
+
+  <div class="mistake"><span class="no">MISTAKE 01</span>
+    <h4>반사율 27% 사건</h4>
+    <p>첫 3D 측정이 물리적으로 불가능한 값을 냈습니다. 기울인 카메라의 시선이 판 밖 배경을 읽고 있었습니다.</p>
+    <p class="fix"><b>교훈</b> — 이상한 결과는 발견이 아니라 버그의 첫 증상일 확률이 높다. 측정 여백 규칙이 코드에 박혔습니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 02</span>
+    <h4>"흐트린 배열이 8배 밝다"</h4>
+    <p>물리 법칙처럼 보였지만, 흐트린 콘들 사이에 벌어진 틈으로 바닥이 드러난 것이었습니다. 틈을 막자 6.7배가 사라졌습니다.</p>
+    <p class="fix"><b>교훈</b> — 결론을 발표하기 전에 지오메트리를 렌더로 확인한다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 03</span>
+    <h4>손으로 적어 넣은 기준값</h4>
+    <p>"평판은 6.12%"라는 분모가 어느 측정에서도 나온 적 없는, 누군가 손으로 적은 숫자였습니다. 실측하니 1.14%. 모든 "N배 어둡다"가 줄었습니다.</p>
+    <p class="fix"><b>교훈</b> — 기준값도 측정값이다. 이후 모든 보고 숫자는 근거 파일과 자동 대조됩니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 04</span>
+    <h4>종잇장 500배 높이의 우승자</h4>
+    <p>어둡기 1등 구조가 벽 두께 0.1mm에 깊이 50mm짜리, 만들 수 없는 물건이었습니다. 수치 표로는 끝까지 알 수 없었고, 렌더를 띄워 보고서야 알았습니다.</p>
+    <p class="fix"><b>교훈</b> — 자동 탐색은 허용해 준 범위의 끝값으로 몰려간다. 허용 범위(제조 한계)부터 정직하게 정한다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 05</span>
+    <h4>도료 모델이 각도 방향까지 반대</h4>
+    <p>실측 논문과 대조하자 우리 도료 가정은 정면 2배, 눕힌 각도 7배 낙관이었고 순위까지 뒤집었습니다.</p>
+    <p class="fix"><b>교훈</b> — 재료 가정은 문헌 실측에 못박는다. 이 정정을 계기로 자동 검사 장치를 만들었습니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 06</span>
+    <h4>30%가 뚫려 있던 벌집</h4>
+    <p>육각형을 잘못 이어 붙여 판의 30%가 바닥까지 열린 통로였습니다. 수치도 렌더도 얼핏 정상. 갤러리를 훑던 사람 눈이 잡았습니다.</p>
+    <p class="fix"><b>교훈</b> — "빈틈없이 이어 붙는다"는 사람이 아니라 코드가 검사한다. 결론 하나가 뒤집혔습니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 07</span>
+    <h4>기준판이 판 속에 서 있었다</h4>
+    <p>항상 5.000%여야 할 기준판이 낮게 읽혔습니다. 기준판이 측정 대상 판의 벌판 안에 겹쳐 서 있었던 것입니다.</p>
+    <p class="fix"><b>교훈</b> — 기준이 오염되면 모든 비율이 오염된다. 기준판 값은 이제 매 측정마다 자동 확인됩니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 08</span>
+    <h4>안팎이 뒤집힌 세 계열</h4>
+    <p>구조 세 계열이 면의 겉과 속이 뒤집힌 채 지어져 있었고, 최대 63%까지 밝게 잘못 읽혔습니다. 가설 일곱 개를 차례로 지운 끝에 찾았습니다.</p>
+    <p class="fix"><b>교훈</b> — 바로잡자 진짜 우승자(피라미드)가 드러났습니다. 면 방향은 이제 생성 코드가 출구에서 강제합니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 09</span>
+    <h4>한 평면만 재고 있었다</h4>
+    <p>모든 측정이 판 정면 평면에서만 이루어지고 있었습니다. 판을 돌려 가며 재자 30도 방향에서 74% 더 밝은 구멍이 나왔습니다.</p>
+    <p class="fix"><b>교훈</b> — 최악값은 모든 방향에서 정의된다. 시뮬레이터도 세 평면을 기본으로 재도록 고쳤습니다.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 10</span>
+    <h4>철회 나흘, 그리고 규칙</h4>
+    <p>연구 중반의 어느 나흘 동안 발표된 결론 네 개가 철회됐습니다. 새로운 물리 때문이 아니라 전부 준비 실수였습니다. 그리고 전부 우리보다 남이 먼저 알아챘습니다. 검토자였고, 질문하는 동료였고, 의뢰인이었습니다.</p>
+    <p class="fix"><b>교훈</b> — "측정 전에 검증하라. 검증 안 된 스윕은 없는 것보다 나쁘다. 누군가 그 순위로 행동하기 때문이다." 이 문장이 연구의 제1규칙이 됐습니다.</p></div>
+</section>
+
+<section id="s16">
+  <div class="eyebrow">16 · 도구</div>
+  <h2>시뮬레이터 — 연구 전체를 담은 도구</h2>
+  <p class="lead">연구가 끝나면 알아낸 것들은 보고서 안에만 남기 쉽습니다. 그래서 연구 전체를 도구 하나에 담았습니다.</p>
+  <p>웹 브라우저에서 구조를 고르고 치수를 움직이면, 연구에 쓰인 것과
+  <em>완전히 같은 측정 코드</em>가 즉석에서 세 축을 재 줍니다.
+  발표된 숫자와 화면의 숫자가 어긋날 수 없도록, 같은 함수를 부르게 만들었습니다.</p>
+  <figure class="figblock">
+    {{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/sim_ui_shot.jpg|시뮬레이터 화면: 광선 추적과 세 축 대시보드}}
+    <figcaption><b>시뮬레이터 실황.</b> 가운데는 광선 추적 화면.
+    색깔은 들어온 각도, 점선 간격은 남은 에너지, 빨간 가위표는 빛이 죽은 자리입니다.
+    오른쪽 위에 세 축이 항상 떠 있습니다.</figcaption>
+  </figure>
+  <div class="tblwrap"><table>
+    <tr><th>기능</th><th>내용</th></tr>
+    <tr><td>세 축 대시보드</td><td>어떤 변경이든 세 축이 함께 갱신됩니다. 한 축만 보고 속을 일이 없어집니다.</td></tr>
+    <tr><td>세 평면 측정</td><td>정면, 대각, 옆면(0/45/90도) 세 방향을 기본으로 잽니다. 방위각 구멍을 놓쳤던 실수의 재발 방지입니다.</td></tr>
+    <tr><td>광선 추적</td><td>빛이 골짜기에서 몇 번 튕기고 어디서 죽는지 눈으로 보여줍니다. 살아 있는 빛만 그립니다.</td></tr>
+    <tr><td>발표값 대조</td><td>지금 만든 설계가 연구 기록의 어느 설계와 같은지, 값이 일치하는지 자동으로 맞춰봅니다.</td></tr>
+    <tr><td>독립 렌더러 교차검증</td><td>버튼 하나로 미츠바 렌더러가 같은 구조를 다시 잽니다.</td></tr>
+    <tr><td>한 장 보고서</td><td>현재 화면, 사양, 측정값을 A4 한 장 PDF로 만들어 줍니다. 진짜 글자라 검색이 됩니다.</td></tr>
+    <tr><td>STL 내보내기</td><td>지금 화면의 구조를 그대로 3D 프린트 파일(STL)로 내보냅니다. 이음매 없이 타일링됩니다.</td></tr>
+  </table></div>
+</section>
+
+<section id="s17">
+  <div class="eyebrow">17 · 남은 일</div>
+  <h2>남은 실물 측정 다섯 가지</h2>
+  <p class="lead">시뮬레이션으로 할 수 있는 연구는 여기까지 끝냈습니다. 이제 몇 개의 값은 실물로만 확인할 수 있습니다.</p>
+  <figure class="figblock">
+    {{IMG:report/ko/img_room.png|공연장 단면 배치 설계도: 프로젝터, 벽 2단 구성, 창 장치, 바닥 띠}}
+    <figcaption><b>방 전체 배치도.</b> 측정으로 얻은 규칙 다섯 개가 이 한 장에 들어 있습니다.
+    무소 구역과 맨 구역의 2단 벽, 빔이 꽂히는 자리의 창 장치, 장치 앞 1m의 어두운 바닥 띠,
+    그냥 맞대면 되는 모서리.</figcaption>
+  </figure>
+  <div class="tblwrap"><table>
+    <tr><th>#</th><th>실측 항목</th><th>이 값이 정하는 것</th></tr>
+    <tr><td class="n">1</td><td>스필 지도 사진 (노출 낮춘 컷 + 연무만 컷)</td><td>어느 벽이 무소 구역이 될지, 맨 구역으로 충분한지</td></tr>
+    <tr><td class="n">2</td><td>검정 우레탄 쿠폰의 반사율</td><td>0.18 법칙에 넣을 재료값 — 맨 구역의 최종 성적</td></tr>
+    <tr><td class="n">3</td><td>무소 블랙 리터당 도포 면적</td><td>도료 예산이 백만 원대인지 천만 원대인지</td></tr>
+    <tr><td class="n">4</td><td>뮤지엄 유리의 35도 반사율 + 먼지 1주 시험</td><td>창 장치의 실전 성능</td></tr>
+    <tr><td class="n">5</td><td>인쇄 쿠폰 측정 (0/±20/±40도)</td><td>시뮬레이터 전체의 합격 판정. 예측 대비 ±25% 안이면 통과, ±40% 밖이면 발주 전 원인 규명</td></tr>
+  </table></div>
+  <p>마지막 줄에 이 연구의 태도가 담겨 있습니다.
+  쿠폰의 합격 기준은 <em>부품이 존재하기 전에</em> 미리 등록해 두었습니다.
+  실물이 예측과 다르면, 다르다고 말하게 되어 있습니다.</p>
+</section>
+
+<section id="s18">
+  <div class="eyebrow">18 · 용어</div>
+  <h2>용어 사전</h2>
+  <p class="lead">본문에 나온 말들을 쉬운 말로 다시 적었습니다.</p>
+  <dl class="gloss">
+    <dt>스필<span class="en">spill</span></dt>
+    <dd>그림을 그리고 남아 벽까지 날아가는 빛. 이 연구가 없애려는 대상입니다.</dd>
+    <dt>반사 총량<span class="en">total reflectance</span></dt>
+    <dd>판에 들어간 빛 중 방으로 되돌아오는 비율. 100%면 거울, 0%면 완전한 암흑입니다. 이 보고서의 %값은 대부분 이것입니다.</dd>
+    <dt>모양 뭉개기<span class="en">smear</span></dt>
+    <dd>돌아온 빛이 원래의 선 모양을 얼마나 잃었는지. 같은 도료의 평판을 1로 놓은 배율로, 클수록 그림이 안 남습니다.</dd>
+    <dt>정면 반짝임<span class="en">head-on peak</span></dt>
+    <dd>광원 방향으로 정통으로 되쏘아지는 가장 밝은 점. 평평한 무광 판을 1로 놓은 비율로, 작을수록 좋습니다.</dd>
+    <dt>렌더 / 렌더러<span class="en">render</span></dt>
+    <dd>컴퓨터 안에 빛과 물체를 지어 놓고 사진을 찍는 일, 그리고 그 계산기. 우리는 영화 산업에서 검증된 물리 렌더러(사이클스)를 측정기로 씁니다.</dd>
+    <dt>광선 추적<span class="en">ray tracing</span></dt>
+    <dd>빛 한 줄기가 가는 길을 튕김 하나하나 따라가는 계산법. 렌더러의 핵심입니다.</dd>
+    <dt>거울 반사 / 확산 반사<span class="en">specular / diffuse</span></dt>
+    <dd>거울처럼 한 방향으로 튕기는 반사와, 무광 벽처럼 사방으로 흩어지는 반사. 실제 도료는 둘의 혼합입니다.</dd>
+    <dt>입사각 θ<span class="en">theta</span></dt>
+    <dd>빛이 판 정면에서 몇 도 기울어 들어오는지. 0도는 정면, 70도는 스치듯 들어오는 각도입니다.</dd>
+    <dt>방위각 φ<span class="en">phi</span></dt>
+    <dd>판을 시계처럼 놓았을 때 빛이 몇 시 방향에서 오는지. 판을 제자리에서 돌려 가며 재면 이 축이 열립니다.</dd>
+    <dt>간격 · 깊이 · 팁<span class="en">pitch · depth · tip</span></dt>
+    <dd>피라미드 한 칸의 폭, 골짜기의 깊이, 꼭짓점에 남는 평평한 면의 폭. 발주 사양은 4mm · 22mm · 0.4mm입니다.</dd>
+    <dt>가파름<span class="en">aspect ratio</span></dt>
+    <dd>깊이 나누기 간격. 이 연구에서 어둡기를 좌우한 단 하나의 형태 변수입니다.</dd>
+    <dt>무소 블랙<span class="en">Musou Black</span></dt>
+    <dd>시판되는 초흑색 수성 도료. 정면 반사율 약 1%. 이 연구의 도료 모델은 이 제품의 실측 논문에 못박혀 있습니다.</dd>
+    <dt>대조판<span class="en">control</span></dt>
+    <dd>답을 미리 아는 기준 물체. 반사율 5%짜리 무광 판을 항상 옆에 세워 두고, 5.000%로 읽히는지 매번 확인합니다.</dd>
+    <dt>스윕<span class="en">sweep</span></dt>
+    <dd>변수 하나를 계단처럼 바꿔 가며 수십, 수백 번 자동 측정하는 일. 이 연구는 스윕 수백 개의 합입니다.</dd>
+    <dt>사전 등록<span class="en">pre-registration</span></dt>
+    <dd>측정을 돌리기 전에 예상 답과 판정 기준을 먼저 적어 두는 규율. 나중에 결과에 맞춰 말을 바꾸는 것을 막아 줍니다.</dd>
+    <dt>재귀 반사<span class="en">retroreflection</span></dt>
+    <dd>들어온 방향 그대로 빛을 되돌려보내는 반사. 도로 표지판은 이걸 노리고, 우리는 이걸 피합니다. 오목한 직각 모서리가 이 성질을 가집니다.</dd>
+    <dt>쿠폰<span class="en">coupon</span></dt>
+    <dd>성능 확인용으로 작게 만드는 실물 시편. 발주 전에 시뮬레이션 예측과 실측을 맞춰 보는 데 씁니다.</dd>
+    <dt>STL<span class="en"></span></dt>
+    <dd>3D 프린터와 금형 업체가 읽는 표준 입체 파일. 시뮬레이터에서 버튼 하나로 나옵니다.</dd>
+  </dl>
+</section>
+
+<section id="s19">
+  <div class="eyebrow">19 · 문헌</div>
+  <h2>참고 문헌</h2>
+  <ol class="refs">
+    <li>J. Filip, R. Vávra, <i>"How dark is dark? A reflectance and scattering analysis of black materials"</i>,
+      J. Opt. Soc. Am. A 43(7), 1037–1045 (2026). <span class="mono">DOI 10.1364/JOSAA.589935 · arXiv:2601.05094</span><br>
+      <span class="small">무소 블랙의 각도별 반사율 실측. 이 연구의 도료 모델이 이 논문의 곡선에 맞춰져 있어,
+      모든 절대값의 뿌리가 되는 문헌입니다.</span></li>
+    <li>Kaster, <i>"Macroscopic structural light absorbers"</i>,
+      J. Appl. Phys. 138, 174904 (2025). Carl Zeiss AG. <span class="mono">arXiv:2507.05152</span><br>
+      <span class="small">가장 가까운 선행 연구. 본문 검증 장에서 전문을 재현해 3배 간극의 대부분이
+      시편의 평면 덮개층임을 밝혔습니다.</span></li>
+    <li>A. Davis, H. F. Nijhout, S. Johnsen, <i>"Diverse nanostructures underlie thin ultra-black scales in butterflies"</i>,
+      Nature Communications 11:1294 (2020).<br>
+      <span class="small">자연의 초흑색 구조. 구멍 뚫린 껍데기 발상의 출처였고, 우리 치수에서는 통하지 않음을 측정으로 확인했습니다.</span></li>
+    <li>S. Mouchet, <i>"Infrared absorbers inspired by nature"</i> (2024). <span class="mono">arXiv:2404.18169</span><br>
+      <span class="small">자연모사 흡수 구조 리뷰. 극락조 깃털과 공작거미 사례의 간접 출처입니다.</span></li>
+    <li>미국 특허 US 11,209,577 B2, <i>"Macro-scale features for optically black surfaces"</i>,
+      Ocean Insight Inc. (2021).<br>
+      <span class="small">밀리미터급 흑색 표면 구조를 폭넓게 청구한 특허. 반사율 데이터는 싣지 않았습니다.
+      발주 전 권리 검토 대상으로 기록해 두었습니다.</span></li>
+    <li>상용품 — 무소 블랙(KoPro, 수성 초흑색 도료) · 레이저큐브 울트라 7.5W MK2(X-Laser) ·
+      뮤지엄 유리(액자용 무반사 유리, 표면당 반사 1% 이하) · 알루미늄 벌집 코어(Huarui Honeycomb, 폭 0.03~0.1mm 박).<br>
+      <span class="small">벌집 치수, 빔 굵기, 유리 반사율 등 실물 제약이 전부 이 제품군의 공개 규격에서 왔습니다.</span></li>
+  </ol>
+</section>
+
+<footer>
+  <span>SPILL SINK PANEL · 개발 여정 보고서 · 시뮬레이션 수치는 전부 재현 가능한 측정 기록에 연결되어 있습니다</span>
+  <span class="co">{{IMG:sim/fetm_logo_600.png|FETM 로고}} fetm.kr</span>
+</footer>
+
+</div>

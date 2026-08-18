@@ -1,0 +1,819 @@
+<meta charset="utf-8">
+<title>The Wall That Eats Light</title>
+<style>
+/* Same instrument-panel identity as the simulator. One deliberate light
+   theme; every ground and ink is explicit so the page reads the same on any
+   host. */
+:root{
+  --bg:#dedbd4; --paper:#efede8; --sunk:#f7f6f2; --line:#c8c4bb; --line2:#b3aea3;
+  --ink:#16181a; --ink2:#4c5054; --ink3:#84878b;
+  --a:#ff4d00; --ok:#1f7a44; --no:#c0341c; --screen:#101215;
+}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);margin:0;
+  font:400 16px/1.75 "Helvetica Neue",Helvetica,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 80px}
+.mono{font-family:Menlo,ui-monospace,monospace}
+header{padding:64px 0 0}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.brandrow img{height:40px;display:block}
+.brandrow .co{font:700 12px/1 Menlo,monospace;letter-spacing:.18em;color:var(--ink2)}
+h1{font-size:46px;line-height:1.15;letter-spacing:-0.02em;margin:0 0 14px;text-wrap:balance}
+.deck{font-size:19px;line-height:1.7;color:var(--ink2);max-width:42em;margin:0 0 26px}
+.meta{font:400 12px/1.6 Menlo,monospace;color:var(--ink3);letter-spacing:.04em;
+  border-top:3px solid var(--a);padding-top:12px;display:flex;gap:18px;flex-wrap:wrap}
+nav{background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:22px 26px;margin:40px 0}
+nav .t{font:700 11px/1 Menlo,monospace;letter-spacing:.2em;color:var(--ink3);margin-bottom:14px}
+nav ol{margin:0;padding-left:1.3em;columns:2;column-gap:36px;font-size:14.5px;line-height:2.1}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line2)}
+nav a:hover{color:var(--a);border-color:var(--a)}
+@media (max-width:640px){nav ol{columns:1}}
+section{margin-top:72px}
+.eyebrow{font:700 11px/1 Menlo,monospace;letter-spacing:.22em;color:var(--a);
+  text-transform:uppercase;margin-bottom:10px}
+h2{font-size:30px;line-height:1.25;letter-spacing:-0.01em;margin:0 0 6px;text-wrap:balance}
+h3{font-size:19px;margin:36px 0 8px}
+p{margin:14px 0;max-width:42em}
+.lead{font-size:17.5px;color:var(--ink2)}
+em{font-style:normal;background:linear-gradient(transparent 62%, #ffd9c7 62%)}
+figure{margin:26px 0}
+figure img{width:100%;display:block;border:1px solid var(--line);border-radius:4px;background:#fff}
+figure.dark img{background:var(--screen)}
+figcaption{font:400 12.5px/1.7 Menlo,monospace;color:var(--ink3);margin-top:8px}
+figcaption b{color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid2 figure,.grid3 figure{margin:0}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.figblock{margin:26px 0}
+.figblock>figcaption{margin-top:10px}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:26px 0}
+@media (max-width:640px){.cards{grid-template-columns:1fr}}
+.card{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.card .k{font-size:13px;color:var(--ink3)}
+.card .v{font:600 26px/1.3 Menlo,monospace;margin:6px 0 4px}
+.card .s{font-size:12px;color:var(--ink3);line-height:1.6}
+.tblwrap{overflow-x:auto;margin:22px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.7}
+th{font:700 11.5px/1.5 Menlo,monospace;letter-spacing:.05em;color:var(--ink3);
+  text-align:left;border-bottom:2px solid var(--line2);padding:8px 12px 8px 0;white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:9px 12px 9px 0;vertical-align:top}
+td.n{font-family:Menlo,monospace;font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:2px solid var(--line2)}
+.box{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--a);
+  border-radius:4px;padding:16px 20px;margin:24px 0;max-width:none}
+.box.g{border-left-color:var(--ok)}
+.box p{margin:8px 0}
+.box .bt{font:700 11px/1 Menlo,monospace;letter-spacing:.16em;color:var(--ink3);margin-bottom:6px}
+.mistake{background:var(--sunk);border:1px solid var(--line);border-radius:6px;
+  padding:18px 20px;margin:16px 0}
+.mistake .no{font:700 11px/1 Menlo,monospace;color:var(--no);letter-spacing:.14em}
+.mistake h4{margin:8px 0 6px;font-size:16.5px}
+.mistake p{margin:6px 0;font-size:14.5px;color:var(--ink2)}
+.mistake .fix{color:var(--ink)}
+.mistake .fix b{color:var(--ok)}
+dl.gloss{margin:26px 0}
+dl.gloss dt{font-weight:700;margin-top:18px}
+dl.gloss dt .en{font:400 12px/1 Menlo,monospace;color:var(--ink3);margin-left:8px}
+dl.gloss dd{margin:4px 0 0;color:var(--ink2);max-width:42em}
+ol.refs{padding-left:1.4em;font-size:14.5px;line-height:1.9}
+ol.refs li{margin:12px 0}
+ol.refs .mono{font-size:12.5px;color:var(--ink3)}
+footer{margin-top:90px;border-top:1px solid var(--line2);padding-top:18px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font:400 12px/1.6 Menlo,monospace;color:var(--ink3)}
+footer .co{display:flex;align-items:center;gap:8px;color:var(--ink)}
+footer img{height:26px}
+a{color:inherit}
+.small{font-size:13px;color:var(--ink3)}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="brandrow">{{IMG:sim/fetm_logo_600.png|FETM logo}}<span class="co">FETM.KR</span></div>
+  <h1>The Wall That Eats Light</h1>
+  <p class="deck">There is a room where hundreds of laser projectors draw pictures
+  in mid-air. The light that paints the picture keeps flying, and lands on a wall.
+  If the wall gives that light back, the audience sees graffiti instead of art.
+  This is the record of reinventing that wall: nine phases of research carried out
+  daily over more than two months, over 2,500 candidate designs and tens of
+  thousands of measurements, ten major mistakes caught by our own checks, and the
+  simulator that now holds it all.</p>
+  <div class="meta">
+    <span>SPILL SINK PANEL — DEVELOPMENT JOURNEY</span>
+    <span>2026 · PHASE 1–9</span>
+    <span>fetm.kr</span>
+  </div>
+</header>
+
+<figure class="dark figblock">
+  {{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/shot_home.png|3D view of the final-spec pyramid panel (pitch 4 mm, depth 22 mm, tip 0.4 mm)}}
+  <figcaption><b>The final product.</b> Pitch-4&nbsp;mm pyramids packing a
+  116&nbsp;mm panel edge to edge — the exact measured geometry, captured in the
+  simulator.</figcaption>
+</figure>
+
+<nav>
+  <div class="t">CONTENTS</div>
+  <ol>
+    <li><a href="#s1">The problem — the wall copies the art</a></li>
+    <li><a href="#s2">Build the ruler first — three axes</a></li>
+    <li><a href="#s3">Act 1 · The era of grooves</a></li>
+    <li><a href="#s4">Act 2 · Going 3D, and three traps</a></li>
+    <li><a href="#s5">Act 3 · The night the paint model was wrong</a></li>
+    <li><a href="#s6">Act 4 · The structure zoo</a></li>
+    <li><a href="#s7">Act 5 · Stacks, and the law of the floor</a></li>
+    <li><a href="#s8">Act 6 · The day everything was inside-out</a></li>
+    <li><a href="#s9">Act 7 · The pyramid, alone</a></li>
+    <li><a href="#s10">The final spec — pitch 4 · depth 22 · tip 0.4</a></li>
+    <li><a href="#s11">Act 9 · The box lost five times</a></li>
+    <li><a href="#s12">Act 10 · The window — transmit, don't absorb</a></li>
+    <li><a href="#s13">Act 11 · Can we make a hundred of these?</a></li>
+    <li><a href="#s14">Measured with other people's rulers</a></li>
+    <li><a href="#s15">The times we were wrong</a></li>
+    <li><a href="#s16">The instrument this journey built</a></li>
+    <li><a href="#s17">What remains — the physical world answers next</a></li>
+    <li><a href="#s18">Glossary</a></li>
+    <li><a href="#s19">References</a></li>
+  </ol>
+</nav>
+
+<section id="s1">
+  <div class="eyebrow">Prologue</div>
+  <h2>The problem — the wall copies the art</h2>
+  <p class="lead">First, picture what actually happens.</p>
+  <p>Fill a venue with thin haze and converge hundreds of laser projectors on one
+  spot. Where the beams cross, letters and figures appear in the air — visible
+  only because the haze particles scatter a small share of each beam toward your
+  eyes.</p>
+  <p>The trouble starts afterwards. A beam does not stop where it drew. Nearly
+  all of its power keeps flying and eventually strikes a wall. The picture in the
+  air glows on a few scattered percent; the wall receives the full beam. So the
+  wall carries a copy of the artwork far sharper than the artwork itself, and the
+  audience reads the wall.</p>
+  <p>The beams cannot be blanked — the beam in flight <em>is</em> the piece.
+  One answer remains: <strong>the wall has to eat the light.</strong></p>
+  <p>The real brush is 7–14&nbsp;mm wide at the wall (a LaserCube Ultra 7.5&nbsp;W
+  MK2: 4&nbsp;mm aperture, 1&nbsp;mrad divergence — about 7&nbsp;mm at 3&nbsp;m,
+  14&nbsp;mm at 10&nbsp;m). That width will matter in several verdicts below.</p>
+  <div class="box">
+    <div class="bt">HOW TO READ THIS REPORT</div>
+    <p>Every act follows the same frame: <strong>what we asked → what we tried →
+    what we learned → what we decided.</strong> Unfamiliar words are collected in
+    the <a href="#s18">glossary</a> at the end. And one habit to know in advance:
+    we wrote our predictions down <em>before</em> running each measurement, and
+    graded them honestly afterwards. That is why the sentence "we were wrong"
+    appears so often here. Those sentences are the most valuable part of the
+    study.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="eyebrow">The Ruler</div>
+  <h2>Build the ruler first — three axes</h2>
+  <p class="lead">To choose a good wall, you first need a ruler that measures "good."</p>
+  <p>Our first naive measurement failed loudly: shining a beam head-on and
+  reading with a camera in the same place gave a ratio of 46,000 at one angle and
+  nearly zero at the next. A ruler that jumps like that is not a ruler.</p>
+  <p>So we rebuilt the instrument. Light the whole sky (a uniform hemisphere) and
+  read the panel with a tilted camera. Because light travels the same path in
+  both directions, that reading equals "everything that returns when a beam
+  enters at that angle, no matter where it exits." The instrument passed its own
+  exams: a zero-reflectance panel reads exactly zero — the ruler has no noise
+  floor — and a 5% reference plate reads 5.0000% at every angle.</p>
+  <p>And we scored on three axes, not one, because one number always lies.
+  A commercial aluminium honeycomb cuts total reflection five-fold while behaving
+  <em>exactly like a bare flat plate</em> on the other two axes. Score one axis
+  and you buy the wrong wall.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Axis 1 · Total return</div><div class="v">How much comes back</div>
+      <div class="s">The share of incoming light returned to the room, quoted at
+      the worst material and worst angle.</div></div>
+    <div class="card"><div class="k">Axis 2 · Shape destruction</div><div class="v">Does the picture survive</div>
+      <div class="s">Whether the returned light keeps its line shape or blurs into
+      texture. A ratio against a flat plate of the same paint — higher is better.</div></div>
+    <div class="card"><div class="k">Axis 3 · Head-on glint</div><div class="v">Does it flash the eye</div>
+      <div class="s">The brightest spot fired straight back at the source, with a
+      flat matte plate as 1. Lower is better.</div></div>
+  </div>
+  <p>We added a discipline of reproducibility on top. The same design, re-measured
+  months apart, must return the same value to the last digit. One reference design
+  reads <span class="mono">0.215484%</span> in six different measurement files
+  across the whole study, without a single last-digit difference. That discipline
+  is what later let us catch the biggest bug of the project.</p>
+</section>
+
+<section id="s3">
+  <div class="eyebrow">Act 1 · The Beginning</div>
+  <h2>Act 1 · The era of grooves</h2>
+  <p class="lead">The first candidates were simple: cut deep grooves into a plate.</p>
+  <p>We tried five families of cross-sections extruded along one axis — tilted
+  slats, open troughs, deep sharp V-grooves, folded labyrinths, and serrated
+  flanks. Several laws measured here still stand: <strong>depth divided by pitch
+  above 2 is dark within ±40°, above 6 is dark at every angle</strong>; and the
+  light that comes back is dominated not by many-bounce survivors but by
+  <em>light that hit once and left</em>.</p>
+  <p>The best V-groove reached one two-hundredth of a flat plate head-on. By the
+  numbers, a success. But the second axis failed: a line drawn parallel to the
+  grooves came back <em>as a line</em>. A profile extruded along one axis has no
+  structure along that axis, so its shape-destruction score was near zero at
+  every angle.</p>
+  <div class="box">
+    <div class="bt">DECISION</div>
+    <p>The first-priority mission — destroying the picture — cannot be done with
+    grooves. <strong>Go three-dimensional.</strong></p>
+  </div>
+  <figure class="figblock">
+    {{IMG:results/cone_vs_ridge.png|Angle sweep comparing 3D cone arrays against 1D V-grooves}}
+    <figcaption><b>Grooves vs cones.</b> The later, fairly-matched comparison:
+    the 3D cone is 5× darker head-on and smears shapes 4× wider.</figcaption>
+  </figure>
+</section>
+
+<section id="s4">
+  <div class="eyebrow">Act 2</div>
+  <h2>Act 2 · Going 3D, and three traps</h2>
+  <p class="lead">The cone field was strong from day one — and fooled us three times on day one.</p>
+  <p><strong>Trap one: the 27% incident.</strong> The first 3D measurement
+  returned a reflectance of 27% — 55 times the paint's own reflectance,
+  physically impossible. The culprit was the measurement margin: a tilted camera
+  looks past the edge of the panel, and it had been reading <em>the background
+  world behind the geometry</em>. Every steep-angle number before that day was
+  discarded.</p>
+  <p><strong>Trap two: the 8× illusion.</strong> "Regular arrays are 8× darker
+  than jittered ones" looked like physics. It was gaps: jittered cones stopped
+  meeting at their bases and the backing plate showed through, inflating
+  brightness 6.7×. Closing the gaps withdrew an entire conclusion.</p>
+  <p><strong>Trap three: the 66× glint.</strong> One panel flashed 66× at a
+  single angle. Its rounded tips had been approximated by six flat facets whose
+  mirror normals lined up at exactly that angle. Finer curvature made it vanish.</p>
+  <p>Even with the traps cleared, one more lesson remained. Our first
+  "3D beats 1D five-fold" comparison had mismatched tip conditions by a factor
+  of 24. Matched fairly, the gap became 2.9× — still a win, but the honest one.</p>
+</section>
+
+<section id="s5">
+  <div class="eyebrow">Act 3 · The Turning Night</div>
+  <h2>Act 3 · The night the paint model was wrong</h2>
+  <p class="lead">Choose structures perfectly, and it is all worthless if you are wrong about the paint. That happened.</p>
+  <p>Our black-paint model assumed the same reflectance at every angle. A precise
+  laboratory measurement of actual Musou Black (Reference 1) says otherwise:
+  1% head-on rising to 3.2% at grazing angles. We had been 2× optimistic head-on,
+  7× optimistic at grazing — and the angular trend ran in the wrong direction.</p>
+  <p>Swapping in the measured curve turned the world over. The flat plate got 2×
+  worse, the cones up to 41× worse, and <em>the ranking inverted</em> — the
+  design in first place fell to last. No past comparison could be rescaled;
+  everything was re-measured.</p>
+  <div class="box">
+    <div class="bt">WHAT THAT NIGHT LEFT BEHIND</div>
+    <p>The same night we built the locks and the gate checks. Every published
+    number is now automatically compared against its source file, and the report
+    generator that still contained two withdrawn claims was disarmed.
+    <strong>A number that cannot prove itself does not appear in a report.</strong></p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="eyebrow">Act 4 · Phase 2</div>
+  <h2>Act 4 · The structure zoo</h2>
+  <p class="lead">Next question: take every structure in the world, build each at the size its own factory can deliver — who wins?</p>
+  <p>Nine structural families entered one arena, each at its honest process
+  limit: bought honeycomb at supplier-catalogue cell and foil sizes, sheet-metal
+  shingles at 0.1&nbsp;mm steel, moulded cones at a 0.4&nbsp;mm tip. 180 designs,
+  roughly twelve thousand measurements.</p>
+  <div class="grid3 figblock">
+    <figure class="dark">{{IMG:report/2026-08-12/web/13_CELL_NEST_p1100_d50_ln00.jpg|Nested cell structure render}}<figcaption>Nested cells — darkest, but…</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/11_HONE_p0750_d50_wt005_wb005_ln00.jpg|Honeycomb render}}<figcaption>Honeycomb — the buy-it-today candidate</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/12_CONE_p0375_d30.jpg|Cone array render}}<figcaption>Cone field — the balanced contender</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/10_SHIN_p0550_d80_t04_o114_k050.jpg|Shingle structure render}}<figcaption>Shingles — folded from sheet metal</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-12/web/18_TRUS_p0550_d30_L3_r060_k2.jpg|Truss structure render}}<figcaption>Truss — a grazing-angle amplifier</figcaption></figure>
+    <figure class="dark">{{IMG:report/2026-08-13/web/ST_cone-comb_50.jpg|Two-layer cone and honeycomb stack render}}<figcaption>Two-layer stack — the next act's subject</figcaption></figure>
+  </div>
+  <p>The most important result was not the ranking but the <em>structure of the
+  gaps</em>:</p>
+  <div class="cards">
+    <div class="card"><div class="k">Structure vs no structure</div><div class="v">30×</div>
+      <div class="s">Any structure against a bare flat plate of the same paint</div></div>
+    <div class="card"><div class="k">Between structures</div><div class="v">1.6×</div>
+      <div class="s">The whole spread across nine families. Which structure barely matters</div></div>
+    <div class="card"><div class="k">The paint unknowns</div><div class="v">Larger</div>
+      <div class="s">Two unmeasured paint properties outweighed both of the above</div></div>
+  </div>
+  <p>And the darkness leader — the nested cell — was disqualified here. Its
+  numbers were flawless. Only when we <em>rendered it and looked</em> did it turn
+  out to be a 0.1&nbsp;mm wall standing 50&nbsp;mm tall: a sheet of paper raised
+  to five hundred times its thickness. Unbuildable. The lesson entered the
+  project's vocabulary — <em>an optimiser always walks to the edge of whatever
+  box you give it</em> — and every winner since has been rendered and looked at
+  first.</p>
+</section>
+
+<section id="s7">
+  <div class="eyebrow">Act 5 · Phase 3–4</div>
+  <h2>Act 5 · Stacks, and the law of the floor</h2>
+  <p class="lead">Stack two layers, keep both virtues? The experiment taught something simpler.</p>
+  <p>We stacked a shape-destroying layer over a glint-killing layer, in every
+  order and split. Two laws emerged, with no exceptions across every pair:
+  <strong>the top layer sets the shape score; the bottom layer sets the head-on
+  glint.</strong></p>
+  <p>Those laws exposed the honeycomb's true culprit. Its head-on failure was
+  never the wall tops — a honeycomb cell is a tube aimed at the viewer with a
+  flat backing plate at the far end. Replace only that floor, and 92% of the
+  glint disappears.</p>
+  <p>How much of the depth must be shaped? Astonishingly little.
+  <strong>Pressing only the last 2–3&nbsp;mm of a 50&nbsp;mm cell into pyramids
+  buys a five-fold improvement.</strong> A 3&nbsp;mm air gap in the same place —
+  the control — buys nothing. Shape does the work, not distance. And the flat
+  spot on a pyramid tip pays back linearly in area: a 0.1&nbsp;mm tip is
+  effectively free; 0.4&nbsp;mm costs 18%.</p>
+  <p>This act had its own incident. The honeycomb-building code had stitched its
+  hexagons wrong, leaving 30% of the panel as open channels straight down to the
+  backing. The CSV looked fine; the render passed at a glance. <em>A human eye
+  browsing the report gallery</em> caught it. After the rebuild one conclusion
+  flipped, and "honeycombs must tessellate" became an assertion the code enforces
+  on itself.</p>
+</section>
+
+<section id="s8">
+  <div class="eyebrow">Act 6 · The Mid-Project Turn</div>
+  <h2>Act 6 · The day everything was inside-out</h2>
+  <p class="lead">The largest single correction of the study: three structural families had been built inside-out from the start.</p>
+  <p>It began as a small inconsistency — a shell with no holes must measure the
+  same as the solid it replaces, and it was off by 34%. Seven plausible
+  explanations were executed one by one: coincident faces, funnel orientation,
+  micro-slits, double walls, floating-point joints, the GPU, light reaching the
+  interior. All acquitted. What remained was <strong>face orientation</strong>.
+  Every face of a 3D model has an inside and an outside, and three families —
+  cone, shingle, pyramid — had been built with their skins pointing inward. The
+  renderer was innocent; we had dressed the geometry inside-out and nearly blamed
+  the mirror.</p>
+  <div class="tblwrap"><table>
+    <tr><th>Design</th><th>Before</th><th>After</th><th>Change</th></tr>
+    <tr><td>Sharp pyramid</td><td class="n">0.182 %</td><td class="n">0.134 %</td><td>26% darker — <strong>takes first place</strong></td></tr>
+    <tr><td>Truncated pyramid</td><td class="n">0.460 %</td><td class="n">0.172 %</td><td>63% darker — from last place to second</td></tr>
+    <tr><td>Cone (reference)</td><td class="n">0.215 %</td><td class="n">0.215 %</td><td>unchanged</td></tr>
+  </table></div>
+  <p>The pyramid's lead grew from 16% to 38%, and a single press-formed layer now
+  beat the two-layer assembly on all three axes. Since that day, every geometry
+  builder checks its own face orientation at the exit. The same mistake cannot
+  happen twice.</p>
+  <div class="grid2 figblock">
+    <figure class="dark">{{IMG:report/phase5/img/hero_periodic.png|Regular pyramid field render}}<figcaption>The regular pyramid field</figcaption></figure>
+    <figure class="dark">{{IMG:report/phase5/img/hero_jitter.png|Jittered pyramid field render}}<figcaption>The jittered variant — measurably worse, it turned out</figcaption></figure>
+  </div>
+</section>
+
+<section id="s9">
+  <div class="eyebrow">Act 7 · Phase 5</div>
+  <h2>Act 7 · The pyramid, alone</h2>
+  <p class="lead">The champion was chosen. Thirteen sub-phases then attacked it from every side.</p>
+
+  <h3>Should it be jittered? — No</h3>
+  <p>The fear of regular arrays came from Act 1's grooves, whose brightness
+  swings 214× with brush position. A pyramid field swings 1.01×. A cell closed
+  on all four sides is uniform by itself; jittering the apexes cost up to 24%
+  for nothing. <strong>Decision: build it periodic. One die.</strong></p>
+
+  <h3>How deep? — Steepness is everything</h3>
+  <p>Sweeping depth and pitch separately collapsed onto one curve: depth divided
+  by pitch. Steeper is darker, and the curve was still falling at the end of the
+  tested range. Where to stop became a tooling-cost question, not an optical
+  one.</p>
+  <figure class="figblock">
+    {{IMG:results/pitch_choice.png|Four-panel sweep chart for choosing pitch}}
+    <figcaption><b>How a pitch gets chosen.</b> Return versus incidence angle by
+    pitch; worst-case curves; and the ranking inversion when grazing angles are
+    counted. Hundreds of charts like this one stand behind each sentence of this
+    report.</figcaption>
+  </figure>
+
+  <h3>Copy the RF chamber? — A trap</h3>
+  <p>RF anechoic chambers mix large and small pyramids, and the photos make you
+  want to copy them. But that trick widens a <em>wavelength</em> band — a wave
+  mechanism. We live in ray optics, where performance follows steepness, so a
+  mixed field is just a mixture of steepnesses: strictly worse. Measured: 28–40%
+  worse, exactly as predicted. <em>Never copy a pattern because the photograph is
+  impressive.</em></p>
+  <figure class="figblock dark">
+    {{IMG:report/phase5/img/grid_mix.png|Mixed-size pyramid field, top and side views}}
+    <figcaption><b>The mixed field.</b> It looks like the chamber photo. In our
+    problem it is pure loss.</figcaption>
+  </figure>
+
+  <h3>The brush width changes the verdict</h3>
+  <p>Shape-destruction scores turned out to hinge on brush-to-cell size. A
+  10&nbsp;mm-pitch pyramid is excellent on totals but returns <em>a line narrower
+  than a flat wall's</em> under the real 7–14&nbsp;mm brush.
+  <strong>To shred a line, the cells must be finer than the brush.</strong>
+  Beam width became a first-class input — in the simulator too.</p>
+
+  <h3>The axis nobody had measured — the compass hole</h3>
+  <p>Until this point every measurement ran in the panel's frontal plane.
+  Rotating the panel exposed a hole: light approaching from about 30° around the
+  compass reads 74% brighter. The definition of "worst case" changed that day,
+  and the duel against the rotation-symmetric cone ended — by the verdict rule
+  registered in advance — in a genuine draw. Reality broke the tie: the cone's
+  advantage (smear) evaporates at real brush widths, while the pyramid's
+  advantage (head-on glint) survives every brush width and every compass
+  direction.</p>
+
+  <h3>Held hostage by the paint</h3>
+  <p>The last sub-phase taught humility. Depending on the paint's surface
+  roughness — a value never yet measured on a physical coupon — the honest
+  "N× darker than flat" claim moves between 3 and 11.6. The design choice is
+  robust; the marketing number is not. So the claim was written as "3–5×" until
+  a real coupon says otherwise.</p>
+</section>
+
+<section id="s10">
+  <div class="eyebrow">Act 8 · Phase 6</div>
+  <h2>The final spec — pitch 4 · depth 22 · tip 0.4</h2>
+  <p class="lead">The champion was a needle bed at 2 mm pitch — a die-maker's nightmare. So we measured an easy-to-build tier.</p>
+  <p>The conclusion: <strong>pitch 4&nbsp;mm, depth 20&nbsp;mm, tip
+  0.1&nbsp;mm.</strong> Less steep, yet its three-axis scores nearly match the
+  champion, and the tip requirement is four times looser — pressable. This
+  design became the study's reference sample.</p>
+  <p>The ORDER spec was then adjusted once more. Depth grew from 20 to
+  <strong>22&nbsp;mm</strong> for margin, and the tip relaxed from 0.1 to
+  <strong>0.4&nbsp;mm</strong> to buy die life and machining tolerance. The
+  price is stated honestly: head-on glint rises from 0.040 to 0.173 — still a
+  sixth of a flat matte plate. Total return rises only 4%, and smear actually
+  improves slightly. The three cards below are the order spec's measured
+  values.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Total return</div><div class="v">0.185 %</div>
+      <div class="s">One sixth of flat Musou (1.14%) · worst over three azimuth planes (θ40, φ45), measured</div></div>
+    <div class="card"><div class="k">Shape destruction</div><div class="v">1.53×</div>
+      <div class="s">At the real 7.5 mm beam · worst plane (φ45); 2.22× in the frontal plane</div></div>
+    <div class="card"><div class="k">Head-on glint</div><div class="v">0.173</div>
+      <div class="s">One sixth of a flat matte plate · 7.5 mm beam</div></div>
+  </div>
+  <div class="figblock">
+    <figure>{{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/blueprint_p4d22t04.png|Final order spec blueprint: section and tip detail}}
+    <figcaption><b>The order-spec blueprint.</b> Pitch 4, depth 22, tip 0.4,
+    backing 2 — 24&nbsp;mm total. Valleys stay sharp, no fillets.</figcaption></figure>
+  </div>
+  <div class="grid2 figblock">
+    <figure class="dark">{{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/shot_front.png|Front view of the order-spec geometry}}<figcaption>The order-spec geometry, seen head-on</figcaption></figure>
+    <figure>{{IMG:report/phase6/img/tip_ladder.png|Tip ladder drawing at 0.1, 0.2, 0.4 mm}}<figcaption>The tip ladder — head-on 0.032 / 0.052 / 0.107 at 0.1 / 0.2 / 0.4&nbsp;mm (2&nbsp;mm beam). The order spec chose 0.4 for die tolerance</figcaption></figure>
+  </div>
+  <p>Two verdicts sealed this design's fate. First, <strong>valley fillets are
+  forbidden.</strong> A rounded bead of just 0.1&nbsp;mm radius left in the
+  valleys more than doubles the head-on limit — a concave trough concentrates
+  light back toward its source. That one verdict chose the process: standard
+  injection moulding is rejected (it cannot hold sharp valleys); silicone-mould
+  casting or row-strip assembly can. Second, <strong>it gets stronger where walls
+  get grazed.</strong> At 70° the flat Musou wall blooms to 4.3% while the final
+  sample sits at 0.198% — a 21.6× advantage. One panel type covers the whole
+  wall, including the corners the projectors graze.</p>
+  <figure class="figblock">
+    {{IMG:report/phase6/img/rays_flat_vs_pyramid.png|Traced ray paths in a flat plate versus a pyramid field}}
+    <figcaption><b>Why it wins.</b> A flat plate returns everything in one
+    bounce. In a pyramid valley the light bounces nine times on average, keeping
+    1% each time — by the time it could leave, almost nothing remains.</figcaption>
+  </figure>
+</section>
+
+<section id="s11">
+  <div class="eyebrow">Act 9 · Phase 7</div>
+  <h2>Act 9 · The box lost five times</h2>
+  <p class="lead">If there is space behind the wall, shouldn't a recessed box beat a flat panel? We built five. All five lost.</p>
+  <p>A plain box, zigzag-folded walls, louvre-folded walls, accordion walls, and
+  finally a box clad on every face with our own panel. Built as real geometry and
+  measured, every one lost to a single flat panel — some were brighter than
+  <em>a bare flat plate</em>.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase7/img/wall_textures.png|Three sheet-metal wall folds and why each failed}}<figcaption>Three walls folded from 1&nbsp;mm sheet — three failures</figcaption></figure>
+    <figure>{{IMG:report/phase7/img/rays_failures.png|Ray paths showing zigzag and louvre walls retro-reflecting}}<figcaption>The failure paths — facing folds form U-turn mirrors</figcaption></figure>
+  </div>
+  <p>The losses bought three design laws. <strong>A concave right-angle corner
+  facing the beam is a retroreflector. No face normal may point into the incoming
+  cone of light. Absorbing texture needs fine, near-vertical faces — and
+  1&nbsp;mm sheet metal cannot be folded into that.</strong>
+  The conclusion was clean: the best use of space behind a wall is
+  <em>distance</em> — move the panel back. <strong>The flat universal panel is
+  the product.</strong></p>
+</section>
+
+<section id="s12">
+  <div class="eyebrow">Act 10 · Phase 8</div>
+  <h2>Act 10 · The window — transmit, don't absorb</h2>
+  <p class="lead">Directly opposite the projectors, where the beams strike hardest, a different idea was needed: don't eat the light. Pour it away.</p>
+  <p>Take museum-grade anti-reflective glass (under 1% reflection per surface),
+  hinge it at the top, tilt it 35° back. 99% of the light passes through into a
+  pyramid-lined trap below, and the 1% reflection is always folded
+  <em>downward</em>. The tilted plane's arithmetic guarantees — by proof, not by
+  scan — that no beam from above can ever reflect toward level or upward
+  sightlines. The audience's eyes are safe by construction.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase8/img/concept.png|Concept diagram of the tilted AR glass and pyramid trap}}<figcaption>The concept — glass pours, pyramids swallow</figcaption></figure>
+    <figure>{{IMG:report/phase8/img/raypaths.png|Ray paths for several beam angles all folding downward}}<figcaption>Whatever the angle, the residual goes to the floor</figcaption></figure>
+  </div>
+  <p>Measurement found one dangerous exception, and watched another disappear.
+  At a 25° tilt there was a single razor-thin retro spike — 34,000× at exactly
+  one angle, gone five degrees away. At 35° the spike left the measured field
+  entirely. The renders then showed a sparkle band at the <em>top edge</em> of
+  the glass, and extending the rim cover over the top quarter erased that too.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase8/img/device.png|As-measured window device drawing}}<figcaption>The device as measured — 35°, with the top lip</figcaption></figure>
+    <figure>{{IMG:report/phase8/img/audience.png|Brightness versus observer elevation angle}}<figcaption>The audience curve — with a dark floor, below the wall's own level down to −16°</figcaption></figure>
+  </div>
+  <p>Final numbers at audience eye level: 0.005–0.038% — 5× to 35× darker than
+  the pyramid wall itself. The installation rule reduced to one line:
+  <strong>keep about one metre of dark floor in front of the unit.</strong>
+  Nothing wakes it except a bright object standing in that strip.</p>
+</section>
+
+<section id="s13">
+  <div class="eyebrow">Act 11 · Phase 9</div>
+  <h2>Act 11 · Can we make a hundred of these?</h2>
+  <p class="lead">The last gate is not optics. It is the factory: what can actually cover a hundred square metres, and at what cost?</p>
+
+  <h3>Why cheap extrusion fails — the 40× law</h3>
+  <p>The factory's sweetest answer is extruding a groove profile from a roll.
+  Measurement closed that door. A pyramid's tip is a <em>point</em> — 0.06% of
+  the panel's area. A groove's tip is a <em>line</em> — 2.5%. Head-on glint
+  follows tip area, so at equal tip width the line pays 40× more than the point.
+  Measured: pyramid 0.040, groove 0.894. And extrusion dies wear their tips round
+  first, so the line only grows in production. <strong>This is the deep reason
+  the pyramid wins.</strong></p>
+  <figure class="figblock">
+    {{IMG:report/phase9/img/tipline.png|Point tip of a pyramid versus line tip of an extruded groove}}
+    <figcaption><b>Point or line.</b> Seen from above, the difference is
+    obvious.</figcaption>
+  </figure>
+
+  <h3>The 0.18 rule — one number predicts every coating</h3>
+  <p>What if panels are cast in bare black urethane, no paint at all? Whatever
+  the material's reflectance, this geometry returns <strong>0.18 of it</strong>.
+  Three bare materials sat exactly on that line, and the measured Musou panel
+  (0.177% from a 1% paint) obeys the same coefficient. Budgeting became
+  arithmetic: the slopes multiply the painted surface tenfold, so 100&nbsp;m² of
+  wall is 1,000&nbsp;m² of paint. Full Musou coverage costs 50–100M&nbsp;KRW in
+  paint alone; painting only the audience-critical 10–20% brings it to
+  5–20M&nbsp;KRW, while the bare zones still sit 33–88× darker than a white
+  wall.</p>
+  <div class="grid2 figblock">
+    <figure>{{IMG:report/phase9/img/rule018.png|Linear relation between material reflectance and panel total}}<figcaption>The 0.18 rule — three points, one line</figcaption></figure>
+    <figure>{{IMG:report/phase9/img/corner.png|Measurement of two panels butted at a right angle}}<figcaption>Corners — just butt them. They read darker than the open wall</figcaption></figure>
+  </div>
+
+  <h3>Two shortcuts, measured shut</h3>
+  <p><strong>Spraying paint on the tips only</strong> (one sixteenth of the paint
+  bill) buys totals but cannot touch the head-on glint — the two axes weight
+  depth in opposite directions. Totals are earned at the tips; the glint is
+  earned everywhere, mostly at the bottom. Rejected.
+  <strong>Flocked fibre sheet</strong> fails at every fibre angle we measured:
+  looking straight down between the fibers, the flat floor shines like a bare
+  plate. Rejected. Both "maybes" were closed with numbers, so they exit the
+  quotation honestly.</p>
+  <figure class="figblock">
+    {{IMG:report/phase9/img/frontspray.png|Why tips-only paint cannot stop head-on light}}
+    <figcaption><b>Why tips-only paint fails.</b> Oblique light only touches the
+    upper faces, but head-on light reaches the valley floor — and the camera sees
+    all of it.</figcaption>
+  </figure>
+
+  <h3>The production route, settled</h3>
+  <div class="box g">
+    <div class="bt">PRODUCTION SUMMARY</div>
+    <p>3D-printed master → platinum silicone moulds (consumables, 30–50 casts
+    each) → foamed urethane casting, about 0.6–1&nbsp;kg per panel, 3–4 moulds
+    per hundred panels. Standard injection is optically rejected (valley
+    fillets); extrusion is rejected as the default (the 40× law). Two-tier
+    painting: Musou only where the audience looks, carbon-black bare urethane
+    elsewhere. Corners simply butt at right angles — no cove strips, no fillets,
+    no rules.</p>
+  </div>
+</section>
+
+<section id="s14">
+  <div class="eyebrow">Verification</div>
+  <h2>Measured with other people's rulers</h2>
+  <p class="lead">If every number comes from one renderer, everything collapses the day that renderer is wrong. So we borrowed other rulers.</p>
+  <p>Verification ran three layers deep. <strong>An independent renderer:</strong>
+  a completely separate research renderer (Mitsuba) re-measured representative
+  designs and agreed within 4%. <strong>Closed-form answers:</strong> we built
+  scenes whose answers exist as formulas — an integrating sphere, a canyon — and
+  graded both renderers against them; ours hit the exact answer within 0.3%,
+  the other drifted past 2% on certain structures. <strong>A third referee:</strong>
+  an independently written plain-Python ray tracer sided with our renderer.
+  Every published number is the audited renderer's.</p>
+  <p>We also reconciled with the literature. The closest published prior art is
+  a 2025 paper by a Zeiss researcher (Reference 2) reporting "0.65× of a flat
+  plate" where we claim 0.19× — a gap of more than 3×. Reading the full paper
+  and reproducing his conditions resolved it: his specimen's top face is 30.6%
+  flat cap layer, while our panel's flat area is 0.06%. Dial our geometry to his
+  cap fraction and our number rises to 0.33–0.40×. <em>Most of the gap was his
+  cap.</em> The residual 1.4–1.8× is recorded as open, with three named
+  candidate causes.</p>
+  <figure class="figblock">
+    {{IMG:results/fig_kaster.png|Ray comparison of flat plate, our pyramid, and a cap-layer analog}}
+    <figcaption><b>Reproducing the prior art.</b> Left to right: a flat plate,
+    our pyramid (0.06% flat area), and an analog of the published specimen's
+    30.6% cap layer. Same material, same angles.</figcaption>
+  </figure>
+  <figure class="figblock dark">
+    {{IMG:results/sheet_candidates.png|Side-by-side rendered photos of a laser line on flat plate versus panel at several angles}}
+    <figcaption><b>The verdict, visible.</b> In each tile the left half is the
+    flat plate, the right half our panel — the same laser line at identical
+    exposure.</figcaption>
+  </figure>
+  <p>The last layer is reproducibility. One anchor value,
+  <span class="mono">0.0013391865650191903</span>, reproduces bit for bit every
+  time it is re-measured. A single pair of values from the earliest code
+  disagrees by 0.055%; instead of papering over it, it is registered in a
+  deviation ledger that the gate check consults — silent drift still fails the
+  build.</p>
+</section>
+
+<section id="s15">
+  <div class="eyebrow">Honesty</div>
+  <h2>The times we were wrong</h2>
+  <p class="lead">The credibility of this study comes not from the predictions we got right but from the mistakes we caught. Here are the ten largest, undisguised.</p>
+
+  <div class="mistake"><span class="no">MISTAKE 01</span>
+    <h4>The 27% incident</h4>
+    <p>The first 3D measurement returned a physically impossible value. The tilted camera was reading the background world past the edge of the panel.</p>
+    <p class="fix"><b>Lesson</b> — a surprising result is usually a bug's first symptom. The margin rule went into the code.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 02</span>
+    <h4>"Jittered arrays are 8× brighter"</h4>
+    <p>It looked like physics. It was daylight: jittered cones stopped meeting at their bases and the backing showed through. Closing the gaps erased 6.7× of it.</p>
+    <p class="fix"><b>Lesson</b> — render the geometry and look at it before publishing a conclusion.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 03</span>
+    <h4>The typed-in baseline</h4>
+    <p>"A flat plate is 6.12%" turned out to be a number someone had typed, traceable to no measurement. Measured: 1.14%. Every "N× darker" claim shrank.</p>
+    <p class="fix"><b>Lesson</b> — the baseline is a measurement too. Every reported figure is now auto-checked against its source file.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 04</span>
+    <h4>The champion that was a sheet of paper</h4>
+    <p>The darkness leader had 0.1&nbsp;mm walls standing 50&nbsp;mm tall — unmanufacturable. The spreadsheet never knew; the render did.</p>
+    <p class="fix"><b>Lesson</b> — an optimiser always walks to the edge of the box you give it. Draw the box (manufacturing limits) honestly first.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 05</span>
+    <h4>A paint model wrong even in its direction</h4>
+    <p>Checked against the published measurement, our paint assumption was 2× optimistic head-on, 7× at grazing — and inverted the ranking.</p>
+    <p class="fix"><b>Lesson</b> — pin material assumptions to measured literature. This correction gave birth to the locks and gate checks.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 06</span>
+    <h4>The honeycomb that was 30% holes</h4>
+    <p>Mis-stitched hexagons left 30% of the panel as open channels to the backing. Numbers and render both looked fine at a glance. A person browsing the gallery caught it.</p>
+    <p class="fix"><b>Lesson</b> — "cells must tessellate" is now asserted by the code, not by people. One conclusion flipped.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 07</span>
+    <h4>The reference plate stood inside the panel</h4>
+    <p>The control plate that must always read 5.000% read low. It had been standing inside the measured panel's own field.</p>
+    <p class="fix"><b>Lesson</b> — contaminate the reference and every ratio is contaminated. The control value is now verified on every run.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 08</span>
+    <h4>Three families built inside-out</h4>
+    <p>Three structure families had inverted face orientations and read up to 63% too bright. Found after executing seven hypotheses in a row.</p>
+    <p class="fix"><b>Lesson</b> — fixing it revealed the true champion (the pyramid). Face orientation is now enforced at every builder's exit.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 09</span>
+    <h4>We were measuring one plane</h4>
+    <p>All measurements ran in the panel's frontal plane. Rotating the panel exposed a direction 74% brighter at 30° around the compass.</p>
+    <p class="fix"><b>Lesson</b> — the worst case is defined over all directions. The simulator now measures three planes by default.</p></div>
+
+  <div class="mistake"><span class="no">MISTAKE 10</span>
+    <h4>Four retractions, and the rule they bought</h4>
+    <p>During one stretch mid-project, four published conclusions were withdrawn. Not one fell to new physics — all four were setup errors, and every one was first caught by someone else: a reviewer, a questioning colleague, the client.</p>
+    <p class="fix"><b>Lesson</b> — "Validate before you measure. An unvalidated sweep is worse than none, because someone will act on its ranking." That sentence became the project's first rule.</p></div>
+</section>
+
+<section id="s16">
+  <div class="eyebrow">The Instrument</div>
+  <h2>The instrument this journey built</h2>
+  <p class="lead">When research ends, its knowledge tends to be buried in reports. So the entire study was folded into a single tool.</p>
+  <p>Pick a structure in a web browser, move the dimensions, and the
+  <em>exact same measurement code</em> the study ran re-measures all three axes
+  on the spot. The published numbers and the on-screen numbers cannot diverge,
+  because they are produced by the same functions.</p>
+  <figure class="figblock">
+    {{IMG:/private/tmp/claude-501/-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator/ea0cb560-6b35-43aa-9df7-9e47dc4396fa/scratchpad/sim_ui_shot.jpg|Simulator screen with live ray tracing and three-axis dashboard}}
+    <figcaption><b>The simulator, live.</b> Centre: the ray-trace view. Colour is
+    the entry angle, dot spacing is remaining energy, a red × marks where a ray
+    died. The three axes stay pinned at top right.</figcaption>
+  </figure>
+  <div class="tblwrap"><table>
+    <tr><th>Feature</th><th>What it does</th></tr>
+    <tr><td>Three-axis dashboard</td><td>Every change updates all three axes together, so no one gets fooled by a single number again.</td></tr>
+    <tr><td>Three-plane measurement</td><td>Frontal, diagonal and side approaches (0/45/90°) measured by default — the compass-hole mistake, structurally prevented.</td></tr>
+    <tr><td>Ray tracing</td><td>Shows where light bounces and where it dies, drawing only living light.</td></tr>
+    <tr><td>Published-value match</td><td>Automatically identifies which study design the current geometry matches, and whether the live number agrees.</td></tr>
+    <tr><td>Cross-check renderer</td><td>One button re-measures the same mesh in the independent Mitsuba renderer.</td></tr>
+    <tr><td>One-page report</td><td>Current view, spec and every measured number as a one-page A4 PDF — real, searchable text.</td></tr>
+    <tr><td>Fabrication output</td><td>Exports the on-screen structure as a seamlessly tileable STL for printing or mould-making.</td></tr>
+  </table></div>
+</section>
+
+<section id="s17">
+  <div class="eyebrow">What Remains</div>
+  <h2>What remains — the physical world answers next</h2>
+  <p class="lead">The simulation study is closed. A handful of values can now only be answered by real objects.</p>
+  <figure class="figblock">
+    {{IMG:report/ko/img_room.png|Room deployment blueprint: projectors, two-tier wall, window unit, floor strip}}
+    <figcaption><b>The room, assembled.</b> Five rules bought by measurement in
+    one drawing: the two-tier wall (Musou zones and bare zones), the window unit
+    where the beams land, the one-metre dark floor strip, and corners that simply
+    butt.</figcaption>
+  </figure>
+  <div class="tblwrap"><table>
+    <tr><th>#</th><th>Physical measurement</th><th>What it decides</th></tr>
+    <tr><td class="n">1</td><td>Spill-map photos (one underexposed frame + one haze-only frame)</td><td>Which walls become Musou zones — and whether bare zones suffice</td></tr>
+    <tr><td class="n">2</td><td>Reflectance of a bare black urethane coupon</td><td>The material value for the 0.18 rule — the bare tier's final grade</td></tr>
+    <tr><td class="n">3</td><td>Musou coverage per litre</td><td>The real magnitude of the paint budget</td></tr>
+    <tr><td class="n">4</td><td>Museum glass reflectance at 35° + a one-week dust test</td><td>The window unit's real-world performance</td></tr>
+    <tr><td class="n">5</td><td>A printed coupon measured at 0/±20/±40°</td><td>The end-to-end verdict on the simulator: within ±25% of prediction passes; outside ±40% stops any order until the broken link is named</td></tr>
+  </table></div>
+  <p>That last line summarises the study's temperament: the coupon's acceptance
+  bands were registered <em>before the part existed</em>. If reality disagrees
+  with the prediction, the protocol makes us say so.</p>
+</section>
+
+<section id="s18">
+  <div class="eyebrow">Glossary</div>
+  <h2>Glossary</h2>
+  <p class="lead">The words used in this report, in plain language.</p>
+  <dl class="gloss">
+    <dt>Spill</dt>
+    <dd>The light left over after drawing, flying on until it hits a wall. The thing this study exists to erase.</dd>
+    <dt>Total return<span class="en">total reflectance</span></dt>
+    <dd>The share of light entering the panel that comes back into the room. 100% is a mirror; 0% is perfect darkness. Most percentages in this report are this.</dd>
+    <dt>Shape destruction<span class="en">smear</span></dt>
+    <dd>How much of the original line shape the returned light has lost, as a multiple of a flat plate with the same paint. Higher means the picture doesn't survive.</dd>
+    <dt>Head-on glint</dt>
+    <dd>The brightest spot fired straight back at the light source, with a flat matte plate as 1. Lower is better.</dd>
+    <dt>Render / renderer</dt>
+    <dd>Building light and objects inside a computer and taking a photograph, and the calculator that does it. We use a film-industry physical renderer (Cycles) as a measuring instrument.</dd>
+    <dt>Ray tracing</dt>
+    <dd>Following one ray of light bounce by bounce. The heart of the renderer.</dd>
+    <dt>Specular / diffuse</dt>
+    <dd>Mirror-like reflection in one direction versus matte scattering in all directions. Real paint is a blend of both.</dd>
+    <dt>Incidence angle θ</dt>
+    <dd>How many degrees off the panel's normal the light arrives. 0° is head-on; 70° is a grazing strike.</dd>
+    <dt>Azimuth φ</dt>
+    <dd>Which o'clock direction the light comes from, seen face-on. Rotating the panel while measuring opens this axis.</dd>
+    <dt>Pitch · depth · tip</dt>
+    <dd>The width of one pyramid cell, the depth of its valley, and the flat left at the apex. The order spec is 4&nbsp;mm · 22&nbsp;mm · 0.4&nbsp;mm.</dd>
+    <dt>Aspect ratio</dt>
+    <dd>Depth divided by pitch. The one geometric variable that ruled darkness in this study.</dd>
+    <dt>Musou Black</dt>
+    <dd>A commercial ultra-black water-based paint, about 1% reflectance head-on. Our paint model is pinned to a published laboratory measurement of it.</dd>
+    <dt>Control</dt>
+    <dd>An object whose answer is known in advance. A 5% matte plate stands beside every measurement, and must read 5.000% every time.</dd>
+    <dt>Sweep</dt>
+    <dd>Stepping one variable through dozens or hundreds of automated measurements. This study is the sum of several hundred sweeps.</dd>
+    <dt>Pre-registration</dt>
+    <dd>Writing down the expected answer and the pass/fail rule before running the measurement, so the story cannot be bent to fit the result.</dd>
+    <dt>Retroreflection</dt>
+    <dd>Reflection that returns light along the direction it came from. Road signs want it; we avoid it. Concave right-angle corners have it.</dd>
+    <dt>Coupon</dt>
+    <dd>A small physical test piece used to compare simulation predictions against reality before ordering at scale.</dd>
+    <dt>STL</dt>
+    <dd>The standard solid-geometry file that 3D printers and mould shops read. One button in the simulator.</dd>
+  </dl>
+</section>
+
+<section id="s19">
+  <div class="eyebrow">References</div>
+  <h2>References</h2>
+  <ol class="refs">
+    <li>J. Filip, R. Vávra, <i>"How dark is dark? A reflectance and scattering analysis of black materials"</i>,
+      J. Opt. Soc. Am. A 43(7), 1037–1045 (2026). <span class="mono">DOI 10.1364/JOSAA.589935 · arXiv:2601.05094</span><br>
+      <span class="small">The angular reflectance measurement of Musou Black. Our paint model is fitted to
+      this paper's curve — the root of every absolute number in the study.</span></li>
+    <li>Kaster, <i>"Macroscopic structural light absorbers"</i>,
+      J. Appl. Phys. 138, 174904 (2025). Carl Zeiss AG. <span class="mono">arXiv:2507.05152</span><br>
+      <span class="small">The closest prior art. Reproduced in full in the verification chapter; most of the
+      3× gap between our claims traces to his specimen's planar cap layer.</span></li>
+    <li>A. Davis, H. F. Nijhout, S. Johnsen, <i>"Diverse nanostructures underlie thin ultra-black scales in butterflies"</i>,
+      Nature Communications 11:1294 (2020).<br>
+      <span class="small">Nature's ultra-black structures — the origin of the perforated-shell idea, which our
+      measurements showed does not carry to our scale.</span></li>
+    <li>S. Mouchet, <i>"Infrared absorbers inspired by nature"</i> (2024). <span class="mono">arXiv:2404.18169</span><br>
+      <span class="small">A review of bio-inspired absorbers; the secondary source for the bird-of-paradise and
+      peacock-spider examples.</span></li>
+    <li>US Patent 11,209,577 B2, <i>"Macro-scale features for optically black surfaces"</i>,
+      Ocean Insight Inc. (2021).<br>
+      <span class="small">A broad claim over millimetre-scale black surface structures, publishing no reflectance
+      data. Flagged for freedom-to-operate review before ordering.</span></li>
+    <li>Commercial items — Musou Black (KoPro, water-based ultra-black paint) · LaserCube Ultra 7.5&nbsp;W MK2
+      (X-Laser) · museum glass (framing-grade AR, under 1% per surface) · aluminium honeycomb core
+      (Huarui Honeycomb, 0.03–0.1&nbsp;mm foil).<br>
+      <span class="small">Every physical constraint — honeycomb sizes, beam width, glass reflectance — came from
+      these products' published specifications.</span></li>
+  </ol>
+</section>
+
+<footer>
+  <span>SPILL SINK PANEL · DEVELOPMENT JOURNEY · every simulated figure links to a reproducible measurement record</span>
+  <span class="co">{{IMG:sim/fetm_logo_600.png|FETM logo}} fetm.kr</span>
+</footer>
+
+</div>
