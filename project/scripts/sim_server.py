@@ -1659,6 +1659,73 @@ class H(BaseHTTPRequestHandler):
                 if cyc and "error" not in mts:
                     out["diff"] = (mts["rho_dh"] - cyc) / max(cyc, 1e-12)
                 return self._send(200, json.dumps(out))
+            if self.path == "/api/report_pdf":
+                # Real-text PDF with no print dialog: the page sends its
+                # fully-inlined print HTML (view/chart/logo as data URIs) and
+                # headless Chrome typesets it. Fonts stay fonts -- the first
+                # report was one big JPEG and the user caught it. Runs on a
+                # worker thread; no bpy involved.
+                html = req.get("html", "")
+                if not html:
+                    return self._send(400, json.dumps({"error": "no html"}))
+                chrome = ("/Applications/Google Chrome.app/Contents/MacOS"
+                          "/Google Chrome")
+                if not os.path.exists(chrome):
+                    return self._send(200, json.dumps(
+                        {"error": "Chrome not found at %s" % chrome}))
+                import subprocess
+                import tempfile
+                import shutil
+                out_dir = "/tmp/simsrv"
+                os.makedirs(out_dir, exist_ok=True)
+                # ONE fresh dir per request holds profile, input and output:
+                # - a reused profile keeps its SingletonLock if chrome ever
+                #   dies mid-run, and every later print fails with "Failed
+                #   to create a ProcessSingleton" (seen live 2026-08-18)
+                # - shared src/dst names would let two concurrent clicks
+                #   read each other's files
+                work = tempfile.mkdtemp(prefix="pdf_", dir=out_dir)
+                src = os.path.join(work, "report.html")
+                dst = os.path.join(work, "report.pdf")
+                with open(src, "w") as f:
+                    f.write(html)
+                pdf = None
+                try:
+                    # Chrome 151 headless on this machine writes the PDF in
+                    # seconds and then NEVER exits -- waiting for the process
+                    # put a flat 60 s on every report (measured 60.07 s for a
+                    # one-line page). So: watch for the finished file (chrome
+                    # writes it once, at the end; one stable size check to be
+                    # safe) and kill chrome ourselves.
+                    proc = subprocess.Popen(
+                        [chrome, "--headless", "--disable-gpu",
+                         "--no-pdf-header-footer",
+                         # let deferred work (big data-URI images decoding)
+                         # finish before the print fires: one cold-start run
+                         # shipped the page without its 3D view (330 KB
+                         # instead of 1.1 MB, 2026-08-18)
+                         "--virtual-time-budget=10000",
+                         "--user-data-dir=" + os.path.join(work, "prof"),
+                         "--print-to-pdf=" + dst, "file://" + src],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    deadline, last = time.time() + 60, -1
+                    while time.time() < deadline:
+                        if os.path.exists(dst):
+                            sz = os.path.getsize(dst)
+                            if sz > 0 and sz == last:
+                                pdf = open(dst, "rb").read()
+                                break
+                            last = sz
+                        elif proc.poll() is not None:
+                            break              # exited without producing one
+                        time.sleep(0.25)
+                    proc.kill()
+                finally:
+                    shutil.rmtree(work, ignore_errors=True)
+                if pdf is None:
+                    return self._send(200, json.dumps(
+                        {"error": "chrome produced no PDF within 60 s"}))
+                return self._send(200, pdf, "application/pdf")
             if self.path == "/api/rays":
                 # Pure Python; no renderer involved. See `raytrace_viz`.
                 import raytrace_viz as RV
