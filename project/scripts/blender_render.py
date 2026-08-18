@@ -1122,6 +1122,20 @@ def to_pixel_window(win):
     return (min(a[0], b[0]), max(a[0], b[0]), min(a[1], b[1]), max(a[1], b[1]))
 
 
+# Optional per-render progress hook. sim_server points this at its progress
+# counter so the UI can poll a live "3/5" while the queue blocks; sweeps leave
+# it None. A hook failure must never kill a render, hence the bare except.
+PROGRESS_CB = None
+
+
+def _progress(done, total):
+    if PROGRESS_CB:
+        try:
+            PROGRESS_CB(done, total)
+        except Exception:
+            pass
+
+
 def run(cfg):
     out_dir = cfg["out_dir"]
     tag = cfg["tag"]
@@ -1167,7 +1181,8 @@ def run(cfg):
         "modes": {},
     }
 
-    for job in cfg["renders"]:
+    for ri, job in enumerate(cfg["renders"]):
+        _progress(ri, len(cfg["renders"]))
         mode = job["mode"]
         theta = job.get("theta", 0.0)
         name = f"{tag}__{mode}_th{theta:+05.1f}"

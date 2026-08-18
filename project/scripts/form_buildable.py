@@ -76,6 +76,9 @@ STRIPE_W = 7.5
 SPREAD_DEG = 0.05
 THETAS = (-40.0, 0.0, 40.0)
 N_PHASE = 16                     # stripe positions across one pitch
+# Optional per-frame progress hook, same contract as blender_render.PROGRESS_CB:
+# sim_server points it at its counter; batch sweeps leave it None.
+PROGRESS_CB = None
 PERIODS_MM = (10.0, 20.0, 40.0)
 NWIN = 361                       # profile window, samples
 
@@ -161,11 +164,17 @@ def run_case(entry):
     # than over three arbitrary draws
     phases = [(-pitch / 2.0) + pitch * i / N_PHASE for i in range(N_PHASE)]
 
-    for theta in THETAS:
+    for ti, theta in enumerate(THETAS):
         rec = {"per_phase": [], "peak_ratio": [], "rms_mm": []}
         acc_p = np.zeros(NWIN)
         acc_c = np.zeros(NWIN)
         for zi, dz in enumerate(phases):
+            # live progress for the interactive server; None for batch sweeps
+            if PROGRESS_CB:
+                try:
+                    PROGRESS_CB(ti * N_PHASE + zi, len(THETAS) * N_PHASE)
+                except Exception:
+                    pass
             for o in list(bpy.data.objects):
                 if o.type in ("LIGHT", "CAMERA"):
                     bpy.data.objects.remove(o, do_unlink=True)

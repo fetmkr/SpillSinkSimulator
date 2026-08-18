@@ -67,6 +67,16 @@ UI = os.path.join(ROOT, "sim")
 # slider is not blocked by a render in flight.
 JOBS = queue.Queue()
 
+# Progress of the render currently occupying the main thread. Renders run one
+# at a time (the queue serialises them), so one dict is enough; worker threads
+# serve it at /api/progress while the render blocks. `done` counts sub-renders
+# STARTED, so the bar reads "which frame am I on", not "which finished".
+PROG = {"done": 0, "total": 0, "at": 0.0}
+
+
+def _prog(done, total):
+    PROG["done"], PROG["total"], PROG["at"] = int(done), int(total), time.time()
+
 # 3. STANDALONE OR INSIDE BLENDER. Every geometry module here is pure Python --
 #    `geom3d`, `geom_topo`, `geom_cell`, `geom_floor`, `geom_stack` and
 #    `profile_ridge` contain no reference to `bpy` at all, and an 8796-face
@@ -109,12 +119,12 @@ def in_blender(op, **req):
                   req["roughness"], req["samples"], req.get("coating",
                   "musou_fit"), req.get("deep_coating"),
                   req.get("paint_depth"), req.get("deep_until"),
-                  req.get("paint_fade", 0.0)),
+                  req.get("paint_fade", 0.0), req.get("phis")),
               "lambert": lambda: measure_lambert(
                   req["spec"], req["theta"], req["rho"], req["samples"]),
               "form": lambda: form(req["spec"], req.get("thetas"),
                                    req.get("n_phase"), req.get("samples"),
-                                   req.get("beam_w")),
+                                   req.get("beam_w"), req.get("phis")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -891,7 +901,7 @@ AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
 
 def measure(spec, thetas, diffuse_frac, roughness, samples,
             coating="musou_fit", deep_coating=None, paint_depth=None,
-            deep_until=None, paint_fade=0.0):
+            deep_until=None, paint_fade=0.0, phis=None):
     _t("measure: enter")
     import blender_render as BR
     from cone3d_sweep import COAT
@@ -935,17 +945,35 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
         cfg["paint_fade"] = float(paint_fade or 0.0)
         _t("measure: paint to %.1f mm, %s below" % (float(paint_depth),
                                                     deep_coating))
-    _t("measure: calling BR.run, %d angle(s)" % len(cfg["renders"]))
-    res = BR.run(cfg)
+    # The camera tilts in one plane, so one run is ONE azimuth of incidence.
+    # phi rotates the panel about its normal (blender_render handles it); each
+    # extra plane is a full re-run -- scene rebuilt, all thetas re-read.
+    phis = [float(x) for x in (phis or [0.0])]
+    n_all = len(phis) * len(cfg["renders"])
+    _t("measure: calling BR.run, %d angle(s) x %d plane(s)"
+       % (len(cfg["renders"]), len(phis)))
+    planes = {}
+    try:
+        for pi, phi in enumerate(phis):
+            c2 = dict(cfg, phi_deg=phi, tag="%s_p%g" % (cfg["tag"], phi))
+            BR.PROGRESS_CB = (lambda i, n, off=pi * len(cfg["renders"]):
+                              _prog(off + i, n_all))
+            res = BR.run(c2)
+            planes["%g" % phi] = {"%.0f" % r["theta"]: r["panel"]["mean"]
+                                  for r in res["modes"].values()}
+    finally:
+        _prog(n_all, n_all)
     _t("measure: BR.run returned")
-    return {"%.0f" % r["theta"]: r["panel"]["mean"]
-            for r in res["modes"].values()}
+    return planes
 
 
 def measure_lambert(spec, theta, rho, samples):
     """Cycles, same design, same pure Lambertian -- the other half of the pair."""
     import blender_render as BR
     from cone3d_sweep import COAT
+    # progress is counted per ANGLE by the /api/measure loop that calls this;
+    # a leftover per-frame hook from measure() would stomp it with "0/1"
+    BR.PROGRESS_CB = None
     m = dict(spec, margin_depths=2.0)
     cfg = {"tag": "xc_%d" % int(time.time() * 1000),
            "family": _render_family(m),
@@ -997,7 +1025,8 @@ def _render_params(spec):
 
 # --- form destruction and head-on brightness --------------------------------
 
-def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None):
+def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
+         phis=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1032,23 +1061,48 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None):
     # The probe beam width at the wall. Phase 5.4/5.5 showed smear depends on
     # beam/pitch, so this is a first-class knob, not a protocol constant. The
     # default stays the historical 2.0 so old numbers keep reproducing.
+    phis = [float(x) for x in (phis or [0.0])]
     old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W)
     FB.N_PHASE = int(n_phase or 6)
     FB.THETAS = tuple(thetas or (-40.0, 40.0, 0.0))
     FB.SAMPLES = int(samples or 256)
     FB.STRIPE_W = float(beam_w or 7.5)
+    n_frames = FB.N_PHASE * len(FB.THETAS)
+    planes = {}
     try:
-        rec = FB.run_case(entry)
+        for pi, phi in enumerate(phis):
+            e2 = dict(entry, tag="%s_p%g" % (entry["tag"], phi))
+            if abs(phi) > 1e-9:
+                e2["phi"] = phi
+            # The stripe's phase walk spans one `pitch` of world z. Rotated
+            # 45 deg, a square grid repeats along z every pitch*sqrt(2); walk
+            # that, or the phase mean under-covers its period by 29 % (the
+            # run_case comment accepts phi <= 30 only). Exact for the square
+            # pyramid grid; for other families it is an approximation, and
+            # 90 deg needs no correction (the grid maps onto itself).
+            if abs(phi % 90.0 - 45.0) < 1e-9:
+                e2["pitch"] = float(entry["pitch"]) * math.sqrt(2.0)
+            FB.PROGRESS_CB = (lambda i, n, off=pi * n_frames:
+                              _prog(off + i, len(phis) * n_frames))
+            rec = FB.run_case(e2)
+            t = rec.get("thetas", {})
+            a, b = t.get("-40"), t.get("+40")
+            planes["%g" % phi] = {
+                "smear": (0.5 * (a["rms_mm"] / a["rms_control_mm"]
+                                 + b["rms_mm"] / b["rms_control_mm"])
+                          if a and b else None),
+                "peak": (t.get("+0") or {}).get("peak_ratio_mean")}
     finally:
         FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W = old
-    t = rec.get("thetas", {})
-    a, b = t.get("-40"), t.get("+40")
-    smear = (0.5 * (a["rms_mm"] / a["rms_control_mm"]
-                    + b["rms_mm"] / b["rms_control_mm"])
-             if a and b else None)
-    return {"smear": smear,
-            "peak": (t.get("+0") or {}).get("peak_ratio_mean"),
-            "n_phase": FB.N_PHASE if False else int(n_phase or 6),
+        _prog(len(phis) * n_frames, len(phis) * n_frames)
+    # the dashboard reports the WORST plane: smear-up is good so worst is the
+    # lowest; head-on-down is good so worst is the highest
+    sm = [p["smear"] for p in planes.values() if p["smear"] is not None]
+    pk = [p["peak"] for p in planes.values() if p["peak"] is not None]
+    return {"smear": min(sm) if sm else None,
+            "peak": max(pk) if pk else None,
+            "planes": planes,
+            "n_phase": int(n_phase or 6),
             "samples": int(samples or 256),
             "beam_w": float(beam_w or 7.5), "reduced": True}
 
@@ -1079,6 +1133,8 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
     FB.THETAS = tuple(thetas)
     FB.SAMPLES = int(samples)
     FB.STRIPE_W = float(beam_w or 7.5)
+    FB.PROGRESS_CB = _prog
+    _prog(0, FB.N_PHASE * len(FB.THETAS))
     try:
         rec = FB.run_case(entry)
     finally:
@@ -1118,19 +1174,38 @@ def _mts(req):
         "mts_env", "bin", "python"))
     if not os.path.exists(venv):
         return {"error": "Mitsuba venv not found at %s" % venv}
-    p = subprocess.run([venv, os.path.join(HERE, "mts_worker.py")],
-                       input=json.dumps(req), capture_output=True, text=True,
-                       timeout=3600)
+    # Streamed, not run(): the worker prints @@PROG@@ lines per frame and the
+    # UI polls /api/progress, so the output must be read while it renders.
+    # stderr merges into stdout -- separate pipes deadlock once one fills.
+    p = subprocess.Popen([venv, os.path.join(HERE, "mts_worker.py")],
+                         stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, text=True)
+    lines = []
+    try:
+        p.stdin.write(json.dumps(req))
+        p.stdin.close()
+        for line in p.stdout:
+            lines.append(line)
+            if line.startswith("@@PROG@@"):
+                try:
+                    _, d, t = line.split()
+                    _prog(int(d), int(t))
+                except Exception:
+                    pass
+        p.wait(timeout=3600)
+    except Exception as e:
+        p.kill()
+        return {"error": str(e)}
     if p.returncode != 0:
-        return {"error": (p.stderr or "")[-300:]}
-    for line in reversed((p.stdout or "").splitlines()):
+        return {"error": "".join(lines)[-300:]}
+    for line in reversed(lines):
         i = line.find("@@RESULT@@")
         if i >= 0:
             try:
                 return json.loads(line[i + 10:])
             except Exception:
                 break
-    return {"error": (p.stdout or p.stderr or "")[-300:]}
+    return {"error": "".join(lines)[-300:]}
 
 
 def measure_mitsuba(spec, theta=0.0, rho=0.01, spp=256):
@@ -1406,7 +1481,10 @@ class H(BaseHTTPRequestHandler):
             f = os.path.join(UI, "index.html")
             if not os.path.exists(f):
                 return self._send(404, "build the UI first", "text/plain")
-            return self._send(200, open(f, "rb").read(), "text/html")
+            # the UI changes between reloads while this server stays up; a
+            # cached copy means the user presses buttons wired to old code
+            return self._send(200, open(f, "rb").read(), "text/html",
+                              {"Cache-Control": "no-store"})
         if p == "/api/families":
             return self._send(200, json.dumps(families_json()))
         if p == "/api/coatings":
@@ -1415,6 +1493,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, json.dumps({"presets": presets()}))
         if p == "/api/health":
             return self._send(200, json.dumps({"ok": True, "port": PORT}))
+        if p == "/api/progress":
+            return self._send(200, json.dumps(PROG))
         return self._send(404, json.dumps({"error": "no such path"}))
 
     def do_POST(self):
@@ -1469,8 +1549,12 @@ class H(BaseHTTPRequestHandler):
                     # The UI says so; it is not the published coating.
                     rho0 = float(req.get("lambert_rho", 0.01))
                     ths = req.get("thetas", [0.0])
+                    # one continuous scale over both codes: Mitsuba angles
+                    # first, then (for "both") the same angles in Cycles
+                    n_steps = len(ths) * (2 if rend == "both" else 1)
                     mts = {}
-                    for th in ths:
+                    for i, th in enumerate(ths):
+                        _prog(i, n_steps)
                         one = measure_mitsuba(req["spec"], float(th), rho0,
                                               int(req.get("samples", 256)))
                         if "error" in one:
@@ -1481,7 +1565,8 @@ class H(BaseHTTPRequestHandler):
                            "seconds": round(time.perf_counter() - t0, 2)}
                     if rend == "both":
                         cyc = {}
-                        for th in ths:
+                        for i, th in enumerate(ths):
+                            _prog(len(ths) + i, n_steps)
                             r2 = in_blender("lambert", spec=req["spec"],
                                             theta=float(th), rho=rho0,
                                             samples=int(req.get("samples",
@@ -1504,11 +1589,16 @@ class H(BaseHTTPRequestHandler):
                                deep_coating=req.get("deep_coating"),
                                paint_depth=req.get("paint_depth"),
                                deep_until=req.get("deep_until"),
-                               paint_fade=req.get("paint_fade", 0.0))
+                               paint_fade=req.get("paint_fade", 0.0),
+                               phis=req.get("phis"))
                 if "error" in r:
                     return self._send(200, json.dumps(r))
+                # `rho` stays the phi-0 plane so old callers keep working;
+                # `rho_planes` carries every measured azimuth plane
+                planes = r["rho"]
                 return self._send(200, json.dumps(
-                    {"rho": r["rho"],
+                    {"rho": planes.get("0") or next(iter(planes.values())),
+                     "rho_planes": planes,
                      "seconds": round(time.perf_counter() - t0, 2)}))
             if self.path == "/api/form":
                 t0 = time.perf_counter()
@@ -1543,7 +1633,8 @@ class H(BaseHTTPRequestHandler):
                 out = in_blender("form", spec=req["spec"], thetas=None,
                                  n_phase=req.get("n_phase"),
                                  samples=req.get("samples"),
-                                 beam_w=req.get("beam_w"))
+                                 beam_w=req.get("beam_w"),
+                                 phis=req.get("phis"))
                 if "error" in out:
                     return self._send(200, json.dumps(out))
                 out["seconds"] = round(time.perf_counter() - t0, 1)

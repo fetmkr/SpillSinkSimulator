@@ -55,7 +55,15 @@ button{width:100%;background:#fff;color:var(--ink);border:1px solid var(--line2)
   display:flex;justify-content:space-between;align-items:center;gap:8px}
 button:hover:not(:disabled){border-color:var(--a);color:#fff}
 button:disabled{opacity:.45;cursor:progress}
-button .t{font:400 10px/1 ui-monospace,Menlo,monospace;color:var(--ink3)}
+button .t{font:400 10px/1 ui-monospace,Menlo,monospace;color:var(--ink3);
+  white-space:nowrap}
+/* two deliberate lines: what the button does, then how much it covers */
+button .lb{text-align:left}
+button .lb small{display:block;margin-top:3px;
+  font:400 10px/1.3 ui-monospace,Menlo,monospace;color:var(--ink3)}
+button:hover:not(:disabled) .t,
+button:hover:not(:disabled) .lb small{color:#fff}
+button.done .lb small{color:var(--ok)}
 button.go{border-color:var(--a);color:var(--a);font-weight:700}
 button:hover:not(:disabled){background:var(--a);color:#fff;border-color:var(--a)}
 /* a measurement that belongs to the CURRENT model: the button goes green when
@@ -218,15 +226,15 @@ details.why p{margin:.4em 0 0}
 <div class="col right">
   <h2>세 축 한눈에 <span style="color:var(--ink3)">study targets in gray</span></h2>
   <div id="axes">
-    <div class="ax" id="ax_total"><span class="nm">반사 총량 total worst-&rho; &darr;</span>
+    <div class="ax" id="ax_total"><span class="nm">반사 총량 total reflectance &darr;</span>
       <span class="val">&mdash;</span>
       <span class="sub">target: final sample 0.177&#8202;% &middot; flat Musou 1.14&#8202;%</span></div>
     <div class="ax" id="ax_smear"><span class="nm">모양 뭉개기 smear &uarr; <i id="ax_beam1"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">target: 1.42 at beam 7&#8202;mm (final sample)</span></div>
+      <span class="sub">flat plate = 1.0 by definition &middot; target: 1.42 at beam 7&#8202;mm (final sample)</span></div>
     <div class="ax" id="ax_head"><span class="nm">정면 반짝임 head-on &darr; <i id="ax_beam2"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">target: 0.040 (beam 7/10&#8202;mm) &middot; tip ladder 0.1/0.2/0.4 &rarr; 0.032/0.052/0.107</span></div>
+      <span class="sub">flat matte patch = 1.0 &middot; target: 0.040 (beam 7/10&#8202;mm) &middot; tip ladder 0.1/0.2/0.4 &rarr; 0.032/0.052/0.107</span></div>
   </div>
 
   <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
@@ -245,17 +253,26 @@ details.why p{margin:.4em 0 0}
   <div class="row"><label for="beamw">beam width at wall, mm</label>
    <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
     style="width:5.5em"></div>
-  <button class="go" id="m5">Render &middot; total, 5 angles <span class="t">2 s</span></button>
-  <p class="note" style="margin:0">Lights the panel from the whole sky at
-   once and reads how much comes back at 0&deg;/&plusmn;20&deg;/&plusmn;40&deg;.
-   Worst angle fills <b>반사 총량</b>.</p>
+  <button class="go" id="m5"><span class="lb">Render &middot; total
+    <small>5 angles &times; 3 planes (&phi; 0/45/90)</small></span>
+    <span class="t">~6 s</span></button>
+  <p class="note" style="margin:0">Reads 0&deg;/&plusmn;20&deg;/&plusmn;40&deg;
+   in <b>three planes</b> &mdash; &phi; 0 / 45 / 90, straight-on and diagonal
+   approaches. Each number is the TOTAL for light entering at that direction
+   and leaving anywhere; the sky-dome lighting is how that total is captured
+   in one shot. Worst of the 15 fills <b>반사 총량</b>. (Mitsuba runs &phi; 0
+   only.)</p>
   <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
   <canvas id="chart"></canvas>
 
-  <button id="mf" class="go">Render &middot; form + head-on <span class="t">~60 s</span></button>
+  <button id="mf" class="go"><span class="lb">Render &middot; smear + head-on
+    <small>3 planes &times; 6 stripe phases</small></span>
+    <span class="t">~90 s</span></button>
   <p class="note" style="margin:0">Shines a stripe beam of the width above and
    reads how much the pattern smears sideways (<b>모양 뭉개기</b>) and how much
-   fires straight back at the source (<b>정면 반짝임</b>).</p>
+   fires straight back at the source (<b>정면 반짝임</b>) &mdash; in three
+   planes (&phi; 0/45/90). The dashboard takes the worst plane. (Mitsuba runs
+   &phi; 0 only.)</p>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <details class="why"><summary>why beam width matters</summary>
   <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
@@ -271,9 +288,10 @@ details.why p{margin:.4em 0 0}
   <h2>Tools</h2>
   <p class="note" style="margin:0"><b>A sample, not the measurement.</b> The
    trace follows a few hundred rays at five angles in ONE azimuth plane at a
-   time (turn &phi; to rotate it). The Render buttons above integrate light
-   from the whole hemisphere &mdash; every angle and every azimuth at once
-   &mdash; so their numbers do not come from these sampled directions.</p>
+   time (turn &phi; to rotate it). The Render above reads its five &theta; in
+   three planes (&phi; 0/45/90), and each render number integrates ALL the
+   light leaving the panel with the real fitted coating, where the trace
+   follows a few hundred rays with a single-&rho; material.</p>
   <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
     <label>rays per angle <input type="number" id="ray_n" value="200" min="20" max="800"
       step="20" style="width:4.5em"></label>
@@ -286,10 +304,16 @@ details.why p{margin:.4em 0 0}
   </div>
   <p class="note" style="margin:0">&rho; comes from the coating picked on the
    left; the trace scatters from that single number, not the full fitted mix.</p>
-  <button id="mr">Trace sample rays &middot; 5 angles &times; 1 plane <span class="t">~9 s</span></button>
+  <button id="mr"><span class="lb">Trace sample rays
+    <small>5 angles &times; 1 plane</small></span>
+    <span class="t">~9 s</span></button>
   <dl class="kv" id="rayout"><div><dt>not traced</dt><dd>&mdash;</dd></div></dl>
   <div id="rayhist" style="display:flex;align-items:flex-end;gap:1px;height:34px"></div>
-  <p class="note" style="margin:.2rem 0 0">path color = its measurement
+  <p class="note" id="rayhistcap" style="display:none;margin:.15rem 0 0">bounce
+   histogram &mdash; &larr; fewer bounces &middot; more bounces &rarr;; bar
+   height = rays, all 5 angles together. Hover a bar for the count.</p>
+  <details class="why"><summary>how to read the trace</summary>
+  <p class="note">path color = its measurement
    angle (same colors as the arrows) &middot; <b style="color:#b34700">red</b>
    <b>&times; = where the ray died</b> (energy below one millionth; nothing
    is drawn past death, so every line leaving the panel is living light)
@@ -297,24 +321,25 @@ details.why p{margin:.4em 0 0}
    ray's exact color and size &mdash; only the gaps widen as energy falls
    (each bounce keeps only &rho;) &middot; bars = bounce histogram, all
    angles together</p>
-  <p class="note" style="margin:.2rem 0 0">per angle: <b>absorbed</b> = how
+  <p class="note">per angle: <b>absorbed</b> = how
    much of the entering light the wall destroys; <b>out</b> = the sliver that
    returns (&rarr; 반사 총량); <b>wander</b> = the share of that sliver
    re-emerging more than half a beam width from where it entered (&rarr; 모양
    뭉개기); <b>retro</b> = the share fired straight back at the source (&rarr;
    정면 반짝임). Crude analogs for intuition &mdash; the Render buttons above
    are the measurement. &phi; rotates the approach around the panel; the
-   render's incoming light already covers every azimuth, only its read
-   direction sits at &phi; 0.</p>
-  <details class="why"><summary>what the trace shows</summary>
+   render measures &phi; 0/45/90, so the dial is for aiming a trace anywhere
+   between those planes.</p>
   <p class="note">The actual transport, not a render: rays are cast at the
    measured incidence, intersected against the same triangles, and scattered
-   from a Lambertian at each hit. <b>Green</b> escapes, <b>red</b> is
-   absorbed; brightness rises with bounce count. It uses its own scattering
-   rule, so the figures illustrate the mechanism rather than second-guess
-   Cycles.</p></details>
+   from a Lambertian at each hit. It uses its own scattering rule, so the
+   figures illustrate the mechanism rather than second-guess Cycles.</p>
+  </details>
 
-  <button id="stl">Download STL <span class="t">tileable</span></button>
+  <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0">
+    <button id="stl">Download STL <span class="t">tileable</span></button>
+    <button id="report" title="one A4 page: current view, parameters, and every measured number">Download report <span class="t">A4 PDF</span></button>
+  </div>
   <div class="err" id="err"></div>
   </div>
 </div>
@@ -371,6 +396,31 @@ let FAM = null, MESH = null, LAST = null, busy = 0;
 
 function setBusy(n){ busy += n; $('#busy').classList.toggle('on', busy>0); }
 
+// Live progress: the server counts sub-renders (/api/progress, updated from
+// inside the render loops -- real frames, not an animation). The button itself
+// fills left to right so no layout moves; its time tag shows "7/18".
+function progressBar(btn){
+  const tag = btn.querySelector('.t'), orig = tag ? tag.textContent : '';
+  const paint = f => { btn.style.backgroundImage =
+    `linear-gradient(90deg, rgba(255,77,0,.22) ${f}%, transparent ${f}%)`; };
+  const t = setInterval(async () => {
+    try{
+      const p = await (await fetch('/api/progress')).json();
+      // done==total is the previous run's leftover until our render starts
+      if(p.total > 0 && p.done < p.total){
+        paint(100 * p.done / p.total);
+        if(tag) tag.textContent = `${p.done}/${p.total}`;
+      }
+    }catch(e){}
+  }, 400);
+  return {
+    set: (done, total) => { paint(100 * done / total);
+                            if(tag) tag.textContent = `${done}/${total}`; },
+    stop: () => { clearInterval(t); btn.style.backgroundImage = '';
+                  if(tag) tag.textContent = orig; }
+  };
+}
+
 // A measurement belongs to the model (and coating) it was taken on, so every
 // parameter change makes every readout stale. refresh() calls this before
 // rebuilding: traced ray paths leave the overlay, the green done-lights go
@@ -383,6 +433,7 @@ function resetResults(){
   $('#formout').innerHTML = '<div><dt>not measured</dt><dd>&mdash;</dd></div>';
   $('#rayout').innerHTML = '<div><dt>not traced</dt><dd>&mdash;</dd></div>';
   $('#rayhist').innerHTML = '';
+  const hc = $('#rayhistcap'); if(hc) hc.style.display = 'none';
   chart([]);
   for(const ax of ['#ax_total','#ax_smear','#ax_head']) axSet(ax, '&mdash;', null);
   // the ray polylines live in the overlay line buffer: rebuild it without them
@@ -497,18 +548,26 @@ function showDerived(d){
 // ---------- measurement
 async function measure(thetas){
   setBusy(1); $('#m5').disabled = true;
+  const prog = progressBar($('#m5'));
   try{
     const R = $('#renderer').value;
     const r = await fetch('/api/measure', {method:'POST', body: JSON.stringify({
       spec: LAST, thetas, renderer: R,
+      // three azimuth planes for the published path; the Mitsuba worker has
+      // no phi rotation, so cross-check modes stay in the phi-0 plane
+      phis: R === 'cycles' ? [0, 45, 90] : undefined,
       diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
       coating: $('#coat').value, deep_coating: $('#deepcoat').value || null,
       paint_depth: $('#deepcoat').value ? +$('#pd').value : null})});
     const j = await r.json();
     if(j.error) throw new Error(j.error);
     SHOW_THETAS = thetas; buildOverlay(thetas); draw();
-    const vals = Object.entries(j.rho).map(([t,v])=>[+t,v]).sort((a,b)=>a[0]-b[0]);
-    const worst = Math.max(...vals.map(v=>v[1]));
+    const planes = j.rho_planes || {'0': j.rho};
+    const series = Object.entries(planes).map(([p, m]) => ({phi: +p,
+      vals: Object.entries(m).map(([t,v])=>[+t,v]).sort((a,b)=>a[0]-b[0])}));
+    let worst = -1, wPhi = 0, wTh = 0;
+    for(const s of series) for(const [t,v] of s.vals)
+      if(v > worst){ worst = v; wPhi = s.phi; wTh = t; }
     const who = R==='cycles' ? 'Cycles' : (R==='mitsuba' ? 'Mitsuba' : 'both');
     let extra = '';
     if(j.diff){
@@ -516,14 +575,17 @@ async function measure(thetas){
       extra = ` · Mitsuba vs Cycles worst ${(100*d).toFixed(1)} %`
             + (d < 0.05 ? ' — agree' : ' — DISAGREE');
     }
+    const nPl = series.length;
     $('#rho').innerHTML = (100*worst).toFixed(5) + ' %'
       + `<small>${who}${R!=='cycles'?' · Lambertian &rho;=0.01':''}`
-      + ` · worst of ${vals.length} angle${vals.length>1?'s':''} · ${j.seconds}s`
-      + ` · &theta;=0 is ${(100*(j.rho['0']??worst)).toFixed(5)} %${extra}</small>`;
-    chart(vals);
+      + ` · worst of 5&theta; &times; ${nPl} plane${nPl>1?'s':''}`
+      + (nPl>1 ? ` (at &theta; ${wTh}&deg;, &phi; ${wPhi}&deg;)` : '')
+      + ` · ${j.seconds}s`
+      + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}</small>`;
+    chart(series);
     $('#m5').classList.add('done');
   }catch(e){ $('#err').textContent = String(e).slice(0,600); }
-  finally{ setBusy(-1); $('#m5').disabled = false; }
+  finally{ setBusy(-1); $('#m5').disabled = false; prog.stop(); }
 }
 
 function drawAxis(g, W, H){
@@ -532,24 +594,37 @@ function drawAxis(g, W, H){
   // the whole hemisphere and reads what leaves toward theta. Drawing a light
   // at theta would be a picture of a different experiment.
 }
-function chart(vals){
+// one polyline per azimuth plane; single-plane callers pass one series
+const PHICOL = {0:'#49c2ca', 45:'#e08a2e', 90:'#8b6fd8'};
+function chart(series){
   const c = $('#chart'), dpr = devicePixelRatio||1;
   // an empty 96 px canvas is not a chart, it is a hole in the layout
-  c.style.display = vals.length ? 'block' : 'none';
+  c.style.display = series.length ? 'block' : 'none';
   c.width = c.clientWidth*dpr; c.height = 96*dpr;
   const g = c.getContext('2d'); g.scale(dpr,dpr);
   const W = c.clientWidth, H = 96, pad = 22;
   g.clearRect(0,0,W,H);
-  if(!vals.length) return;
-  const mx = Math.max(...vals.map(v=>v[1]))*1.15 || 1;
+  if(!series.length) return;
+  const mx = Math.max(...series.flatMap(s=>s.vals.map(v=>v[1])))*1.15 || 1;
   g.strokeStyle='#1e262d'; g.beginPath(); g.moveTo(pad,H-16); g.lineTo(W-6,H-16); g.stroke();
   const x = t => pad + (t+40)/80*(W-pad-10);
   const y = v => (H-16) - v/mx*(H-26);
-  g.strokeStyle='#49c2ca'; g.lineWidth=2; g.beginPath();
-  vals.forEach(([t,v],i)=> i?g.lineTo(x(t),y(v)):g.moveTo(x(t),y(v))); g.stroke();
-  g.fillStyle='#49c2ca';
-  vals.forEach(([t,v])=>{ g.beginPath(); g.arc(x(t),y(v),3,0,7); g.fill(); });
-  g.fillStyle='#6b7883'; g.font='10px ui-monospace,Menlo,monospace';
+  for(const s of series){
+    const col = PHICOL[s.phi] || '#49c2ca';
+    g.strokeStyle=col; g.lineWidth=2; g.beginPath();
+    s.vals.forEach(([t,v],i)=> i?g.lineTo(x(t),y(v)):g.moveTo(x(t),y(v))); g.stroke();
+    g.fillStyle=col;
+    s.vals.forEach(([t,v])=>{ g.beginPath(); g.arc(x(t),y(v),3,0,7); g.fill(); });
+  }
+  g.font='10px ui-monospace,Menlo,monospace';
+  if(series.length > 1){
+    let lx = W - 6 - series.length*38;
+    for(const s of series){
+      g.fillStyle = PHICOL[s.phi] || '#49c2ca';
+      g.fillText('φ'+s.phi, lx, 10); lx += 38;
+    }
+  }
+  g.fillStyle='#6b7883';
   [-40,-20,0,20,40].forEach(t=>g.fillText(t+'°', x(t)-8, H-4));
 }
 
@@ -986,13 +1061,15 @@ addEventListener('resize', draw);
   }
   $('#mf').onclick = async () => {
     const b = $('#mf'); b.disabled = true; setBusy(1);
+    const prog = progressBar(b);
     $('#formout').innerHTML = '<div><dt>rendering&hellip;</dt><dd>~60 s</dd></div>';
     try{
       const R = $('#renderer').value;
       const BW = parseFloat($('#beamw').value) || 7.5;
       const r = await fetch('/api/form', {method:'POST',
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
-                              beam_w: BW, renderer: R})});
+                              beam_w: BW, renderer: R,
+                              phis: R === 'cycles' ? [0, 45, 90] : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
       const num = v => v==null ? '\u2014' : (+v).toFixed(4);
@@ -1012,17 +1089,23 @@ addEventListener('resize', draw);
       } else {
         const who = R==='cycles' ? 'Cycles'
                   : 'Mitsuba \u00b7 Lambertian \u03c1=0.01';
+        // per-plane rows use a bare "\u03c6 N\u00b0" dt so the dashboard mirror (which
+        // greps dt for smear/head) keeps reading the WORST rows, not a plane
+        const P = j.planes || null;
+        const planeRows = P ? Object.entries(P).map(([p, d]) =>
+          `<div><dt>&phi; ${p}&deg;</dt><dd>smear ${d.smear!=null?d.smear.toFixed(2)+'\u00d7':'\u2014'} &middot; head-on ${d.peak!=null?(+d.peak).toFixed(4):'\u2014'}</dd></div>`).join('') : '';
         $('#formout').innerHTML =
-          `<div><dt>form destruction</dt><dd>${j.smear!=null?j.smear.toFixed(2)+'\u00d7':'\u2014'}</dd></div>
-           <div><dt>head-on brightness</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>
-           <div><dt>renderer</dt><dd>${who}</dd></div>
+          `<div><dt>smear${P?' (worst of '+Object.keys(P).length+' planes)':''}</dt><dd>${j.smear!=null?j.smear.toFixed(2)+'\u00d7':'\u2014'}</dd></div>
+           <div><dt>head-on brightness${P?' (worst)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
+          + planeRows +
+          `<div><dt>renderer</dt><dd>${who}</dd></div>
            <div><dt>beam</dt><dd>${(j.beam_w||BW).toFixed(1)} mm</dd></div>
-           <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases</dd></div>`;
+           <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases${P?' \u00d7 '+Object.keys(P).length+' planes':''}</dd></div>`;
       }
       b.classList.add('done');
     }catch(e){ $('#err').textContent = String(e).slice(0,600);
                $('#formout').innerHTML = '<div><dt>failed</dt><dd>&mdash;</dd></div>'; }
-    finally{ b.disabled = false; setBusy(-1); }
+    finally{ b.disabled = false; setBusy(-1); prog.stop(); }
   };
   // ---- coatings: a named product is one number, rho_dh at normal incidence
   const CO = await (await fetch('/api/coatings')).json();
@@ -1059,11 +1142,14 @@ addEventListener('resize', draw);
     cycles: 'The published path. Fitted Musou coating, Fresnel-weighted '
       + 'diffuse/glossy mix. Every number in the reports came through here. '
       + '<b>The light covers the whole hemisphere at once</b> &mdash; the five '
-      + '&theta; are read directions, not the only directions lit.',
+      + '&theta; are read once per measured plane (&phi; 0/45/90), and by '
+      + 'reciprocity each reading equals the total for light ENTERING at that '
+      + '&theta;, &phi;.',
     mitsuba: 'An independent code on the same mesh, with a pure '
       + '<b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> &mdash; not the fitted '
       + 'coating, which has no identical construction in Mitsuba. Use it to '
-      + 'check transport and geometry, not absolute coating performance.',
+      + 'check transport and geometry, not absolute coating performance. '
+      + 'Runs the &phi; 0 plane only.',
     both: 'Runs both codes on the same mesh with the same '
       + '<b>Lambertian &rho;&nbsp;=&nbsp;0.01</b> and reports the difference. '
       + 'On comb 6.5/0.08 the three axes agree to &minus;4.3&nbsp;% (total), '
@@ -1082,6 +1168,7 @@ addEventListener('resize', draw);
   $('#rendnote').innerHTML = RENDNOTE.cycles;
   $('#mr').onclick = async () => {
     const b=$('#mr'); b.disabled=true; setBusy(1);
+    const prog = progressBar(b);   // trace progress is counted client-side
     try{
       const mode = $('#ray_mode').value;
       // the coating already chosen on the left owns rho -- no second picker
@@ -1097,6 +1184,7 @@ addEventListener('resize', draw);
       const THS = [0,-20,-40,20,40];
       const out = [];
       for(const th of THS){
+        prog.set(out.length, THS.length);
         const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
           {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode})});
         const j = await r.json();
@@ -1141,10 +1229,11 @@ addEventListener('resize', draw);
         d.title = `${i} bounce${i===1?'':'s'}: ${c} rays`;
         H.appendChild(d);
       });
+      $('#rayhistcap').style.display = 'block';
       b.classList.add('done');
     }catch(e){ $('#rayout').innerHTML =
       `<div><dt>failed</dt><dd>${String(e).slice(0,200)}</dd></div>`; }
-    finally{ b.disabled=false; setBusy(-1); }
+    finally{ b.disabled=false; setBusy(-1); prog.stop(); }
   };
   $('#m5').onclick = () => measure([0,-20,-40,20,40]);
   $('#stl').onclick = async () => {
@@ -1153,6 +1242,263 @@ addEventListener('resize', draw);
     a.href = URL.createObjectURL(b);
     a.download = `${LAST.top}${LAST.floor!=='none'?'_'+LAST.floor:''}_d${LAST.depth}.stl`;
     a.click();
+  };
+
+  // ---- one-page A4 report: the current view plus every number on screen.
+  // Composed on a 150 dpi canvas, then wrapped as a single JPEG inside a
+  // hand-written minimal PDF (no library, no print dialog: the page is a
+  // local instrument and stays self-contained).
+  function pdfFromJpeg(jpeg, imgW, imgH){
+    const PW = '595.28', PH = '841.89';                    // A4 in points
+    const enc = new TextEncoder();
+    const cs = `q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+    const objs = [
+      enc.encode('1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n'),
+      enc.encode('2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n'),
+      enc.encode(`3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${PW} ${PH}]`
+        + `/Resources<</XObject<</Im0 4 0 R>>>>/Contents 5 0 R>>endobj\n`),
+      (() => { const h = enc.encode(`4 0 obj<</Type/XObject/Subtype/Image`
+          + `/Width ${imgW}/Height ${imgH}/ColorSpace/DeviceRGB`
+          + `/BitsPerComponent 8/Filter/DCTDecode/Length ${jpeg.length}`
+          + `>>stream\n`), t = enc.encode('\nendstream endobj\n');
+        const o = new Uint8Array(h.length + jpeg.length + t.length);
+        o.set(h, 0); o.set(jpeg, h.length); o.set(t, h.length + jpeg.length);
+        return o; })(),
+      enc.encode(`5 0 obj<</Length ${cs.length}>>stream\n${cs}\nendstream endobj\n`),
+    ];
+    const head = enc.encode('%PDF-1.4\n');
+    let off = head.length; const offs = [];
+    for(const o of objs){ offs.push(off); off += o.length; }
+    // xref offsets are byte-exact -- every part above went through TextEncoder
+    const xr = 'xref\n0 6\n0000000000 65535 f \n'
+      + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('')
+      + `trailer<</Size 6/Root 1 0 R>>\nstartxref\n${off}\n%%EOF`;
+    return new Blob([head, ...objs, enc.encode(xr)], {type: 'application/pdf'});
+  }
+
+  function reportCanvas(){
+    const Wp = 1240, Hp = 1754, M = 66;                    // A4 at 150 dpi
+    const c = document.createElement('canvas'); c.width = Wp; c.height = Hp;
+    const g = c.getContext('2d');
+    const F = '"Helvetica Neue",Helvetica,"Apple SD Gothic Neo",sans-serif';
+    const MO = 'Menlo,monospace';
+    const INK = '#16181a', INK3 = '#84878b', LINE = '#c8c4bb', SOFT = '#f5f4f0';
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, Wp, Hp);
+
+    const sect = (x, y, w, t) => {                         // ruled section title
+      g.font = '700 14px ' + MO; g.fillStyle = INK3;
+      g.fillText(t.toUpperCase(), x, y);
+      g.strokeStyle = LINE; g.beginPath();
+      g.moveTo(x, y + 9); g.lineTo(x + w, y + 9); g.stroke();
+      return y + 38;
+    };
+    const kv = (x, y, w, k, v, kw) => {                    // label + wrapped value
+      g.font = '400 15px ' + MO; g.fillStyle = INK3; g.fillText(k, x, y);
+      g.font = '400 18px ' + F; g.fillStyle = INK;
+      let ln = '', yy = y;
+      for(const wd of String(v).split(' ')){
+        const t = ln ? ln + ' ' + wd : wd;
+        if(g.measureText(t).width > w - kw && ln){ g.fillText(ln, x + kw, yy); yy += 25; ln = wd; }
+        else ln = t;
+      }
+      g.fillText(ln, x + kw, yy);
+      return yy + 29;
+    };
+    const dim = (x, y, t) => { g.font = '400 18px ' + F; g.fillStyle = INK3;
+                               g.fillText(t, x, y); return y + 40; };
+
+    // header
+    g.fillStyle = INK; g.font = '700 33px ' + F;
+    g.fillText('Spill Sink Panel — design report', M, M + 26);
+    const d = new Date(), p2 = n => String(n).padStart(2, '0');
+    g.font = '400 17px ' + MO; g.fillStyle = INK3; g.textAlign = 'right';
+    g.fillText(`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`,
+               Wp - M, M + 26);
+    g.textAlign = 'left';
+    g.fillStyle = '#ff4d00'; g.fillRect(M, M + 46, Wp - 2*M, 3);
+
+    // current view, exactly as on screen (orbit angle, rays, arrows and all).
+    // The GL context has no preserveDrawingBuffer, so draw() must run in the
+    // same task as drawImage or the buffer may already be cleared.
+    draw();
+    const vb = {x: M, y: M + 68, w: Wp - 2*M, h: 560};
+    g.fillStyle = '#101215'; g.fillRect(vb.x, vb.y, vb.w, vb.h);
+    const sc = Math.min(vb.w / cv.width, vb.h / cv.height);
+    const dw = cv.width * sc, dh = cv.height * sc;
+    g.drawImage(cv, vb.x + (vb.w - dw)/2, vb.y + (vb.h - dh)/2, dw, dh);
+    g.strokeStyle = LINE; g.strokeRect(vb.x + .5, vb.y + .5, vb.w - 1, vb.h - 1);
+    // caption = the design's key dimensions, so the picture alone identifies
+    // the part. Probe settings are report content, not a caption -- they live
+    // in the DESIGN column below.
+    const tp0 = LAST.top_params || {};
+    let capL = `${LAST.top} — depth ${LAST.depth} mm`;
+    if(tp0.pitch != null) capL += ` · pitch ${tp0.pitch} mm`;
+    if(tp0.tip_flat != null) capL += ` · tip_flat ${tp0.tip_flat} mm`;
+    if(LAST.floor !== 'none') capL += ` · floor ${LAST.floor}`;
+    capL += ` · panel ${LAST.panel} mm sq`;
+    g.font = '400 15px ' + MO; g.fillStyle = INK3;
+    g.fillText(capL, M, vb.y + vb.h + 24);
+
+    // three-axis strip: the verdict before any detail, one card per axis.
+    // Every card names its yardstick -- a reader who only ever sees this PDF
+    // must be able to tell whether the number is good. smear and head-on are
+    // ALREADY ratios against the flat matte control patch rendered beside the
+    // panel; total is absolute, so the flat-Musou plate figure is printed and
+    // the measured value is restated as a multiple of it.
+    const ay = vb.y + vb.h + 46, bw = (Wp - 2*M - 40)/3, bh = 106;
+    [['반사 총량 · total ↓', '#ax_total',
+      v => { const m = parseFloat(v);
+             return isFinite(m) ? `= ${(m/1.14).toFixed(2)}× of flat` : ''; },
+      'flat Musou plate 1.14 % · study best 0.177 %'],
+     ['모양 뭉개기 · smear ↑', '#ax_smear', () => '',
+      'flat plate = 1.0 by definition · study best 1.42 (beam 7 mm)'],
+     ['정면 반짝임 · head-on ↓', '#ax_head', () => '',
+      'flat matte patch = 1.0 · study best 0.040']
+    ].forEach(([nm, id, note, base], i) => {
+      const x = M + i*(bw + 20);
+      g.fillStyle = SOFT; g.fillRect(x, ay, bw, bh);
+      g.strokeStyle = LINE; g.strokeRect(x + .5, ay + .5, bw - 1, bh - 1);
+      g.font = '400 15px ' + F; g.fillStyle = INK3; g.fillText(nm, x + 16, ay + 28);
+      const v = $(id).querySelector('.val').textContent.trim();
+      g.font = v === '—' ? '400 19px ' + F : '600 25px ' + MO;
+      g.fillStyle = v === '—' ? INK3 : INK;
+      g.fillText(v === '—' ? 'not measured' : v, x + 16, ay + 64);
+      if(v !== '—'){
+        const ann = note(v);
+        if(ann){
+          g.font = '600 25px ' + MO; const vw = g.measureText(v).width;
+          g.font = '400 14px ' + F; g.fillStyle = INK3;
+          g.fillText(ann, x + 16 + vw + 10, ay + 64);
+        }
+      }
+      g.font = '400 12.5px ' + F; g.fillStyle = INK3;
+      g.fillText(base, x + 16, ay + 90);
+    });
+
+    // two columns: the design on the left, measurement detail on the right
+    const y0 = ay + bh + 54, colw = (Wp - 2*M - 56)/2, x2 = M + colw + 56, LW = 118;
+    let y = sect(M, y0, colw, 'Design');
+    // units per parameter, verified against the dataclass comments in
+    // geom_floor.py: pitch/tip_flat/valley_round/row_offset are mm;
+    // apex_jitter and tip_drop are fractions (of pitch/2 and of depth).
+    const UNITS = {pitch: ' mm', tip_flat: ' mm', valley_round: ' mm',
+                   row_offset: ' mm'};
+    const pl = o => Object.entries(o || {}).map(([k, v]) =>
+      `${k} ${v}${UNITS[k] || ''}`).join(' · ');
+    y = kv(M, y, colw, 'top', `${LAST.top} — ${pl(LAST.top_params)}`, LW);
+    if(LAST.floor !== 'none')
+      y = kv(M, y, colw, 'floor', `${LAST.floor} d${LAST.floor_depth} — ${pl(LAST.floor_params)}`, LW);
+    y = kv(M, y, colw, 'panel', `${LAST.panel} mm sq · envelope depth ${LAST.depth} mm`, LW);
+    const co = $('#coat'), dc = $('#deepcoat');
+    const coLabel = co.selectedOptions[0].textContent;   // usually ends in "· N %"
+    y = kv(M, y, colw, 'coating', coLabel
+      + (/%/.test(coLabel) ? '' : ` (ρ₀ ${(100*CO[co.value].rho0).toFixed(2)} %)`)
+      + (dc.value ? ` · below ${$('#pd').value} mm: ${dc.selectedOptions[0].textContent}` : ''), LW);
+    y = kv(M, y, colw, 'model', `diffuse ${$('#df').value} · roughness ${$('#rg').value} (assumed)`, LW);
+    y = kv(M, y, colw, 'probe', `beam ${$('#beamw').value} mm at wall · renderer ${$('#renderer').value}`, LW);
+    for(const dv of $('#derived').querySelectorAll('div')){
+      const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
+      const v = ((dv.querySelector('dd') || {}).textContent || '').trim();
+      if(k === 'min feature')  y = kv(M, y, colw, 'feature', v, LW);
+      else if(k === 'process') y = kv(M, y, colw, 'process', v, LW);
+      else if(/BUILDABLE|BELOW/.test(v)) y = kv(M, y, colw, 'build', `${v} — ${k}`, LW);
+    }
+
+    let yr = sect(x2, y0, colw, 'Total · 5 angles');
+    const rsm = $('#rho').querySelector('small');
+    if(rsm && !/not measured/.test(rsm.textContent)){
+      yr = kv(x2, yr, colw, '', rsm.textContent.trim(), 0);
+      const ch = $('#chart');
+      if(ch.style.display !== 'none' && ch.width){
+        const chh = colw * ch.height / ch.width;
+        g.drawImage(ch, x2, yr - 8, colw, chh); yr += chh + 16;
+      }
+    } else yr = dim(x2, yr, 'not measured');
+
+    yr = sect(x2, yr, colw, 'Smear + head-on');
+    let any = false;
+    for(const dv of $('#formout').querySelectorAll('div')){
+      const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
+      const v = ((dv.querySelector('dd') || {}).textContent || '').trim();
+      if(/not measured|rendering/.test(k)) continue;
+      g.font = '400 17px ' + F; g.fillStyle = INK; g.fillText(k, x2, yr);
+      g.font = '500 17px ' + MO; g.textAlign = 'right'; g.fillText(v, x2 + colw, yr);
+      g.textAlign = 'left'; yr += 28; any = true;
+    }
+    yr = any ? yr + 14 : dim(x2, yr, 'not measured');
+
+    yr = sect(x2, yr, colw, 'Trace sample · 5 angles × 1 plane');
+    const rows = [], meta = {};
+    for(const dv of $('#rayout').querySelectorAll('div')){
+      const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
+      const v = ((dv.querySelector('dd') || {}).textContent || '').trim();
+      if(/not traced|failed/.test(k)) continue;
+      if(/^-?\d+°$/.test(k))
+        rows.push([k, v.split('·').map(s => s.trim().replace(/^[a-z]+ /, ''))]);
+      else if(/worst/.test(k)) meta.worst = v;
+      else if(/mode/.test(k))  meta.mode = v;
+      else if(/took/.test(k))  meta.took = v;
+    }
+    if(rows.length){
+      // a real table: one row per angle, numerals right-aligned per column
+      const cx = i => x2 + 88 + i*(colw - 88)/4;           // right edge of col i
+      g.font = '400 13px ' + MO; g.fillStyle = INK3;
+      g.fillText('θ', x2, yr); g.textAlign = 'right';
+      ['absorbed', 'out', 'wander', 'retro'].forEach((h, i) => g.fillText(h, cx(i + 1), yr));
+      g.textAlign = 'left';
+      g.strokeStyle = LINE; g.beginPath();
+      g.moveTo(x2, yr + 9); g.lineTo(x2 + colw, yr + 9); g.stroke();
+      yr += 33;
+      rows.sort((a, b) => parseFloat(a[0]) - parseFloat(b[0]));
+      for(const [th, vs] of rows){
+        g.font = '600 16px ' + MO;
+        g.fillStyle = (thc(parseFloat(th)) || [])[2] || INK;
+        g.fillText(th, x2, yr);
+        g.font = '400 16px ' + MO; g.fillStyle = INK; g.textAlign = 'right';
+        vs.slice(0, 4).forEach((v, i) => g.fillText(v, cx(i + 1), yr));
+        g.textAlign = 'left'; yr += 26;
+      }
+      g.strokeStyle = LINE; g.beginPath();
+      g.moveTo(x2, yr - 16); g.lineTo(x2 + colw, yr - 16); g.stroke();
+      if(meta.worst){
+        g.font = '600 16px ' + F; g.fillStyle = INK;
+        g.fillText('worst of 5 sampled angles', x2, yr + 6);
+        g.font = '600 16px ' + MO; g.textAlign = 'right';
+        g.fillText(meta.worst, x2 + colw, yr + 6);
+        g.textAlign = 'left'; yr += 32;
+      }
+      g.font = '400 13px ' + MO; g.fillStyle = INK3;
+      const cap = `${meta.mode || ''}${meta.took ? ' · took ' + meta.took : ''}` +
+                  ' — a sample, not the measurement';
+      let cl = '';
+      for(const wd of cap.split(' ')){
+        const t = cl ? cl + ' ' + wd : wd;
+        if(g.measureText(t).width > colw && cl){ g.fillText(cl, x2, yr); yr += 19; cl = wd; }
+        else cl = t;
+      }
+      g.fillText(cl, x2, yr);
+    } else dim(x2, yr, 'not traced — a sample, not the measurement');
+
+    // footer
+    g.strokeStyle = LINE; g.beginPath();
+    g.moveTo(M, Hp - M - 26); g.lineTo(Wp - M, Hp - M - 26); g.stroke();
+    g.font = '400 15px ' + MO; g.fillStyle = INK3;
+    g.fillText('Spill Sink Panel Simulator — uniform-hemisphere render; numbers compare designs, absolute level depends on the assumed coating.',
+               M, Hp - M - 4);
+    return c;
+  }
+
+  $('#report').onclick = () => {
+    try{
+      const c = reportCanvas();
+      const b64 = c.toDataURL('image/jpeg', 0.9).split(',')[1];
+      const bin = atob(b64), u8 = new Uint8Array(bin.length);
+      for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(pdfFromJpeg(u8, c.width, c.height));
+      a.download = `spillsink_${LAST.top}${LAST.floor !== 'none' ? '_' + LAST.floor : ''}_d${LAST.depth}.pdf`;
+      a.click();
+    }catch(e){ $('#err').textContent = 'report: ' + String(e).slice(0, 300); }
   };
   rebuild();
   // boot into the user's chosen default design, if one was saved

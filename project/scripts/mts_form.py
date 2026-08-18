@@ -243,11 +243,15 @@ def run(mi, ply, rho, face_w, face_h, pitch, thetas=(-40.0, 40.0, 0.0),
     phases = [(-pitch / 2.0) + pitch * i / n_phase for i in range(n_phase)]
 
     out = {"mm_per_px": mm_per_px, "n_phase": n_phase, "thetas": {}}
-    for theta in thetas:
+    for ti, theta in enumerate(thetas):
         acc_p = np.zeros(NWIN)
         acc_c = np.zeros(NWIN)
         peaks = []
-        for dz in phases:
+        for pi, dz in enumerate(phases):
+            # progress marker: sim_server streams these lines from the
+            # subprocess so the UI bar moves during a Mitsuba form render too
+            print("@@PROG@@ %d %d" % (ti * n_phase + pi,
+                                      len(thetas) * n_phase), flush=True)
             img = mi.render(mi.load_dict(scene_dict(
                 mi, ply, rho, face_w, face_h, theta, dz, spp)))
             arr = np.array(img)
