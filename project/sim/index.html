@@ -445,6 +445,20 @@ function resetResults(){
   buildOverlay(SHOW_THETAS); draw();
 }
 
+// A number typed outside the slider's track used to be swallowed. Assigning to
+// a range input CLAMPS: `r.value = 500` on a 5..80 track leaves 80, while the
+// number box and the label kept showing 500. The readout lied and the model got
+// the old size. The server has no such limit -- pitch 100 / depth 500 build and
+// measure fine -- so the track grows to meet the typed value instead.
+// Slider ranges stay narrow on purpose: dragging is for fine work near the
+// study's sizes, typing is how you jump somewhere else.
+function fitRange(rng, v){
+  v = +v;
+  if(!isFinite(v)) return;
+  if(v > +rng.max) rng.max = String(v);
+  if(v < +rng.min) rng.min = String(v);
+}
+
 // ---------- parameter widgets, generated from the server's dataclass fields
 function sliders(host, fields, cls){
   host.innerHTML = '';
@@ -458,7 +472,8 @@ function sliders(host, fields, cls){
         <input type="range" class="${cls}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.default}">
         <input type="number" step="${f.step}" value="${f.default}">`;
       const [lab,rng,num] = [d.querySelector('b'), d.querySelector('input[type=range]'), d.querySelector('input[type=number]')];
-      const sync = v => { lab.textContent = (+v).toFixed(dec); rng.value = v; num.value = v; d.dataset.val = v; refresh(); };
+      const sync = v => { lab.textContent = (+v).toFixed(dec); fitRange(rng, v);
+                          rng.value = v; num.value = v; d.dataset.val = v; refresh(); };
       rng.oninput = e => sync(e.target.value);
       num.onchange = e => sync(e.target.value);
       d.dataset.val = f.default;
@@ -1063,7 +1078,8 @@ addEventListener('resize', draw);
   f.onchange = () => { $('#preset').value=''; resetEnvelope(); rebuild(); };
   for(const [id,lab] of [['panel','v_panel'],['depth','v_depth'],['fdepth','v_fdepth'],['df','v_df'],['rg','v_rg']]){
     const r=$('#'+id), num=$('#n_'+id), L=$('#'+lab);
-    const sync = v => { r.value=v; if(num) num.value=v; L.textContent=(+v).toFixed(2); refresh(); };
+    const sync = v => { fitRange(r, v); r.value=v; if(num) num.value=v;
+                        L.textContent=(+v).toFixed(2); refresh(); };
     r.oninput = e=>sync(e.target.value); if(num) num.onchange = e=>sync(e.target.value);
   }
   $('#mf').onclick = async () => {
@@ -1133,7 +1149,8 @@ addEventListener('resize', draw);
   $('#deepcoat').onchange = () => { coatNote(); resetResults(); };
   for(const [id,lab] of [['pd','v_pd']]){
     const r=$('#'+id), n=$('#n_'+id), L=$('#'+lab);
-    const sync = v => { r.value=v; if(n) n.value=v; L.textContent=(+v).toFixed(1); coatNote(); resetResults(); };
+    const sync = v => { fitRange(r, v); r.value=v; if(n) n.value=v;
+                        L.textContent=(+v).toFixed(1); coatNote(); resetResults(); };
     r.oninput = e=>sync(e.target.value); if(n) n.onchange = e=>sync(e.target.value);
   }
   coatNote();
