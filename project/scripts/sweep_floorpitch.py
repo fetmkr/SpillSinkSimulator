@@ -17,6 +17,7 @@ check 8 has a design in common with sweep_floor.csv.
 """
 import sys, os, csv, json, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sweep_shard import shard_csv, take                # noqa: E402
 import blender_render as BR
 import geom_stack as ST
 from cone3d_sweep import COAT
@@ -28,7 +29,7 @@ RESULTS = os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "results")
 RENDERS = os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "renders", "floorpitch")
-OUTCSV = os.path.join(RESULTS, "sweep_floorpitch.csv")
+OUTCSV = shard_csv(os.path.join(RESULTS, "sweep_floorpitch.csv"))
 PITCHES = (1.0, 1.5, 2.0, 3.0)
 TUBE_SET = ("p650f080", "bl050o115")
 
@@ -61,6 +62,10 @@ def main():
         for dfrac in DIFFUSE_FRACS:
             mname = "d%02d" % (dfrac * 100)
             n += 1
+            # another shard is measuring this design; NSHARD unset makes
+            # take() always true, so an unsharded run is unchanged
+            if not take(tag):
+                continue
             if (tag, mname) in seen:
                 continue
             body, spec = BR.coating_split(dfrac)

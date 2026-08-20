@@ -34,6 +34,7 @@ import json
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sweep_shard import done_tags, shard_csv, take                # noqa: E402
 import blender_render as BR                                        # noqa: E402
 import geom_topo as GT                                             # noqa: E402
 from cone3d_sweep import COAT                                       # noqa: E402
@@ -41,7 +42,7 @@ from cone3d_sweep import COAT                                       # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(ROOT, "results")
 RENDERS = os.path.join(ROOT, "renders", "comb")
-OUTCSV = os.path.join(RESULTS, "sweep_comb.csv")
+OUTCSV = shard_csv(os.path.join(RESULTS, "sweep_comb.csv"))
 
 FACE = 60.0
 SAMPLES = 64
@@ -80,7 +81,6 @@ def designs():
     return out
 
 
-
 def open_append(path, fields):
     """Append to `path`, but ONLY if its header is exactly `fields`.
 
@@ -114,11 +114,6 @@ def open_append(path, fields):
         fh.flush()
     return fh, w
 
-def done_tags(path):
-    if not os.path.exists(path):
-        return set()
-    return {(r["tag"], r["diffuse_frac"]) for r in csv.DictReader(open(path))}
-
 
 def main():
     os.makedirs(RENDERS, exist_ok=True)
@@ -137,6 +132,10 @@ def main():
         for dfrac in DIFFUSE_FRACS:
             mname = "d%02d" % (dfrac * 100)
             n += 1
+            # another shard is measuring this design; NSHARD unset makes
+            # take() always true, so an unsharded run is unchanged
+            if not take(tag):
+                continue
             if (tag, mname) in seen:
                 continue
             body, spec = BR.coating_split(dfrac)

@@ -54,6 +54,7 @@ import json
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sweep_shard import done_tags, shard_csv, take                # noqa: E402
 import blender_render as BR                                        # noqa: E402
 import geom_topo as GT                                             # noqa: E402
 import geom_cell as GC                                             # noqa: E402
@@ -63,7 +64,7 @@ from cone3d_sweep import COAT                                      # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(ROOT, "results")
 RENDERS = os.path.join(ROOT, "renders", "buildable")
-OUTCSV = os.path.join(RESULTS, "sweep_buildable.csv")
+OUTCSV = shard_csv(os.path.join(RESULTS, "sweep_buildable.csv"))
 
 FACE = 60.0
 SAMPLES = 64
@@ -177,12 +178,6 @@ def tag_for(family, topology, feat, seed, prm):
                                          prm["wall_top"] * 1000, seed)
 
 
-def done_tags(path):
-    if not os.path.exists(path):
-        return set()
-    return {(r["tag"], r["diffuse_frac"]) for r in csv.DictReader(open(path))}
-
-
 def main():
     stage = int(os.environ.get("STAGE", "1"))
     seeds = (23,) if stage == 1 else tuple(range(101, 113))
@@ -219,6 +214,10 @@ def main():
         for dfrac in DIFFUSE_FRACS:
             mname = "d%02d" % (dfrac * 100)
             n += 1
+            # another shard is measuring this design; NSHARD unset makes
+            # take() always true, so an unsharded run is unchanged
+            if not take(tag):
+                continue
             if (tag, mname) in seen:
                 continue
             body, spec = BR.coating_split(dfrac)

@@ -42,6 +42,7 @@ import json
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sweep_shard import shard_csv, take                # noqa: E402
 import blender_render as BR                                        # noqa: E402
 import geom_stack as ST                                            # noqa: E402
 import geom3d as G3                                                # noqa: E402
@@ -53,7 +54,7 @@ from sweep_floor import (FACE, SAMPLES, RES, THETAS, DIFFUSE_FRACS,
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(ROOT, "results")
 RENDERS = os.path.join(ROOT, "renders", "conefloor")
-OUTCSV = os.path.join(RESULTS, "sweep_conefloor.csv")
+OUTCSV = shard_csv(os.path.join(RESULTS, "sweep_conefloor.csv"))
 
 # byte-identical to B_CONE_p0550 in sweep_buildable.csv
 CONE = dict(pitch=5.5, tip_radius=0.2, jitter=0.30, radial_seg=24,
@@ -107,6 +108,10 @@ def main():
         for dfrac in DIFFUSE_FRACS:
             mname = "d%02d" % (dfrac * 100)
             n += 1
+            # another shard is measuring this design; NSHARD unset makes
+            # take() always true, so an unsharded run is unchanged
+            if not take(tag):
+                continue
             if (tag, mname) in seen:
                 continue
             body, spec = BR.coating_split(dfrac)

@@ -61,6 +61,69 @@ run_job() {
   return 0
 }
 
+# run_job_sharded <name> <script> <csv> <nshard> [ENV=VAL ...]
+#
+# The same job split across <nshard> Blender processes, then merged back into
+# <csv>. Worth it because a sweep uses one resource at a time: building a
+# design is single-threaded Python (2.6 s for the 1.1 M-vertex cone) with the
+# GPU idle, rendering is Metal with the CPU idle. Measured on four cone
+# measurements: 55 s serial, 42 s at two at a time. Four at a time measured
+# 43 s -- no better -- so two is the number.
+#
+# The gain comes from the OVERLAP, so it scales with how long the Python build
+# takes. A vgroove builds in 0.01 s and will gain almost nothing.
+#
+# Each shard writes its own <csv>.shardN and they are merged afterwards, so
+# `results/<csv>` keeps its name and the nineteen scripts that read it are
+# untouched. See scripts/sweep_shard.py.
+run_job_sharded() {
+  local name=$1 script=$2 csv=$3 nshard=$4; shift 4
+  if [[ -f logs/STOP ]]; then log "STOP present, not starting $name"; return 1; fi
+  log "START $name (${nshard} shards)"
+  local t0=$SECONDS
+  local -a pids=()
+  local i rc=0
+  for (( i = 0; i < nshard; i++ )); do
+    env SHARD=$i NSHARD=$nshard "$@" "$BLENDER" --background --factory-startup \
+        --python-exit-code 77 --python "$script" \
+        >> "logs/$name.shard$i.log" 2>&1 &
+    pids+=($!)
+    # Blender launches that land on top of each other have been seen to die
+    # inside ShaderCache::load_kernel -- Metal kernel compilation, not
+    # anything this code does (the same collision is why sim_server retries
+    # its worker once). Staggering the starts costs 5 s and avoids provoking
+    # it deliberately, which is what starting N at the same instant would be.
+    (( i + 1 < nshard )) && sleep 5
+  done
+  local src
+  for (( i = 0; i < nshard; i++ )); do
+    # zsh arrays are 1-indexed. And `$?` must be read on its own line: inside
+    # `if ! wait ...` it is the status of the negation, which is always 0.
+    wait ${pids[$((i + 1))]}
+    src=$?
+    if (( src != 0 )); then
+      log "WARN  $name shard $i rc=$src -- see logs/$name.shard$i.log"
+      rc=$src
+    fi
+    if tail -60 "logs/$name.shard$i.log" 2>/dev/null | grep -q "^Traceback"; then
+      log "WARN  $name shard $i raised a Python exception -- see logs/$name.shard$i.log"
+      rc=77
+    fi
+  done
+
+  # MERGE EVEN WHEN A SHARD FAILED. Each shard's rows are complete measurements
+  # whatever happened to the design after them, and the sweeps resume on what
+  # the CSV holds -- leaving good rows in a .shardN file would make the next
+  # cycle re-measure them.
+  local merged
+  merged=$(python3 scripts/merge_shards.py "results/$csv" 2>&1)
+  log "$merged"
+
+  local dt=$((SECONDS - t0))
+  log "END   $name rc=$rc  ${dt}s"
+  return 0
+}
+
 log "queue up, pid $$"
 
 # One pass per cycle. Jobs are ordered cheapest-first so a fresh design list
@@ -72,7 +135,7 @@ while true; do
   # is complete, so the order only bites on a cold start.
 
   # 1. darkness, one seed -- the list everything else selects from
-  run_job sweep_buildable scripts/sweep_buildable.py || break
+  run_job_sharded sweep_buildable scripts/sweep_buildable.py sweep_buildable.csv 2 || break
 
   # 2. FORM -- the project's stated FIRST priority, and never measured until
   #    now. Slowest job here: 11 designs x 3 thetas x 16 stripe phases. The 16
@@ -94,14 +157,14 @@ while true; do
   #     error costs, and whether restricting the blades to 0/90 degrees (which
   #     lets them be slotted together like an egg crate, with no base plate and
   #     no welding) keeps the 31% that random azimuth buys.
-  run_job sweep_fab       scripts/sweep_fab.py || break
+  run_job_sharded sweep_fab scripts/sweep_fab.py sweep_fab.csv 2 || break
 
   # 3b. darkness over 12 geometry seeds, for error bars. Long -- 2160 designs.
-  run_job sweep_seeds     scripts/sweep_buildable.py STAGE=2 || break
+  run_job_sharded sweep_seeds scripts/sweep_buildable.py sweep_buildable.csv 2 STAGE=2 || break
 
-  run_job sweep_feature scripts/sweep_feature.py || break
-  run_job sweep_topo   scripts/sweep_topo.py   || break
-  run_job sweep_shapes scripts/sweep_shapes.py || break
+  run_job_sharded sweep_feature scripts/sweep_feature.py sweep_feature.csv 2 || break
+  run_job_sharded sweep_topo scripts/sweep_topo.py sweep_topo.csv 2 || break
+  run_job_sharded sweep_shapes scripts/sweep_shapes.py sweep_shapes.csv 2 || break
 
   # Both jobs are no-ops once their design lists are exhausted, so without a
   # pause this spins on Blender startups. Sleep, then look again -- the point
