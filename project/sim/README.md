@@ -8,8 +8,9 @@ bit-identical numbers.
     python3 scripts/sim_server.py
     open http://127.0.0.1:8777
 
-Plain CPython. Structure picking, every slider, the 3D preview, the derived
-figures, the published-number lookup and **STL export** all run here, because
+Plain CPython. Structure picking, every slider, **the materials inspector**,
+the 3D preview, the derived figures, the published-number lookup and
+**STL export** all run here, because
 every geometry module is pure Python — `geom3d`, `geom_topo`, `geom_cell`,
 `geom_floor`, `geom_stack` and `profile_ridge` contain no reference to `bpy`.
 
@@ -25,6 +26,45 @@ the page still works; only the three measurements report an error saying so.
 No GUI window; Blender runs headless and its main thread becomes the render
 worker. Identical behaviour, minus the process launch per measurement. Use this
 when running many measurements in a row.
+
+## Materials
+
+A panel is not one finish. The **Materials** block on the left lists the parts
+of whatever structure is loaded, with the share of the area each covers, and
+**Assign materials** opens an inspector docked over the right of the viewport
+— not a modal, because you are assigning finishes to regions of a shape you
+need to keep looking at.
+
+| part | what it is |
+|---|---|
+| tips | everything facing the sky. One bounce here and the light leaves with the beam's position intact. On honeycomb 6.5/0.08 it is **under 1 % of the area** and it decides the answer. |
+| inner sides | the flanks — where light must survive several bounces to be destroyed, and almost all of the material. |
+| base | the floor under the structure: a shaped floor layer, or the slab the cells stand on. A separate part in any real build. |
+| hidden | buried in the union, plus the slab's underside. Listed so the areas add to 100 %. |
+
+Which face belongs to which part is derived from the built mesh rather than
+tabulated per family, so it cannot go stale, and it works for a structure this
+file has never heard of. `python3 scripts/audit_slots.py` checks the tip area
+against a closed form written from the design intent — 2·wall/pitch of crown,
+(tip_flat/pitch)² of pyramid flat, πr² per cone cell.
+
+Each material carries four numbers — ρ₀, diffuse fraction, roughness, IOR —
+and **says which of them nobody has measured**. Only `musou_fit` has a measured
+shape; anodised is translated from Kaster 2025 and is labelled as an estimate.
+Changing a value marks it, amends the provenance note, and the generated PDF
+prints an "estimated, not measured" row. A session override must not be able
+to pass as a cited product.
+
+Assigning the same material everywhere takes the single-material path, so the
+Cycles scene is byte-identical and a published row still reproduces. Verified
+on comb 6.5/0.08: no materials block and uniform `musou_fit` both return
+`0.0006134170689620078`, while anodised inner sides return 1.444× that.
+
+The old **paint reaches N mm** control is gone from the page. A depth plane
+could never be drawn in the viewport, because a honeycomb wall is one quad from
+the mouth to the floor — which is exactly why that split needed a
+position-dependent shader. `paint_depth` still works from a job file, and
+`geom_kit.split_at_depth` is the geometric replacement, not yet wired to it.
 
 ## Which renderer
 

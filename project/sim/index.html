@@ -419,8 +419,11 @@ details.why p{margin:.4em 0 0}
       <option value="diffuse">diffuse &mdash; Monte Carlo</option>
     </select>
   </div>
-  <p class="note" style="margin:0">The coating picked on the left owns all four
-   numbers &mdash; &rho;, the diffuse fraction, the roughness and the IOR.
+  <p class="note" style="margin:0">The tracer carries ONE material, so it uses
+   the one on the <b>inner sides</b> &mdash; about 94 % of the area, and where
+   nearly every bounce happens. It owns all four numbers: &rho;, the diffuse
+   fraction, the roughness and the IOR. The tips and base finishes are in the
+   render but not in this trace.
    <b>coating</b> scatters from the same Fresnel mix the render builds;
    <b>specular</b> and <b>diffuse</b> are its two EXTREMES, kept because a
    mirror ladder shows the mechanism a Monte Carlo cloud hides. They are not
@@ -2047,7 +2050,8 @@ footer img{height:5.5mm}
   <div><h2>Design</h2>${design}
        <h2>Trace sample · 5 angles × 1 plane</h2>${trace}</div>
   <div><h2>Total · 5 angles</h2>${total}
-       <h2>Smear + head-on</h2>${smear}</div>
+       <h2>Smear + head-on</h2>${smear}
+       <h2>Where the light goes · incidence × observation</h2>${bidir}</div>
 </div>
 <footer><span>Spill Sink Panel Simulator — uniform-hemisphere render; numbers compare designs.</span>
 <span class="co"><img src="${logoSrc}">fetm.kr</span></footer>
