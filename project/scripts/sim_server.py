@@ -212,10 +212,33 @@ NORMAL = {
                       depth=50.0),
     "nested":   dict(pitch=11.0, wall_top=0.1, wall_bot=0.1, depth=50.0),
     "flat":     dict(depth=10.0),
+}
+
+# THE FLOOR LAYER'S OWN DEFAULTS, and why they cannot share the dict above.
+#
+# `pyramid`, `cone` and `comb` name a shape, not a role: each is both a
+# standalone panel and something `geom_stack` can put UNDER a tube, and the two
+# want different numbers. One namespace served both, so the floor-sized pyramid
+# was written as a SECOND "pyramid" key 21 lines below the first. Python keeps
+# the last one, so from that moment picking pyramid as a top structure silently
+# built the 2 mm floor part -- a pitch 2.75x off the phase 5 champion its own
+# comment cites, at whatever depth the slider said. `audit_normal.py` ran green
+# over it for two reasons at once: a duplicate key is legal Python and `exec`
+# says nothing, and `which_family` had no branch for geom_floor's `kind` field,
+# so no pyramid row in 30-odd sweep files was ever compared. Both are now
+# checked there.
+#
+# Anything absent here falls back to NORMAL, so cone and comb floors keep the
+# values they have always had.
+FLOOR_NORMAL = {
     "pyramid":  dict(pitch=2.0, tip_flat=0.1, depth=3.0),
     "wave":     dict(pitch=2.0, depth=3.0),
     "gap":      dict(depth=3.0),
 }
+
+
+def floor_normal(kind):
+    return FLOOR_NORMAL.get(kind, NORMAL.get(kind, {}))
 
 # Which structures are still in play, and what each one is FOR. The dropdown
 # used to list thirteen with no distinction, including three the study threw
@@ -420,10 +443,13 @@ NEEDS_MARGIN = "margin_depths"
 DROPPED = {}
 
 
-def field_spec(mod, cname, fixed, key=None):
+def field_spec(mod, cname, fixed, key=None, floor=False):
     import dataclasses
     used = uses(mod, cname, fixed)
-    norm = NORMAL.get(key or "", {})
+    # WHICH ROLE. `pyramid` as a top structure and `pyramid` as a floor layer
+    # are different designs, so the slider defaults must come from the right
+    # dict or the panel on screen is not the one the caller asked for.
+    norm = (floor_normal(key or "") if floor else NORMAL.get(key or "", {}))
     out = []
     for f in dataclasses.fields(_cls(mod, cname)):
         if f.name in HIDDEN or f.name in fixed:
@@ -464,12 +490,12 @@ def families_json():
             out["floor"][k] = []
         else:
             mod, cname, fixed = v
-            out["floor"][k] = field_spec(mod, cname, fixed, k)
+            out["floor"][k] = field_spec(mod, cname, fixed, k, floor=True)
     out["groups"] = [[g, [k for k in ks if k in out["top"]]]
                      for g, ks in GROUPS]
     out["normal_depth"] = {k: NORMAL.get(k, {}).get("depth", 50.0)
                            for k in out["top"]}
-    out["floor_depth"] = {k: NORMAL.get(k, {}).get("depth", 3.0)
+    out["floor_depth"] = {k: floor_normal(k).get("depth", 3.0)
                           for k in out["floor"]}
     # Which tops `geom_stack` can actually put a floor under. The 1D families
     # are cross-sections the renderer extrudes and have no mesh builder it can
@@ -493,7 +519,7 @@ def build(spec):
     tp = dict(NORMAL.get(top, {}), **(spec.get("top_params") or {}))
     tp.pop("depth", None)
     floor = spec.get("floor", "none")
-    fp = dict(NORMAL.get(floor, {}), **(spec.get("floor_params") or {}))
+    fp = dict(floor_normal(floor), **(spec.get("floor_params") or {}))
     fp.pop("depth", None)
     # PANEL SIZE, one number for both layers. It was 60 mm hard-coded and
     # hidden, which is fine for a measurement -- the window is the face and the
@@ -745,10 +771,22 @@ def clip_to_panel(verts, faces, face_w, face_h):
     return v2, f2
 
 
-def mesh_binary(verts, faces):
-    """Flat-shaded triangles as float32 [px,py,pz,nx,ny,nz] * 3 per tri."""
+def mesh_binary(verts, faces, slot_ids=None):
+    """Flat-shaded triangles as float32 [px,py,pz,nx,ny,nz,slot] * 3 per tri.
+
+    The 7th float is which part the face belongs to (see `mat_slots`), constant
+    across a face's whole triangle fan so a `flat` interpolant reads it exactly.
+    A parallel array would be a second thing to keep in step with a mesh that is
+    rebuilt whole on every keystroke, which is the failure `DROPPED` exists to
+    catch elsewhere in this file; one interleaved buffer cannot desynchronise.
+
+    Costs 17 % on the wire (a honeycomb goes 738 KB -> 861 KB). `slot_ids=None`
+    writes 0 everywhere, so the buffer is always the same shape and the client
+    has one stride to know about.
+    """
     buf = io.BytesIO()
-    for f in faces:
+    for i, f in enumerate(faces):
+        sid = float(slot_ids[i]) if slot_ids is not None else 0.0
         idx = list(f)
         for a in range(1, len(idx) - 1):
             tri = (verts[idx[0]], verts[idx[a]], verts[idx[a + 1]])
@@ -761,7 +799,7 @@ def mesh_binary(verts, faces):
             L = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
             nx, ny, nz = nx / L, ny / L, nz / L
             for q in tri:
-                buf.write(struct.pack("<6f", q[0], q[1], q[2], nx, ny, nz))
+                buf.write(struct.pack("<7f", q[0], q[1], q[2], nx, ny, nz, sid))
     return buf.getvalue()
 
 
@@ -976,33 +1014,108 @@ def min_feature(spec):
 
 # --- coatings ---------------------------------------------------------------
 #
-# A named coating is one number: rho_dh at normal incidence. The diffuse
-# fraction then splits it between a Lambertian body and a Fresnel lobe, and
-# `roughness` shapes that lobe. Only rho0 distinguishes the products.
+# THE TABLE MOVED TO scripts/materials.py. It is no longer a table of one
+# number: a material now carries rho0, diffuse fraction, roughness and ior,
+# each labelled with whether it was measured or estimated. It also stopped
+# being something only this server could see -- sweep scripts and lock.py can
+# import it now, which is the point.
 #
-# EVERY VALUE HERE HAS A SOURCE, and the two that do not agree say so.
-COATINGS = {
-    "musou_air": (0.0060, "Musou Black, airbrushed \u2014 0.6 % total "
-                          "reflectance at 550 nm, AOI 8 deg integrating "
-                          "sphere [musoublack.com product spec]"),
-    "musou_fit": (0.00998, "Musou Black as fitted in this project \u2014 "
-                           "Filip & V\u00e1vra 2026 JOSA A 43, 1037, "
-                           "RGB-weighted 380\u2013700 nm. Every number in "
-                           "phases 2\u20135 uses this."),
-    "musou_brush": (0.0110, "Musou Black, brush-applied \u2014 1.1 % or "
-                            "lower [the-black-market.com]. 1.8x the airbrushed "
-                            "figure; application method is a larger lever than "
-                            "any geometry parameter measured so far."),
-    "anodised_lo": (0.030, "Black anodised aluminium, optimistic end. Sources "
-                           "disagree: 'below 5 % in the visible' vs 'at least "
-                           "5 %'. Swept, not assumed."),
-    "anodised": (0.045, "Black anodised aluminium, nominal \u2014 what bought "
-                        "honeycomb actually arrives as [arXiv 1407.8265; "
-                        "Rubin M2 baffle]."),
-    "anodised_hi": (0.060, "Black anodised aluminium, pessimistic end."),
-    "wall_5pct": (0.050, "Plain matte black wall \u2014 the control patch in "
-                         "every render."),
+# `COATINGS` survives as a derived view so /api/coatings keeps its exact shape
+# for anything already reading it. New code should use /api/materials.
+import materials as MAT                                            # noqa: E402
+import mat_slots as MS                                             # noqa: E402
+
+COATINGS = {k: (m.rho0, m.note) for k, m in MAT.LIBRARY.items()}
+
+
+# --- material slots ----------------------------------------------------------
+#
+# WHERE AN ASSIGNMENT LIVES: inside the spec, under "materials".
+#
+#   "materials": {"defaults": {"diffuse_frac": 0.76, "roughness": 0.30},
+#                 "slots": {"tips":  {"base": "musou_air"},
+#                           "walls": {"base": "anodised"},
+#                           "base":  {"base": "musou_fit"}}}
+#
+# That one decision fixes the persistence bug for free. Every endpoint here
+# already takes a spec, so /api/mesh, /api/measure, /api/form, /api/rays and
+# /api/stl all get materials without a new argument, and `spec()` in the UI
+# carries them into localStorage. Until now the coating lived in separate DOM
+# controls and was NOT saved with a design: reloading a saved design silently
+# reused whatever coating happened to be selected.
+
+def resolve_materials(spec):
+    """slot key -> resolved Material, for every assignable slot."""
+    blk = (spec or {}).get("materials") or {}
+    slots = blk.get("slots") or {}
+    defaults = blk.get("defaults") or {}
+    dflt = MAT.LIBRARY[MAT.STUDY_DEFAULT]
+    out = {}
+    for key in MS.ASSIGNABLE:
+        out[key] = MAT.resolve(slots.get(key), default=dflt, defaults=defaults)
+    return out
+
+
+def materials_payload(spec):
+    """What the resolver decided, echoed back for the UI to display.
+
+    THE NUMBERS THE RENDER WILL USE, ON SCREEN BEFORE THE BUTTON IS PRESSED --
+    the same discipline as the rig readout: a resolution bug cannot hide behind
+    a plausible reflectance if the plausible reflectance is printed first.
+    """
+    res = resolve_materials(spec)
+    out = {}
+    for key, m in res.items():
+        out[key] = {"name": m.name, "rho0": m.rho0,
+                    "diffuse_frac": m.diffuse_frac, "roughness": m.roughness,
+                    "ior": m.ior, "model": m.model, "note": m.note,
+                    "estimated": list(m.estimated),
+                    "rho_dh_0": m.rho_dh(0.0), "rho_dh_80": m.rho_dh(80.0),
+                    "edited": "OVERRIDDEN" in m.note,
+                    "missing": "NO MATERIAL NAMED" in m.note}
+    return out
+
+
+def materials_json():
+    """Everything the inspector needs to build itself, in one request."""
+    return {"fields": material_fields(),
+            "library": MAT.library_json(),
+            "slot_rules": MS.slot_rules_json(),
+            "defaults": {"rho0": MAT.MUSOU_RHO0, "diffuse_frac": 0.76,
+                         "roughness": 0.30, "ior": MAT.MUSOU_IOR},
+            "study_default": MAT.STUDY_DEFAULT}
+
+
+# Slider bounds for the material properties. Same suffix table the geometry
+# fields use, but these are matched on the FULL name because `rho0` and `ior`
+# are too short to be safe suffixes.
+MAT_RANGES = {
+    "rho0": (0.0, 0.20, 0.0005, 5),
+    "diffuse_frac": (0.0, 1.0, 0.02, 2),
+    "roughness": (0.02, 0.60, 0.01, 2),
+    "ior": (1.0, 3.0, 0.01, 2),
 }
+
+
+def material_fields():
+    """Widget descriptors for a Material, generated -- never hand-written.
+
+    Same reasoning as `uses()`: a hand-typed field list "is exactly the thing
+    that goes stale". A property added to `materials.Material` tomorrow gets a
+    slider, and `test_sim`'s extreme-value loop covers it, with no edit here.
+
+    `dec` is carried because the client derives decimals from the step, and
+    rho0 at step 0.0005 would print 0.00998 as "0.010" -- a readout that lies
+    in exactly the way `fitRange` was written to stop.
+    """
+    out = []
+    dflt = MAT.LIBRARY[MAT.STUDY_DEFAULT]
+    for name in MAT.fields():
+        lo, hi, step, dec = MAT_RANGES[name]
+        out.append({"name": name, "kind": "num",
+                    "default": getattr(dflt, name),
+                    "min": lo, "max": hi, "step": step, "dec": dec})
+    return out
 
 
 def coatings_json():
@@ -1692,6 +1805,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(families_json()))
         if p == "/api/coatings":
             return self._send(200, json.dumps(coatings_json()))
+        if p == "/api/materials":
+            return self._send(200, json.dumps(materials_json()))
         if p == "/api/presets":
             return self._send(200, json.dumps({"presets": presets()}))
         if p == "/api/health":
@@ -1738,7 +1853,22 @@ class H(BaseHTTPRequestHandler):
                                            "why": "this setting produces no "
                                                   "geometry at all"})})
                 d = derived(p, v, req)
-                blob = mesh_binary(v, f)
+                # WHICH PART IS EACH FACE. Not a property of the family -- a
+                # honeycomb with a floor has a different slot set than one
+                # without -- so it is recomputed from the built mesh, which is
+                # rebuilt on every parameter change anyway. Measured at ~6 ms
+                # against the 68 ms build, so it rides along for free.
+                one = FAMILIES.get(req.get("top"), ("",))[0] in (
+                    "profile_ridge", "profile2d", "profile_scatter")
+                fl = (0.0 if req.get("floor", "none") == "none"
+                      else float(req.get("floor_depth", 0.0) or 0.0))
+                sids, sstats = MS.classify(
+                    v, f, depth=float(req.get("depth", 50.0) or 50.0),
+                    floor_depth=fl, one_slot=one)
+                d["slots"] = sstats
+                d["one_slot"] = one
+                d["materials"] = materials_payload(req)
+                blob = mesh_binary(v, f, sids)
                 d["build_ms"] = round((time.perf_counter() - t0) * 1000, 1)
                 return self._send(200, blob, "application/octet-stream",
                                   {"X-Derived": json.dumps(d)})
@@ -1970,14 +2100,43 @@ class H(BaseHTTPRequestHandler):
                 fw = float(req.get("spec", {}).get(
                     "panel", req.get("spec", {}).get("face", 100.0)))
                 v, f = clip_to_panel(v, f, fw, fw)
+                # THE COATING IS FOUR NUMBERS AND THIS ROUTE USED TO SEND ONE.
+                # `rho` alone cannot say how much of a return is Lambertian, so
+                # raytrace_viz had nothing to scatter from but a mirror or a
+                # perfect diffuser -- and the mirror was the UI's default. On
+                # honeycomb + flat base at anodised_hi that read 6.8x the
+                # measurement at theta 0 and 0.06x at theta 20.
+                #
+                # RESOLVED BY NAME, not from the sliders. A library entry
+                # states its own split (anodised is 0.85 / 0.362, Musou
+                # 0.76 / 0.30); letting a global slider overwrite a cited value
+                # is the defect `principles/02` is about. The sliders are the
+                # fallback for an inline material only, which is exactly
+                # `materials.resolve`'s contract.
+                spec_m = req.get("material", req.get("coating"))
+                if spec_m is None and req.get("rho") is not None:
+                    # A caller with a bare rho and no name gets an INLINE
+                    # material at that rho, not the study default's rho0 with
+                    # its own split stapled on. `resolve` only lets the
+                    # sliders reach an inline spec, which is the case this is.
+                    spec_m = {"rho0": float(req["rho"])}
+                mat = MAT.resolve(spec_m, defaults={
+                    k: float(req[k]) for k in ("diffuse_frac", "roughness")
+                    if req.get(k) is not None})
+                body, spec_scale = mat.split()
                 out = RV.trace(v, f, fw, fw,
                                theta_deg=float(req.get("theta", 0.0)),
                                phi_deg=float(req.get("phi", 0.0)),
                                n_rays=int(req.get("n_rays", 120)),
                                max_bounces=int(req.get("max_bounces", 12)),
-                               rho=float(req.get("rho", 0.5)),
-                               mode=str(req.get("mode", "diffuse")),
-                               seed=int(req.get("seed", 23)))
+                               rho=mat.rho0,
+                               mode=str(req.get("mode", "coating")),
+                               seed=int(req.get("seed", 23)),
+                               body=body, spec_scale=spec_scale,
+                               roughness=mat.roughness, ior=mat.ior,
+                               divergence_deg=req.get("divergence"))
+                out["stats"]["material"] = mat.name or "inline"
+                out["stats"]["diffuse_frac"] = mat.diffuse_frac
                 out["seconds"] = round(time.perf_counter() - t0, 2)
                 return self._send(200, json.dumps(out))
             if self.path == "/api/published":

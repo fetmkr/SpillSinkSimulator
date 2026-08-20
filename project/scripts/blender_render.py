@@ -216,16 +216,52 @@ def make_ar_glass(name, r_surface, roughness=0.02):
 #     Cycles   0.998  0.999  1.007  1.060  1.294  2.278  3.085  %
 #     residual -0.2   -0.1   -2.2   -6.2   -9.5   -2.2   -3.0   %
 #
+# 2026-08-20 CORRECTION -- WHAT THAT RESIDUAL ROW IS, AND IS NOT.
+#
+# It was read here as the accuracy of the implementation, and the theta-0 row
+# was described as exact by construction. Neither survives measurement. The
+# model this file actually builds, evaluated in pure Python, reproduces the
+# Cycles row to better than 0.04% at EVERY angle:
+#
+#     theta        0      15      30      45      60      75      80
+#     Cycles    .00998  .00999  .01007  .01060  .01294  .02278  .03085
+#     model     .00998  .00999  .01007  .01060  .01293  .02277  .03086
+#     error     +.02%   -.03%   +.03%   -.03%   -.04%   -.03%   +.03%
+#
+# So the residual row is the MODEL disagreeing with Filip & Vavra's paper, not
+# the implementation disagreeing with the model. Those are different claims and
+# only the second would be a defect. See materials.Material.rho_dh, whose
+# self-test locks the agreement above.
+#
+# Two things had to be right to close it, both found by the session working on
+# the ray tracer:
+#
+#   * THE FRESNEL TERM IS THE EXACT DIELECTRIC CURVE, NOT SCHLICK. Anything
+#     reproducing what ShaderNodeFresnel evaluates must use the exact one; they
+#     agree at normal incidence and diverge by -21.5% at 60 deg and +5.7% at
+#     80. materials.fresnel() is exact; Schlick survives under its own name.
+#
+#   * THE MIX SHADER CARRIES A CROSS-TERM. mix(diffuse, glossy, fac) is
+#     (1-fac)*body + fac*1, so the diffuse arm is attenuated by the same fac
+#     that weights the specular arm. It integrates to rho0 - fac*body, NOT
+#     rho0. At the fitted split that is 0.99818% against a nominal 0.998 --
+#     which IS the "-0.2" in the row above. The theta-0 row is not exact by
+#     construction; it is short by exactly the cross-term.
+#
 # Worst residual 9.5%, at 60 deg, and always on the optimistic side in the
 # 45-60 band. A parameter sweep found body=0.0082 gives a lower WORST residual
 # (6.1%) by spreading the error, but it costs +6% at normal incidence, which is
 # the angle every headline number is quoted at. Exact-at-normal is kept
-# deliberately; the mid-band bound is documented instead of hidden.
+# deliberately; the mid-band bound is documented instead of hidden. That
+# trade-off is unaffected by the correction above -- it is a choice about which
+# angle to favour against the PAPER, and the paper is still what it was.
 #
 # For scale: this replaces a model that was 100% wrong at normal incidence and
 # 600% wrong at 80 deg, with the angular trend running the wrong way.
 #
-# DO NOT read the 9.5% as the accuracy of the coating model. The paper reports
+# DO NOT read the 9.5% as the accuracy of the coating model -- and, per the
+# correction above, do not read it as the accuracy of this implementation
+# either. The paper reports
 # BRDF "in relative units" and never states how THR is put on an absolute
 # scale; their own Vantablack reads 0.0023 against a 3.5e-4 spec, and their
 # Musou reads 0.0100 against a 6e-3 spec. An absolute uncertainty of order
@@ -241,11 +277,14 @@ def make_ar_glass(name, r_surface, roughness=0.02):
 # DARKER when coated with Au-Pd (Mouchet 2024 p.8), so coating and geometry are
 # not separable.
 
-MUSOU_THR = {0: 0.0100, 15: 0.0100, 30: 0.0103, 45: 0.0113,
-             60: 0.0143, 75: 0.0233, 80: 0.0318}
-MUSOU_BODY = 0.00758
-MUSOU_SPEC_SCALE = 0.0605
-MUSOU_IOR = 1.5
+# THESE NOW LIVE IN scripts/materials.py and are re-exported here.
+# ~30 sweep scripts read them as BR.MUSOU_BODY and BR.coating_split, and
+# lock.py::material_check guards the coating against drift -- so a second copy
+# of the constants is a second thing to keep in step, which is exactly what
+# `principles/02` says goes wrong. One home, re-exported.
+from materials import (                                            # noqa: E402
+    MUSOU_THR, MUSOU_BODY, MUSOU_SPEC_SCALE, MUSOU_IOR,
+)
 
 
 # The single most consequential UNMEASURED parameter in the project.
@@ -267,14 +306,11 @@ MUSOU_IOR = 1.5
 # (body, spec_scale) that give diffuse fraction d while keeping rho_dh(0) at
 # the measured flat-plate value -- the one thing that IS constrained.
 
-F0_IOR15 = 0.04                      # Fresnel reflectance at normal, n = 1.5
-MUSOU_RHO0 = 0.00998                 # measured flat-plate rho_dh(0)
-
-
-def coating_split(diffuse_frac, rho0=MUSOU_RHO0):
-    """(body, spec_scale) for a given diffuse fraction at fixed rho_dh(0)."""
-    d = min(1.0, max(0.0, diffuse_frac))
-    return d * rho0, (1.0 - d) * rho0 / F0_IOR15
+from materials import (                                            # noqa: E402
+    F0_IOR15,        # Fresnel reflectance at normal, n = 1.5
+    MUSOU_RHO0,      # measured flat-plate rho_dh(0)
+    coating_split,   # (body, spec_scale) for a diffuse fraction at fixed rho0
+)
 
 
 def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
@@ -584,7 +620,7 @@ def world_to_pixel(x, z):
     return u * sc.render.resolution_x, v * sc.render.resolution_y
 
 
-def configure_cycles(samples, use_gpu=True, seed=None):
+def configure_cycles(samples, use_gpu=True, seed=None, persistent=False):
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     cy = sc.cycles
@@ -617,22 +653,64 @@ def configure_cycles(samples, use_gpu=True, seed=None):
     sc.display_settings.display_device = "sRGB"
     sc.sequencer_colorspace_settings.name = "Non-Color"
 
+    # The scene is built once and the angles are looped over it, changing only
+    # camera and lights, so re-syncing the mesh to the device on every angle is
+    # pure waste. Measured on the 5-angle V-groove measurement: 10.06 s off,
+    # 9.52 s on. Only set for multi-render jobs -- for a single render there is
+    # nothing to persist and it only holds device memory. See `run`.
+    sc.render.use_persistent_data = bool(persistent)
+
     if use_gpu:
         prefs = bpy.context.preferences.addons["cycles"].preferences
         prefs.compute_device_type = "METAL"
         prefs.get_devices()
         enabled = []
         for d in prefs.devices:
-            # enabling the CPU alongside Metal costs more than it adds here
+            # Enabling the CPU alongside Metal costs more than it adds here,
+            # measured rather than assumed: the same 5-angle measurement takes
+            # 10.06 s on Metal alone and 21.83 s on Metal + CPU. The CPU tiles
+            # finish late and the GPU waits on them.
             d.use = (d.type == "METAL")
             if d.use:
                 enabled.append(d.name)
-        cy.device = "GPU"
         print("[CFG] metal devices enabled: %s" % enabled)
+
+        # WITHOUT THIS GUARD A GPU RUN CAN QUIETLY BE A CPU RUN. Cycles does
+        # not refuse `device = "GPU"` when no device is enabled -- it falls
+        # back to the CPU, silently, and `report_cycles_settings` below still
+        # prints device=GPU. Measured: 6.09 s against 2.0 s for the same frame,
+        # with nothing in the log to say why. A number produced that way is not
+        # wrong, but a sweep that says GPU while running 3x slower on the CPU
+        # is exactly the kind of thing this project has been bitten by.
+        if not enabled:
+            if os.environ.get("ALLOW_CPU") == "1":
+                cy.device = "CPU"
+                print("[CFG] no Metal device; ALLOW_CPU=1 -- rendering on CPU "
+                      "deliberately, expect ~3x the time")
+            else:
+                raise RuntimeError(
+                    "gpu=True but no Metal device could be enabled. Cycles "
+                    "would fall back to the CPU without saying so. Set "
+                    "ALLOW_CPU=1 to render on the CPU on purpose.")
+        else:
+            cy.device = "GPU"
     else:
         cy.device = "CPU"
 
     return cy
+
+
+def render_provenance():
+    """What rendered this frame, read back off the scene rather than assumed."""
+    cy = bpy.context.scene.cycles
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    return {
+        "blender": bpy.app.version_string,
+        "device": cy.device,
+        "devices": [d.name for d in prefs.devices if d.use],
+        "metalrt": getattr(prefs, "metalrt", None),
+        "persistent_data": bool(bpy.context.scene.render.use_persistent_data),
+    }
 
 
 def report_cycles_settings():
@@ -1151,7 +1229,8 @@ def run(cfg):
     ortho = total_w * 1.02
 
     configure_cycles(cfg.get("samples", 512), cfg.get("gpu", True),
-                     seed=cfg.get("cycles_seed"))
+                     seed=cfg.get("cycles_seed"),
+                     persistent=len(cfg["renders"]) > 1)
     report_cycles_settings()
 
     w_panel, w_ctrl = measurement_windows(p, ctrl_x0, None)
@@ -1178,6 +1257,9 @@ def run(cfg):
         "paint_depth": cfg.get("paint_depth"),
         "n_slats": len(cs.stage1),
         "n_baffles": len(cs.stage2),
+        # what actually rendered this, not what was asked for -- so a row can
+        # be checked after the fact rather than trusted
+        "renderer": render_provenance(),
         "modes": {},
     }
 
