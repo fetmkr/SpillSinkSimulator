@@ -100,6 +100,13 @@ BLENDER = os.environ.get(
     "BLENDER_BIN", "/Applications/Blender.app/Contents/MacOS/Blender")
 
 
+# True only while `main()` is pumping JOBS on Blender's main thread. Anything
+# that marshals must check it: `cyc_worker` imports this module INSIDE Blender
+# and calls its functions directly, with no pump running, so an unconditional
+# on_main() there blocks for ever on a queue nobody reads.
+MAIN_PUMP = False
+
+
 def on_main(fn, *a, **kw):
     """Run `fn` on Blender's main thread; block this thread for the result."""
     box, done = {}, threading.Event()
@@ -136,8 +143,15 @@ def in_blender(op, **req):
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
-                  beam_w=req.get("beam_w"))}[op]
-        val = on_main(fn)
+                  beam_w=req.get("beam_w")),
+              "bidir": lambda: bidir_sweep(
+                  req["spec"], req.get("step", 20.0),
+                  req.get("in_limit", 80.0), req.get("out_limit", 80.0),
+                  req.get("samples", 256), req.get("coating"))}[op]
+        # bidir_sweep marshals to the main thread cell by cell itself, so
+        # that a 81-cell run does not hold Blender's main thread for minutes
+        # and freeze every other request behind it
+        val = fn() if op == "bidir" else on_main(fn)
         return {"rho": val} if op in ("measure", "lambert") else val
 
     if not os.path.exists(BLENDER):
@@ -1375,6 +1389,71 @@ def measure_lambert(spec, theta, rho, samples):
     return list(res["modes"].values())[0]["panel"]["mean"]
 
 
+def bidir_sweep(spec, step=20.0, in_limit=80.0, out_limit=80.0,
+                samples=256, coating=None):
+    """metric 08 -- the angle-in / angle-out map, live.
+
+    The whole grid at one incidence completes before the next starts, so the UI
+    can paint a stripe as soon as a column lands and a run that is stopped
+    early still says something.
+
+    NOT A BATCH JOB. `sweep_bidir.py` is, and it deliberately does not come
+    through here -- `sweep_standalone.py`'s docstring records what happens when
+    a queue of renders sits in front of the user's own button. The grid offered
+    here is coarse for that reason: 9 x 9 at the 20 deg default.
+    """
+    import bidir as BD
+    ins, outs = BD.grid(step, in_limit, out_limit)
+    # the same widening rule `measure` applies, for the same reason -- and it
+    # binds here almost always, because this sweep exists to look at grazing
+    m = dict(spec, margin_depths=BD.margin_for(ins, outs))
+    params = _render_params(m)
+    params["margin_depths"] = m["margin_depths"]
+    sun = BD.default_sun_angle(ins)
+
+    # in the server, every bpy touch is marshalled; in `cyc_worker` we ARE the
+    # main thread and there is no pump to marshal to
+    run = on_main if MAIN_PUMP else (lambda f, *a: f(*a))
+    sc = run(lambda: BD.build(params, material=coating, samples=samples,
+                              family=_render_family(m)))
+    total = len(ins) * len(outs)
+    _prog(0, total)
+    grid = [[None] * len(ins) for _ in outs]
+    ix = {v: i for i, v in enumerate(ins)}
+    ox = {v: i for i, v in enumerate(outs)}
+    worst_ctrl = 0.0
+    n = [0]
+
+    def column(ti):
+        got = []
+        for to in outs:
+            rec = BD.cell(sc, ti, to, sun, out_dir="/tmp/simsrv/bidir_ui")
+            got.append(rec)
+            n[0] += 1
+            _prog(n[0], total)
+        return got
+
+    for ti in ins:
+        for rec in run(column, ti):
+            grid[ox[rec["theta_out"]]][ix[rec["theta_in"]]] = rec["brdf"]
+            worst_ctrl = max(worst_ctrl, rec["control_dev"])
+
+    return {"ins": ins, "outs": outs, "grid": grid,
+            "meta": {"sun_angle_deg": sun, "samples": samples,
+                     "mm_per_px": sc["mm_per_px"], "res_x": sc["res_x"],
+                     "res_y": sc["res_y"], "cells": total,
+                     "margin_depths": m["margin_depths"],
+                     "material": sc["material"].name or "inline",
+                     "rho0": sc["material"].rho0,
+                     "diffuse_frac": sc["material"].diffuse_frac,
+                     "roughness": sc["material"].roughness,
+                     "worst_control_dev": worst_ctrl,
+                     # the three lines the map is read against
+                     "lines": {"retro": "theta_out = +theta_in",
+                               "specular": "theta_out = -theta_in",
+                               "audience": "theta_out = 0"}}}
+
+
 def _render_family(spec):
     if spec.get("floor", "none") != "none":
         return "stack"
@@ -2238,6 +2317,19 @@ class H(BaseHTTPRequestHandler):
                     return self._send(200, json.dumps(
                         {"error": "chrome produced no PDF within 60 s"}))
                 return self._send(200, pdf, "application/pdf")
+            if self.path == "/api/bidir":
+                # metric 08. Cost is one render per cell, so the grid is
+                # named in the response and the UI states it before asking.
+                t0 = time.time()
+                out = in_blender("bidir", spec=req.get("spec", {}),
+                                 step=float(req.get("step", 20.0)),
+                                 in_limit=float(req.get("in_limit", 80.0)),
+                                 out_limit=float(req.get("out_limit", 80.0)),
+                                 samples=int(req.get("samples", 256)),
+                                 coating=req.get("coating"))
+                if isinstance(out, dict) and "meta" in out:
+                    out["meta"]["seconds"] = round(time.time() - t0, 1)
+                return self._send(200, json.dumps(out))
             if self.path == "/api/rays":
                 # Pure Python; no renderer involved. See `raytrace_viz`.
                 import raytrace_viz as RV
@@ -2320,6 +2412,8 @@ def main():
         srv.serve_forever()          # nothing to marshal; this thread waits
         return
     # Blender's main thread becomes the render worker and never returns.
+    global MAIN_PUMP
+    MAIN_PUMP = True
     while True:
         fn, a, kw, box, done = JOBS.get()
         try:

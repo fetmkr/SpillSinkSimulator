@@ -47,7 +47,7 @@ hundreds of measurements through one process on exactly that basis.
 `sim_server.py` still runs inside Blender when it is started that way -- it
 dispatches here only when `bpy` is absent. Same server, same answers.
 
-Input:  {"op": "measure" | "lambert" | "form", ...the op's arguments}
+Input:  {"op": "measure" | "lambert" | "form" | "bidir", ...its arguments}
 Output: one line, "@@RESULT@@" + JSON. The marker is required because Blender
         writes its own banner and Cycles its progress to stdout.
 """
@@ -114,6 +114,11 @@ def handle(req):
     elif op == "form":
         out = S.form(req["spec"], req.get("thetas"), req.get("n_phase"),
                      req.get("samples"), beam_w=req.get("beam_w"))
+    elif op == "bidir":
+        out = S.bidir_sweep(req["spec"], req.get("step", 20.0),
+                            req.get("in_limit", 80.0),
+                            req.get("out_limit", 80.0),
+                            req.get("samples", 256), req.get("coating"))
     else:
         out = {"error": "no such op: %s" % op}
     return out

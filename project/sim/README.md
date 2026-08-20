@@ -74,6 +74,37 @@ the mouth to the floor — which is exactly why that split needed a
 position-dependent shader. `paint_depth` still works from a job file, and
 `geom_kit.split_at_depth` is the geometric replacement, not yet wired to it.
 
+## Where the light goes
+
+The two Render buttons ask **how much** light comes back. **Render · where the
+light goes** asks **where it goes**: it puts the beam at each incidence angle in
+turn and looks from each observation angle in turn, and reads the BRDF —
+brightness per unit solid angle, in 1/sr — for every pair. 81 renders at the
+9 × 9 default, one per cell.
+
+Three questions are three straight lines on the map:
+
+| line | what it is |
+|---|---|
+| `y = +x` | **retro** — straight back at the projector |
+| `y = −x` | the direction a flat mirror would send it. A bright ridge here means the panel is only *dimming* the reflection, not moving it |
+| `y = 0` | **the audience** — the one row a client actually stands in |
+
+Every cell is read against the flat Lambertian control plate in its own frame,
+so the number is an absolute BRDF and not a ratio to something unstated. The
+source's angular **diameter** is set to the incidence step, so a column is an
+honest bin average rather than a delta with a fudge factor.
+
+**What it cannot say.** It is one azimuth plane, so there is no hemisphere total
+in it. And the coating fit constrains only a flat plate's total reflectance —
+nothing in it constrains BRDF *shape*, which is exactly what this map reads. The
+structure of the map is a geometric result; the absolute numbers wait on a
+measured coupon. Definition and defects: `metrics/08_brdf_slice.md`.
+
+Batch runs do **not** come through the server — `scripts/sweep_bidir.py` writes
+`results/sweep_bidir_<tag>.csv` and `scripts/plot_bidir.py` draws it, because a
+thousand-cell queue in front of the Render button looks like a hang.
+
 ## Which renderer
 
 | | runs in | what it is for |

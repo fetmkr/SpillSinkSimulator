@@ -23,6 +23,12 @@ with a specular exclusion cone of half-angle 5°.
 
 ## Implementation note
 
+**The directional readout now exists** — `metrics/08_brdf_slice.md`, beam and
+camera rather than reciprocity, absolute in 1/sr. What 05 still needs from it
+is an AZIMUTH axis: TIS is a ratio of two hemisphere integrals, and 08 measures
+one plane. At normal incidence, where the BRDF is azimuthally symmetric, 08
+already closes the integral (`gate_bidir` G6) and TIS is computable today.
+
 Needs a directional readout, not the reciprocity trick — TIS is defined on the
 outgoing distribution for a fixed incidence, so it wants the beam-and-camera
 geometry with the specular cone masked out. The 5° exclusion cone is the

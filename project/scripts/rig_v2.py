@@ -128,7 +128,7 @@ def sky_inset_mm(mm_per_px, pixels=4.0):
 
 
 def build(params, samples=256, roughness=0.30, lambert_rho=None,
-          family="floor"):
+          family="floor", extra=None):
     """Build the scene with the control placed clear. Returns everything the
     callers need, including the geometry's real extent so overlap can be
     asserted rather than assumed."""
@@ -145,6 +145,12 @@ def build(params, samples=256, roughness=0.30, lambert_rho=None,
         cfg["material_mode"] = "all_diffuse"
         cfg.update(rho_slat=lambert_rho, rho_chamber=lambert_rho,
                    rho_specular=lambert_rho, rho_control=0.05)
+    # `extra` reaches build_scene untouched, for cfg keys this helper does not
+    # model -- `prebuilt_mesh` above all, which is how a caller supplies a
+    # genuinely flat plate (a single quad, built exactly like the control) that
+    # no family module produces.
+    if extra:
+        cfg.update(extra)
 
     # build once to see where the field really ends, then rebuild clear of it
     BR.clear_scene()
@@ -189,3 +195,37 @@ def assert_clear(sc):
             "panel field reaches x=%.1f, control starts at x=%.1f -- still "
             "overlapping" % (hi, sc["ctrl_x0"]))
     return hi, sc["ctrl_x0"]
+
+
+def assert_window_covered(sc, win, what="panel window"):
+    """D3's own failure mode, found 2026-08-21 by the bidir gate.
+
+    Opening the window to the full face (D3) assumes the geometry actually
+    REACHES the full face. `lock.py`'s flat_coating case does not: pitch 50 on
+    a 100 mm face lays its two periods over z -25..+75, so a full-face window
+    reads 25 % background and the plate comes back 25 % dark. The stock rig's
+    30 % z inset hid this by accident -- z -20..+20 sits inside the covered
+    band -- which is why it survived until the window was opened.
+
+    Nothing else in the rig catches it: `assert_clear` checks the panel field
+    does not reach the CONTROL, and `assert_window_in_frame` checks the window
+    fits the IMAGE. Neither asks whether the sample is under the window.
+    """
+    lo = hi = None
+    for o in __import__("bpy").data.objects:
+        if o.type != "MESH" or "control" in o.name:
+            continue
+        for v in o.data.vertices:
+            z = (o.matrix_world @ v.co).z
+            lo = z if lo is None else min(lo, z)
+            hi = z if hi is None else max(hi, z)
+    if lo is None:
+        raise AssertionError("%s: no panel geometry in the scene at all" % what)
+    if lo > win[2] + 1e-6 or hi < win[3] - 1e-6:
+        raise AssertionError(
+            "%s runs z %.2f..%.2f but the geometry only covers z %.2f..%.2f "
+            "-- the window would read %.1f %% background as if it were the "
+            "sample" % (what, win[2], win[3], lo, hi,
+                        100.0 * (1.0 - (min(hi, win[3]) - max(lo, win[2]))
+                                 / (win[3] - win[2]))))
+    return lo, hi

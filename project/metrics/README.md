@@ -17,12 +17,13 @@ file is marked SUPERSEDED and a new number is issued.
 | [02](02_smear_rms.md) | smear, rms | how far the returned line is spread | `form_mtf.py` `rms_width` | — |
 | [04](04_peak_radiance.md) | **peak radiance ratio** | **how bright the brightest point of the wall copy is, vs a plain black wall** | `form_mtf.py` `peak` + `metrics.py` | — |
 | [07](07_mtf.md) | MTF at a spatial period | how much contrast survives at a given feature size | `form_mtf.py` `mtf_at` | — |
+| [08](08_brdf_slice.md) | **in-plane BRDF slice** | **where the light goes — incidence against observation, in 1/sr** | `bidir.py` / `sweep_bidir.py` | `gate_bidir.py` |
 
 ## Planned
 
 | # | metric | why |
 |---|---|---|
-| [05](05_tis.md) | total integrated scatter | published definition, makes our panel comparable to measured real materials |
+| [05](05_tis.md) | total integrated scatter | published definition, makes our panel comparable to measured real materials. **Blocked only on an azimuth axis now that [08](08_brdf_slice.md) exists — 08 is the directional readout 05 said it needed** |
 | [06](06_effective_albedo.md) | effective albedo | one cosine-weighted number when the rig's angle distribution is unknown |
 
 ## Retired
