@@ -176,6 +176,24 @@ def main():
     check("geometry audit", a.returncode == 0,
           "%d failure(s) -- run scripts/audit_geometry.py" % a.returncode)
 
+    # --- 3c: the slot audit, same reasoning -------------------------------
+    # Which face belongs to which part cannot be checked from a reflectance:
+    # a wrong slot map paints a third of the area with the wrong finish and
+    # every number still looks plausible. `audit_slots.py` measures the tip
+    # area on the built mesh and compares it with a closed form written from
+    # the design intent, so a classifier bug and an algebra bug would have to
+    # agree to pass.
+    print("\n[3c] slot audit (which face is which part, and how much area)")
+    b2 = subprocess.run([sys.executable,
+                         os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      "audit_slots.py")],
+                        capture_output=True, text=True)
+    for line in (b2.stdout or "").splitlines():
+        if "FAIL" in line:
+            check(line.strip()[:70], False, "")
+    check("slot audit", b2.returncode == 0,
+          "%d failure(s) -- run scripts/audit_slots.py" % b2.returncode)
+
     # --- 4: a measured number still matches the study ----------------------
     if not QUICK:
         print("\n[4] a live measurement reproduces the published number")
