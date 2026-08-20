@@ -414,6 +414,94 @@ def build(date):
                  'nothing in this study knows that yet.</p>')
         P.append("</section>")
 
+    # ---- the room, and the corner of the map it uses
+    import report_geometry as G
+    g = G.facts()
+    near = G.closest_to_retro()
+    frac_out, _incs = G.fraction_outside_scored()
+    rb = os.path.join(RESULTS, "rigband_hcflat.csv")
+    band = defaultdict(list)
+    flat_at = {}
+    if os.path.exists(rb):
+        for r in csv.DictReader(open(rb)):
+            if r.get("rho"):
+                band[float(r["theta"])].append(float(r["rho"]))
+                flat_at[float(r["theta"])] = float(r["flat_coating_rho"])
+    band = {k: sum(v) / len(v) for k, v in band.items()}
+
+    P.append("<section>")
+    P.append('<div class="eyebrow">The room</div>')
+    P.append("<h2>The audience plane &mdash; which corner of the map this "
+             "room uses</h2>")
+    P.append('<p class="col">The panel has a reading for every incidence '
+             'against every observation angle. A room only ever visits part of '
+             'it, and this one visits a corner that the search never scored. '
+             'The geometry below is <b>stated, not measured</b> &mdash; a '
+             '%g&nbsp;m ring of projectors at %.1f&nbsp;m aimed inward and up '
+             'at %.0f&deg; with a &plusmn;%.0f&deg; square scan field, a '
+             'ceiling at %.1f&nbsp;m, and an audience keeping inside '
+             '%.1f&nbsp;m. Everything after it is arithmetic.</p>'
+             % (2 * G.RING_R, G.EYE_H, G.AIM_EL, G.SCAN, G.CEIL_H, G.AUD_R))
+    P.append(G.fig_section())
+    P.append(G.fig_plan())
+    P.append(G.fig_plane(near))
+
+    P.append('<div class="warn col"><p><b>The band the panel was chosen in is '
+             'not the band this room uses.</b> Scoring is &theta;&nbsp;= '
+             '0/&plusmn;20/&plusmn;40. This rig delivers %.0f&ndash;%.0f&deg;, '
+             'so <b>%.0f&nbsp;%% of what it throws at the ceiling arrives '
+             'outside the scored band</b> &mdash; and normal incidence, where '
+             'the panel is far and away at its best, never happens at all. '
+             'That is README open item 1, and the geometry above closes '
+             'it.</p></div>' % (g["inc_lo"], g["inc_hi"], 100 * frac_out))
+
+    if band:
+        sc = max(band[t] for t in G.SCORED if t in band)
+        rg = max(v for t, v in band.items()
+                 if g["inc_lo"] <= t <= g["inc_hi"])
+        P.append('<div class="levers">')
+        P.append('<div><dt>Scored worst, &theta; 0/&plusmn;20/&plusmn;40</dt>'
+                 '<dd>%s</dd><p>the figure the search ranked on</p></div>'
+                 % num(sc))
+        P.append('<div><dt>This room&rsquo;s worst, %.0f&ndash;%.0f&deg;</dt>'
+                 '<dd class="big">%s</dd><p>%.2f&times; the scored figure. '
+                 'This is the number to quote</p></div>'
+                 % (g["inc_lo"], g["inc_hi"], num(rg), rg / sc))
+        P.append('<div><dt>Straight up, off the retro ridge</dt><dd>%.0f&deg;'
+                 '</dd><p>and a grazing look at the far rim comes within '
+                 '%.0f&deg;</p></div>' % (g["overhead_gap"], near[0]))
+        P.append("</div>")
+        P.append('<div class="tbl"><table><thead><tr><th>incidence</th>'
+                 '<th>panel &rho;<sub>dh</sub></th><th>its own coating, flat'
+                 '</th><th>panel &divide; coating</th><th></th></tr></thead>'
+                 '<tbody>')
+        for t in sorted(band):
+            # str.strip takes a SET of characters, not a suffix: stripping
+            # " &middot;" off "in the room's band" ate the i and the d and
+            # printed "n the room's ban".
+            parts = []
+            if t in G.SCORED:
+                parts.append("scored")
+            if g["inc_lo"] <= t <= g["inc_hi"]:
+                parts.append("in the room&rsquo;s band")
+            tag = " &middot; ".join(parts)
+            P.append('<tr%s><td>%.0f&deg;</td><td>%s</td><td>%s</td>'
+                     '<td>%.3f</td><td class="note">%s</td></tr>'
+                     % (' class="hit"' if t == max(band, key=band.get) else "",
+                        t, num(band[t]), num(flat_at.get(t, 0.0)),
+                        band[t] / flat_at[t] if flat_at.get(t) else 0.0, tag))
+        P.append("</tbody></table></div>")
+        P.append('<p class="col">The panel is at its best head-on, where it '
+                 'reads %.3f of its own coating on a flat plate, and at its '
+                 'worst near %.0f&deg;. It never stops working: even at '
+                 '%.0f&deg; the structure is still holding the coating down by '
+                 '%.1f&times;. <b>But the honest headline for this room is '
+                 '%s, not %s.</b></p>'
+                 % (band[0.0] / flat_at[0.0], 55.0, g["inc_hi"],
+                    1.0 / (band[g["inc_hi"]] / flat_at[g["inc_hi"]]),
+                    num(rg), num(sc)))
+    P.append("</section>")
+
     # caveats
     P.append("<section>")
     P.append('<div class="eyebrow">What would change these numbers</div>')
@@ -424,7 +512,7 @@ def build(date):
              'roughness <em>and</em> refractive index estimated &mdash; '
              'translated from Kaster 2025, with its own note reading '
              '&ldquo;Sweep it; do not trust it.&rdquo; &rho;<sub>0</sub>&nbsp;='
-             '&nbsp;6&nbsp;%% is the pessimistic end of a 3&ndash;6&nbsp;%% '
+             '&nbsp;6&nbsp;% is the pessimistic end of a 3&ndash;6&nbsp;% '
              'spread. A goniometer reading of the actual foil would settle it '
              'and could move every absolute number on this page.</p></div>')
     P.append('<ul class="col">')
@@ -522,6 +610,8 @@ tr.hit td{background:var(--soft)}
 figure.fig{margin:0;border:1px solid var(--line);border-radius:3px;
   background:var(--surface);padding:14px;overflow-x:auto}
 figure.fig img{width:100%;min-width:720px;height:auto;display:block}
+figure.diag svg{width:100%;min-width:560px;height:auto;display:block}
+td.note{color:var(--ink-3);font-size:11.5px;text-align:left;white-space:normal}
 figcaption{margin-top:10px;font:400 12.5px/1.5 ui-monospace,Menlo,monospace;
   color:var(--ink-3)}
 .k{font-weight:650}

@@ -71,6 +71,8 @@ tr.hit td{background:var(--soft)}
 figure.fig{margin:0;border:1px solid var(--line);border-radius:3px;
   background:var(--surface);padding:14px;overflow-x:auto}
 figure.fig img{width:100%;min-width:720px;height:auto;display:block}
+figure.diag svg{width:100%;min-width:560px;height:auto;display:block}
+td.note{color:var(--ink-3);font-size:11.5px;text-align:left;white-space:normal}
 figcaption{margin-top:10px;font:400 12.5px/1.5 ui-monospace,Menlo,monospace;
   color:var(--ink-3)}
 .k{font-weight:650}
@@ -227,9 +229,127 @@ a:focus-visible,img:focus-visible{outline:2px solid var(--dark);
 <p class="col">Excluding &theta;<sub>in</sub>&nbsp;=&nbsp;0, where all three lines coincide and the number would say nothing about any of them. <b>A honeycomb wall and a flat floor are mutually perpendicular mirrors</b>, so a bounce off both reverses the ray: the brightest structure on every map is the retro diagonal. It is superb in front of people and it sends light back up the beam. Whether that matters depends on where the projectors sit relative to the audience, and nothing in this study knows that yet.</p>
 </section>
 <section>
+<div class="eyebrow">The room</div>
+<h2>The audience plane &mdash; which corner of the map this room uses</h2>
+<p class="col">The panel has a reading for every incidence against every observation angle. A room only ever visits part of it, and this one visits a corner that the search never scored. The geometry below is <b>stated, not measured</b> &mdash; a 6&nbsp;m ring of projectors at 1.6&nbsp;m aimed inward and up at 45&deg; with a &plusmn;25&deg; square scan field, a ceiling at 4.5&nbsp;m, and an audience keeping inside 1.5&nbsp;m. Everything after it is arithmetic.</p>
+<figure class="fig diag"><svg viewBox="0 0 780 356" role="img" aria-label="Section through the room. Beams leave the projector ring at 45 degrees plus or minus 25 and strike the ceiling panel between 20 and 70 degrees from its normal. The retroreflected return goes back to the projector; the light reaching a listener under the convergence leaves the panel at about zero degrees.">
+<defs><marker id="ar-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--dark)"/></marker><marker id="ar-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--peak)"/></marker></defs>
+<polygon points="224,214 283,52 670,52" fill="var(--form)" opacity=".12"/>
+<line x1="34" y1="52" x2="746" y2="52" stroke="currentColor" stroke-width="3.5"/>
+<line x1="34" y1="304" x2="746" y2="304" stroke="currentColor" stroke-width="1.4" opacity=".4"/>
+<text x="40" y="41" font-size="12.5" fill="currentColor" opacity=".8">spill sink &#183; ceiling 4.5 m</text>
+<text x="40" y="321" font-size="12" fill="currentColor" opacity=".5">floor</text>
+<line x1="224" y1="214" x2="283" y2="52" stroke="var(--form)" stroke-width="1.7" opacity=".9"/>
+<text x="283" y="42" font-size="12" fill="var(--form)" text-anchor="middle">20&#176;</text>
+<line x1="224" y1="214" x2="386" y2="52" stroke="var(--form)" stroke-width="1.7" opacity=".9"/>
+<text x="386" y="42" font-size="12" fill="var(--form)" text-anchor="middle">45&#176;</text>
+<line x1="224" y1="214" x2="670" y2="52" stroke="var(--form)" stroke-width="1.7" opacity=".9"/>
+<text x="670" y="42" font-size="12" fill="var(--form)" text-anchor="middle">70&#176;</text>
+<line x1="386" y1="52" x2="386" y2="118" stroke="currentColor" stroke-dasharray="4 4" opacity=".45"/>
+<text x="393" y="114" font-size="11" fill="currentColor" opacity=".55">panel normal</text>
+<rect x="214" y="208" width="20" height="13" rx="2.5" fill="var(--form)"/>
+<text x="224" y="241" font-size="12" fill="currentColor" text-anchor="middle" opacity=".8">projector ring</text>
+<text x="224" y="256" font-size="11.5" fill="currentColor" text-anchor="middle" opacity=".5">r = 3 m, h = 1.6 m</text>
+<line x1="381" y1="56" x2="237" y2="203" stroke="var(--dark)" stroke-width="2.2" marker-end="url(#ar-d)"/>
+<text x="295" y="119" font-size="12.5" fill="var(--dark)" text-anchor="middle">retro &#8212; back up the beam</text>
+<line x1="308" y1="304" x2="476" y2="304" stroke="var(--peak)" stroke-width="4" opacity=".55"/>
+<circle cx="354" cy="212" r="5" fill="var(--peak)" opacity=".9"/>
+<line x1="354" y1="218" x2="354" y2="304" stroke="var(--peak)" stroke-width="3" opacity=".9"/>
+<circle cx="392" cy="212" r="5" fill="var(--peak)" opacity=".9"/>
+<line x1="392" y1="218" x2="392" y2="304" stroke="var(--peak)" stroke-width="3" opacity=".9"/>
+<circle cx="430" cy="212" r="5" fill="var(--peak)" opacity=".9"/>
+<line x1="430" y1="218" x2="430" y2="304" stroke="var(--peak)" stroke-width="3" opacity=".9"/>
+<line x1="389" y1="56" x2="395" y2="200" stroke="var(--peak)" stroke-width="2.2" marker-end="url(#ar-p)"/>
+<text x="408" y="133" font-size="12.5" fill="var(--peak)">to the eye &#8212; 0&#176;</text>
+<text x="392" y="321" font-size="12" fill="currentColor" text-anchor="middle" opacity=".8">audience, r &#8804; 1.5 m</text>
+</svg><figcaption>The scan field puts light on the panel between <b>20&#176; and 70&#176; from its normal</b> &#8212; never near normal. Someone under the convergence looks almost straight up, so what reaches their eye leaves the panel at about 0&#176;, while the retroreflected return goes back to the projector at 45&#176;. Those two directions are 45&#176; apart, which is the whole reason this works.</figcaption></figure>
+<figure class="fig diag"><svg viewBox="0 0 780 404" role="img" aria-label="Plan view. The lit patch of ceiling reaches about five metres radius, the projectors sit on a three metre ring where the retroreflected light returns, and the audience keeps inside one and a half metres.">
+<circle cx="390" cy="200" r="154" fill="var(--form)" opacity=".10"/>
+<circle cx="390" cy="200" r="154" fill="none" stroke="var(--form)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".7"/>
+<circle cx="390" cy="200" r="93" fill="none" stroke="var(--dark)" stroke-width="2"/>
+<rect x="478.5" y="195.5" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="466.0" y="242.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="432.0" y="276.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="385.5" y="288.5" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="339.0" y="276.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="305.0" y="242.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="292.5" y="195.5" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="305.0" y="149.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="339.0" y="115.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="385.5" y="102.5" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="432.0" y="115.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<rect x="466.0" y="149.0" width="9" height="9" rx="1.5" fill="var(--dark)"/>
+<circle cx="390" cy="200" r="46" fill="var(--peak)" opacity=".18"/>
+<circle cx="390" cy="200" r="46" fill="none" stroke="var(--peak)" stroke-width="1.6"/>
+<text x="390" y="204" font-size="12" fill="var(--peak)" text-anchor="middle">audience</text>
+<text x="390" y="96" font-size="11.5" fill="var(--dark)" text-anchor="middle">projectors &#8212; and where the retro return lands</text>
+<text x="390" y="371" font-size="11.5" fill="var(--form)" text-anchor="middle">lit ceiling, to r &#8776; 5.0 m</text>
+</svg><figcaption>Plan. The audience is held inside 1.5 m and the return comes back on the 3 m ring, so nobody is standing in it. The exposure that remains is not overhead &#8212; it is a grazing look outward at the far rim.</figcaption></figure>
+<figure class="fig diag"><svg viewBox="0 0 780 400" role="img" aria-label="The angle map with the operating region marked. Incidence runs 20 to 70 degrees so normal incidence is never used, the retro ridge is the diagonal, an overhead view sits 45 degrees below it, and a grazing look at the far rim comes within about 4 degrees of it.">
+<defs><marker id="ar-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--dark)"/></marker><marker id="ar-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--peak)"/></marker></defs>
+<rect x="132" y="52" width="146" height="292" fill="currentColor" opacity=".07"/>
+<rect x="205" y="104" width="182" height="240" fill="var(--form)" opacity=".17"/>
+<line x1="132" y1="344" x2="431" y2="344" stroke="currentColor" stroke-width="1.4"/>
+<line x1="132" y1="344" x2="132" y2="45" stroke="currentColor" stroke-width="1.4"/>
+<text x="132" y="361" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="middle">0</text>
+<text x="124" y="348" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="end">0</text>
+<text x="205" y="361" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="middle">20</text>
+<text x="124" y="275" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="end">20</text>
+<text x="278" y="361" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="middle">40</text>
+<text x="124" y="202" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="end">40</text>
+<text x="351" y="361" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="middle">60</text>
+<text x="124" y="129" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="end">60</text>
+<text x="424" y="361" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="middle">80</text>
+<text x="124" y="56" font-size="11.5" fill="currentColor" opacity=".6" text-anchor="end">80</text>
+<text x="278" y="380" font-size="12" fill="currentColor" opacity=".75" text-anchor="middle">incidence on the panel (&#176;)</text>
+<text transform="translate(96,198) rotate(-90)" font-size="12" fill="currentColor" opacity=".75" text-anchor="middle">observation (&#176;)</text>
+<line x1="132" y1="344" x2="424" y2="52" stroke="var(--dark)" stroke-width="2.4"/>
+<line x1="296" y1="333" x2="296" y2="172" stroke="var(--peak)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-p)"/>
+<circle cx="296" cy="344" r="5.5" fill="var(--peak)"/>
+<circle cx="388" cy="104" r="6" fill="none" stroke="var(--no)" stroke-width="2.4"/>
+<rect x="486" y="49" width="22" height="13" fill="currentColor" opacity=".07"/>
+<rect x="486" y="49" width="22" height="13" fill="none" stroke="currentColor" opacity=".25"/>
+<text x="517" y="59" font-size="12.5" fill="currentColor">the band the study scores</text>
+<text x="517" y="75" font-size="11.5" fill="currentColor" opacity=".6">|&#952;| &#8804; 40&#176;</text>
+<rect x="486" y="93" width="22" height="13" fill="var(--form)" opacity=".17"/>
+<rect x="486" y="93" width="22" height="13" fill="none" stroke="currentColor" opacity=".25"/>
+<text x="517" y="103" font-size="12.5" fill="currentColor">what this room delivers</text>
+<text x="517" y="119" font-size="11.5" fill="currentColor" opacity=".6">20&#8211;70&#176; incidence</text>
+<line x1="486" y1="143" x2="508" y2="143" stroke="var(--dark)" stroke-width="2.4"/>
+<text x="517" y="147" font-size="12.5" fill="var(--dark)">the retro ridge</text>
+<text x="517" y="163" font-size="11.5" fill="currentColor" opacity=".6">back at the projectors</text>
+<circle cx="497" cy="187" r="5.5" fill="var(--peak)"/>
+<text x="517" y="191" font-size="12.5" fill="var(--peak)">looking straight up</text>
+<text x="517" y="207" font-size="11.5" fill="currentColor" opacity=".6">45&#176; clear of the ridge</text>
+<circle cx="497" cy="231" r="6" fill="none" stroke="var(--no)" stroke-width="2.4"/>
+<text x="517" y="235" font-size="12.5" fill="var(--no)">grazing look at the far rim</text>
+<text x="517" y="251" font-size="11.5" fill="currentColor" opacity=".6">only 4&#176; off it &#8212; the one exposure</text>
+</svg><figcaption>The audience plane. Incidence never falls below 20&#176;, so the left third of the map &#8212; including normal incidence, where this panel is at its very best &#8212; is never used. Straight up is 45&#176; clear of the retro ridge. The one place a listener can meet the ridge is a grazing look outward at the far rim of the lit ceiling.</figcaption></figure>
+<div class="warn col"><p><b>The band the panel was chosen in is not the band this room uses.</b> Scoring is &theta;&nbsp;= 0/&plusmn;20/&plusmn;40. This rig delivers 20&ndash;70&deg;, so <b>68&nbsp;% of what it throws at the ceiling arrives outside the scored band</b> &mdash; and normal incidence, where the panel is far and away at its best, never happens at all. That is README open item 1, and the geometry above closes it.</p></div>
+<div class="levers">
+<div><dt>Scored worst, &theta; 0/&plusmn;20/&plusmn;40</dt><dd>0.001645</dd><p>the figure the search ranked on</p></div>
+<div><dt>This room&rsquo;s worst, 20&ndash;70&deg;</dt><dd class="big">0.002905</dd><p>1.77&times; the scored figure. This is the number to quote</p></div>
+<div><dt>Straight up, off the retro ridge</dt><dd>45&deg;</dd><p>and a grazing look at the far rim comes within 4&deg;</p></div>
+</div>
+<div class="tbl"><table><thead><tr><th>incidence</th><th>panel &rho;<sub>dh</sub></th><th>its own coating, flat</th><th>panel &divide; coating</th><th></th></tr></thead><tbody>
+<tr><td>0&deg;</td><td>0.000343</td><td>0.009962</td><td>0.034</td><td class="note">scored</td></tr>
+<tr><td>10&deg;</td><td>0.000765</td><td>0.009963</td><td>0.077</td><td class="note"></td></tr>
+<tr><td>20&deg;</td><td>0.001113</td><td>0.009978</td><td>0.112</td><td class="note">scored &middot; in the room&rsquo;s band</td></tr>
+<tr><td>30&deg;</td><td>0.001353</td><td>0.010052</td><td>0.135</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr><td>40&deg;</td><td>0.001645</td><td>0.010303</td><td>0.160</td><td class="note">scored &middot; in the room&rsquo;s band</td></tr>
+<tr><td>45&deg;</td><td>0.001826</td><td>0.010570</td><td>0.173</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr><td>50&deg;</td><td>0.002018</td><td>0.011011</td><td>0.183</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr><td>55&deg;</td><td>0.002211</td><td>0.011728</td><td>0.189</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr><td>60&deg;</td><td>0.002416</td><td>0.012885</td><td>0.188</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr><td>65&deg;</td><td>0.002646</td><td>0.014746</td><td>0.179</td><td class="note">in the room&rsquo;s band</td></tr>
+<tr class="hit"><td>70&deg;</td><td>0.002905</td><td>0.017749</td><td>0.164</td><td class="note">in the room&rsquo;s band</td></tr>
+</tbody></table></div>
+<p class="col">The panel is at its best head-on, where it reads 0.034 of its own coating on a flat plate, and at its worst near 55&deg;. It never stops working: even at 70&deg; the structure is still holding the coating down by 6.1&times;. <b>But the honest headline for this room is 0.002905, not 0.001645.</b></p>
+</section>
+<section>
 <div class="eyebrow">What would change these numbers</div>
 <h2>The search is conditional on a material nobody has measured</h2>
-<div class="warn col"><p><b>anodised_hi is an estimate in every shape parameter.</b> The library marks its diffuse fraction, roughness <em>and</em> refractive index estimated &mdash; translated from Kaster 2025, with its own note reading &ldquo;Sweep it; do not trust it.&rdquo; &rho;<sub>0</sub>&nbsp;=&nbsp;6&nbsp;%% is the pessimistic end of a 3&ndash;6&nbsp;%% spread. A goniometer reading of the actual foil would settle it and could move every absolute number on this page.</p></div>
+<div class="warn col"><p><b>anodised_hi is an estimate in every shape parameter.</b> The library marks its diffuse fraction, roughness <em>and</em> refractive index estimated &mdash; translated from Kaster 2025, with its own note reading &ldquo;Sweep it; do not trust it.&rdquo; &rho;<sub>0</sub>&nbsp;=&nbsp;6&nbsp;% is the pessimistic end of a 3&ndash;6&nbsp;% spread. A goniometer reading of the actual foil would settle it and could move every absolute number on this page.</p></div>
 <ul class="col">
 <li>The coating model is <b>not reciprocal</b>, so the BRDF cells carry that caveat. The <em>structure</em> of the maps is geometric and stands.</li>
 <li><b>Zero physical measurements.</b> Still true of the whole study, and still the largest open item.</li>
