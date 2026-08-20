@@ -146,6 +146,68 @@ def main():
         check("%s tips are 0 < area < 1%% of total" % name, 0.0 < fr < 0.01,
               "%.4f%%" % (100 * fr))
 
+    print("\n[bands] split_at_depth cuts where it says it does")
+    import geom_kit as GK
+
+    def _area(v, fs):
+        t = 0.0
+        for face in fs:
+            idx = list(face)
+            for a in range(1, len(idx) - 1):
+                q, r, w = v[idx[0]], v[idx[a]], v[idx[a + 1]]
+                ux, uy, uz = r[0] - q[0], r[1] - q[1], r[2] - q[2]
+                vx, vy, vz = w[0] - q[0], w[1] - q[1], w[2] - q[2]
+                nx = uy * vz - uz * vy
+                ny = uz * vx - ux * vz
+                nz = ux * vy - uy * vx
+                t += 0.5 * (nx * nx + ny * ny + nz * nz) ** 0.5
+        return t
+
+    # one tall quad, exactly like a pyramid flank spanning its whole depth --
+    # the case a labelling scheme gets wrong and a cut gets right
+    V = [(0, 0, 0), (10, 0, 0), (10, -20, 0), (0, -20, 0)]
+    F = [(0, 1, 2, 3)]
+    S = ["flank"]
+
+    v0, f0, s0 = GK.split_at_depth(V, F, S, [], ["x"])
+    check("no planes is the identity, same objects",
+          v0 is V and f0 is F and s0 is S)
+
+    v1, f1, s1 = GK.split_at_depth(V, F, S, [-5.0], ["shallow", "deep"])
+    by = {}
+    for i, face in enumerate(f1):
+        by[s1[i]] = by.get(s1[i], 0.0) + _area(v1, [face])
+    check("a cut at -5 of a 20 mm flank splits the area exactly 1:3",
+          abs(by.get("flank@shallow", 0) - 50.0) < 1e-9
+          and abs(by.get("flank@deep", 0) - 150.0) < 1e-9, str(by))
+    check("the cut conserves area", abs(sum(by.values()) - 200.0) < 1e-9)
+
+    pl = [-2.0, -5.0, -10.0, -15.0]
+    bd = ["b0", "b1", "b2", "b3", "b4"]
+    v2, f2, s2 = GK.split_at_depth(V, F, S, pl, bd)
+    by2 = {}
+    for i, face in enumerate(f2):
+        by2[s2[i]] = by2.get(s2[i], 0.0) + _area(v2, [face])
+    check("a four-plane staircase gives exactly 2/3/5/5/5 mm bands",
+          all(abs(by2.get("flank@" + k, 0.0) / 10.0 - w) < 1e-9
+              for k, w in zip(bd, [2, 3, 5, 5, 5])), str(by2))
+
+    # THE ULP TRAP. Two faces sharing an edge traverse it in opposite
+    # directions; without a canonical key they each solve a different equation
+    # and the cut points differ in the last bit -- a sub-micron gap, and this
+    # module's own opening records a 1 um join reading 37 % dark.
+    V3 = [(0, 0, 0), (10, 0, 0), (10, -20, 0), (0, -20, 0),
+          (0, 0, 5), (0, -20, 5)]
+    F3 = [(0, 1, 2, 3), (0, 3, 5, 4)]
+    v3, f3, s3 = GK.split_at_depth(V3, F3, ["a", "b"], [-7.3], ["s", "d"])
+    new_i = list(range(len(V3), len(v3)))
+    check("a shared edge is cut ONCE, not once per face", len(new_i) == 3,
+          "%d new vertices" % len(new_i))
+    check("every cut point sits exactly on the plane",
+          {v3[i][1] for i in new_i} == {-7.3})
+    check("the split conserves area on a two-face mesh",
+          abs(_area(v3, f3) - _area(V3, F3)) < 1e-9)
+
     print("\n%d checks, %d failures" % (NCHECK[0], len(FAIL)))
     if FAIL:
         print("FAILURES: %s" % ", ".join(FAIL))

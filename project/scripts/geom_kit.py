@@ -363,3 +363,117 @@ def orient_outward(verts, faces):
         else:
             out.append(tuple(f))
     return verts, out
+
+
+# --- depth bands -------------------------------------------------------------
+
+def split_at_depth(verts, faces, slots, planes, bands):
+    """Cut every face at each y = plane so none straddles a band boundary.
+
+    Returns (verts, faces, slots) with each slot suffixed "@<band>", shallow
+    band first. `planes` are y values in DESCENDING order (0 is the mouth,
+    deeper is more negative); `bands` has len(planes) + 1 names.
+
+    WHY CUTTING AND NOT LABELLING. "The paint reaches 10 mm" is not a partition
+    of the faces. A honeycomb wall is ONE quad from y = 0 to y = -50, and a
+    pyramid flank is one quad spanning its whole depth, so classifying a face
+    by (say) its lowest vertex puts the entire flank in the deep band and
+    returns roughly the bare number. Phase 9.2 measured paint reaching 2 / 5 /
+    10 mm into a pyramid field of depth 20 and got 0.829 / 0.561 / 0.290 %; a
+    labelling scheme cannot reproduce any of that. The polygon has to be cut.
+
+    FOUR PROPERTIES THIS RELIES ON:
+
+    1. `planes == []` IS THE IDENTITY -- the same list objects come back, no
+       new vertices, no reindexing. Stated as an early return rather than left
+       to emerge from the loop, because it is what lets an unbanded job stay
+       bit-identical.
+    2. A face wholly inside one band passes through UNTOUCHED, original vertex
+       indices and all. Only straddling faces are rebuilt, which for a
+       honeycomb at paint_depth 5 is one ring of side quads per cell.
+    3. THE SHARED-EDGE ULP TRAP. Two neighbouring wall quads share an edge and
+       traverse it in opposite directions, so t = da/(da-db) differs between
+       them and `a + t*(b-a)` can land a fraction of a micron away from
+       `b + t'*(a-b)`. This module's own opening records a 1 um join reading
+       37 % dark under a glossy coating. Fixed twice over: the endpoints are
+       ordered canonically before cutting so both faces solve the SAME
+       equation, and the cut point's y is forced EXACTLY onto the plane rather
+       than interpolated.
+    4. Winding is preserved, so `orient_outward` need not be re-run.
+
+    A single plane gives a hard paint line. Several give a staircase
+    approximating a real spray fading with depth; the error against a linear
+    ramp is bounded by (deep - shallow) / 2N.
+    """
+    if not planes:
+        return verts, faces, slots
+    if len(bands) != len(planes) + 1:
+        raise ValueError("split_at_depth: %d planes needs %d band names, got %d"
+                         % (len(planes), len(planes) + 1, len(bands)))
+    ys = [float(y) for y in planes]
+    if any(ys[i] <= ys[i + 1] for i in range(len(ys) - 1)):
+        raise ValueError("split_at_depth: planes must descend, got %r" % (ys,))
+
+    out_v = list(verts)
+    cut_cache = {}
+
+    def cut(ia, ib, y):
+        """Index of the point where edge (ia, ib) meets y, memoised.
+
+        The key is the SORTED index pair, so the two faces sharing this edge
+        get the same vertex back rather than two that merely agree to within a
+        rounding error.
+        """
+        key = (ia, ib, y) if ia < ib else (ib, ia, y)
+        hit = cut_cache.get(key)
+        if hit is not None:
+            return hit
+        a, b = out_v[key[0]], out_v[key[1]]
+        da, db = a[1] - y, b[1] - y
+        t = 0.0 if da == db else da / (da - db)
+        out_v.append((a[0] + t * (b[0] - a[0]), y,        # y EXACT, not lerped
+                      a[2] + t * (b[2] - a[2])))
+        cut_cache[key] = len(out_v) - 1
+        return cut_cache[key]
+
+    def clip(poly, y, keep_above):
+        """Sutherland-Hodgman against the half-space y >= / <= plane."""
+        if not poly:
+            return []
+        res = []
+        n = len(poly)
+        for i in range(n):
+            ia, ib = poly[i], poly[(i + 1) % n]
+            ya, yb = out_v[ia][1], out_v[ib][1]
+            ina = (ya >= y) if keep_above else (ya <= y)
+            inb = (yb >= y) if keep_above else (yb <= y)
+            if ina:
+                res.append(ia)
+            if ina != inb:
+                res.append(cut(ia, ib, y))
+        return res
+
+    out_f, out_s = [], []
+    for fi, face in enumerate(faces):
+        base = slots[fi] if slots is not None else ""
+        lo_y = min(out_v[i][1] for i in face)
+        hi_y = max(out_v[i][1] for i in face)
+        # which bands this face actually spans -- most touch exactly one
+        first = next((k for k, y in enumerate(ys) if hi_y > y), len(ys))
+        last = next((k for k, y in enumerate(ys) if lo_y >= y), len(ys))
+        if first == last:
+            out_f.append(face)                      # untouched, indices intact
+            out_s.append("%s@%s" % (base, bands[first]) if base
+                         else bands[first])
+            continue
+        for k in range(len(bands)):
+            piece = list(face)
+            if k > 0:
+                piece = clip(piece, ys[k - 1], False)   # below the upper plane
+            if k < len(ys):
+                piece = clip(piece, ys[k], True)        # above the lower plane
+            if len(piece) < 3:
+                continue
+            out_f.append(tuple(piece))
+            out_s.append("%s@%s" % (base, bands[k]) if base else bands[k])
+    return out_v, out_f, out_s

@@ -269,6 +269,95 @@ def main():
     check("no preset name appears twice", not dupes,
           "; ".join("%s x%d" % (k, len(v)) for k, v in dupes.items()))
 
+    # --- 8: the material library and its provenance ------------------------
+    # There was no coverage of coatings at all before this. Every check here is
+    # about whether a number can be traced, because a constant with no source
+    # is the defect principles/02 exists for.
+    print("\n[8] the material library, and whether its numbers name a source")
+    M = get("/api/materials")
+    lib = M["library"]
+    check("library has the study's materials", len(lib) >= 7, "%d" % len(lib))
+    for k, v in sorted(lib.items()):
+        check("%s cites a source" % k, bool((v.get("note") or "").strip()))
+        check("%s declares which numbers are estimates" % k,
+              isinstance(v.get("estimated"), list))
+        check("%s estimates name real fields" % k,
+              set(v["estimated"]) <= {f["name"] for f in M["fields"]},
+              str(v["estimated"]))
+    for f in M["fields"]:
+        check("field %s has a usable range" % f["name"],
+              f["min"] < f["max"] and f["step"] > 0)
+        # rho0 at step 5e-4 would print 0.00998 as "0.010" without this
+        check("field %s says how many decimals" % f["name"],
+              f.get("dec") is not None)
+    rules = M["slot_rules"]
+    check("slot ids are 0..n-1", sorted(r["id"] for r in rules)
+          == list(range(len(rules))))
+    for r in rules:
+        check("slot %s says what the part is" % r["key"],
+              len((r.get("why") or "")) > 40)
+    check("at least one slot is not assignable (nothing lights it)",
+          any(not r["assignable"] for r in rules))
+
+    # --- 9: slots on a real mesh, and materials that round-trip -------------
+    print("\n[9] slots and materials survive the round trip")
+    sp = {"top": "honeycomb",
+          "top_params": {"pitch": 6.5, "wall_top": 0.08, "wall_bot": 0.08},
+          "floor": "none", "depth": 50, "panel": 60, "margin_depths": 0.2}
+    b, h, dt, err = post("/api/mesh", sp, timeout=120)
+    if check("mesh with no materials block builds", err is None, err or ""):
+        d = json.loads(h.get("X-Derived", "{}"))
+        check("the buffer is a whole number of stride-7 vertices",
+              (len(b) / 4) % 21 == 0, "%d floats" % (len(b) / 4))
+        st = d.get("slots") or []
+        check("slots are reported", len(st) >= 3, "%d" % len(st))
+        check("slot areas sum to 1",
+              abs(sum(x["area_frac"] for x in st) - 1.0) < 1e-6)
+        tips = [x for x in st if x["key"] == "tips"]
+        # the number the whole feature exists for
+        check("honeycomb tips are a small minority of the area",
+              tips and 0.0 < tips[0]["area_frac"] < 0.01,
+              "%.4f" % (tips[0]["area_frac"] if tips else -1))
+        check("a material is resolved for every assignable slot",
+              set(d.get("materials", {})) ==
+              {r["key"] for r in rules if r["assignable"]})
+
+    mats = {"version": 1,
+            "slots": {"tips": {"base": "musou_air"},
+                      "walls": {"base": "anodised", "roughness": 0.05},
+                      "base": {"base": "musou_fit"}}}
+    b2, h2, dt2, err2 = post("/api/mesh", dict(sp, materials=mats), timeout=120)
+    if check("mesh with per-part materials builds", err2 is None, err2 or ""):
+        d2 = json.loads(h2.get("X-Derived", "{}"))
+        m2 = d2["materials"]
+        check("each part keeps the material it was given",
+              [m2[k]["name"] for k in ("tips", "walls", "base")]
+              == ["musou_air", "anodised", "musou_fit"])
+        # anodised must NOT inherit Musou's split -- that was the bug
+        check("anodised keeps its own diffuse fraction",
+              abs(m2["walls"]["diffuse_frac"] - 0.85) < 1e-9,
+              "%.4f" % m2["walls"]["diffuse_frac"])
+        check("an override reaches the server",
+              abs(m2["walls"]["roughness"] - 0.05) < 1e-9)
+        check("an override is flagged as edited", m2["walls"]["edited"])
+        check("an override amends the provenance note",
+              "OVERRIDDEN" in m2["walls"]["note"])
+        check("an override marks the field as no longer measured",
+              "roughness" in m2["walls"]["estimated"])
+        check("an override touches only its own part",
+              not m2["tips"]["edited"] and not m2["base"]["edited"])
+        check("geometry is unchanged by a material change", len(b2) == len(b))
+
+    bad, hb, _, errb = post("/api/mesh",
+                            dict(sp, materials={"slots":
+                                                {"tips": {"base": "nope"}}}),
+                            timeout=120)
+    if check("an unknown material name still builds", errb is None, errb or ""):
+        db = json.loads(hb.get("X-Derived", "{}"))
+        # SILENT FALLBACK IS HOW A RENAMED ENTRY BECOMES A WRONG NUMBER
+        check("an unknown material name is reported, not silently swapped",
+              db["materials"]["tips"]["missing"])
+
     print("\n" + "=" * 72)
     print("%d checks, %d failures, %.0f s"
           % (NCHECK, len(FAILS), time.time() - t_all))
