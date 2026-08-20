@@ -1,0 +1,70 @@
+{
+ "csvs": [
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p06.5_d62.5_w0.03_f015.csv",
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p06.5_d80.0_w0.03_f015.csv",
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p06.5_d65.0_w0.03_f015.csv",
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p06.4_d80.0_w0.03_f015.csv",
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p06.4_d64.0_w0.03_f015.csv",
+  "/Users/elliotwoods/dev/SpillSinkSimulator/project/results/sweep_bidir_hc_p10.0_d80.0_w0.03_f015.csv"
+ ],
+ "designs": [
+  {
+   "pitch": 6.5,
+   "depth": 62.5,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.001634545197399954,
+   "sem": 5.287395250593348e-06,
+   "seeds": 3
+  },
+  {
+   "pitch": 6.5,
+   "depth": 80.0,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.0016351690671096246,
+   "sem": 9.876560437879063e-06,
+   "seeds": 3
+  },
+  {
+   "pitch": 6.5,
+   "depth": 65.0,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.0016436511650681496,
+   "sem": 1.2989267502106641e-05,
+   "seeds": 3
+  },
+  {
+   "pitch": 6.4,
+   "depth": 80.0,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.0016447272306929033,
+   "sem": 6.286951930078524e-06,
+   "seeds": 3
+  },
+  {
+   "pitch": 6.4,
+   "depth": 64.0,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.001644818965966503,
+   "sem": 1.5687491356981433e-05,
+   "seeds": 3
+  },
+  {
+   "pitch": 10.0,
+   "depth": 80.0,
+   "wall": 0.03,
+   "paint_frac": 0.15,
+   "rho_worst": 0.0016484730488931139,
+   "sem": 6.411125451698658e-06,
+   "seeds": 3
+  }
+ ],
+ "shallow": "musou_fit",
+ "deep": "anodised_hi",
+ "step": 10.0,
+ "samples": 128
+}

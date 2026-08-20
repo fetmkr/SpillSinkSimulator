@@ -127,16 +127,28 @@ def draw(ax, ins, outs, m, meta, norm):
     ax.axhline(0.0, color="#8b6fd8", lw=1.0, zorder=3, label="the audience")
     ax.set_xlabel("incidence  theta_in  (deg)")
     ax.set_ylabel("observation  theta_out  (deg)")
-    ax.set_title("%s  ·  %s %s" % (meta["tag"], meta["topology"],
-                                   meta["material"]), fontsize=10)
+    ax.set_title(meta["tag"], fontsize=9)
     ax.set_aspect("equal")
-    ax.set_xticks(range(-80, 81, 20))
-    ax.set_yticks(range(-80, 81, 20))
+    # Limits from the DATA, not a fixed +-80: a map measured over the scoring
+    # band drawn on a +-80 frame is mostly empty paper, and in a grid of panels
+    # the empty margin is what pushes the titles into each other.
+    lo, hi = float(min(xs[0], ys[0])), float(max(xs[-1], ys[-1]))
+    pad = 0.06 * (hi - lo)
+    ax.set_xlim(lo - pad, hi + pad)
+    ax.set_ylim(lo - pad, hi + pad)
+    tick = 20 if (hi - lo) > 100 else 10
+    ax.set_xticks([t for t in range(-80, 81, tick) if lo - pad <= t <= hi + pad])
+    ax.set_yticks([t for t in range(-80, 81, tick) if lo - pad <= t <= hi + pad])
+    ax.tick_params(labelsize=8)
+    ax.set_xlabel(ax.get_xlabel(), fontsize=9)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=9)
     return pc
 
 
 def main():
-    paths = sys.argv[1:]
+    paths = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if "--out" in sys.argv:
+        paths = [p for p in paths if p != sys.argv[sys.argv.index("--out") + 1]]
     if not paths:
         import glob
         paths = sorted(glob.glob(os.path.join(RESULTS, "sweep_bidir_*.csv")))
@@ -152,11 +164,21 @@ def main():
     norm = LogNorm(vmin=max(fin.min(), fin.max() * 1e-6), vmax=fin.max())
 
     n = len(loaded)
-    fig, axes = plt.subplots(1, n, figsize=(1 + 4.6 * n, 5.2), squeeze=False)
+    # A row of seven panels is unreadable; wrap into a grid past four. The
+    # normalisation does NOT change with the layout -- one LogNorm over every
+    # cell of every panel, which is the point of drawing them together.
+    cols = n if n <= 4 else int(math.ceil(math.sqrt(n)))
+    rows = int(math.ceil(n / cols))
+    fig, axes = plt.subplots(rows, cols, figsize=(1 + 4.3 * cols, 4.9 * rows),
+                             squeeze=False)
+    flat_axes = [a for r in axes for a in r]
     pc = None
-    for ax, (ins, outs, m, meta) in zip(axes[0], loaded):
+    for ax, (ins, outs, m, meta) in zip(flat_axes, loaded):
         pc = draw(ax, ins, outs, m, meta, norm)
-    cb = fig.colorbar(pc, ax=axes[0].tolist(), fraction=0.035, pad=0.02)
+    for ax in flat_axes[n:]:
+        ax.axis("off")
+    axes = np.array([flat_axes[:n]])
+    cb = fig.colorbar(pc, ax=flat_axes, fraction=0.022, pad=0.02, shrink=0.8)
     cb.set_label("BRDF  f_r  (1/sr)")
     # legend BELOW the axes: in the top-left corner it covers the grazing
     # corner of the map, which on a flat plate is the brightest thing on it
@@ -164,8 +186,15 @@ def main():
     fig.legend(h, lb, loc="lower center", ncol=3, fontsize=8, frameon=False,
                bbox_to_anchor=(0.5, -0.02))
 
-    out = os.path.join(RESULTS, "bidir_%s.png"
-                       % "_vs_".join(d[3]["tag"] for d in loaded))
+    # Naming every design in the filename works for two and produces a 250
+    # character path for seven.
+    tags = [d[3]["tag"] for d in loaded]
+    name = "_vs_".join(tags) if len(tags) <= 3 else "set%d_%s" % (len(tags),
+                                                                  tags[0])
+    out = os.path.join(RESULTS, "bidir_%s.png" % name)
+    for i, a in enumerate(sys.argv[1:]):
+        if a == "--out":
+            out = sys.argv[i + 2]
     fig.savefig(out, dpi=140, bbox_inches="tight")
     print("wrote %s" % out)
 
