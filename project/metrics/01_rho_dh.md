@@ -40,6 +40,12 @@ the baseline must be named explicitly and is one of:
 
 ## What it does NOT capture
 
+- **How bright the surface looks.** This is a hemispherical TOTAL, so it has
+  already integrated away the direction an observer stands in. For the
+  recommended honeycomb it credits the structure with 5-30x over its own
+  coating while a person under it sees 2.1x, because a honeycomb is a
+  retroreflector and much of what this metric scores as *removed* is
+  *redirected back up the beam*. Use `metrics/09` for what a client is asking.
 - **Where the light goes.** ρ_dh is a single scalar; a design that returns the
   same energy as a sharp line and one that returns it as a wide smear score
   identically. Form destruction is metric 02/04/07, not this one.

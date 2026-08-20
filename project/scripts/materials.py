@@ -429,6 +429,38 @@ LIBRARY = {
         (), model="lambert"),
 }
 
+# --- reference surfaces, for saying how dark something is in units a person
+# --- can check. Both are LAMBERTIAN MODELS, and that is the estimate in them.
+_WHITE_NOTE = (
+    "A perfect Lambertian white, rho = 1.0, is the definition of radiance "
+    "factor 1.0. Office paper measures 75-85 % and is close to Lambertian; "
+    "0.80 is the middle of that range and is an APPROXIMATION OF PAPER IN "
+    "GENERAL, never a measurement of anyone's actual sheet. It exists so a "
+    "client can hold a sheet up next to the panel and check the claim.")
+
+_VELOUR_NOTE = (
+    "Black theatrical velour. rho = 0.002 is the directional-hemispherical "
+    "reflectance of black velvet at normal incidence measured by Filip & "
+    "Vavra 2026 (reference/SUMMARY.md, Fig. 6) -- the same THR quantity as "
+    "metrics/01. THE ANGULAR BEHAVIOUR HERE IS A LAMBERTIAN ASSUMPTION AND "
+    "THE PAPER SAYS IT IS WRONG: they measure velvet rising to 0.0122 at 85 "
+    "deg, and they report it with the LOWEST TIS of any sample they tested, "
+    "meaning its return is the most specular-concentrated, not the most "
+    "diffuse. So this models velour at its darkest, most flattering "
+    "behaviour. A comparison against it is therefore CONSERVATIVE: real "
+    "velour at the angles this room uses is very likely worse than this.")
+
+
+def _ref(name, rho0, note):
+    return Material(rho0=rho0, diffuse_frac=1.0, roughness=0.0,
+                    model="lambert", name=name, note=note,
+                    estimated=("diffuse_frac", "roughness"))
+
+
+LIBRARY["white_paper"] = _ref("white_paper", 0.80, _WHITE_NOTE)
+LIBRARY["white_perfect"] = _ref("white_perfect", 1.00, _WHITE_NOTE)
+LIBRARY["black_velour"] = _ref("black_velour", 0.002, _VELOUR_NOTE)
+
 STUDY_DEFAULT = "musou_fit"
 
 

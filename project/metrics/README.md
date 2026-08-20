@@ -17,6 +17,7 @@ file is marked SUPERSEDED and a new number is issued.
 | [02](02_smear_rms.md) | smear, rms | how far the returned line is spread | `form_mtf.py` `rms_width` | — |
 | [04](04_peak_radiance.md) | **peak radiance ratio** | **how bright the brightest point of the wall copy is, vs a plain black wall** | `form_mtf.py` `peak` + `metrics.py` | — |
 | [07](07_mtf.md) | MTF at a spatial period | how much contrast survives at a given feature size | `form_mtf.py` `mtf_at` | — |
+| [09](09_audience_reflectance.md) | **reflectance at the audience** | **how bright the ceiling looks to a person under it — radiance factor β, 1.000 = perfect white** | `audience.py` / `measure_audience.py` | the two Lambertian references |
 | [08](08_brdf_slice.md) | **in-plane BRDF slice** | **where the light goes — incidence against observation, in 1/sr** | `bidir.py` / `sweep_bidir.py` | `gate_bidir.py` |
 
 ## Planned
@@ -31,6 +32,10 @@ file is marked SUPERSEDED and a new number is issued.
 | # | metric | why it was retired |
 |---|---|---|
 | [03](03_core_frac.md) | core fraction | breaks at large smear — energy leaving the measurement window leaves the denominator too, so a *more* smeared design can score *better* |
+
+## Which number goes to a client
+
+**[09](09_audience_reflectance.md).** [01](01_rho_dh.md) is a hemispherical total and has already integrated away the direction the audience stands in; on the recommended panel the two disagree by 2.4x about what the structure is worth. Rank absorbers with 01; quote 09.
 
 ## Rules
 

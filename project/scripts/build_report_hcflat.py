@@ -183,14 +183,121 @@ def build(date):
     # header
     P.append('<header class="top">')
     P.append('<div class="eyebrow">Panel search &middot; %s</div>' % A(date))
-    P.append("<h1>Pay for the black coating only where it decides "
-             "the answer</h1>")
+    P.append("<h1>The ceiling reads one two-hundredth of a sheet of "
+             "white paper</h1>")
     P.append('<p class="sub">A honeycomb front on a flat back, sprayed with '
              'Musou Black at the mouth and left as bought further down. '
              '%d designs, %d design&ndash;seed measurements, about three hours '
              'of Cycles, over cell pitch, cell depth, foil thickness and how '
              'far the paint reaches.</p>' % (len(agg), n_meas))
     P.append("</header>")
+
+    # ---- REFLECTANCE AT THE AUDIENCE: the top line
+    import audience as AUD
+    ab = defaultdict(dict)
+    apath = os.path.join(RESULTS, "audience.csv")
+    if os.path.exists(apath):
+        for r in csv.DictReader(open(apath)):
+            ab[r["surface"]][(float(r["theta_in"]),
+                              float(r["theta_out"]))] = float(r["brdf"])
+    if ab:
+        sc_ = {k: AUD.score(v) for k, v in ab.items()}
+        vel_flat = sc_["black_velour"][0]
+        # velour with the grazing rise its own source measured, not just its
+        # normal-incidence value -- see metrics/09
+        w_ = AUD.cells()
+
+        def _vel(th):
+            t = max(0.0, min(1.0, th / 85.0))
+            return 0.002 + (0.0122 - 0.002) * t ** 3
+        vel_rise = (sum(w * _vel(a) for (a, _b), w in w_.items())
+                    / sum(w_.values()))
+        pan = sc_["panel"][0]
+
+        P.append("<section>")
+        P.append('<div class="eyebrow">The top line</div>')
+        P.append("<h2>Reflectance at the audience</h2>")
+        P.append('<p class="col lede"><b>Radiance factor &beta;</b> &mdash; '
+                 'this surface&rsquo;s brightness divided by that of a '
+                 '<b>perfect Lambertian white</b> under the same light. '
+                 '&beta;&nbsp;=&nbsp;1.000 is the white standard. It is the '
+                 'CIE reflectance factor, it is dimensionless, and it is what '
+                 'a goniometer reports.</p>')
+        P.append('<div class="levers">')
+        P.append('<div><dt>Radiance factor &beta; at the audience</dt>'
+                 '<dd class="big">%.4f</dd><p>mean over the angles this room '
+                 'actually uses. 1.000 = perfect white</p></div>' % pan)
+        P.append('<div><dt>As a fraction of white paper</dt><dd>1 / %.0f</dd>'
+                 '<p>paper is 75&ndash;85 %% and near-Lambertian, '
+                 '&beta;&nbsp;&asymp;&nbsp;0.80</p></div>'
+                 % (1.0 / AUD.as_paper(pan)))
+        P.append('<div><dt>Against black velour</dt><dd>%.2f&times;</dd>'
+                 '<p>theatrical blackout, modelled with the grazing rise its '
+                 'source measured. <b>The panel is brighter</b></p></div>'
+                 % (pan / vel_rise))
+        P.append("</div>")
+
+        P.append('<div class="tbl"><table><thead><tr><th>surface</th>'
+                 '<th>&beta; mean<br><span class="u">radiance factor, '
+                 '1.000 = white</span></th><th>&beta; peak<br>'
+                 '<span class="u">brightest patch</span></th>'
+                 '<th>&times; white paper</th><th>&times; black velour</th>'
+                 '</tr></thead><tbody>')
+        LAB = [("panel", "the panel &mdash; honeycomb 6.4 / 64 / 0.03, "
+                         "Musou to 15 %", True),
+               ("flat_musou", "a flat plate of the panel&rsquo;s own Musou "
+                              "coating", False),
+               ("black_velour", "black velour, at its normal-incidence value "
+                                "only", False),
+               ("white_paper", "white paper (Lambertian model, &rho; = 0.80)",
+                False)]
+        for key, lab, hit in LAB:
+            if key not in sc_:
+                continue
+            m, pk, _c = sc_[key]
+            P.append('<tr%s><td>%s</td><td>%.4f</td><td>%.4f</td>'
+                     '<td>1 / %.0f</td><td>%.2f&times;</td></tr>'
+                     % (' class="hit"' if hit else "", lab, m, pk,
+                        1.0 / AUD.as_paper(m) if m else 0, m / vel_rise))
+        P.append('<tr><td>black velour, <b>with its measured grazing rise'
+                 '</b></td><td>%.4f</td><td>&mdash;</td><td>1 / %.0f</td>'
+                 '<td>1.00&times;</td></tr>'
+                 % (vel_rise, 1.0 / AUD.as_paper(vel_rise)))
+        P.append("</tbody></table></div>")
+
+        P.append('<div class="warn col"><p><b>Two things this changes.</b></p>'
+                 '<p style="margin-top:9px"><b>The structure is worth about '
+                 '%.1f&times;, not the 5&ndash;30&times; &rho;<sub>dh</sub> '
+                 'credits it with.</b> &rho;<sub>dh</sub> is a hemispherical '
+                 'total &mdash; the fraction of the beam that leaves in '
+                 '<i>any</i> direction. At the audience the panel buys '
+                 '%.4f&nbsp;&rarr;&nbsp;%.4f over its own coating. The '
+                 'difference is not error: a honeycomb is a retroreflector, so '
+                 'much of what &rho;<sub>dh</sub> scores as <i>removed</i> is '
+                 'in fact <i>redirected back up the beam</i>. Real light, '
+                 'going somewhere the audience is not.</p>'
+                 '<p style="margin-top:9px"><b>It does not beat black '
+                 'velour.</b> Velour reads &beta;&nbsp;=&nbsp;%.4f over this '
+                 'room&rsquo;s angles against the panel&rsquo;s %.4f. And the '
+                 'velour figure is already generous: it is a Lambertian model, '
+                 'and its own source reports velour with the <i>lowest</i> TIS '
+                 'of any sample it measured, meaning velour is not Lambertian. '
+                 'The case for this panel is not that it out-darkens velour '
+                 '&mdash; it is that it is a rigid ceiling panel with a '
+                 'buyable process, <i>at</i> velour&rsquo;s brightness.</p>'
+                 '</div>'
+                 % (sc_["flat_musou"][0] / pan, sc_["flat_musou"][0], pan,
+                    vel_rise, pan))
+        P.append('<p class="col">Weighted over the cells this room actually '
+                 'uses &mdash; every projector, every part of the scan field, '
+                 'every place a person may stand. The two Lambertian '
+                 'references are the check on the rig: through the identical '
+                 '48-cell grid, white paper returns %.6f and black velour '
+                 '%.6f, so the rig gives back exactly what it is handed and '
+                 'anything the panel reads is the panel. Definition and '
+                 'defects: <code>metrics/09</code>.</p>'
+                 % (sc_["white_paper"][0], sc_["black_velour"][0]))
+        P.append("</section>")
 
     # the answer
     P.append("<section>")
@@ -202,8 +309,8 @@ def build(date):
     rec_key = rec + (0.15,)
     rec_rho, rec_n = (agg[rec_key][0], agg[rec_key][2]) if rec_key in agg \
         else (agg[best][0], agg[best][2])
-    P.append('<div><dt>&rho;<sub>dh</sub>, worst of &theta; 0/&plusmn;20/'
-             '&plusmn;40</dt><dd class="big">%s</dd>'
+    P.append('<div><dt>&rho;<sub>dh</sub> &mdash; hemispherical total, NOT '
+             'what the audience sees</dt><dd>%s</dd>'
              '<p>this cell, mean over %d geometry seeds. The darkest cell '
              'anywhere in the search is %s.</p></div>'
              % (num(rec_rho), rec_n, num(agg[best][0])))
@@ -611,6 +718,8 @@ figure.fig{margin:0;border:1px solid var(--line);border-radius:3px;
   background:var(--surface);padding:14px;overflow-x:auto}
 figure.fig img{width:100%;min-width:720px;height:auto;display:block}
 figure.diag svg{width:100%;min-width:560px;height:auto;display:block}
+th .u{display:block;font-weight:400;text-transform:none;letter-spacing:0;
+  font-size:10px;color:var(--ink-3);margin-top:2px}
 td.note{color:var(--ink-3);font-size:11.5px;text-align:left;white-space:normal}
 figcaption{margin-top:10px;font:400 12.5px/1.5 ui-monospace,Menlo,monospace;
   color:var(--ink-3)}

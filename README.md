@@ -110,14 +110,30 @@ Run a report with `python3 scripts/make_report.py "note"`. Every number on the
 sheet is read back out of `results/*.csv`, so it cannot quote something that
 was not measured.
 
+## What a person standing under it sees
+
+**Radiance factor β = 0.0037** — about **one two-hundredth of a sheet of white
+paper** held in the same place, and **level with black velour, not better than
+it** (`project/metrics/09_audience_reflectance.md`). That is the number to
+quote. ρ_dh above is a hemispherical total and credits the structure with 5–30×
+where a person sees 2.1×, because a honeycomb redirects light back up the beam
+rather than absorbing it.
+
 ## Open
 
-1. The incidence-angle distribution of the real rig. The pitch choice flips
-   entirely on whether ±80° has to be held; 13 mm is a hedge, not an optimum.
+1. ~~The incidence-angle distribution of the real rig.~~ **Stated, and it
+   changes the answer** — see `project/INSTALLATION.md`. A ring of projectors
+   aimed up at 45° with a ±25° scan field puts **20–70°** on the ceiling and
+   never anything near normal, so **68 % of the light arrives outside the
+   0/±20/±40 band every design here was scored in**. Still open: nobody has
+   surveyed the room, and φ was never swept.
 2. Whether the coating reaches the bottom of the groove. An uncoated floor is
    not ρ 0.005, it is bare substrate.
-3. No Fresnel in the material model, so the grazing-angle figures are
-   optimistic by an unmeasured factor.
+3. ~~No Fresnel in the material model.~~ **There is now** — `materials.py`
+   fits one and `metrics/01` records that it inverted the ranking. What
+   replaces this: the coating model is **not reciprocal**
+   (`results/FINDINGS_bidir_2026_08_20.md`), which is the property
+   `metrics/01`'s reciprocity measurement rests on.
 4. Every absolute number assumes the coating really is ρ 0.005. Unverified
    until a physical coupon is measured — `export/` has the coupons and the
    flat control to do it with.
