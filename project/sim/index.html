@@ -648,7 +648,7 @@ function collect(host){
 // block would create its own binding and silently shadow these, so spec()
 // would attach no materials and refresh() would throw on LASTSLOTS.
 let LASTSLOTS = null, LASTMATS = null;
-let mxCollect = null, mxRows = null;
+let mxCollect = null, mxRows = null, mxApply = null;
 
 function spec(){
   const floor = $('#floor').value;
@@ -1371,6 +1371,12 @@ addEventListener('resize', draw);
     if(sp.panel != null) setTop('panel','v_panel', sp.panel);
     setTop('depth','v_depth', sp.depth);
     if(sp.floor && sp.floor!=='none') setTop('fdepth','v_fdepth', sp.floor_depth||3);
+    // MATERIALS TOO, and a design that carries none RESETS rather than
+    // inherits. Every published preset was measured on the study coating and
+    // never recorded it, so leaving the current assignment in place would
+    // quietly measure someone else's design under anodised walls and report
+    // it beside the published figure.
+    if(mxApply) mxApply(sp.materials);
     loading = false;
     refresh();
   };
@@ -1583,6 +1589,39 @@ addEventListener('resize', draw);
     }
     e.querySelector('.mxbase').onchange = () => { mxLoadBase(e, false); mxSelect(e.dataset.slot); refresh(); };
   }
+
+  // Drive the inspector FROM a spec -- the inverse of mxCollect. `null` means
+  // the design said nothing about materials, which resets to the study
+  // default rather than keeping whatever happens to be on screen.
+  mxApply = function(mats){
+    const slots = (mats && mats.slots) || null;
+    for(const e of $('#mxedit').children){
+      const rec = slots ? slots[e.dataset.slot] : null;
+      e.querySelector('.mxbase').value = (rec && rec.base) || MATS.study_default;
+      mxLoadBase(e, false);
+      if(!rec) continue;
+      for(const d of e.querySelector('.mxprops').children){
+        if(!(d.dataset.name in rec)) continue;
+        const v = rec[d.dataset.name];
+        const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]'),
+              b=d.querySelector('b');
+        const f = MATFIELDS.find(x=>x.name===d.dataset.name);
+        if(r){ fitRange(r, v); r.value=v; } if(n) n.value=v;
+        if(b) b.textContent=(+v).toFixed(f && f.dec != null ? f.dec : 3);
+        d.dataset.val = v; d.dataset.src = 'edited';
+      }
+    }
+    if(mats && mats.defaults){
+      for(const [k,id] of [['diffuse_frac','df'],['roughness','rg']]){
+        if(mats.defaults[k] == null) continue;
+        const r=$('#'+id), n=$('#n_'+id), L=$('#v_'+id);
+        fitRange(r, mats.defaults[k]); r.value=mats.defaults[k];
+        if(n) n.value=mats.defaults[k];
+        if(L) L.textContent=(+mats.defaults[k]).toFixed(2);
+      }
+    }
+    mxSelect(MXSEL);
+  };
 
   mxCollect = function(){
     const slots = {};
