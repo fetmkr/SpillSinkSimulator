@@ -802,7 +802,7 @@ def sun_rotation_for(theta_deg):
     return math.atan2(-math.cos(t), math.sin(t))
 
 
-def add_sun(theta_deg, strength=1.0, angular_size_deg=0.5):
+def add_sun(theta_deg, strength=1.0, angular_size_deg=0.5, phi_deg=0.0):
     """
     A strictly delta-function sun (angle = 0) against a specular stage 1 makes
     the front camera sample the BRDF at a single direction: near zero almost
@@ -811,12 +811,30 @@ def add_sun(theta_deg, strength=1.0, angular_size_deg=0.5):
     for real beam divergence plus coating microroughness and keeps the
     measurement conditioned. It does not fix the glint physics -- that is real,
     and is why max and p99 are reported alongside the mean.
+
+    `phi_deg` ROTATES THE SOURCE ABOUT THE PANEL NORMAL, which is the axis this
+    rig could not reach until 2026-08-21. Without it the sun can only sit in the
+    Y-Z plane, so a source-detector pair is either exactly retro or exactly
+    specular and nothing between -- and a ROOM lights a point from every azimuth
+    at once. Measured on the laser rig this study is for: only 6 % of the light
+    an audience sees arrives near retro and 18 % near specular, while the mode
+    sits at 150 deg, which an in-plane rig cannot sample at all. That gap is
+    what produced, and hid, a wrong audience figure; see
+    `results/FINDINGS_audience_azimuth_2026_08_21.md`.
+
+    Blender composes Euler XYZ as Rz*Ry*Rx, so setting Y here is Ry(phi)*Rx(th)
+    -- the already-aimed sun turned about the normal. Its propagation direction
+    becomes (-sin th sin phi, -cos th, -sin th cos phi), which is EXACTLY the
+    convention `raytrace_viz.trace` already uses for its own `phi_deg` (see `d0`
+    there). The two tracers therefore agree by construction rather than by
+    coincidence, and phi = 0 still means what it has always meant.
     """
     d = bpy.data.lights.new("sun", type="SUN")
     d.energy = strength
     d.angle = math.radians(angular_size_deg)
     o = bpy.data.objects.new("sun", d)
-    o.rotation_euler = (sun_rotation_for(theta_deg), 0.0, 0.0)
+    o.rotation_euler = (sun_rotation_for(theta_deg),
+                        math.radians(phi_deg), 0.0)
     bpy.context.collection.objects.link(o)
     return o
 

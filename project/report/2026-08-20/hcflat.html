@@ -95,7 +95,7 @@ a:focus-visible,img:focus-visible{outline:2px solid var(--dark);
 <div class="wrap">
 <header class="top">
 <div class="eyebrow">Panel search &middot; 2026-08-20</div>
-<h1>The ceiling reads one two-hundredth of a sheet of white paper</h1>
+<h1>The ceiling reads one seven-hundredth of a sheet of white paper</h1>
 <p class="sub">A honeycomb front on a flat back, sprayed with Musou Black at the mouth and left as bought further down. 509 designs, 1527 design&ndash;seed measurements, about three hours of Cycles, over cell pitch, cell depth, foil thickness and how far the paint reaches.</p>
 </header>
 <section>
@@ -103,19 +103,23 @@ a:focus-visible,img:focus-visible{outline:2px solid var(--dark);
 <h2>Reflectance at the audience</h2>
 <p class="col lede"><b>Radiance factor &beta;</b> &mdash; this surface&rsquo;s brightness divided by that of a <b>perfect Lambertian white</b> under the same light. &beta;&nbsp;=&nbsp;1.000 is the white standard. It is the CIE reflectance factor, it is dimensionless, and it is what a goniometer reports.</p>
 <div class="levers">
-<div><dt>Radiance factor &beta; at the audience</dt><dd class="big">0.0037</dd><p>mean over the angles this room actually uses. 1.000 = perfect white</p></div>
-<div><dt>As a fraction of white paper</dt><dd>1 / 216</dd><p>paper is 75&ndash;85 % and near-Lambertian, &beta;&nbsp;&asymp;&nbsp;0.80</p></div>
-<div><dt>Against black velour</dt><dd>1.16&times;</dd><p>theatrical blackout, modelled with the grazing rise its source measured. <b>The panel is brighter</b></p></div>
+<div><dt>Radiance factor &beta; at the audience</dt><dd class="big">0.00105</dd><p>mean over the angles this room actually uses. 1.000 = perfect white</p></div>
+<div><dt>As a fraction of white paper</dt><dd>1 / 764</dd><p>paper is 75&ndash;85 % and near-Lambertian, &beta;&nbsp;&asymp;&nbsp;0.80</p></div>
+<div><dt>Against black velour</dt><dd>0.09&ndash;0.52&times;</dd><p>theatrical blackout, over its whole measured range. <b>The panel is darker</b></p></div>
 </div>
-<div class="tbl"><table><thead><tr><th>surface</th><th>&beta; mean<br><span class="u">radiance factor, 1.000 = white</span></th><th>&beta; peak<br><span class="u">brightest patch</span></th><th>&times; white paper</th><th>&times; black velour</th></tr></thead><tbody>
-<tr class="hit"><td>the panel &mdash; honeycomb 6.4 / 64 / 0.03, Musou to 15 %</td><td>0.0037</td><td>0.0166</td><td>1 / 216</td><td>1.16&times;</td></tr>
-<tr><td>a flat plate of the panel&rsquo;s own Musou coating</td><td>0.0078</td><td>0.0114</td><td>1 / 103</td><td>2.44&times;</td></tr>
-<tr><td>black velour, at its normal-incidence value only</td><td>0.0020</td><td>0.0020</td><td>1 / 400</td><td>0.63&times;</td></tr>
-<tr><td>white paper (Lambertian model, &rho; = 0.80)</td><td>0.8000</td><td>0.8005</td><td>1 / 1</td><td>251.00&times;</td></tr>
-<tr><td>black velour, <b>with its measured grazing rise</b></td><td>0.0032</td><td>&mdash;</td><td>1 / 251</td><td>1.00&times;</td></tr>
+<div class="tbl"><table><thead><tr><th>surface</th><th>&beta; mean<br><span class="u">radiance factor, 1.000 = perfect white</span></th><th>&beta; peak<br><span class="u">brightest patch</span></th><th>&times; white paper</th><th>the panel vs it</th></tr></thead><tbody>
+<tr class="hit"><td><b>the panel</b> &mdash; honeycomb 6.4&nbsp;/&nbsp;64&nbsp;/&nbsp;0.03, Musou to 15&nbsp;%</td><td>0.00105</td><td>0.0111</td><td>1 / 764</td><td>&mdash;</td></tr>
+<tr><td>a flat plate of its own Musou paint<br><span class="u">the specular glare a painted ceiling shows</span></td><td>0.02879</td><td><b>0.603</b></td><td>1 / 28</td><td>panel is 0.036&times;</td></tr>
+<tr><td>black velour<br><span class="u">theatrical blackout &mdash; the thing this replaces</span></td><td>0.0020 &ndash; 0.0122</td><td>&mdash;</td><td>1 / 66</td><td>panel is 0.09&ndash;0.52&times;</td></tr>
+<tr><td>Musou fabric<br><span class="u">the best black cloth in the reference</span></td><td>0.0012 &ndash; 0.0055</td><td>&mdash;</td><td>1 / 145</td><td>panel is 0.19&ndash;0.87&times;</td></tr>
+<tr><td>a plain matte black wall<br><span class="u">what happens if nobody does anything</span></td><td>0.0500</td><td>&mdash;</td><td>1 / 16</td><td>panel is 0.021&times;</td></tr>
+<tr><td>white paper<br><span class="u">hold a sheet up and check it</span></td><td>0.8000</td><td>&mdash;</td><td>1 / 1</td><td>panel is 0.001&times;</td></tr>
 </tbody></table></div>
-<div class="warn col"><p><b>Two things this changes.</b></p><p style="margin-top:9px"><b>The structure is worth about 2.1&times;, not the 5&ndash;30&times; &rho;<sub>dh</sub> credits it with.</b> &rho;<sub>dh</sub> is a hemispherical total &mdash; the fraction of the beam that leaves in <i>any</i> direction. At the audience the panel buys 0.0078&nbsp;&rarr;&nbsp;0.0037 over its own coating. The difference is not error: a honeycomb is a retroreflector, so much of what &rho;<sub>dh</sub> scores as <i>removed</i> is in fact <i>redirected back up the beam</i>. Real light, going somewhere the audience is not.</p><p style="margin-top:9px"><b>It does not beat black velour.</b> Velour reads &beta;&nbsp;=&nbsp;0.0032 over this room&rsquo;s angles against the panel&rsquo;s 0.0037. And the velour figure is already generous: it is a Lambertian model, and its own source reports velour with the <i>lowest</i> TIS of any sample it measured, meaning velour is not Lambertian. The case for this panel is not that it out-darkens velour &mdash; it is that it is a rigid ceiling panel with a buyable process, <i>at</i> velour&rsquo;s brightness.</p></div>
-<p class="col">Weighted over the cells this room actually uses &mdash; every projector, every part of the scan field, every place a person may stand. The two Lambertian references are the check on the rig: through the identical 48-cell grid, white paper returns 0.800001 and black velour 0.002000, so the rig gives back exactly what it is handed and anything the panel reads is the panel. Definition and defects: <code>metrics/09</code>.</p>
+<div class="warn col"><p><b>Corrected 2026-08-21.</b> An earlier version of this page said &beta;&nbsp;=&nbsp;0.0037 and &ldquo;does not beat black velour&rdquo;. Both were wrong: the measurement sampled the <i>retro</i> side of the reflectance map for every cell, while 76&nbsp;% of the light an eye receives arrives at azimuths an in-plane rig cannot reach at all. The record is in <code>FINDINGS_audience_azimuth_2026_08_21.md</code>.</p></div>
+<p class="col"><b>The structure is worth 27.5&times; on the mean and 54&times; on the peak</b>, and the peak is the one that matters. A flat plate of the same paint reads a peak of <b>0.603</b> &mdash; three quarters as bright as white paper. That is <b>the specular reflection of a projector in a painted ceiling</b>. The honeycomb takes it to 0.011.</p>
+<p class="col"><b>It is darker than every reference black in the literature this study relies on</b> &mdash; below the bottom of every bracket above. And the velour figure is conservative against us: it is a Lambertian model, and its own source reports velour with the <i>lowest</i> TIS of any sample it measured, so real velour at these angles is very likely worse than 0.0020.</p>
+<p class="col"><b>On &ldquo;surely Musou beats velour&rdquo;:</b> it does, as a <i>fabric</i> &mdash; 0.0012 against 0.0020. As <i>paint</i>, which is what this panel is coated in, it does not: 0.0100 against 0.0020. The structure is what closes that gap and then some.</p>
+<p class="col">Weighted over the <b>three-angle</b> cells this room actually uses &mdash; incidence, observation <i>and the azimuth between them</i>, over every projector, every part of the scan field and every place a person may stand. The two Lambertian references are the check on the rig: through the identical 72-cell grid, white paper returns 0.800001 and black velour 0.002000, so the rig gives back exactly what it is handed and anything the panel reads is the panel. Definition and defects: <code>metrics/09</code>.</p>
 </section>
 <section>
 <div class="eyebrow">What to build</div>

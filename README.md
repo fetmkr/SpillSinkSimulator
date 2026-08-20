@@ -112,12 +112,16 @@ was not measured.
 
 ## What a person standing under it sees
 
-**Radiance factor β = 0.0037** — about **one two-hundredth of a sheet of white
-paper** held in the same place, and **level with black velour, not better than
-it** (`project/metrics/09_audience_reflectance.md`). That is the number to
-quote. ρ_dh above is a hemispherical total and credits the structure with 5–30×
-where a person sees 2.1×, because a honeycomb redirects light back up the beam
-rather than absorbing it.
+**Radiance factor β = 0.00105** — about **one seven-hundredth of a sheet of
+white paper** held in the same place, and **darker than every reference black in
+the literature**: below black velour's 0.0020–0.0122 bracket, below Musou
+fabric's 0.0012–0.0055, and 25× below a plain matte black wall
+(`project/metrics/09_audience_reflectance.md`). That is the number to quote.
+
+Against a flat plate of the same paint it is **27.5× on the mean and 54× on the
+peak** — and the peak is the one that matters, because a painted ceiling shows
+the projector's specular reflection at β = 0.603, three quarters as bright as
+white paper. The structure takes that to 0.011.
 
 ## Open
 

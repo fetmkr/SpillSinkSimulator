@@ -207,8 +207,25 @@ def _clear_lights_and_cameras():
 
 
 def cell(sc, theta_in, theta_out, sun_angle_deg, out_dir="/tmp/simsrv/bidir",
-         keep=False):
-    """One (theta_in, theta_out) cell. Returns the record that becomes a row.
+         keep=False, phi_deg=0.0):
+    """One (theta_in, theta_out, delta-phi) cell. Returns the row record.
+
+    `phi_deg` is the AZIMUTH BETWEEN THE SOURCE AND THE DETECTOR, about the
+    panel normal. The camera always sits at positive elevation in the Y-Z
+    plane, so:
+
+        phi =   0    source and detector on the same side  -> RETRO
+        phi = 180    opposite sides                        -> SPECULAR
+        in between   the directions an in-plane rig cannot reach at all
+
+    This SUBSUMES the signed convention this module started with rather than
+    replacing it: the old (theta_in, +theta_out) is (theta_in, theta_out, 0)
+    and the old (theta_in, -theta_out) is (theta_in, theta_out, 180). Every
+    cell is now addressable as three non-negative angles.
+
+    It exists because a room lights a point from every azimuth at once. The
+    2026-08-20 audience figure was measured with source and detector locked in
+    one plane, on the retro side, and was wrong for that reason.
 
     The camera is rebuilt every cell because only its elevation changes; the
     sun is rebuilt with it, which costs nothing next to a render.
@@ -218,14 +235,15 @@ def cell(sc, theta_in, theta_out, sun_angle_deg, out_dir="/tmp/simsrv/bidir",
     BR.setup_camera(sc["cx"], sc["cz"], sc["ortho"], sc["res_x"], sc["res_y"],
                     elev_deg=theta_out)
     BR.set_world(0.0)
-    BR.add_sun(theta_in, strength=1.0, angular_size_deg=sun_angle_deg)
+    BR.add_sun(theta_in, strength=1.0, angular_size_deg=sun_angle_deg,
+               phi_deg=phi_deg)
 
     # to_pixel_window projects through the camera that was just placed, so it
     # follows the tilt. It has to be called AFTER setup_camera, every cell.
     px_panel = BR.to_pixel_window(sc["w_panel"])
     px_ctrl = BR.to_pixel_window(sc["w_ctrl"])
 
-    name = "bidir_i%+05.1f_o%+05.1f" % (theta_in, theta_out)
+    name = "bidir_i%+05.1f_o%+05.1f_p%03.0f" % (theta_in, theta_out, phi_deg)
     exr = os.path.join(out_dir, name + ".exr")
     png = os.path.join(out_dir, name + ".png")
     BR.render_to(exr, png)
@@ -256,6 +274,7 @@ def cell(sc, theta_in, theta_out, sun_angle_deg, out_dir="/tmp/simsrv/bidir",
                      if abs(theta_in) < 89.0 else float("nan"))
 
     return {"theta_in": float(theta_in), "theta_out": float(theta_out),
+            "phi_deg": float(phi_deg),
             "brdf": brdf, "brdf_analytic": brdf_analytic,
             "panel_mean": s_panel["mean"], "panel_p99": s_panel["p99"],
             "panel_max": s_panel["max"], "panel_px": s_panel["px"],
@@ -273,7 +292,7 @@ def cell(sc, theta_in, theta_out, sun_angle_deg, out_dir="/tmp/simsrv/bidir",
 
 
 def sweep(sc, theta_ins, theta_outs, sun_angle_deg=None, skip=None,
-          out_dir="/tmp/simsrv/bidir", keep=False, on_cell=None):
+          out_dir="/tmp/simsrv/bidir", keep=False, on_cell=None, phi_deg=0.0):
     """Yield one record per cell, theta_in outer so a column completes first.
 
     A column is the useful unit: it is one incidence angle's whole exit
@@ -289,7 +308,8 @@ def sweep(sc, theta_ins, theta_outs, sun_angle_deg=None, skip=None,
         for to in theta_outs:
             if skip is not None and skip(ti, to):
                 continue
-            rec = cell(sc, ti, to, sun_angle_deg, out_dir=out_dir, keep=keep)
+            rec = cell(sc, ti, to, sun_angle_deg, out_dir=out_dir, keep=keep,
+                       phi_deg=phi_deg)
             if on_cell is not None:
                 on_cell(rec)
             yield rec

@@ -9,9 +9,16 @@ direction. It ranks absorbers and it says nothing about how visible the spill
 copy is. What a client asks is how bright the ceiling looks, and that is
 directional.
 
-Measures the BRDF over the (incidence, observation) cells the room actually
-uses -- `audience.cells()` says which, and they are theta_in 20-70 against
-theta_out 0-70 -- then reports, for every surface:
+THREE ANGLES, NOT TWO. The first version of this script measured
+(theta_in, theta_out) with both positive, which in this rig's convention is the
+RETRO side of the map for every cell -- the side a honeycomb is brightest on --
+while only 24.5 % of the light an eye receives arrives there. It published
+beta = 0.0037 and the wrong conclusion. Corrected 2026-08-21:
+`results/FINDINGS_audience_azimuth_2026_08_21.md`.
+
+Measures the BRDF over the (incidence, observation, azimuth) cells the room
+actually uses -- `audience.cells()` says which -- then reports, for every
+surface:
 
     RADIANCE FACTOR beta = pi * f_r      1.0 = a perfect Lambertian white
     x WHITE PAPER   beta / 0.80          paper is 75-85 % and near-Lambertian
@@ -35,6 +42,7 @@ import math
 import os
 import sys
 import time
+from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
@@ -51,8 +59,12 @@ OUT = "/tmp/simsrv/audience"
 SPP = 128
 PITCH, DEPTH, WALL, FRAC = 6.4, 64.0, 0.03, 0.15
 
-FIELDS = ["surface", "kind", "theta_in", "theta_out", "brdf", "beta",
-          "weight", "samples", "params_json"]
+FIELDS = ["surface", "kind", "theta_in", "theta_out", "delta_phi", "brdf",
+          "beta", "weight", "samples", "params_json"]
+
+# Cells below this share of the room's light are not rendered. Whatever is
+# dropped is REPORTED, because a mean over 90 % of the light is not a mean.
+WEIGHT_FLOOR = 0.0015
 
 
 def panel_scene():
@@ -76,9 +88,19 @@ def flat_scene(mat):
 
 
 def main():
-    ins, outs = AUD.axes()
     w = AUD.cells()
+    todo = sorted((k for k, v in w.items() if v >= WEIGHT_FLOOR),
+                  key=lambda k: -w[k])
+    kept = sum(w[k] for k in todo)
     sun = 10.0
+    print("  %d of %d cells carry >= %.2f %% each; together %.1f %% of the "
+          "light. The remaining %.1f %% is not rendered."
+          % (len(todo), len(w), 100 * WEIGHT_FLOOR, 100 * kept,
+             100 * (1 - kept)), flush=True)
+    # The Lambertian references need no renderer: for a Lambertian beta = rho
+    # exactly, at every angle and every azimuth, and gate az proved this rig
+    # returns that to 0.000 %. They are measured anyway, because a reference
+    # that goes through a different path is not a reference.
     jobs = [("panel", "honeycomb 6.4/64/0.03, Musou to 15 %", panel_scene),
             ("flat_musou", "flat plate, its own Musou coating",
              lambda: flat_scene("musou_fit")),
@@ -87,33 +109,53 @@ def main():
             ("white_paper", "white paper (Lambertian model, rho 0.80)",
              lambda: flat_scene("white_paper"))]
 
+    # RESUMABLE, AND WRITTEN AS IT GOES. The first attempt held every row in
+    # memory and wrote at the end; the process was killed after the panel's ten
+    # minutes and all of it was lost. A surface already complete in the CSV is
+    # skipped.
+    done = defaultdict(dict)
+    if os.path.exists(CSV) and os.path.getsize(CSV) > 0:
+        for r in csv.DictReader(open(CSV)):
+            if r.get("brdf") and r.get("delta_phi"):
+                done[r["surface"]][(float(r["theta_in"]),
+                                    float(r["theta_out"]),
+                                    float(r["delta_phi"]))] = float(r["brdf"])
+    fresh = not os.path.exists(CSV) or os.path.getsize(CSV) == 0 or not done
+    fh = open(CSV, "a" if not fresh else "w", newline="")
+    wr = csv.DictWriter(fh, fieldnames=FIELDS)
+    if fresh:
+        wr.writeheader()
+
     rows, res = [], {}
     for tag, kind, make in jobs:
+        if len(done.get(tag, {})) >= len(todo):
+            brdf = done[tag]
+            mean, peak, cov = AUD.score(brdf)
+            res[tag] = (mean, peak, cov, kind)
+            print("  %-13s already measured: beta mean %.6f  peak %.6f"
+                  % (tag, mean, peak), flush=True)
+            continue
         t0 = time.time()
         sc, params = make()
         pj = json.dumps(params, sort_keys=True, default=str)
-        brdf = {}
-        for a in ins:
-            for b in outs:
-                if w.get((a, b), 0.0) <= 0.0:
-                    continue                 # the room never uses this cell
-                r = BD.cell(sc, a, b, sun, out_dir=OUT)
-                brdf[(a, b)] = r["brdf"]
-                rows.append({"surface": tag, "kind": kind, "theta_in": a,
-                             "theta_out": b, "brdf": r["brdf"],
-                             "beta": math.pi * r["brdf"], "weight": w[(a, b)],
-                             "samples": SPP, "params_json": pj})
+        brdf = dict(done.get(tag, {}))
+        for (a, b, ph) in todo:
+            if (a, b, ph) in brdf:
+                continue
+            r = BD.cell(sc, a, b, sun, out_dir=OUT, phi_deg=ph)
+            brdf[(a, b, ph)] = r["brdf"]
+            wr.writerow({"surface": tag, "kind": kind, "theta_in": a,
+                         "theta_out": b, "delta_phi": ph, "brdf": r["brdf"],
+                         "beta": math.pi * r["brdf"], "weight": w[(a, b, ph)],
+                         "samples": SPP, "params_json": pj})
+            fh.flush()
         mean, peak, cov = AUD.score(brdf)
         res[tag] = (mean, peak, cov, kind)
         print("  %-13s beta mean %.6f  peak %.6f  (%.0f %% of the light, "
               "%.0f s)" % (tag, mean, peak, 100 * cov, time.time() - t0),
               flush=True)
 
-    with open(CSV, "w", newline="") as fh:
-        wr = csv.DictWriter(fh, fieldnames=FIELDS)
-        wr.writeheader()
-        for r in rows:
-            wr.writerow(r)
+    fh.close()
 
     print("\n=== REFLECTANCE AT THE AUDIENCE ===", flush=True)
     print("radiance factor beta: 1.000 = a perfect Lambertian white\n",

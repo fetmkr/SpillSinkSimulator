@@ -541,3 +541,27 @@ metric 08(`metrics/08_brdf_slice.md`) 작업 중에 나왔습니다. **둘 다 m
 같은 값인가, 다르다면 얼마나 다른가** 입니다.
 
 자세한 것은 `results/FINDINGS_bidir_2026_08_20.md`.
+
+### QC. `lock.py -- check` 의 대조판이 0.05 를 안 읽습니다 `[확인]`
+
+```
+[CONTROL] *** flat_coating th=0.0   control=0.041786 (nominal 0.0500)
+[CONTROL] *** flat_coating th=-40.0 control=0.041786
+[CONTROL] *** flat_coating th=-70.0 control=0.041786
+The 0.05 diffuse reference plate did not read 0.05.
+```
+
+**락 자체는 통과합니다.** 잠긴 값 15 개 전부 편차 0.5 % 이내 `ok`, 재질
+검사도 −0.0 %. 즉 **측정 체인은 안 움직였습니다.** 실패하는 것은
+`flat_coating` 케이스의 **대조판 하나**이고, 세 각도에서 값이 완전히
+같으므로 각도 의존 누출이 아니라 **정적인 기하 문제**입니다.
+
+`flat_coating` 은 `lock.py` 의 퇴화 V홈(pitch 50, depth 0.001)이고, 이미
+`rig_v2.assert_window_covered` 가 **자기 면을 못 덮는다**고 잡아낸 그
+기하입니다 (`FINDINGS_bidir_2026_08_20.md`). 대조판 쪽에서도 같은 뿌리일
+가능성이 높습니다.
+
+**2026-08-21 의 azimuth 수정과는 무관합니다** — `add_sun` 은 `hemi_view`
+경로에서 아예 호출되지 않고, 잠긴 숫자가 그대로인 것이 그 증거입니다.
+다만 락의 자기 게이트가 실패 중이므로, **그 규칙대로라면 지금 락의 숫자는
+인용 불가**입니다. 소유자 판단이 필요합니다.

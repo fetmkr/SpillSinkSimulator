@@ -10,37 +10,43 @@ Recorded 2026-08-21.
 **Radiance factor β** — this surface's radiance divided by that of a **perfect
 Lambertian white** under the same light. β = 1.000 is the white standard.
 
-| surface | β, mean | β, peak | × white paper | × black velour |
+| surface | β, mean | β, peak | × white paper | vs this |
 |---|---|---|---|---|
-| **the panel** — honeycomb 6.4 / 64 / 0.03, Musou to 15 % | **0.0037** | 0.0166 | **1 / 216** | **1.16 ×** |
-| a flat plate of the panel's own Musou coating | 0.0078 | 0.0114 | 1 / 103 | 2.44 × |
-| black velour, with its measured grazing rise | 0.0032 | — | 1 / 251 | 1.00 |
-| black velour, at its normal-incidence value only | 0.0020 | 0.0020 | 1 / 400 | 0.63 |
-| white paper (Lambertian model, ρ = 0.80) | 0.8000 | 0.8005 | 1 / 1 | 251 × |
+| **the panel** — honeycomb 6.4 / 64 / 0.03, Musou to 15 % | **0.00105** | **0.0111** | **1 / 764** | — |
+| a flat plate of the panel's own Musou paint | 0.0288 | **0.603** | 1 / 28 | panel is **0.036×** |
+| black velour (Lambertian model, bracket 0–85°) | 0.0020 – 0.0122 | — | 1 / 400 – 1 / 66 | panel is **0.09–0.52×** |
+| Musou fabric (Lambertian model, bracket 0–85°) | 0.0012 – 0.0055 | — | 1 / 667 – 1 / 145 | panel is **0.19–0.87×** |
+| a plain matte black wall | 0.0500 | — | 1 / 16 | panel is **0.02×** |
+| white paper (Lambertian model, ρ = 0.80) | 0.8000 | 0.8000 | 1 / 1 | panel is **0.0013×** |
 
-**Read that as: the ceiling reads about one two-hundredth of a sheet of white
-paper held in the same place, and it is level with black velour — not better
-than it.**
+**Read that as: the ceiling reads about one seven-hundredth of a sheet of white
+paper held in the same place, and it is darker than every reference black in the
+literature this study relies on — below the bottom of every bracket.**
+
+> **Corrected 2026-08-21.** An earlier version of this table said β = 0.0037 and
+> "does not beat black velour". Both were wrong: the measurement sampled the
+> retro side of the BRDF for every cell while 76 % of the light an eye receives
+> arrives at azimuths an in-plane rig cannot reach.
+> `results/FINDINGS_audience_azimuth_2026_08_21.md`.
 
 ### Two things this changes
 
-**1. The structure is worth about 2×, not 5–30×.** `metrics/01` ρ_dh — the
-hemispherical total — credits the honeycomb with 5–30× over its own coating. At
-the audience it buys **2.1×** (0.0078 → 0.0037). The difference is not error: a
-honeycomb is a retroreflector, so much of what ρ_dh scores as *removed* is
-actually *redirected back up the beam*. Real light, going somewhere the audience
-is not. ρ_dh takes the credit; the audience does not get the benefit.
+**1. The structure is worth 27.5× on the mean and 54× on the peak.** A flat
+plate of the same Musou paint reads β = 0.0288 with a **peak of 0.603** — three
+quarters as bright as white paper. That peak is **the specular reflection of a
+projector in a painted ceiling**, and it is the strongest argument for the
+structure this study has produced: the honeycomb takes it to 0.011.
 
-**2. It does not beat black velour.** Modelled with the grazing rise Filip &
-Vávra 2026 measured (β 0.002 at normal → 0.0122 at 85°), velour reads β = 0.0032
-over this room's angles against the panel's 0.0037 — **the panel is 16 %
-brighter.** Against velour's normal-incidence value alone it is 1.85× brighter.
-The velour model is Lambertian and the same paper says velour is not Lambertian
-(it has the *lowest* TIS of anything they measured), so this comparison is
-already tilted in the panel's favour.
+**2. It is darker than every black in the reference literature.** Below black
+velour's whole bracket (0.0020–0.0122), below Musou fabric's (0.0012–0.0055),
+25× below a plain matte black wall. And the velour figure is conservative
+against us: it is a Lambertian model, and its own source reports velour with the
+*lowest* TIS of any sample measured, so real velour at these angles is very
+likely worse than the bracket's floor.
 
-The case for the panel is therefore **not** that it out-darkens velour. It is
-that it is a rigid ceiling panel with a buyable process, at velour's brightness.
+**On "surely Musou beats velour":** it does — as a *fabric*, 0.0012 against
+0.0020. As *paint*, which is what this panel is coated in, it does not: 0.0100
+against 0.0020. The structure is what closes that gap and then some.
 
 ## The room
 

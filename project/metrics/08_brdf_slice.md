@@ -84,6 +84,15 @@ When a ratio is quoted it must name its baseline, and it is one of:
   cell value is quotable until a coating coupon is measured on a goniometer.**
   This is the strongest argument the project has yet produced for closing
   README open item 4.
+- **AN IN-PLANE SLICE CANNOT ANSWER A QUESTION ABOUT A ROOM.** This is the
+  right instrument for characterising a surface and the wrong one for
+  predicting what an audience sees, because a room lights every point from
+  every azimuth at once. On the laser rig this study is for, only 24.5 % of the
+  light reaching an eye arrives near retro and 17.7 % near specular — the two
+  directions a slice can reach — while the mode sits at Δφ = 150°. Publishing
+  an audience figure off a slice produced a number wrong by 3.5×
+  (`results/FINDINGS_audience_azimuth_2026_08_21.md`). `add_sun` now takes a
+  `phi_deg`; use `metrics/09` for anything room-shaped.
 - **One azimuth plane.** There is no hemisphere integral in a slice, so no TIS
   — `metrics/05` stays planned until an azimuth axis is added. The single
   exception is normal incidence, where the BRDF is azimuthally symmetric and
