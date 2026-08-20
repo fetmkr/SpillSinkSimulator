@@ -497,3 +497,47 @@ Cycles 는 비간섭(incoherent) 경로추적기입니다. 즉 **스페클(speck
 것이므로 — **적분구에 넣었을 때 6.12 % 가 아니라 1 % 대가 나오면,
 그 자리에서 이 문서의 모든 배수가 무효가 됩니다.** 클라이언트 앞에서
 그 일이 벌어지는 것보다, 지금 렌더 한 번으로 확인하는 편이 낫습니다.
+
+---
+
+## 추가 2026-08-20 — 다른 세션의 작업 중 발견된 것 두 가지
+
+metric 08(`metrics/08_brdf_slice.md`) 작업 중에 나왔습니다. **둘 다 metric 08
+의 문제가 아니고, 고치지 않았습니다** — 소유자가 판단할 일이라 여기에만
+적어 둡니다.
+
+### QA. `test_sim.py` 가 3 건 실패합니다 `[확인]`
+
+```
+420 checks, 3 failures
+  - no top layer is slower than 450 ms to preview: cone 704ms
+  - no floor is slower than 450 ms to preview: wave 768ms, cone 912ms
+  - live == published within rounding: worst 1.292%
+```
+
+**세 번째가 중요합니다.** `test_sim.py:222` 가 라이브 `/api/measure` 를
+`results/sweep_floor.csv` 의 발표값과 비교하는데, 허용치 0.1 % 에 대해
+1.292 % 어긋납니다. 유휴 상태에서 두 번 돌려 **자릿수까지 동일**하게
+재현됐으므로 부하나 잡음이 아니라 결정론적입니다. 그 검사를 마지막으로
+건드린 커밋은 materials 리팩터의 `53de00a` 이고, metric 08 의 diff 는 measure
+경로를 건드리지 않습니다. **발표된 숫자 하나가 움직였다는 뜻일 수
+있습니다** — `sim/README.md` 이 "a published row still reproduces" 를 근거로
+단일 재질 경로를 정당화하고 있으므로 확인이 필요합니다.
+
+앞의 두 건은 미리보기 속도이고 예산이 450 ms 인데 cone 이 704–912 ms 입니다.
+
+### QB. 코팅 모델이 상호적(reciprocal)이지 않습니다 `[확인]`
+
+평판에서 측정: `f(0,80)/f(80,0) = 0.681` (1024 spp, 태양 각지름 5°). 같은
+장비·같은 적분으로 램버시안은 `rho_dh(0)` 에 −0.98 % 로 닫히는데 `musou_fit`
+은 +23.17 % 입니다. Fresnel mix 의 가중치가 **시선 방향**을 따라가기
+때문입니다.
+
+`metrics/01` 은 ρ_dh 를 **헬름홀츠 상호성**으로 읽습니다 — 균일 하늘 +
+기울인 카메라. 그 등식이 성립하려면 BRDF 가 상호적이어야 합니다.
+발표된 숫자가 틀렸다는 주장은 **아닙니다**: `Material.rho_dh()` 는 바로 그
+구성에 맞춰 피팅·검증됐으므로 자기 일관적입니다. 열려 있는 것은
+**hemispherical-directional 과 directional-hemispherical 이 이 재질에서
+같은 값인가, 다르다면 얼마나 다른가** 입니다.
+
+자세한 것은 `results/FINDINGS_bidir_2026_08_20.md`.
