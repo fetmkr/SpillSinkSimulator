@@ -67,7 +67,20 @@ def main():
         # Beam width at the wall is a first-class knob (phase 5.5); both
         # renderers must read the SAME value or the cross-check compares
         # different experiments.
-        MF.STRIPE_W = float(req.get("beam_w", 2.0))
+        # THE WHOLE RIG CROSSES, NOT JUST THE BEAM. mts_form carries its own
+        # copies of the rig constants, and on 2026-08-20 form_buildable's were
+        # repaired (window opened to the face instead of a fixed 40 % of it,
+        # sampling density held at mm-per-pixel instead of a constant pixel
+        # count, frame height made to contain the face). A cross-check that
+        # sends only the beam compares the new rig against the old one and
+        # reports the difference as renderer disagreement -- which is exactly
+        # what the beam default already did (7.5 here, 2.0 there).
+        MF.STRIPE_W = float(req.get("beam_w", 7.5))
+        if req.get("mm_per_px"):
+            MF.MM_PER_PX = float(req["mm_per_px"])
+        if req.get("full_face_window"):
+            MF.MEAS_INSET_X = 0.0
+            MF.MEAS_INSET_Z = 0.0
         ply_f = os.path.join(out, "panel_form.ply")
         nv_f, nt_f = write_ply(ply_f, v, f)
         face_f = float(prm.get("face_w", 60.0))

@@ -72,11 +72,18 @@ The baseline is a flat plate wearing the same coating. Flat Musou Black returns
 |---|---|---|---|
 | Total reflectance | 0.185 % | 0.17668 % | 1.1413 % |
 | Smear | 1.53× | 1.42× | 1.00 |
-| Head-on peak | 0.173 | 0.0400 | 1.00 |
+| Head-on peak | **0.189** | **0.0677** | 1.00 |
 
-Going to depth 22 and relaxing the tip to 0.4 costs **roughly 4× on head-on
-peak**. That is still a sixth of a flat matte panel. Total reflectance rises
-only 4 %, and smear actually improves slightly.
+Going to depth 22 and relaxing the tip to 0.4 costs **2.8× on head-on peak**.
+That is still a fifth of a flat matte panel.
+
+> **Corrected 2026-08-20.** Head-on moved from 0.173 and 0.040 to 0.189 and
+> 0.0677. The rig's pixels were coarser than the tip that makes the peak, so
+> the peak was averaged with the dark around it -- worse for the finer tip,
+> which inflated the gap between the two designs to 4.3×. It is really 2.8×.
+> See `results/FINDINGS_rig_audit_2026_08_20.md`.
+
+Total reflectance rises only 4 %, and smear actually improves slightly.
 
 **It performs better at grazing angles.** At 70° a flat Musou surface brightens
 to 4.27 %; this panel stays at 0.198 %. A gap of 21.6×. That means the corners

@@ -68,6 +68,20 @@ CAND = os.path.join(RESULTS, "form_candidates.json")
 
 SAMPLES = 512
 RES_X, RES_Y = 1400, 620
+# Sampling density in mm per pixel, held FIXED so the instrument does not
+# change with the sample (see the note in run_case). Set to 0 to restore the
+# pre-2026-08-20 behaviour of a constant pixel count, which is what every
+# published number was measured with.
+MM_PER_PX = 0.215
+# NOT A QUALITY KNOB. The rig renders at whatever the protocol density asks
+# for; this only stops a request that would not fit in memory. 6000 was my own
+# render-time budget and it silently coarsened the sampling on any panel over
+# ~590 mm -- the same class of hidden setting as the 40 %-of-sample window and
+# the constant 1400 px it was meant to replace. Correctness first: raise the
+# frame, accept the time. Exceeding this raises rather than degrading.
+RES_CAP = 20000
+ALLOW_COARSE = False
+GAP_EST = 100.0
 # Default probe = the DEPLOYMENT beam (user 2026-08-16: "빔 2mm 쓰지마.
 # 기본을 5-10mm"). 7.5 mm is the midpoint of the expected 5-10 mm at the
 # wall (LaserCube Ultra MK2, 3-6 m throw). Historical numbers were taken
@@ -80,7 +94,16 @@ N_PHASE = 16                     # stripe positions across one pitch
 # sim_server points it at its counter; batch sweeps leave it None.
 PROGRESS_CB = None
 PERIODS_MM = (10.0, 20.0, 40.0)
-NWIN = 361                       # profile window, samples
+# PROFILE WINDOW. This was a fixed SAMPLE COUNT, so its physical length shrank
+# as the sampling got finer -- 361 samples is 77.6 mm at 0.215 mm/px but only
+# 9.0 mm at 0.025. A return 10 mm wide then gets clipped by the very array it
+# is recentred into, and rms collapses onto the core: measured 2.234 -> 1.730
+# -> 1.008 as density went 0.100 -> 0.050 -> 0.025 while head-on (which needs
+# the fine density) held at 0.189. Same defect class as the 40 %-of-sample
+# window and the constant pixel count: a length written as a count.
+# It is now derived per run from the measurement window, so it always holds
+# whatever the window holds. NWIN stays as the floor and the legacy value.
+NWIN = 361                       # floor only; run_case derives the real one
 
 
 # The four statistics live in `form_metrics` so the Mitsuba cross-check scores
@@ -139,7 +162,63 @@ def run_case(entry):
     total_w = ctrl_x0 + p.face_w
     cx, cz = total_w / 2.0, 0.0
     ortho = total_w * 1.02
-    mm_per_px = ortho / RES_X
+    # FIXED SAMPLING DENSITY (2026-08-20). RES_X used to be a constant while
+    # `ortho` tracks the scene, so mm-per-pixel scaled with the sample: 0.15 at
+    # a 50 mm panel, 1.9 at a 1250 mm one. The same instrument sampled 13x
+    # coarser on a bigger sample, which is not an instrument. Hold the density
+    # the study used at its 100 mm panel and let the pixel count follow.
+    # rho_dh survived that (it is an area average) but a WIDTH does not, and
+    # the control stripe stops being resolved: a 7.5 mm beam is 34 px at a
+    # 100 mm panel and 4.9 px at a 1000 mm one.
+    # MM_PER_PX = 0 restores the legacy constant-pixel behaviour exactly.
+    res_x, res_y = RES_X, RES_Y
+    if not MM_PER_PX:
+        # legacy sampling, but never a frame shorter than the face
+        res_y = max(RES_Y, int(round(res_x * (p.face_h * 1.06) / ortho)))
+    if MM_PER_PX:
+        want = int(round(ortho / MM_PER_PX))
+        if want > RES_CAP and not ALLOW_COARSE:
+            # AN INSTRUMENT DOES NOT SILENTLY DEGRADE. RES_CAP is a render-time
+            # budget, not a physical constant, so quietly sampling coarser than
+            # the protocol asks for would hide a rig setting inside a result --
+            # the same defect as the 40 %-of-sample window and the constant
+            # 1400 px this replaced. Refuse, and say what would work.
+            need_face = MM_PER_PX * RES_CAP / (2.04) - GAP_EST / 2.0
+            raise ValueError(
+                "sample too large to measure at the protocol's %.3f mm/px: it "
+                "needs %d px and the budget is %d. Either reduce the sample to "
+                "about %.0f mm (a periodic surface only needs enough cells, "
+                "not the whole wall), or set form_buildable.ALLOW_COARSE = True "
+                "to accept %.3f mm/px -- which dilutes the head-on PEAK and "
+                "must not be quoted."
+                % (MM_PER_PX, want, RES_CAP, max(need_face, 0.0),
+                   ortho / RES_CAP))
+        res_x = max(400, min(RES_CAP, want))
+        # THE FRAME MUST CONTAIN THE FACE. res_y used to be a fixed 0.443 of
+        # res_x, so the frame's height was 0.443 x ortho whatever the panel
+        # was: at face 1000 in a 2104 mm scene that is 951 mm of frame for a
+        # 1000 mm face, and the measurement window ran off the top and bottom
+        # of the image. The control profile came back empty and head-on read
+        # NaN. face 500 sat exactly on the boundary (499 mm of frame), so the
+        # 50-500 mm ladder was one millimetre from silent truncation.
+        # Height now follows the face, with 6 % of air.
+        res_y = max(200, int(round(res_x * (p.face_h * 1.06) / ortho)))
+        if want > RES_CAP:
+            print("   [rig] COARSE, EXPLICITLY ALLOWED: wanted %d px for "
+                  "%.3f mm/px, using %d px at %.3f mm/px -- head-on is not "
+                  "quotable from this run"
+                  % (want, MM_PER_PX, res_x, ortho / res_x), flush=True)
+    mm_per_px = ortho / res_x
+    # profile array long enough to hold the whole measured window (see NWIN)
+    nwin = max(NWIN, int(round(p.face_h / mm_per_px)) | 1)
+    nwin = min(nwin, 60001)
+    # the frame must contain the face, or the window is read off the image
+    _frame_h = ortho * float(res_y) / float(res_x)
+    if p.face_h > _frame_h * 1.0001:
+        raise ValueError(
+            "frame is %.1f mm tall but the face is %.1f mm -- the measurement "
+            "window would run off the image (ortho %.1f, %dx%d px)"
+            % (_frame_h, p.face_h, ortho, res_x, res_y))
     BR.configure_cycles(SAMPLES, True)
     w_panel, w_ctrl = BR.measurement_windows(p, ctrl_x0, None)
     # ADAPTIVE WINDOW (user 2026-08-16: "측정창 키워"). The phase walk spans
@@ -158,16 +237,48 @@ def run_case(entry):
 
     out = {"tag": tag, "topology": entry["topology"],
            "process": entry["process"], "pitch": pitch,
-           "mm_per_px": mm_per_px, "n_phase": N_PHASE, "thetas": {}}
+           "mm_per_px": mm_per_px, "n_phase": N_PHASE,
+           # NEVER omit these again: 15 result files carry a beam
+           # width recoverable only by inverting the control rms.
+           "beam_w_mm": STRIPE_W, "spread_deg": SPREAD_DEG,
+           "res_x": res_x, "res_y": res_y, "samples": SAMPLES,
+           "face_w": p.face_w, "face_h": p.face_h,
+           "rig": "v2" if MM_PER_PX else "legacy", "thetas": {}}
 
     # phases walk exactly one pitch, so the mean is over the full period rather
     # than over three arbitrary draws
     phases = [(-pitch / 2.0) + pitch * i / N_PHASE for i in range(N_PHASE)]
 
+    # WINDOW LADDER (2026-08-20). The legacy window is 40 % of the face, so a
+    # design whose return is wider than that is clipped -- and rms_width divides
+    # by the energy INSIDE the window, so the clipped reading collapses onto the
+    # core instead of merely shrinking. Measured: p10/d90 reads 1.35x through a
+    # 24 mm window, 23.03x through a converged one, off IDENTICAL renders; and
+    # a synthetic return of true rms 17.8 mm reads 0.80 mm through 24 mm, which
+    # is indistinguishable from a design that does not smear at all.
+    #
+    # The renders are unchanged; only the region read off them varies. So the
+    # ladder costs nothing but arithmetic. `rms_mm` becomes the CONVERGED value,
+    # `rms_mm_legacy` keeps the old fixed-window number so published figures stay
+    # reproducible, and `converged` says whether the value may be quoted at all.
+    _h0 = max(w_panel[3] - w_panel[2], pitch + 2.0 * STRIPE_W)
+    LADDER = []
+    _h = _h0
+    while _h < p.face_h * 0.999:
+        LADDER.append(_h)
+        _h *= 2.0
+    LADDER.append(p.face_h)                       # the whole face, the ceiling
+    LEGACY_H = w_panel[3] - w_panel[2]
+
+    def _win(h, x0, x1):
+        return (x0, x1, -h / 2.0, h / 2.0)
+
     for ti, theta in enumerate(THETAS):
         rec = {"per_phase": [], "peak_ratio": [], "rms_mm": []}
-        acc_p = np.zeros(NWIN)
-        acc_c = np.zeros(NWIN)
+        acc_p = np.zeros(nwin)
+        acc_c = np.zeros(nwin)
+        lad_p = {h: np.zeros(nwin) for h in LADDER}
+        lad_c = {h: np.zeros(nwin) for h in LADDER}
         for zi, dz in enumerate(phases):
             # live progress for the interactive server; None for batch sweeps
             if PROGRESS_CB:
@@ -178,7 +289,7 @@ def run_case(entry):
             for o in list(bpy.data.objects):
                 if o.type in ("LIGHT", "CAMERA"):
                     bpy.data.objects.remove(o, do_unlink=True)
-            BR.setup_camera(cx, cz, ortho, RES_X, RES_Y, elev_deg=0.0)
+            BR.setup_camera(cx, cz, ortho, res_x, res_y, elev_deg=0.0)
             px_panel = BR.to_pixel_window(w_panel)
             px_ctrl = BR.to_pixel_window(w_ctrl)
             BR.set_world(0.0)
@@ -187,14 +298,21 @@ def run_case(entry):
             name = "%s__th%+05.1f_p%02d" % (tag, theta, zi)
             exr = os.path.join(OUT, name + ".exr")
             BR.render_to(exr, os.path.join(OUT, name + ".png"))
-            arr = BR.read_exr(exr, RES_X, RES_Y)
-            pp = recentre(z_profile(arr, px_panel), NWIN)
-            pc = recentre(z_profile(arr, px_ctrl), NWIN)
+            arr = BR.read_exr(exr, res_x, res_y)
+            pp = recentre(z_profile(arr, px_panel), nwin)
+            pc = recentre(z_profile(arr, px_ctrl), nwin)
             acc_p += pp
             acc_c += pc
             pk = float(pp.max()) / float(pc.max()) if pc.max() > 0 else float("nan")
             rec["peak_ratio"].append(pk)
             rec["rms_mm"].append(rms_width(pp, mm_per_px))
+            for h in LADDER:                      # same frame, wider readings
+                lad_p[h] += recentre(
+                    z_profile(arr, BR.to_pixel_window(
+                        _win(h, w_panel[0], w_panel[1]))), nwin)
+                lad_c[h] += recentre(
+                    z_profile(arr, BR.to_pixel_window(
+                        _win(h, w_ctrl[0], w_ctrl[1]))), nwin)
             try:
                 os.remove(exr)
             except OSError:
@@ -202,8 +320,51 @@ def run_case(entry):
 
         acc_p /= N_PHASE
         acc_c /= N_PHASE
-        d = {"rms_mm": rms_width(acc_p, mm_per_px),
-             "rms_control_mm": rms_width(acc_c, mm_per_px),
+
+        # walk the ladder outward and stop where two successive windows agree
+        curve = []
+        for h in LADDER:
+            rp = rms_width(lad_p[h], mm_per_px)
+            rc = rms_width(lad_c[h], mm_per_px)
+            curve.append({"window_mm": h, "rms_mm": rp, "rms_control_mm": rc,
+                          "smear": (rp / rc) if rc and rc == rc else None})
+        conv_i, converged = len(curve) - 1, False
+        for i in range(1, len(curve)):
+            a, b = curve[i - 1]["smear"], curve[i]["smear"]
+            if a and b and abs(b - a) / b <= 0.02:
+                conv_i, converged = i, True
+                break
+        best = curve[conv_i]
+
+        # How wide the return actually is, so a caller that did NOT converge
+        # can size the next sample instead of shrugging. z90 is the half-width
+        # holding 90 % of the energy -- robust to a faint tail, unlike rms.
+        # Today's two convergences both needed a window near 6 x z90
+        # (p10/d90: z90 30 mm, converged at 192; p4/d22: z90 10 mm, at 48).
+        _w = lad_p[LADDER[-1]]
+        _tot = _w.sum()
+        if _tot > 1e-20:
+            _z = (np.arange(_w.size) - _w.size / 2.0) * mm_per_px
+            _q = _w / _tot
+            _c = float((_z * _q).sum())
+            _d = np.abs(_z - _c)
+            _o = np.argsort(_d)
+            _cum = np.cumsum(_q[_o])
+            z90 = float(_d[_o][min(int(np.searchsorted(_cum, 0.90)),
+                                   _w.size - 1)])
+        else:
+            z90 = float("nan")
+
+        d = {"rms_mm": best["rms_mm"],
+             "rms_control_mm": best["rms_control_mm"],
+             "converged": converged,
+             "window_mm": best["window_mm"],
+             "window_legacy_mm": LEGACY_H,
+             "z90_mm": z90,
+             "window_needed_mm": (6.0 * z90) if z90 == z90 else None,
+             "window_curve": curve,
+             "rms_mm_legacy": rms_width(acc_p, mm_per_px),
+             "rms_control_legacy_mm": rms_width(acc_c, mm_per_px),
              "peak_ratio_mean": float(np.mean(rec["peak_ratio"])),
              "peak_ratio_sd": float(np.std(rec["peak_ratio"])),
              "peak_ratio_max": float(np.max(rec["peak_ratio"])),

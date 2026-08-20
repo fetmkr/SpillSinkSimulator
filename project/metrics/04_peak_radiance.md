@@ -83,6 +83,65 @@ fine steps and look at the spread of peak_ratio. If it is large, the metric
 needs phase averaging before any 1D number from it is reportable — and the
 striking results above are provisional until then.
 
+
+## MEASUREMENT CONDITIONS (added 2026-08-20 — this axis is the fragile one)
+
+This is a **PEAK**, and that makes it behave unlike the other two axes. An area
+average (metric 01) and a ratio of two widths in one frame (metric 02) both
+survive a coarse pixel, because the coarsening happens to numerator and
+denominator alike. A peak has nothing to cancel against: enlarge the pixel and
+the peak is averaged with the darkness beside it, always downward, on the one
+axis that says whether the audience is dazzled.
+
+Measured, order spec, panel 100 mm:
+
+| density | smear (metric 02) | head-on (this metric) |
+|---|---|---|
+| 0.215 mm/px | 2.238 | 0.1835 |
+| 0.600 | 2.232 | 0.1064 |
+| 1.200 | 2.227 | 0.0821 |
+
+**The peak comes from the smallest observer-facing feature** — a pyramid's tip
+flat, a honeycomb's wall top, a blade's edge — so the density that matters is a
+ratio to THAT, not a global constant:
+
+> **mm per pixel = min feature / 4**
+
+The 4 is measured, not chosen: pixels-across-the-tip was swept 1, 2, 4, 8, 16
+and the answer settled at 4 (0.15024 / 0.16979 / 0.18898 / 0.18907 / 0.18874).
+
+At the old 0.215 mm/px protocol:
+
+| design | min feature | pixels across it | under-resolved by |
+|---|---|---|---|
+| pyramid p4 / tip 0.4 | 0.40 mm | 1.86 | 2.1x |
+| pyramid p4 / tip 0.1 | 0.10 mm | 0.47 | 8.6x |
+| honeycomb 6.5 / wall 0.08 | 0.08 mm | 0.37 | 10.8x |
+| blade 0.1 | 0.10 mm | 0.47 | 8.6x |
+
+Three of those are SUB-PIXEL. **Every published head-on is low, and the finer
+the feature the lower**, which distorts comparisons between designs and not
+just their absolute values:
+
+| design | published | resolved |
+|---|---|---|
+| pyramid tip 0.4 (order spec) | 0.173 | **0.189** |
+| pyramid tip 0.1 (study std) | 0.040 | **0.0677** |
+| the penalty for relaxing the tip | 4.3x | **2.8x** |
+
+**Measure it on a 10-cell patch, not the panel.** A peak is local, and this was
+checked rather than assumed: a 40 mm patch returns 0.18919 against 0.18881 and
+0.18895 from full 100 and 200 mm panels at the same density -- 0.2 %, and 25x
+faster. Resolving a honeycomb wall across a 400 mm panel is 15 000 px and hours
+per row; ten cells of it is minutes.
+
+**Panel size does not matter once the feature is resolved** (0.18881 at 100 mm,
+0.18895 at 200 mm). What looked like a sample-size dependence was the pixel
+coarsening as the scene grew.
+
+**Measure at theta = 0.** It is in the name and it is easy to get wrong; a
+-40 deg peak ratio for the order spec reads 0.0466 against 0.189 head-on.
+
 ## What it does NOT capture
 
 - **One viewing direction at a time.** peak_ratio is measured from the camera

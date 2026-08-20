@@ -1,5 +1,36 @@
 # Phase 5.5 — the probe beam width was an assumption; sweeping it changes the story's shape but not its verdict
 
+> ## VERDICT WITHDRAWN 2026-08-20 — THE TABLE BELOW IS CLIPPED
+>
+> Every smear in this file was measured on a 60 mm panel, whose measurement
+> window was 24 mm. `rms_width` normalises by the energy INSIDE the window, so
+> light past the edge leaves numerator and denominator alike and the reading
+> collapses onto the core instead of merely shrinking. Re-measured with the
+> window opened until it converges, off the same designs and beams:
+>
+> | design | beam | published here | converged | ratio |
+> |---|---|---|---|---|
+> | p02/d18 | 2 | 4.104 | 5.226 | 1.27x |
+> | p02/d18 | 10 | 1.040 | 1.463 | 1.41x |
+> | p55/d50 | 2 | 4.159 | **14.220** | 3.42x |
+> | p55/d50 | 10 | 1.075 | 3.123 | 2.91x |
+> | p10/d90 | 2 | **1.272** | **24.766** | **19.5x** |
+> | p10/d90 | 10 | 0.655 | 5.184 | 7.91x |
+>
+> **The order inverts.** This file concluded "coarse pitch is not rehabilitated
+> by a big beam" and rejected pitch 10 on a smear of 1.272. With converged
+> windows the order is p10 > p55 > p02 at EVERY beam width — the reverse — and
+> pitch 10 leads by 3.5x at the deployment beam.
+>
+> Point 2 below ("Coarse pitch is not rehabilitated by a big beam") is
+> withdrawn. Points 1 and 3 survive: the ratio still compresses as the beam
+> widens, and head-on and span still do not see the beam.
+>
+> Reproduce: `Blender --background --factory-startup --python
+> scripts/redo_phase55.py`. Full account in
+> `results/FINDINGS_rig_audit_2026_08_20.md`.
+
+
 2026-08-16. Data: `form_phase55.json` (6 runs, full-fidelity form protocol at
 stripe widths 5 and 10 mm) + width-2 anchors from `form_pyr.json` /
 `form_phase5.json` / `form_phase54.json`. Predictions pre-registered in

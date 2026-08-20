@@ -138,6 +138,15 @@ details.why p{margin:.4em 0 0}
   color:var(--a);letter-spacing:.1em;opacity:0;transition:opacity .15s}
 #busy.on{opacity:1}
 .match{border:1px solid var(--line2);border-radius:4px;padding:9px;background:var(--sunk)}
+#rigbox{margin-top:8px;border:1px solid var(--line2);border-radius:4px;background:var(--sunk)}
+.righ{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;
+  font:600 10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink);user-select:none}
+.righ .caret{margin-left:auto;opacity:.6}
+.rigb{padding:0 9px 9px}
+.rigb .kv{margin:0}
+.rigw{margin:8px 0 0;padding:0 0 0 16px;font-size:10.5px;line-height:1.5;color:var(--a)}
+.rigw li{margin:3px 0}
 .match .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;
   margin-bottom:6px}
 .match .nm{font:600 11.5px/1.3 ui-monospace,Menlo,monospace}
@@ -239,6 +248,7 @@ details.why p{margin:.4em 0 0}
 
   <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
   <dl class="kv" id="derived"></dl>
+  <div id="rigbox"></div>
 
   <h2>Against the study</h2>
   <div class="match" id="match"><span class="note">adjust a parameter&hellip;</span></div>
@@ -253,6 +263,17 @@ details.why p{margin:.4em 0 0}
   <div class="row"><label for="beamw">beam width at wall, mm</label>
    <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
     style="width:5.5em"></div>
+  <!-- SAMPLING DENSITY IS A CONTROL, NOT A CONSTANT (2026-08-20). It used to
+       be a hidden res_x = 1400, which made the instrument coarser as the
+       sample grew; replacing it with a hidden cap repeated the same mistake.
+       Speed is a real concern, so it belongs to the user: the protocol value
+       is the default, anything coarser is labelled draft. -->
+  <div class="row"><label for="mmpx" style="flex:1">measure density
+    <span class="note">mm per pixel &mdash; 0.215 is the protocol; larger is
+    faster and NOT quotable</span></label>
+   <input type="number" id="mmpx" value="0.215" min="0.02" max="4" step="0.005"
+    style="width:5.5em"></div>
+  <div class="note" id="mmpxcost" style="margin:-4px 0 6px">&nbsp;</div>
   <button class="go" id="m5"><span class="lb">Render &middot; total
     <small>5 angles &times; 3 planes (&phi; 0/45/90)</small></span>
     <span class="t">~6 s</span></button>
@@ -321,7 +342,10 @@ details.why p{margin:.4em 0 0}
    ray's exact color and size &mdash; only the gaps widen as energy falls
    (each bounce keeps only &rho;) &middot; bars = bounce histogram, all
    angles together</p>
-  <p class="note">per angle: <b>absorbed</b> = how
+  <p class="note">per angle &mdash; note the DENOMINATORS differ: <b>absorbed</b> and <b>out</b>
+   are shares of the INCIDENT beam, <b>wander</b> and <b>retro</b> are shares of
+   what ESCAPES. When almost nothing escapes the last two are printed as
+   &mdash;, because 100 % of nothing reads as 100 %. <b>absorbed</b> = how
    much of the entering light the wall destroys; <b>out</b> = the sliver that
    returns (&rarr; 반사 총량); <b>wander</b> = the share of that sliver
    re-emerging more than half a beam width from where it entered (&rarr; 모양
@@ -546,6 +570,64 @@ function refresh(){
   }, 40);
 }
 
+// ---------- rig readout: can this model even be measured?
+// Every defect found on 2026-08-20 was invisible until after a render -- a
+// window that was 40 % of the sample, pixels that coarsened as the sample grew,
+// a beam that stopped being resolved, a sample with too few cells. These are
+// all arithmetic on the scene that is already built, so they can be shown
+// BEFORE the button is pressed. Collapsed by default; the state sticks.
+let RIG_OPEN = localStorage.getItem('rigOpen') === '1';
+function showRig(r, err){
+  const host = $('#rigbox');
+  if(!host) return;
+  if(err || !r){
+    host.innerHTML = `<div class="righ">rig <span class="note">${err||'—'}</span></div>`;
+    return;
+  }
+  const warn = r.warnings || [];
+  const badge = warn.length
+    ? `<span class="pill no">${warn.length} warning${warn.length>1?'s':''}</span>`
+    : '<span class="pill ok">READY</span>';
+  const f2 = x => x==null ? '—' : (+x).toFixed(2);
+  const f0 = x => x==null ? '—' : Math.round(+x).toLocaleString();
+  const rows = [
+    ['sampling', `${f2(r.mm_per_px)} mm/px · ${f0(r.res_x)} px wide`
+       + (r.res_capped ? ' <b style="color:var(--a)">CAPPED</b>' : '')],
+    ['beam on film', `${f2(r.beam_mm)} mm = ${f2(r.beam_px)} px`],
+    ['cells across', `${f2(r.cells_across)}`],
+    ['triangles', f0(r.tris)],
+    ['sample face', `${f0(r.face_mm)} mm · margin ${f0(r.margin_mm)} mm`],
+    ['window', `up to ${f0(r.window_max_mm)} mm (opened until it converges)`],
+    ['control plate', `x ${f0(r.control_x0_mm)} mm · field reaches ${f0(r.field_reaches_mm)} mm · `
+       + (r.control_clear ? 'clear' : 'overlapped')],
+  ];
+  host.innerHTML =
+    `<div class="righ" id="rigtog">rig ${badge}<span class="caret">${RIG_OPEN?'▾':'▸'}</span></div>`
+    + `<div class="rigb" style="display:${RIG_OPEN?'block':'none'}">`
+    + `<dl class="kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`
+    + (warn.length ? `<ul class="rigw">${warn.map(w=>`<li>${w}</li>`).join('')}</ul>` : '')
+    + `</div>`;
+  $('#rigtog').onclick = () => {
+    RIG_OPEN = !RIG_OPEN; localStorage.setItem('rigOpen', RIG_OPEN?'1':'0');
+    host.querySelector('.rigb').style.display = RIG_OPEN ? 'block' : 'none';
+    host.querySelector('.caret').textContent = RIG_OPEN ? '▾' : '▸';
+  };
+}
+
+// what the chosen density costs, live, so speed is a decision and not a surprise
+function showCost(r){
+  const el = $('#mmpxcost'); if(!el) return;
+  const mmpx = parseFloat($('#mmpx').value) || 0.215;
+  if(!r || !r.ortho_mm){ el.innerHTML = '&nbsp;'; return; }
+  const rx = Math.round(r.ortho_mm / mmpx);
+  const ry = Math.max(200, Math.round(rx * (r.face_mm * 1.06) / r.ortho_mm));
+  const mp = rx * ry / 1e6;
+  const over = rx > (r.res_limit || 20000);
+  el.innerHTML = `${rx.toLocaleString()} × ${ry.toLocaleString()} px · ${mp.toFixed(1)} Mpx per frame`
+    + (over ? ' <b style="color:var(--a)">— above the memory ceiling, will be refused</b>' : '')
+    + (mmpx > 0.215*1.01 ? ' <b style="color:var(--a)">— draft density</b>' : '');
+}
+
 function showDerived(d){
   const rows = [
     ['aspect ratio', d.aspect ? d.aspect.toFixed(2) : '—'],
@@ -560,6 +642,8 @@ function showDerived(d){
                    : '<span class="pill no">BELOW FLOOR</span>');
   $('#derived').innerHTML = rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')
     + `<div><dt>${d.buildable_note||''}</dt><dd>${pill}</dd></div>`;
+  showRig(d.rig, d.rig_error);
+  showCost(d.rig);
   $('#hud').textContent = `${$('#top').value}${LAST.floor!=='none' ? ' + '+LAST.floor : ''} · `
     + `${LAST.depth} mm · drag to orbit, scroll to zoom`;
 }
@@ -782,11 +866,29 @@ function buildOverlay(thetas){
   // needed. Green means the ray got back out, red means it was absorbed; the
   // segment brightens with depth so a ray still rattling at bounce ten reads
   // differently from one that left immediately.
-  // a small red X in 3D: where a ray died
-  const mark = p => { const r = 0.9, RED = [0.95, 0.22, 0.18];
+  // MARKER SIZE FOLLOWS THE SCENE, not a fixed millimetre. It used to be
+  // r = 0.9 mm, which is a length written as a constant: invisible on a 1000 mm
+  // panel and covering the model on a 10 mm one. Same defect class as the
+  // measurement window and the fixed pixel count. RAD is the model's own
+  // half-extent, so this reads the same at any size.
+  const MR = () => Math.max(RAD * 0.012, 1e-4);
+
+  // a red X where a ray DIED
+  const mark = p => { const r = MR() * 1.6, RED = [0.95, 0.22, 0.18];
     push([p[0]-r,p[1],p[2]], [p[0]+r,p[1],p[2]], RED, 1.3);
     push([p[0],p[1]-r,p[2]], [p[0],p[1]+r,p[2]], RED, 1.3);
     push([p[0],p[1],p[2]-r], [p[0],p[1],p[2]+r], RED, 1.3);
+  };
+
+  // A TICK WHERE A RAY HIT AND BOUNCED. Until now only the death point was
+  // marked, so a path read as one bent line and you could not see where it
+  // struck -- which is the whole mechanism the trace exists to show. Each hit
+  // gets a small cross in the ray's own colour, shrinking with the energy
+  // still left, so a first strike reads heavier than a tenth.
+  const hit = (p, col, e) => {
+    const r = MR() * Math.max(0.35, Math.pow(e, 0.2));
+    push([p[0]-r,p[1],p[2]], [p[0]+r,p[1],p[2]], col, 1.1);
+    push([p[0],p[1]-r,p[2]], [p[0],p[1]+r,p[2]], col, 1.1);
   };
   if(RAYS && RAYS.angles){
     for(const j of RAYS.angles){
@@ -813,9 +915,16 @@ function buildOverlay(thetas){
           } else {
             dashPush(A, B, base, Math.max(0.08, Math.pow(e, 0.15)));
           }
+          // the strike that starts the NEXT segment: i > 0 means A is a hit
+          // on the structure rather than the ray's entry point
+          if(i > 0) hit(A, base, e);
         }
         // bounce budget spent while still above threshold: dead all the same
         if(!out && !died) mark([P[(n-1)*3], P[(n-1)*3+1], P[(n-1)*3+2]]);
+        // the last strike before a surviving ray leaves the panel
+        if(out && !died && n >= 3)
+          hit([P[(n-2)*3], P[(n-2)*3+1], P[(n-2)*3+2]], base,
+              Math.pow(rho, n-2));
       }
     }
   }
@@ -862,7 +971,17 @@ function traceAxes(j, phi, beam_w){
     if(Math.hypot(P[(n-2)*3]-P[3], P[(n-2)*3+2]-P[5]) > far) wFar += w;
     wOut += w;
   }
-  return { retro: wOut ? wRetro/wOut : 0, wander: wOut ? wFar/wOut : 0 };
+  // wander and retro are shares OF THE ESCAPING ENERGY, not of the incident
+  // beam, and that reads badly when almost nothing escapes: the d500 report's
+  // theta 0 row showed "out 4.1e-31, wander 95.1 %, retro 100.0 %", which is
+  // arithmetically right and invites the reading "all the light comes straight
+  // back". It is 100 % of nothing. Below a millionth of the incident beam the
+  // ratios are reported as null and the UI prints a dash.
+  const NEG = wOut < 1e-6;
+  return { retro: (!wOut || NEG) ? null : wRetro/wOut,
+           wander: (!wOut || NEG) ? null : wFar/wOut,
+           out_frac: wOut / Math.max(j.paths.length, 1),
+           negligible: NEG };
 }
 
 const VAO = gl.createVertexArray(), VBO = gl.createBuffer();
@@ -1089,9 +1208,10 @@ addEventListener('resize', draw);
     try{
       const R = $('#renderer').value;
       const BW = parseFloat($('#beamw').value) || 7.5;
+      const MMPX = parseFloat($('#mmpx').value) || 0.215;
       const r = await fetch('/api/form', {method:'POST',
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
-                              beam_w: BW, renderer: R,
+                              beam_w: BW, mm_per_px: MMPX, renderer: R,
                               phis: R === 'cycles' ? [0, 45, 90] : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
@@ -1117,10 +1237,40 @@ addEventListener('resize', draw);
         const P = j.planes || null;
         const planeRows = P ? Object.entries(P).map(([p, d]) =>
           `<div><dt>&phi; ${p}&deg;</dt><dd>smear ${d.smear!=null?d.smear.toFixed(2)+'\u00d7':'\u2014'} &middot; head-on ${d.peak!=null?(+d.peak).toFixed(4):'\u2014'}</dd></div>`).join('') : '';
+        // CONVERGENCE IS PART OF THE READING, NOT A FOOTNOTE (2026-08-20).
+        // The smear window used to be 40 % of the panel, so a design whose
+        // return is wider than that read low -- and because rms divides by the
+        // energy INSIDE the window, it did not read a bit low, it collapsed
+        // onto the core. A published 1.272 turned out to be 24.8. The server
+        // now opens the window until two readings agree; when the panel is too
+        // small to contain the return the ladder runs out at the face and the
+        // value is a LOWER BOUND. Say so on the face of the readout.
+        const conv = j.converged;
+        const bound = conv === false;
+        const smearTxt = j.smear!=null
+          ? (bound ? '&ge; ' : '') + j.smear.toFixed(2) + '\u00d7' : '\u2014';
+              const draft = j.draft_density;
+        const densRow = j.mm_per_px == null ? '' :
+          `<div><dt>density</dt><dd>${(+j.mm_per_px).toFixed(3)} mm/px${
+             draft ? ' <b style="color:var(--a)">DRAFT — coarser than the '
+                     + (+j.protocol_mm_per_px).toFixed(3)
+                     + ' protocol; head-on dilutes, do not quote</b>' : ''}</dd></div>`;
+  const grew = j.sample_face_mm && j.requested_face_mm
+                     && j.sample_face_mm > j.requested_face_mm * 1.01;
+        const convRow = (conv == null ? '' :
+          `<div><dt>window</dt><dd>${j.window_mm?j.window_mm.toFixed(0)+' mm':'\u2014'}${
+             j.face_mm?' of a '+j.face_mm.toFixed(0)+' mm sample':''} &middot; ${
+             conv ? 'converged'
+                  : '<b style="color:var(--a)">NOT converged \u2014 lower bound</b>'}</dd></div>`)
+          + (grew ? `<div><dt>sample grown</dt><dd>${(+j.requested_face_mm).toFixed(0)} \u2192 ${(+j.sample_face_mm).toFixed(0)} mm &middot; the return was wider than the panel could hold. A wall is many tiles butted together, so a wider sample measures the same design more faithfully.</dd></div>` : '');
+        // The pre-2026-08-20 fixed-window value still ships in the API response
+        // as `smear_legacy`, because re-auditing the published reports needs
+        // it. It is deliberately NOT shown here: it is known wrong, and a wrong
+        // number on a working instrument gets used.
         $('#formout').innerHTML =
-          `<div><dt>smear${P?' (worst of '+Object.keys(P).length+' planes)':''}</dt><dd>${j.smear!=null?j.smear.toFixed(2)+'\u00d7':'\u2014'}</dd></div>
+          `<div><dt>smear${P?' (worst of '+Object.keys(P).length+' planes)':''}</dt><dd>${smearTxt}</dd></div>
            <div><dt>head-on brightness${P?' (worst)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
-          + planeRows +
+          + densRow + convRow + planeRows +
           `<div><dt>renderer</dt><dd>${who}</dd></div>
            <div><dt>beam</dt><dd>${(j.beam_w||BW).toFixed(1)} mm</dd></div>
            <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases${P?' \u00d7 '+Object.keys(P).length+' planes':''}</dd></div>`;
@@ -1228,7 +1378,7 @@ addEventListener('resize', draw);
           return `<div><dt><label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer">
             <input type="checkbox" checked data-th="${s.theta}" style="accent-color:${thc(s.theta)[2]};margin:0">
             <span style="color:${thc(s.theta)[2]};font-weight:600">${s.theta}&deg;</span></label></dt>
-            <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${(100*ax.wander).toFixed(1)} % &middot; retro ${(100*ax.retro).toFixed(1)} %</dd></div>`;
+            <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
         }).join('') +
         `<div><dt><b>worst of 5 sampled angles</b></dt><dd><b>${fmt(worst)}</b></dd></div>
          <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${$('#coat').value} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>

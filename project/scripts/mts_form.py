@@ -49,10 +49,16 @@ import numpy as np
 
 from form_metrics import z_profile, recentre, rms_width, mtf_at
 
-# Held identical to `blender_render` / `form_buildable`, and read from there
-# where possible rather than copied, so the two cannot drift apart.
+# COPIES, and the comment that used to sit here claimed they were "read from
+# there rather than copied, so the two cannot drift apart". They are copies and
+# they DID drift: STRIPE_W was 2.0 here against 7.5 in form_buildable, so any
+# cross-check that did not pass a beam compared two different experiments --
+# the flat control returns beam/sqrt(12), so the smear denominator was 3.75x
+# apart. mts_worker now overwrites every one of these from the request; the
+# values below are only what a bare `python mts_form.py` would use.
 GAP = 100.0                  # x gap between panel and flat control
-STRIPE_W = 2.0               # mm
+STRIPE_W = 7.5               # mm -- the deployment beam, as form_buildable
+MM_PER_PX = 0.0              # 0 = legacy fixed pixel count; set from request
 RES_X, RES_Y = 1400, 620
 NWIN = 361
 MEAS_INSET_X = 0.20
@@ -60,6 +66,24 @@ MEAS_INSET_Z = 0.30
 RHO_CONTROL = 0.05           # the matte black wall the ratio is against
 SLIT_Y = 10.0                # height of the slit above the face plane, mm
 EYE_Y = 500.0                # orthographic eye height; near_clip hides the slit
+
+
+def _res_x(face_w):
+    """Pixel count follows the scene when a density is set, so mm-per-pixel
+    does not drift with the sample -- the same repair form_buildable got."""
+    if not MM_PER_PX:
+        return RES_X
+    ortho = (2.0 * face_w + GAP) * 1.02
+    return max(400, min(20000, int(round(ortho / MM_PER_PX))))
+
+
+def _res_y(face_w, face_h):
+    """The frame must contain the face; a fixed aspect ran the window off the
+    image above ~500 mm."""
+    if not MM_PER_PX:
+        return RES_Y
+    ortho = (2.0 * face_w + GAP) * 1.02
+    return max(200, int(round(_res_x(face_w) * (face_h * 1.06) / ortho)))
 
 
 def _blocker(mi, cx, z0, z1, slit_y):
@@ -161,7 +185,8 @@ def scene_dict(mi, ply, rho, face_w, face_h, theta_deg, target_z, spp):
             "near_clip": EYE_Y - SLIT_Y + 5.0,
             "far_clip": EYE_Y * 4.0,
             "sampler": {"type": "independent", "sample_count": spp},
-            "film": {"type": "hdrfilm", "width": RES_X, "height": RES_Y,
+            "film": {"type": "hdrfilm", "width": _res_x(face_w),
+                     "height": _res_y(face_w, face_h),
                      "pixel_format": "rgb", "rfilter": {"type": "box"}},
         },
         "panel": {"type": "ply", "filename": ply, "bsdf": mat},

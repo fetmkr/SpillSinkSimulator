@@ -122,9 +122,13 @@ def in_blender(op, **req):
                   req.get("paint_fade", 0.0), req.get("phis")),
               "lambert": lambda: measure_lambert(
                   req["spec"], req["theta"], req["rho"], req["samples"]),
+              # every knob the request carries must reach form(); dropping one
+              # here is invisible -- the density control silently did nothing
+              # until this was found, because the response echoed the default
               "form": lambda: form(req["spec"], req.get("thetas"),
                                    req.get("n_phase"), req.get("samples"),
-                                   req.get("beam_w"), req.get("phis")),
+                                   req.get("beam_w"), req.get("phis"),
+                                   req.get("mm_per_px")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -401,6 +405,14 @@ def _fit(mod, cname, kw):
 
 # a family that cannot take a margin cannot be measured at +-40 deg: the
 # camera sees past the panel edge and reads the world, not the design
+# ONE BEAM DEFAULT FOR BOTH RENDERERS. Until 2026-08-20 the Cycles form path
+# defaulted to 7.5 mm and the Mitsuba one to 2.0 mm, so a cross-check with no
+# explicit beam compared two different experiments: the flat control's own
+# return is beam/sqrt(12), so smear divides by a denominator 3.75x apart and
+# head-on scales with the deposited line power. Any "renderer disagreement" on
+# the two form axes was that, not transport.
+BEAM_DEFAULT_MM = 7.5
+
 NEEDS_MARGIN = "margin_depths"
 
 # request-scoped: which envelope keys a family could not accept, keyed by the
@@ -792,6 +804,120 @@ def derived(p, verts, spec):
         d.setdefault("aspect", depth / pitch)
         d["pitch"] = pitch
     d["verts"] = len(verts)
+
+    # ---- RIG READOUT (2026-08-20) -------------------------------------
+    # Everything below is arithmetic on the scene the user has already built,
+    # so it costs nothing and updates live as a slider moves. It exists because
+    # every measurement defect found today was invisible until after a render:
+    # a window that was 40 % of the sample, pixels that coarsened as the sample
+    # grew, a beam that stopped being resolved, a sample with too few cells.
+    # The point is to see whether a measurement is worth starting.
+    try:
+        import form_buildable as _FB
+        import blender_render as _BR
+        face = float(getattr(p, "face_w", spec.get("panel", 100.0)) or 100.0)
+        margin = 0.0
+        try:
+            margin = float(p.margin())
+        except Exception:
+            pass
+        gap = float(_BR.GAP)
+        ctrl_x0 = face + gap
+        total_w = ctrl_x0 + face
+        ortho = total_w * 1.02
+        res_x = _FB.RES_X
+        capped = False
+        if getattr(_FB, "MM_PER_PX", 0):
+            want = int(round(ortho / _FB.MM_PER_PX))
+            res_x = max(400, min(_FB.RES_CAP, want))
+            capped = want > _FB.RES_CAP
+        mmpx = ortho / res_x
+        beam = float(_FB.STRIPE_W)
+        rig = {
+            "mm_per_px": mmpx,
+            "res_x": res_x,
+            "res_capped": capped,
+            "ortho_mm": ortho,
+            "res_limit": _FB.RES_CAP,
+            "megapixels": (res_x * max(200, int(round(
+                res_x * (face * 1.06) / ortho)))) / 1e6,
+            "beam_mm": beam,
+            "beam_px": beam / mmpx if mmpx else None,
+            "tris": max(len(verts) // 3, 0),
+            "cells_across": (face / pitch) if pitch else None,
+            "face_mm": face,
+            "margin_mm": margin,
+            "field_reaches_mm": face + margin,
+            "control_x0_mm": ctrl_x0,
+            "control_clear": (face + margin) < ctrl_x0,
+            "window_max_mm": face,          # the ladder can open to the face
+            "window_legacy_mm": face * (1.0 - 2.0 * _BR.MEAS_INSET_Z),
+        }
+        # verdicts, each traceable to a measurement made today
+        w = []
+        if rig["beam_px"] is not None and rig["beam_px"] < 10:
+            w.append("beam is %.1f px wide — the flat control stops being "
+                     "resolved below ~10 px" % rig["beam_px"])
+        if rig["cells_across"] is not None and rig["cells_across"] < 25:
+            w.append("%.0f cells across — rho_dh was still falling at 50 cells "
+                     "(GATE 11); under 25 reads high"
+                     % rig["cells_across"])
+        if capped:
+            w.append("pixel budget capped: sampling %.3f mm/px instead of "
+                     "%.3f — a width metric will read low"
+                     % (mmpx, _FB.MM_PER_PX))
+        if not rig["control_clear"]:
+            w.append("panel field reaches x=%.0f but the control starts at "
+                     "x=%.0f — harmless for pyramids (they expose ~0 %% at "
+                     "y=0) but not for wall families"
+                     % (rig["field_reaches_mm"], ctrl_x0))
+        rig["warnings"] = w
+
+        # EVERY LIMIT THAT CAN CHANGE AN ANSWER, AND WHETHER IT BINDS NOW.
+        # Three defects found on 2026-08-20 were all the same shape: a number
+        # inside the rig that silently altered the result and was known only to
+        # whoever wrote it (window = 40 % of the sample, res_x = 1400 constant,
+        # and then my own RES_CAP replacing the second one). An instrument does
+        # not get to have private settings. They are listed here, live, with a
+        # "binding" flag, so a limit can never again be discovered afterwards.
+        want_px = int(round(ortho / _FB.MM_PER_PX)) if getattr(
+            _FB, "MM_PER_PX", 0) else _FB.RES_X
+        rig["limits"] = [
+            {"name": "pixel budget", "value": "%d px (memory ceiling)"
+                                % _FB.RES_CAP,
+             "binding": bool(capped),
+             "needs": "%d px" % want_px,
+             "effect": "the frame is rendered at whatever the protocol asks "
+                       "for; this ceiling only stops a request that will not "
+                       "fit in memory, and raises rather than coarsening"},
+            {"name": "light bounces", "value": "%d" % 128,
+             "binding": False,
+             "needs": "3 at coating rho 1 %, 917 at rho 0.99",
+             "effect": "a rho=1 cavity reads 0.467 at 8 bounces and 0.9999 at "
+                       "512 (GATE 13); at the real 1 % coating three suffice"},
+            {"name": "profile array",
+             "value": "%.0f mm (follows the window)" % face,
+             "binding": False,
+             "needs": "at least the return's full width",
+             "effect": "was a fixed 361 SAMPLES, so its length shrank with the "
+                       "sampling: 77.6 mm at 0.215 mm/px but 9.0 mm at 0.025, "
+                       "which clipped a 10 mm return and collapsed smear from "
+                       "2.234 to 1.008. Now derived from the face."},
+            {"name": "measurement window", "value": "opens to the face",
+             "binding": False,
+             "needs": "about 6x the return's 90 %% half-width",
+             "effect": "was a fixed 40 % of the sample until 2026-08-20, which "
+                       "under-read a wide return by up to 18x"},
+            {"name": "phase steps", "value": "set per request",
+             "binding": False,
+             "needs": "16 for a published figure, 6-8 for a look",
+             "effect": "the stripe walks one pitch; too few samples one phase"},
+        ]
+        rig["any_limit_binding"] = any(x["binding"] for x in rig["limits"])
+        d["rig"] = rig
+    except Exception as _e:
+        d["rig_error"] = repr(_e)[:200]
+    # -------------------------------------------------------------------
     dropped = DROPPED.pop(id(p), [])
     if NEEDS_MARGIN in dropped:
         d["measure_ok"] = False
@@ -1026,7 +1152,7 @@ def _render_params(spec):
 # --- form destruction and head-on brightness --------------------------------
 
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
-         phis=None):
+         phis=None, mm_per_px=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1062,11 +1188,18 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # beam/pitch, so this is a first-class knob, not a protocol constant. The
     # default stays the historical 2.0 so old numbers keep reproducing.
     phis = [float(x) for x in (phis or [0.0])]
-    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W)
+    # Sampling density is the caller's choice now, not a hidden constant.
+    # The protocol value is FB.MM_PER_PX; anything coarser is a draft and
+    # the response says so, because a PEAK statistic dilutes with pixel
+    # size even where an area average does not.
+    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX)
+    PROTOCOL_MMPX = FB.MM_PER_PX
+    if mm_per_px:
+        FB.MM_PER_PX = float(mm_per_px)
     FB.N_PHASE = int(n_phase or 6)
     FB.THETAS = tuple(thetas or (-40.0, 40.0, 0.0))
     FB.SAMPLES = int(samples or 256)
-    FB.STRIPE_W = float(beam_w or 7.5)
+    FB.STRIPE_W = float(beam_w or BEAM_DEFAULT_MM)
     n_frames = FB.N_PHASE * len(FB.THETAS)
     planes = {}
     try:
@@ -1087,24 +1220,65 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
             rec = FB.run_case(e2)
             t = rec.get("thetas", {})
             a, b = t.get("-40"), t.get("+40")
+            # CONVERGENCE TRAVELS WITH THE NUMBER (2026-08-20). run_case now
+            # reads each frame through a ladder of windows and stops where two
+            # agree. When the return is wider than the panel can hold, the
+            # ladder runs out at the face and the value is a LOWER BOUND, not a
+            # measurement -- p10/d90 reads 16.5 on a 100 mm panel and 24.9 on a
+            # 200 mm one, and only the second has converged. Handing over the
+            # bare number is how a 1.272 got published for a design that is
+            # really 24.8, so the flag ships with it.
+            conv = [x.get("converged") for x in (a, b) if x]
+            wins = [x.get("window_mm") for x in (a, b)
+                    if x and x.get("window_mm")]
+            need = [x.get("window_needed_mm") for x in (a, b)
+                    if x and x.get("window_needed_mm")]
             planes["%g" % phi] = {
                 "smear": (0.5 * (a["rms_mm"] / a["rms_control_mm"]
                                  + b["rms_mm"] / b["rms_control_mm"])
                           if a and b else None),
-                "peak": (t.get("+0") or {}).get("peak_ratio_mean")}
+                "peak": (t.get("+0") or {}).get("peak_ratio_mean"),
+                "converged": (all(conv) if conv else None),
+                "window_mm": (max(wins) if wins else None),
+                "window_needed_mm": (max(need) if need else None),
+                "face_mm": rec.get("face_h"),
+                "smear_legacy": (0.5 * (a["rms_mm_legacy"]
+                                        / a["rms_control_legacy_mm"]
+                                        + b["rms_mm_legacy"]
+                                        / b["rms_control_legacy_mm"])
+                                 if a and b and a.get("rms_mm_legacy") else None)}
     finally:
-        FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W = old
+        (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W,
+         FB.MM_PER_PX) = old
         _prog(len(phis) * n_frames, len(phis) * n_frames)
     # the dashboard reports the WORST plane: smear-up is good so worst is the
     # lowest; head-on-down is good so worst is the highest
     sm = [p["smear"] for p in planes.values() if p["smear"] is not None]
     pk = [p["peak"] for p in planes.values() if p["peak"] is not None]
+    cv = [p.get("converged") for p in planes.values()
+          if p.get("converged") is not None]
+    wn = [p["window_mm"] for p in planes.values() if p.get("window_mm")]
+    nd = [p["window_needed_mm"] for p in planes.values()
+          if p.get("window_needed_mm")]
+    fc = [p["face_mm"] for p in planes.values() if p.get("face_mm")]
+    sl = [p["smear_legacy"] for p in planes.values()
+          if p.get("smear_legacy") is not None]
     return {"smear": min(sm) if sm else None,
             "peak": max(pk) if pk else None,
             "planes": planes,
+            # a smear the panel was too small to contain is a LOWER BOUND
+            "converged": (all(cv) if cv else None),
+            "window_mm": (max(wn) if wn else None),
+            "window_needed_mm": (max(nd) if nd else None),
+            "face_mm": (max(fc) if fc else None),
+            "smear_legacy": (min(sl) if sl else None),
             "n_phase": int(n_phase or 6),
             "samples": int(samples or 256),
-            "beam_w": float(beam_w or 7.5), "reduced": True}
+            "beam_w": float(beam_w or BEAM_DEFAULT_MM), "reduced": True,
+            "mm_per_px": float(mm_per_px or PROTOCOL_MMPX),
+            "protocol_mm_per_px": PROTOCOL_MMPX,
+            "draft_density": bool(mm_per_px
+                                  and float(mm_per_px) > PROTOCOL_MMPX * 1.01)}
 
 
 def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
@@ -1128,17 +1302,22 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
              "process": min_feature(spec)[1] or "unknown",
              "params": prm, "pitch": pitch, "rho": float(rho),
              "rho_control": 0.05}
-    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W)
+    # Sampling density is the caller's choice now, not a hidden constant.
+    # The protocol value is FB.MM_PER_PX; anything coarser is a draft and
+    # the response says so, because a PEAK statistic dilutes with pixel
+    # size even where an area average does not.
+    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX)
     FB.N_PHASE = int(n_phase)
     FB.THETAS = tuple(thetas)
     FB.SAMPLES = int(samples)
-    FB.STRIPE_W = float(beam_w or 7.5)
+    FB.STRIPE_W = float(beam_w or BEAM_DEFAULT_MM)
     FB.PROGRESS_CB = _prog
     _prog(0, FB.N_PHASE * len(FB.THETAS))
     try:
         rec = FB.run_case(entry)
     finally:
-        FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W = old
+        (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W,
+         FB.MM_PER_PX) = old
     t = rec.get("thetas", {})
     a, b, z = t.get("-40"), t.get("+40"), t.get("+0")
     return {"smear": (0.5 * (a["rms_mm"] / a["rms_control_mm"]
@@ -1148,14 +1327,44 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
             "thetas": t}
 
 
-def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None):
+def FB_MMPX():
+    import form_buildable as _FB
+    return _FB.MM_PER_PX or 0.215
+
+
+def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None,
+                 mm_per_px=None):
     """The same, in Mitsuba, as a subprocess."""
     return _mts(dict(_mts_req(spec, rho=rho), op="form",
                      pitch=(spec.get("top_params") or {}).get("pitch")
                      or (spec.get("top_params") or {}).get("pitch_mean")
                      or 6.5,
                      n_phase=int(n_phase), spp=int(spp),
-                     beam_w=float(beam_w or 2.0)))
+                     beam_w=float(beam_w or BEAM_DEFAULT_MM),
+                     mm_per_px=float(mm_per_px or FB_MMPX()),
+                     full_face_window=True))
+
+
+# WHERE THE MITSUBA INTERPRETER LIVES. This used to be a hard-coded path into
+# an agent session's scratchpad under /private/tmp. macOS prunes /tmp by access
+# time, and on 2026-08-20 it took `pyvenv.cfg` and every `__init__.py` inside
+# site-packages/mitsuba while leaving the directory standing -- so the
+# existence check passed and every cross-check render died on
+# `ModuleNotFoundError: No module named 'mitsuba'`. The venv now lives in the
+# user's home, which nothing prunes. First existing candidate wins; MTS_PYTHON
+# still overrides.
+def _mts_python():
+    cands = [os.environ.get("MTS_PYTHON"),
+             os.path.expanduser("~/.spillsink/mts_env/bin/python"),
+             os.path.join("/private/tmp/claude-501",
+                          "-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-"
+                          "SpillSinkSimulator",
+                          "ea0cb560-6b35-43aa-9df7-9e47dc4396fa", "scratchpad",
+                          "mts_env", "bin", "python")]
+    for c in cands:
+        if c and os.path.exists(c):
+            return c
+    return None
 
 
 def _mts_req(spec, rho=0.01, theta=0.0, spp=256):
@@ -1167,13 +1376,10 @@ def _mts_req(spec, rho=0.01, theta=0.0, spp=256):
 def _mts(req):
     """Run `mts_worker` in the Mitsuba venv and read its marker line."""
     import subprocess
-    venv = os.environ.get("MTS_PYTHON", os.path.join(
-        "/private/tmp/claude-501",
-        "-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator",
-        "ea0cb560-6b35-43aa-9df7-9e47dc4396fa", "scratchpad",
-        "mts_env", "bin", "python"))
-    if not os.path.exists(venv):
-        return {"error": "Mitsuba venv not found at %s" % venv}
+    venv = _mts_python()
+    if venv is None:
+        return {"error": "Mitsuba interpreter not found. Expected "
+                         "~/.spillsink/mts_env/bin/python, or set MTS_PYTHON."}
     # Streamed, not run(): the worker prints @@PROG@@ lines per frame and the
     # UI polls /api/progress, so the output must be read while it renders.
     # stderr merges into stdout -- separate pipes deadlock once one fills.
@@ -1215,13 +1421,10 @@ def measure_mitsuba(spec, theta=0.0, rho=0.01, spp=256):
     single number from a second code is not a cross-check -- the pair is.
     """
     import subprocess
-    venv = os.environ.get("MTS_PYTHON", os.path.join(
-        "/private/tmp/claude-501",
-        "-Users-hojunsong-Desktop-Desktop---hojun-s-mbp-SpillSinkSimulator",
-        "ea0cb560-6b35-43aa-9df7-9e47dc4396fa", "scratchpad",
-        "mts_env", "bin", "python"))
-    if not os.path.exists(venv):
-        return {"error": "Mitsuba venv not found at %s" % venv}
+    venv = _mts_python()
+    if venv is None:
+        return {"error": "Mitsuba interpreter not found. Expected "
+                         "~/.spillsink/mts_env/bin/python, or set MTS_PYTHON."}
     m = dict(spec, margin_depths=2.0)
     req = {"family": _render_family(m), "params": _render_params(m),
            "rho": rho, "theta": theta, "spp": spp}
@@ -1630,14 +1833,46 @@ class H(BaseHTTPRequestHandler):
                             for k in ("smear", "head_on")}
                     out["seconds"] = round(time.perf_counter() - t0, 1)
                     return self._send(200, json.dumps(out))
-                out = in_blender("form", spec=req["spec"], thetas=None,
-                                 n_phase=req.get("n_phase"),
-                                 samples=req.get("samples"),
-                                 beam_w=req.get("beam_w"),
-                                 phis=req.get("phis"))
-                if "error" in out:
-                    return self._send(200, json.dumps(out))
+                # GROW THE SAMPLE UNTIL THE ANSWER FITS IN IT (2026-08-20).
+                # The smear window can only open as far as the measured face,
+                # so a design that throws light wider than the face reads LOW
+                # -- p10/d90 gives 16.5 on a 100 mm face and 24.8 once the face
+                # holds the return. Reporting the low number with a warning was
+                # the wrong call: the face here is the SAMPLE, not the product.
+                # A real wall is many tiles butted together, and the builder
+                # already surrounds the face with `margin` of identical field,
+                # so a wider face is a MORE faithful sample of that wall, not a
+                # different design. So measure, and if the ladder ran out, size
+                # the next sample from the return's own width (~6 x z90, the
+                # ratio both of today's convergences landed on) and measure
+                # again. Bounded, and every attempt is reported.
+                spec_i = dict(req["spec"])
+                tries, GROW_MAX, FACE_MAX = [], 3, 2000.0
+                out = None
+                for _ in range(GROW_MAX):
+                    out = in_blender("form", spec=spec_i, thetas=None,
+                                     n_phase=req.get("n_phase"),
+                                     samples=req.get("samples"),
+                                     beam_w=req.get("beam_w"),
+                                     phis=req.get("phis"),
+                                     mm_per_px=req.get("mm_per_px"))
+                    if "error" in out:
+                        return self._send(200, json.dumps(out))
+                    tries.append({"face_mm": out.get("face_mm"),
+                                  "smear": out.get("smear"),
+                                  "converged": out.get("converged")})
+                    if out.get("converged") is not False:
+                        break
+                    need = out.get("window_needed_mm") or 0.0
+                    face = float(spec_i.get("panel") or out.get("face_mm") or 0)
+                    grow = max(need, face * 2.0)
+                    if grow <= face * 1.05 or grow > FACE_MAX:
+                        break
+                    spec_i["panel"] = min(grow, FACE_MAX)
                 out["seconds"] = round(time.perf_counter() - t0, 1)
+                out["sample_face_mm"] = spec_i.get("panel")
+                out["requested_face_mm"] = req["spec"].get("panel")
+                out["grow_attempts"] = tries
                 return self._send(200, json.dumps(out))
             if self.path == "/api/crosscheck":
                 t0 = time.perf_counter()
