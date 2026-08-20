@@ -597,7 +597,11 @@ function sliders(host, fields, cls){
     if(f.name === 'depth' || f.name === 'backing') continue;   // owned above
     const d = document.createElement('div'); d.className = 'sl';
     if(f.kind === 'num'){
-      const dec = f.step < 0.05 ? 3 : (f.step < 1 ? 2 : 1);
+      // A field may state its own precision. rho0 steps by 5e-4, and the
+      // rule below would print 0.00998 as "0.010" -- a readout that lies in
+      // exactly the way fitRange() was written to stop. Geometry fields carry
+      // no `dec` and are unaffected.
+      const dec = f.dec != null ? f.dec : (f.step < 0.05 ? 3 : (f.step < 1 ? 2 : 1));
       d.innerHTML = `<span class="nm">${f.name} <b>${(+f.default).toFixed(dec)}</b></span>
         <input type="range" class="${cls}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.default}">
         <input type="number" step="${f.step}" value="${f.default}">`;
@@ -683,7 +687,12 @@ function refresh(){
       MESH = new Float32Array(await r.arrayBuffer());
       upload(MESH); buildOverlay(SHOW_THETAS); draw();
       showDerived(d);
-      if(d.slots){ LASTSLOTS = d.slots; LASTMATS = d.materials || null; mxRows(); }
+      // GUARDED: the boot block calls refresh() before it has fetched
+      // /api/materials and built the inspector, so mxRows may not exist yet.
+      // The state is still recorded, and the first real mxRows() call paints
+      // it -- losing the rows on the very first frame would be silent.
+      if(d.slots){ LASTSLOTS = d.slots; LASTMATS = d.materials || null;
+                   if(mxRows) mxRows(); }
       $('#err').textContent = '';
       matchStudy(s);
     }catch(e){ $('#err').textContent = String(e).slice(0,400); }
