@@ -40,6 +40,8 @@ import struct
 import threading
 import traceback
 import queue
+import atexit
+import collections
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -85,7 +87,9 @@ def _prog(done, total):
 #    parameters and STL export behind a renderer that has nothing to do with
 #    them. When `bpy` is absent the server still starts, serves all of that,
 #    and dispatches a measurement to `cyc_worker.py` in a Blender subprocess --
-#    the same separation `mts_worker.py` already uses for Mitsuba.
+#    the same separation `mts_worker.py` already uses for Mitsuba. That
+#    subprocess is now a WARM one, held open across measurements rather than
+#    launched per click; see `worker_ask`.
 try:
     import bpy                                                   # noqa: F401
     IN_BLENDER = True
@@ -136,40 +140,175 @@ def in_blender(op, **req):
         val = on_main(fn)
         return {"rho": val} if op in ("measure", "lambert") else val
 
-    import subprocess
     if not os.path.exists(BLENDER):
         return {"error": "Blender not found at %s -- set BLENDER_BIN. "
                          "Preview and STL work without it; measurement does "
                          "not." % BLENDER}
-    # ONE RETRY. A launch immediately after another Blender exits has been seen
-    # to die inside `ShaderCache::load_kernel` with an uncaught NSException --
-    # Metal kernel compilation, not anything this code does. The same command
-    # succeeded when run by hand, from a thread, and on every attempt after.
-    # The collision is the likely cause but is NOT proven, so this is a
-    # workaround and is labelled one: retry once, and report the real error if
-    # the second attempt fails too.
-    last = ""
-    for attempt in (1, 2):
-        p = subprocess.run(
-            [BLENDER, "--background", "--factory-startup",
-             "--python", os.path.join(HERE, "cyc_worker.py")],
-            input=json.dumps(dict(req, op=op)), capture_output=True,
-            text=True, timeout=1800)
-        for line in reversed((p.stdout or "").splitlines()):
-            i = line.find("@@RESULT@@")
-            if i >= 0:
-                try:
-                    return json.loads(line[i + 10:])
-                except Exception:
-                    break
-        last = (p.stderr or p.stdout or "no output")[-400:]
-        if attempt == 1:
-            print("[SIM] Blender subprocess produced no result; retrying once",
-                  flush=True)
-    return {"error": last}
+    return worker_ask(dict(req, op=op))
 
 
 RENDER_LOCK = threading.Lock()
+
+
+# --- the warm Blender ------------------------------------------------------
+#
+# ONE LONG-LIVED WORKER, NOT ONE PER MEASUREMENT. Measured at the UI's 64-sample
+# default: a subprocess measurement is 1.30 s wall of which the Cycles render is
+# 0.56 s. The rest is Blender starting, importing and exiting -- paid on every
+# click, and paid again on the first render of each process as Metal loads its
+# shader cache. A worker that stays up pays both once: measured after, the same
+# click is 0.6-0.75 s. An idle worker costs 33 MB resident.
+#
+# `cyc_worker.py --serve` reads one JSON request per line and answers with an
+# "@@RESULT@@" line, so this is the same worker, the same ops and the same
+# answers as the one-shot mode it replaces -- only the process boundary moved.
+#
+# THREE THINGS THIS HAS TO GET RIGHT, all of them ways a pipe goes wrong:
+#
+# 1. ONE REQUEST AT A TIME. `ThreadingHTTPServer` will happily run two
+#    /api/measure calls at once, and two threads writing one stdin interleaves
+#    two requests into gibberish. RENDER_LOCK -- which existed here unused --
+#    serialises them. Measurements were already serial in practice (one GPU);
+#    this makes it true rather than lucky.
+# 2. DRAIN WHILE WAITING. Cycles writes progress to stdout continuously. A
+#    reader that waited for the marker without consuming the lines before it
+#    would fill the pipe buffer and deadlock Blender mid-render. Reading every
+#    line until the marker appears is what keeps that from happening, so
+#    `stderr` is merged into `stdout`: one pipe, one reader, nothing unread.
+# 3. A DEAD WORKER MUST NOT LOSE THE REQUEST. Same one-retry as before, for the
+#    same reason -- see `_worker_send`.
+WORKER_TIMEOUT = 1800.0
+_WORKER = None
+_WORKER_TAIL = collections.deque(maxlen=40)   # for the error message
+
+
+def _worker_start():
+    """Spawn the serve-mode worker. Caller holds RENDER_LOCK."""
+    global _WORKER
+    import subprocess
+    _WORKER_TAIL.clear()
+    _WORKER = subprocess.Popen(
+        [BLENDER, "--background", "--factory-startup",
+         "--python", os.path.join(HERE, "cyc_worker.py"), "--", "--serve"],
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, text=True, bufsize=1)
+    print("[SIM] Blender worker up, pid %d" % _WORKER.pid, flush=True)
+    return _WORKER
+
+
+def _worker_alive():
+    return _WORKER is not None and _WORKER.poll() is None
+
+
+def _worker_stop():
+    """Close the pipe and let the worker exit. Safe to call twice."""
+    global _WORKER
+    p, _WORKER = _WORKER, None
+    if p is None or p.poll() is not None:
+        return
+    try:
+        p.stdin.close()
+    except Exception:
+        pass
+    try:
+        p.wait(timeout=10)
+    except Exception:
+        p.kill()
+
+
+def _worker_send(req):
+    """One request down the pipe, one result back. Caller holds RENDER_LOCK.
+
+    Raises if the worker dies or stops answering, so `worker_ask` can decide
+    whether to respawn and retry.
+    """
+    if not _worker_alive():
+        _worker_start()
+    p = _WORKER
+
+    deadline = time.time() + WORKER_TIMEOUT
+    p.stdin.write(json.dumps(req) + "\n")
+    p.stdin.flush()
+
+    while True:
+        line = p.stdout.readline()
+        if line == "":                       # EOF: the worker died mid-request
+            raise RuntimeError("worker exited (rc=%s)" % p.poll())
+        _WORKER_TAIL.append(line.rstrip("\n"))
+        # The worker owns `_prog` now that the render lives in another process,
+        # so it reports back on the same "@@PROG@@ done total" line the Mitsuba
+        # path has always used. Without this every button's progress bar is
+        # inert in standalone mode -- invisible on a one-second measurement,
+        # not on an 81-render sweep. See cyc_worker._relay_progress.
+        if line.startswith("@@PROG@@"):
+            try:
+                _, d, t = line.split()
+                _prog(int(d), int(t))
+            except Exception:
+                pass
+            continue
+        i = line.find("@@RESULT@@")
+        if i >= 0:
+            return json.loads(line[i + 10:])
+        if time.time() > deadline:
+            p.kill()
+            raise RuntimeError("worker exceeded %.0fs" % WORKER_TIMEOUT)
+
+
+def worker_ask(req):
+    """Ask the warm worker, respawning once if it is dead or wedged.
+
+    ONE RETRY, kept from the subprocess version and for the same reason: a
+    Blender launch landing on top of another exiting has been seen to die
+    inside `ShaderCache::load_kernel` with an uncaught NSException -- Metal
+    kernel compilation, not anything this code does. That was a LAUNCH race,
+    and a warm worker launches once instead of once per click, so the window
+    it needed is mostly gone. Mostly is not never, and a request must not be
+    lost to it, so the retry stays.
+
+    A worker that answers `{"error": ...}` is working correctly -- serve mode
+    survives a bad request on purpose -- and is not retried.
+    """
+    with RENDER_LOCK:
+        for attempt in (1, 2):
+            try:
+                return _worker_send(req)
+            except Exception as exc:
+                _worker_stop()
+                if attempt == 1:
+                    print("[SIM] Blender worker failed (%s); restarting once"
+                          % exc, flush=True)
+                    continue
+                tail = "\n".join(_WORKER_TAIL) or "no output"
+                return {"error": "%s\n%s" % (exc, tail[-400:])}
+
+
+def worker_warm():
+    """Start the worker before the first click needs it.
+
+    Only moves the cost, but it moves it off the measurement: the first render
+    in a fresh Blender pays Metal shader-cache load, which is 7.5 s on a cold
+    cache here, and there is no reason for a user to wait for it.
+    """
+    if not os.path.exists(BLENDER):
+        return
+    try:
+        with RENDER_LOCK:
+            if not _worker_alive():
+                _worker_start()
+                while True:                  # drain to the ready marker
+                    line = _WORKER.stdout.readline()
+                    if line == "":
+                        break
+                    _WORKER_TAIL.append(line.rstrip("\n"))
+                    if "@@READY@@" in line:
+                        print("[SIM] worker warm", flush=True)
+                        break
+    except Exception as exc:
+        print("[SIM] could not pre-warm the worker: %s" % exc, flush=True)
+
+
+atexit.register(_worker_stop)
 
 
 # --- what the UI can build -------------------------------------------------
@@ -2173,7 +2312,11 @@ def main():
           % (PORT, len(FAMILIES), len(FLOORS)), flush=True)
     if not IN_BLENDER:
         print("[SIM] standalone: preview, parameters and STL need no Blender; "
-              "measurement launches %s" % BLENDER, flush=True)
+              "measurement uses a warm %s" % BLENDER, flush=True)
+        # On a thread, so the port is listening immediately: warming takes as
+        # long as Blender takes to start, and there is no reason for the page
+        # to wait for it.
+        threading.Thread(target=worker_warm, daemon=True).start()
         srv.serve_forever()          # nothing to marshal; this thread waits
         return
     # Blender's main thread becomes the render worker and never returns.

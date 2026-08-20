@@ -14,10 +14,18 @@ the 3D preview, the derived figures, the published-number lookup and
 every geometry module is pure Python — `geom3d`, `geom_topo`, `geom_cell`,
 `geom_floor`, `geom_stack` and `profile_ridge` contain no reference to `bpy`.
 
-Pressing **Measure** launches Blender as a subprocess (`scripts/cyc_worker.py`)
-for that one render and lets it exit. Set `BLENDER_BIN` if Blender is not at
-`/Applications/Blender.app/Contents/MacOS/Blender`. Without Blender installed
-the page still works; only the three measurements report an error saying so.
+Pressing **Measure** hands the job to a warm Blender running
+`scripts/cyc_worker.py --serve`, started when the server starts and held open
+across measurements. It used to be one subprocess per click, which cost more
+than it rendered: at the 64-sample default a measurement was 1.30 s of wall
+clock for a 0.56 s render, the rest being Blender starting and exiting.
+Measured after: 0.6-0.75 s for the same click. An idle worker costs 33 MB.
+
+If it dies it is restarted on the next measurement, and a bad request gets an
+error back without taking the worker down with it. Set `BLENDER_BIN` if Blender
+is not at `/Applications/Blender.app/Contents/MacOS/Blender`. Without Blender
+installed the page still works; only the three measurements report an error
+saying so.
 
 ## Inside Blender — the renderer stays warm
 
