@@ -98,3 +98,84 @@ Two failures drove this:
 So: `run_queue.sh` (job loop, survives a crashing job) + `keepalive.sh`
 (restarts the queue, flags a 45-minute output stall). Both on disk, both
 stoppable with `touch logs/STOP`.
+
+---
+
+## 2026-08-20 — the renderer was never the bottleneck
+
+Asked whether results are being rendered with full acceleration. Measured
+rather than assumed, on the M1 Pro under Blender 4.3.2 at 480x220:
+
+| variant | 5 angles x 512 spp |
+|---|---|
+| **Metal GPU, MetalRT AUTO — what we already do** | **10.06 s** |
+| MetalRT forced ON | 10.86 s |
+| Metal GPU + CPU together | 21.83 s |
+| CPU only | 28.21 s |
+| Blender 5.1.2 (installed, unused) | 10.20 s |
+
+So Cycles is fine. Four things worth writing down:
+
+- **MetalRT AUTO is correct here.** An M1 Pro has no ray-tracing cores, so AUTO
+  resolves to off. Forcing it on costs 8% and a 51 s one-time kernel compile.
+- **The CPU+GPU comment in `configure_cycles` was right.** It said hybrid
+  "costs more than it adds" without a number; it is 2.2x slower, and the number
+  is now in the comment.
+- **128 bounces is free.** At 32 bounces rho is identical to seven digits and no
+  faster: at rho 0.005 the rays die long before the cap. The correctness setting
+  costs nothing, which is worth knowing before anyone is tempted to lower it.
+- **Blender 5.1.2 is not an upgrade.** Same speed, and it moves rho by ~0.12%.
+  Staying on 4.3.2 costs nothing and avoids a lock re-freeze.
+
+**The defect this turned up.** `configure_cycles` set `cy.device = "GPU"`
+whether or not the device loop had enabled anything. Cycles does not refuse
+that — it falls back to the CPU silently, and `report_cycles_settings` went on
+printing `device=GPU`. Reproduced: 6.09 s against 2.0 s for the same frame,
+with nothing in the log to say why. A sweep could have run 3x slow for hours
+while its own log said GPU. It now raises unless `ALLOW_CPU=1`, and the results
+JSON carries a `renderer` block naming the device that actually rendered it.
+
+**What was actually slow was the pipeline around the render.** An interactive
+Measure at the 64-spp default is 1.30 s wall of which 0.56 s is the render; the
+rest is Blender starting and exiting, paid per click. And sweeps ran one process
+at a time, so the single-threaded Python geometry build — 2.6 s for the
+1.1 M-vertex cone — always had the GPU idle beside it.
+
+Hence `sweep_shard.py`: the same sweep split over two Blender processes, each
+building while the other renders, merged back into the canonical CSV afterwards
+so nothing downstream learns that sharding exists. Measured end-to-end on
+`sweep_fab`, 720 rows regenerated from nothing: **557 s serial, 411 s sharded,
+1.36x**. Sharded and serial re-runs agree to 0.0018%, which is the GPU's own
+run-to-run spread. With `NSHARD` unset every function in the module is a no-op
+and an unsharded run is byte-identical — verified against the committed CSV.
+
+The persistent-worker half landed too, once `sim_server.py` went quiet:
+`cyc_worker.py --serve` reads one JSON request per line, `sim_server` keeps one
+warm and serialises on `RENDER_LOCK`, which had been defined and unused. An
+interactive Measure at the 64-sample default went **1.30 s to 0.6-0.75 s**.
+One-shot mode is kept and both modes agree to 0.0015%, inside the GPU's own
+spread, so the process boundary moved and nothing else did.
+
+Two things measured rather than assumed while building it. A malformed request
+returns an error and the worker survives -- verified, because the whole value
+of the mode is the startup it has already paid. And the idle worker costs
+**33 MB**, not the ~1.4 GB this journal nearly claimed: the "Mem:1345M" Cycles
+prints is the DEVICE allocation during a render and it is released afterwards.
+RSS sawtooths 110-250 MB across 30 consecutive 3-angle measurements with
+persistent data on, with no monotonic growth.
+
+**Two things found on the way that are not mine to fix:**
+
+- `lock.py -- check` is red before any of this, and has been: `flat_coating`
+  reads control 0.041786 against a 0.05 nominal at all three angles, tripping
+  `CONTROL_TOL`. Confirmed identical on pristine a0cb21a. Another session traced
+  it to `CASES["flat_coating"]` using a degenerate ridge (pitch_mean 50, depth
+  0.001) whose two periods do not cover the measurement window, so the plate
+  reads dark by exactly its coverage shortfall — 0.8357 here, 0.7485 in their
+  case. It is the window, not the coating.
+- **The committed sweep CSVs no longer reproduce.** Re-measuring all 720 rows of
+  `sweep_fab.csv` against today's code gives a median drift of 1.20% and a worst
+  of 8.75% on `d00` (pure specular), against 0.28% median on `d100` (pure
+  Lambertian). The gradient with diffuse fraction points at the material-model
+  work, not at geometry. The original file was restored untouched; nobody has
+  re-frozen anything.
