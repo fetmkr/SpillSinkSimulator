@@ -134,15 +134,20 @@ def build(date):
             if band_geom else [])
 
     # wall series at the best pitch/depth
-    wall = sorted((w, agg[(best[0], best[1], w, best[3])][0])
+    # SERIES ARE TAKEN FROM A POINT ON THE BASE GRID, not from `best`. Stage C
+    # refines around the winner and its pitches and depths sit between grid
+    # lines, so a series anchored there exists for one or two values and the
+    # table collapses to a single row under prose describing a curve.
+    gbest = min(on, key=lambda k: on[k][0])
+    wall = sorted((w, agg[(gbest[0], gbest[1], w, gbest[3])][0])
                   for w in set(SW.WALL)
-                  if (best[0], best[1], w, best[3]) in agg)
-    # depth series at the best pitch/wall
-    dep = sorted((d, agg[(best[0], d, best[2], best[3])][0])
-                 for d in set(SW.DEPTH) if (best[0], d, best[2], best[3]) in agg)
-    # pitch series at the best depth/wall
-    pit = sorted((p, agg[(p, best[1], best[2], best[3])][0])
-                 for p in set(SW.PITCH) if (p, best[1], best[2], best[3]) in agg)
+                  if (gbest[0], gbest[1], w, gbest[3]) in agg)
+    dep = sorted((d, agg[(gbest[0], d, gbest[2], gbest[3])][0])
+                 for d in set(SW.DEPTH)
+                 if (gbest[0], d, gbest[2], gbest[3]) in agg)
+    pit = sorted((p, agg[(p, gbest[1], gbest[2], gbest[3])][0])
+                 for p in set(SW.PITCH)
+                 if (p, gbest[1], gbest[2], gbest[3]) in agg)
 
     # the re-rank
     rr = []
@@ -330,9 +335,12 @@ def build(date):
     if maps:
         fa = maps[0][1][0]
         ha = min(m[1][0] for m in maps[1:]) if len(maps) > 1 else fa
-        P.append('<div><dt>On the audience line</dt><dd class="big">%.0f&times;'
-                 '</dd><p>darker than a flat plate of the same coating</p>'
-                 '</div>' % (fa / ha))
+        P.append('<div><dt>In-plane map, &theta;<sub>out</sub>&nbsp;=&nbsp;0 '
+                 'row</dt><dd>%.0f&times;</dd><p>darker than a flat plate, in '
+                 'the &plusmn;40&deg; slice only. <b>Not the audience figure '
+                 '&mdash; that is %.0f&times;, above</b></p></div>'
+                 % (fa / ha, (sc_["flat_musou"][0] / sc_["panel"][0])
+                    if "panel" in sc_ else 0))
     P.append("</div>")
     if same and rec_depth != min(same, key=lambda d: same[d]):
         deepest = min(same, key=lambda d: same[d])
@@ -408,13 +416,13 @@ def build(date):
              '<th>&rho;<sub>dh</sub></th><th>aspect</th></tr></thead><tbody>')
     for d, v in dep:
         P.append("<tr><td>%g</td><td>%s</td><td>%.1f</td></tr>"
-                 % (d, num(v), d / best[0]))
+                 % (d, num(v), d / gbest[0]))
     P.append("</tbody></table></div>")
     P.append('<div class="tbl"><table><thead><tr><th>wall (mm)</th>'
              '<th>&rho;<sub>dh</sub></th><th>tip area</th></tr></thead><tbody>')
     for w, v in wall:
         P.append("<tr><td>%g</td><td>%s</td><td>%.2f&nbsp;%%</td></tr>"
-                 % (w, num(v), 100 * 2 * w / best[0]))
+                 % (w, num(v), 100 * 2 * w / gbest[0]))
     P.append("</tbody></table></div>")
     P.append("</div>")
     P.append('<p class="col">Past an aspect of roughly eight the wall is '
