@@ -1168,6 +1168,14 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
                        for t in thetas]}
     cfg.update({k: v2 for k, v2 in COAT.items() if k != "spec_roughness"})
     cfg["material_mode"] = "coating"
+    # PER-PART FINISHES ride on the spec, so they reach the renderer without a
+    # new argument on every endpoint. `paint_depth` still wins when it is set:
+    # several published rows were measured through that path and it is not
+    # this change's business to move them.
+    if spec.get("materials") and paint_depth is None:
+        cfg["materials"] = spec["materials"]
+        cfg["floor_depth"] = (0.0 if spec.get("floor", "none") == "none"
+                              else float(spec.get("floor_depth", 0.0) or 0.0))
     # Paint only reaches so far into a cell; below `paint_depth` the surface
     # is whatever the part was bought as. Without BOTH a depth and a deep
     # coating there is no split and the whole mesh keeps one finish.

@@ -510,7 +510,7 @@ def loops_to_object(loops, width, x0, name, material):
 
 
 def mesh_to_object(verts, faces, name, material, deep_material=None,
-                   paint_depth=None):
+                   paint_depth=None, slot_ids=None, slot_materials=None):
     """Build an object from an explicit 3D mesh.
 
     TWO FINISHES, SPLIT BY DEPTH. A panel is not painted uniformly. The
@@ -547,6 +547,55 @@ def mesh_to_object(verts, faces, name, material, deep_material=None,
                 n_deep += 1
         print("[COAT] %s: %d of %d faces below %.1f mm get the deep finish"
               % (name, n_deep, len(mesh.polygons), abs(lim)), flush=True)
+    elif slot_ids is not None and slot_materials:
+        # PER-PART FINISHES. `slot_ids[i]` is which part face i belongs to, in
+        # the order the faces were handed in; `slot_materials` maps that id to
+        # a material. See `mat_slots`.
+        #
+        # THE POLYGON COUNT IS ASSERTED, not assumed. `mesh.validate()` above
+        # is allowed to delete degenerate or duplicate faces, and if it ever
+        # does, indexing polygons by enumeration position silently
+        # desynchronises from `slot_ids` -- every face below the deletion
+        # shifts by one and takes the wrong finish, with nothing in the render
+        # to say so. Same posture as geom_stack's slab assert.
+        if len(mesh.polygons) != len(faces):
+            raise RuntimeError(
+                "%s: mesh.validate() changed the face count (%d -> %d); slot "
+                "ids can no longer be trusted" % (name, len(faces),
+                                                  len(mesh.polygons)))
+        # One bpy material per DISTINCT material, not per slot: two slots
+        # resolving to the same finish share one. A mesh carrying eight
+        # identical materials is a .blend that lies about the design.
+        order, index_of = [], {}
+        for sid in sorted(set(slot_ids)):
+            m = slot_materials.get(sid)
+            if m is None:
+                continue
+            k = m.name
+            if k not in index_of:
+                index_of[k] = len(order)
+                order.append(m)
+        for m in order:
+            obj.data.materials.append(m)
+        n_by = {}
+        for i, poly in enumerate(mesh.polygons):
+            m = slot_materials.get(slot_ids[i])
+            if m is None:
+                continue
+            poly.material_index = index_of[m.name]
+            n_by[m.name] = n_by.get(m.name, 0) + 1
+        # AREA, not face count: area is the physical quantity and the counts
+        # are wildly misleading here -- a honeycomb's tips are a quarter of its
+        # faces and under a hundredth of its area.
+        area = {}
+        for i, poly in enumerate(mesh.polygons):
+            m = slot_materials.get(slot_ids[i])
+            if m is not None:
+                area[m.name] = area.get(m.name, 0.0) + poly.area
+        tot = sum(area.values()) or 1.0
+        print("[SLOT] %s: %s" % (name, ";  ".join(
+            "%s %d f / %.2f%% area" % (k, n_by.get(k, 0), 100 * v / tot)
+            for k, v in sorted(area.items()))), flush=True)
     bpy.context.collection.objects.link(obj)
     return obj
 
@@ -851,6 +900,63 @@ def window_stats(arr, win):
 # job
 # --------------------------------------------------------------------------
 
+def _material_from(m, name):
+    """One `materials.Material` -> one bpy material, by its own model.
+
+    The discriminator matters: `make_glossy` is a bare Glossy BSDF and is NOT
+    this model at diffuse_frac 0, which would put spec_scale = rho/F0 behind a
+    Fresnel term. Reproducing an old number means emitting the old tree.
+    """
+    if m.model == "lambert":
+        return make_diffuse(name, m.rho0)
+    if m.model == "glossy":
+        return make_glossy(name, m.rho0, m.roughness)
+    body, spec_scale = m.split()
+    return make_coating(name, roughness=m.roughness, body=body,
+                        spec_scale=spec_scale, ior=m.ior)
+
+
+def _slot_materials(cfg, verts, faces):
+    """(slot_ids, {slot_id: bpy material}) for a per-part job.
+
+    Returns (None, None) when every slot resolves to the same finish, so the
+    caller can take the single-material path and keep the scene identical.
+    """
+    import materials as _MAT
+    import mat_slots as _MS
+    res = {k: _MAT.resolve(((cfg["materials"].get("slots") or {}).get(k)),
+                           default=_MAT.LIBRARY[_MAT.STUDY_DEFAULT],
+                           defaults=cfg["materials"].get("defaults") or {})
+           for k in _MS.ASSIGNABLE}
+    if len({m.key() for m in res.values()}) <= 1:
+        return None, None
+    prm = cfg.get("params", {}) or {}
+    dep = prm.get("depth")
+    if dep is None:                      # a stack states its two layers
+        dep = (prm.get("top_depth", 0.0) or 0.0) + (prm.get("bot_depth", 0.0)
+                                                    or 0.0)
+    ids, _stats = _MS.classify(
+        verts, faces, depth=abs(float(dep or 50.0)),
+        floor_depth=float(cfg.get("floor_depth", 0.0) or 0.0))
+    built = {}
+    for key in _MS.ASSIGNABLE:
+        built[_MS.BY_KEY[key]["id"]] = _material_from(res[key], "coat_" + key)
+    # hidden faces are inside the union and see no light; give them the flank
+    # finish so the .blend has no material-less polygons
+    built[_MS.HIDDEN] = built[_MS.BY_KEY["walls"]["id"]]
+    return ids, built
+
+
+def _slot_uniform_material(cfg):
+    import materials as _MAT
+    import mat_slots as _MS
+    blk = cfg["materials"]
+    m = _MAT.resolve((blk.get("slots") or {}).get(_MS.ASSIGNABLE[0]),
+                     default=_MAT.LIBRARY[_MAT.STUDY_DEFAULT],
+                     defaults=blk.get("defaults") or {})
+    return _material_from(m, "coat_uniform")
+
+
 def build_scene(cfg):
     # two geometry families share this harness: "slat" (profile2d) attenuates,
     # "scatter" (profile_scatter) aims at destroying form instead
@@ -1134,7 +1240,23 @@ def build_scene(cfg):
                 paint_fade=cfg.get("paint_fade", 0.0))
         else:
             mat = m_s1
-        mesh_to_object(v, f, "panel_mesh", mat)
+        # PER-PART FINISHES, when the job asks for them. `cfg["materials"]` is
+        # the slot -> material assignment; absent, nothing here runs and every
+        # earlier measurement is reproduced through the identical code path.
+        sids, smats = None, None
+        if pd is None and cfg.get("materials"):
+            sids, smats = _slot_materials(cfg, v, f)
+            if smats is None:
+                # UNIFORM IS A FAST PATH, NOT AN OPTIMISATION. When every slot
+                # resolves to the same finish there must be ONE material and
+                # today's code path, so the Cycles scene is byte-identical and
+                # a published row still reproduces. A second material carrying
+                # the same numbers is not free: it changes nothing physical and
+                # everything about what the .blend claims.
+                mat = _slot_uniform_material(cfg)
+                sids = None
+        mesh_to_object(v, f, "panel_mesh", mat,
+                       slot_ids=sids, slot_materials=smats)
         cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
     else:
         # Overrun the face along the extrusion axis by the same margin the
