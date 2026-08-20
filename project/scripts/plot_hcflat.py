@@ -59,8 +59,16 @@ def score(path):
     return out
 
 
-def _grid(agg, wall, frac):
+def _grid(agg, wall, frac, base=None):
     sel = {k: v for k, v in agg.items() if k[2] == wall and k[3] == frac}
+    # Stage C refines AROUND the best cells, so it adds pitches and depths that
+    # sit between the grid lines and exist for only a few combinations. Drawn
+    # as a heatmap those become ragged holes and a row of colliding tick
+    # labels. The refinement is in the CSV and in the ranking; this figure is
+    # the regular grid it was refined from.
+    if base is not None:
+        ps0, ds0 = base
+        sel = {k: v for k, v in sel.items() if k[0] in ps0 and k[1] in ds0}
     if not sel:
         return None, None, None
     ps = sorted({k[0] for k in sel})
@@ -81,6 +89,9 @@ def _edges(v):
                                  [lg[-1] + (lg[-1] - mid[-1])]))
 
 
+BASE = None
+
+
 def draw(agg, frac, norm, best, out):
     walls = sorted({k[2] for k in agg if k[3] == frac})
     if not walls:
@@ -89,7 +100,7 @@ def draw(agg, frac, norm, best, out):
                              squeeze=False, sharey=True)
     pc = None
     for ax, wl in zip(axes[0], walls):
-        ps, ds, m = _grid(agg, wl, frac)
+        ps, ds, m = _grid(agg, wl, frac, base=BASE)
         if ps is None:
             continue
         pc = ax.pcolormesh(_edges(ps), _edges(ds), np.ma.masked_invalid(m),
@@ -133,11 +144,17 @@ def main():
     agg = score(a.csv)
     if not agg:
         raise SystemExit("no scored rows in %s" % a.csv)
+    global BASE
+    import sweep_hcflat as SW
+    BASE = (set(SW.PITCH), set(SW.DEPTH))
 
-    vals = np.array([v[0] for v in agg.values()])
+    vals = np.array([v[0] for k, v in agg.items()
+                     if k[0] in BASE[0] and k[1] in BASE[1]])
     # ONE scale for every panel of every figure
     norm = LogNorm(vmin=vals.min(), vmax=vals.max())
-    best = min(agg, key=lambda k: agg[k][0])
+    ongrid = {k: v for k, v in agg.items()
+              if k[0] in BASE[0] and k[1] in BASE[1]}
+    best = min(ongrid, key=lambda k: ongrid[k][0])
 
     made = []
     for frac in sorted({k[3] for k in agg}, reverse=True):
