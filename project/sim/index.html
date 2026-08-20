@@ -88,6 +88,52 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .note{font-size:11px;color:var(--ink3);line-height:1.5}
 .err{color:var(--no);font:400 11px/1.5 ui-monospace,Menlo,monospace;
   white-space:pre-wrap;max-height:120px;overflow:auto}
+/* ---- materials inspector -------------------------------------------------
+   NOT A MODAL, and the file has none for a reason. Assigning a finish to a
+   region of the part is a job you do WHILE LOOKING AT THE PART, so a sheet
+   over the page would hide the one thing being edited. It docks against the
+   right edge of the screen in the same chrome as the columns and leaves the
+   viewport clear; the model stays orbitable behind it. An inspector, not a
+   dialog -- hence aria-modal="false" and no focus trap. */
+#matx{position:absolute;right:12px;top:10px;bottom:10px;width:300px;z-index:5;
+  display:none;flex-direction:column;background:var(--panel);
+  border:1px solid var(--line2);border-radius:4px;
+  box-shadow:0 6px 26px rgba(0,0,0,.45)}
+#matx.open{display:flex}
+#matx header{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-bottom:1px solid var(--line);
+  font:700 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink3)}
+#matx header b{color:var(--ink)}
+#matx header button{width:auto;margin-left:auto;padding:2px 7px;border:none;
+  background:none;color:var(--ink3);font-size:13px}
+#matx header button:hover{background:none;color:var(--a)}
+#matx .mxb{flex:1;overflow-y:auto;padding:10px;display:flex;
+  flex-direction:column;gap:10px}
+#matx footer{border-top:1px solid var(--line);padding:8px 10px}
+.slotlist{list-style:none;margin:0;padding:0;border:1px solid var(--line);
+  border-radius:4px;background:var(--sunk);overflow:hidden}
+.slotlist li{display:grid;grid-template-columns:9px 1fr auto;gap:7px;
+  align-items:center;padding:6px 8px;cursor:pointer;
+  border-bottom:1px solid var(--line);
+  font:400 11px/1.45 ui-monospace,Menlo,monospace}
+.slotlist li:last-child{border-bottom:none}
+.slotlist li i{width:9px;height:9px;border-radius:2px}
+/* the area column is the point of the panel: tabular so it compares down */
+.slotlist li .a{color:var(--ink3);font-variant-numeric:tabular-nums}
+.slotlist li .m{grid-column:2/-1;color:var(--ink2)}
+.slotlist li.on{background:#fff;box-shadow:inset 2px 0 0 var(--a)}
+.slotlist li[aria-disabled=true]{opacity:.55;cursor:default}
+.slotlist li:focus-visible{outline:1px solid var(--a);outline-offset:-1px}
+.pill.ed{background:var(--a);color:#fff}
+.mxe{display:flex;flex-direction:column;gap:9px}
+.mxwhy{font-size:10.5px;color:var(--ink3);line-height:1.5;margin:0}
+.mxsrc{font-size:10.5px;color:var(--ink3);line-height:1.5;margin:0;
+  border-left:2px solid var(--line2);padding-left:7px}
+.mxsrc b{color:var(--ink2)}
+.mxest{color:var(--a);font-weight:600}
+body.mxopen #busy{right:324px}
+
 #illum{position:absolute;left:12px;top:10px;max-width:330px;
   background:rgba(10,13,15,.82);border:1px solid var(--line2);border-radius:3px;
   padding:9px 11px;font:400 10.5px/1.6 ui-monospace,Menlo,monospace;
@@ -190,23 +236,24 @@ details.why p{margin:.4em 0 0}
   <h2 id="floorh">Floor parameters</h2>
   <div class="grp f" id="fp"></div>
 
-  <h2>Coating</h2>
+  <h2>Materials</h2>
   <div class="grp">
-    <div class="row"><label>Painted surface</label><select id="coat"></select></div>
-    <div class="row"><label>Below the paint (as bought)</label>
-      <select id="deepcoat"><option value="">— painted all the way down —</option></select></div>
-    <div class="sl" id="pdwrap"><span class="nm">paint reaches <b id="v_pd">10.0</b> mm</span>
-      <input type="range" id="pd" min="0" max="50" step="1" value="10">
-      <input type="number" id="n_pd" step="1" value="10"></div>
-    <p class="note" id="coatnote"></p>
-    <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.76</b></span>
+    <!-- A panel is not one finish. The summary lists the parts with the area
+         each covers; the inspector assigns and edits them. `deepcoat` and
+         `paint reaches N mm` are gone: a depth plane could never be drawn,
+         because a honeycomb wall is ONE quad from the mouth to the floor. -->
+    <ul id="mxsum" class="slotlist"></ul>
+    <button id="mxopen" class="go"><span class="lb">Assign materials
+      <small>per part, with sources</small></span><span class="t">&#9656;</span></button>
+    <div class="sl"><span class="nm">default diffuse fraction <b id="v_df">0.76</b></span>
       <input type="range" id="df" min="0" max="1" step="0.02" value="0.76">
       <input type="number" id="n_df" step="0.02" value="0.76"></div>
-    <div class="sl"><span class="nm">specular roughness <b id="v_rg">0.30</b></span>
+    <div class="sl"><span class="nm">default specular roughness <b id="v_rg">0.30</b></span>
       <input type="range" id="rg" min="0.05" max="0.6" step="0.01" value="0.30">
       <input type="number" id="n_rg" step="0.01" value="0.30"></div>
-    <p class="note">Neither was measured. They set the absolute level of every
-      number; ratios between designs are robust.</p>
+    <p class="note">Defaults only &mdash; a named material states its own, and
+      says which of its numbers were measured. Roughness is not constrained by
+      any total: it shapes the return, and must be swept per geometry.</p>
   </div>
 </div>
 
@@ -218,6 +265,17 @@ details.why p{margin:.4em 0 0}
     <button data-view="right">right</button><button data-view="front">front</button>
     <label>ray width <input type="range" id="linew" min="1" max="6" step="0.5" value="2.5"></label>
   </div>
+  <aside id="matx" role="dialog" aria-modal="false" aria-labelledby="matxh">
+    <header><b id="matxh">Materials</b><span class="note" id="matxsum"></span>
+      <button id="matxc" title="close (Esc)" aria-label="close">&#10005;</button></header>
+    <div class="mxb">
+      <ul id="mxslots" class="slotlist"></ul>
+      <p class="mxwhy" id="mxwhy"></p>
+      <div id="mxedit"></div>
+      <p class="note" id="mxfoot"></p>
+    </div>
+    <footer><button id="mxreset">Reset every part to its library value</button></footer>
+  </aside>
   <div id="hud"></div>
   <div id="illum">
     <b>Illumination</b>
@@ -305,26 +363,69 @@ details.why p{margin:.4em 0 0}
    report's 16 at 512. An estimate of the published number, not the
    number.</p></details>
 
+  <button id="mbd" class="go"><span class="lb">Render &middot; where the light goes
+    <small>9 incidence &times; 9 observation</small></span>
+    <span class="t">~4 min</span></button>
+  <p class="note" style="margin:0">The two buttons above ask <b>how much</b>
+   light comes back. This one asks <b>where it goes</b>. It puts the beam at
+   each incidence angle in turn and looks from each observation angle in turn,
+   and reads the BRDF &mdash; brightness per unit solid angle, in 1/sr &mdash;
+   for every pair. 81 renders, one per cell.</p>
+  <canvas id="bidir" style="width:100%;display:none"></canvas>
+  <p class="note" id="bdcap" style="display:none;margin:.15rem 0 0">x =
+   incidence, y = observation &middot;
+   <b style="color:#49c2ca">&mdash; &mdash;</b> retro, back at the projector
+   &middot; <b style="color:#e08a2e">&mdash; &mdash;</b> flat-mirror specular
+   &middot; <b style="color:#8b6fd8">&mdash;&mdash;</b> the audience.
+   Log scale. Hover a cell for its number.</p>
+  <dl class="kv" id="bdout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
+  <details class="why"><summary>how to read the map</summary>
+  <p class="note">Three questions are three straight lines. On
+   <b style="color:#49c2ca">y = +x</b> the observer sits where the projector
+   is, so that line is what fires back up the beam. On
+   <b style="color:#e08a2e">y = &minus;x</b> sits the direction a flat mirror
+   would send it &mdash; a bright ridge there means the panel is only
+   <i>dimming</i> the reflection, not moving it. <b style="color:#8b6fd8">y =
+   0</b> is the audience, and it is the one row a client actually stands in.</p>
+  <p class="note">Every cell is read against the flat Lambertian control plate
+   in its own frame, so the number is an absolute BRDF and not a ratio to
+   something unstated. A perfect Lambertian of &rho; reads &rho;/&pi;
+   everywhere &mdash; 0.0159 for the 5 % control &mdash; which is what the rig
+   is gated against.</p>
+  <p class="note"><b>What this cannot say.</b> It is ONE azimuth plane, so
+   there is no hemisphere total in it. And the coating fit constrains only the
+   flat plate's total reflectance &mdash; nothing in it constrains BRDF
+   <i>shape</i>, which is exactly what this map reads. The structure of the map
+   is a geometric result; the absolute numbers wait on a measured coupon. See
+   metrics/08.</p>
+  </details>
+
   <div class="tools">
   <h2>Tools</h2>
   <p class="note" style="margin:0"><b>A sample, not the measurement.</b> The
    trace follows a few hundred rays at five angles in ONE azimuth plane at a
    time (turn &phi; to rotate it). The Render above reads its five &theta; in
-   three planes (&phi; 0/45/90), and each render number integrates ALL the
-   light leaving the panel with the real fitted coating, where the trace
-   follows a few hundred rays with a single-&rho; material.</p>
+   three planes (&phi; 0/45/90) and integrates ALL the light leaving the panel;
+   the trace follows a few hundred rays in one plane, one scatter sample per
+   bounce. Same coating, far fewer samples.</p>
   <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
     <label>rays per angle <input type="number" id="ray_n" value="200" min="20" max="800"
       step="20" style="width:4.5em"></label>
     <label>azimuth &phi;&deg; <input type="number" id="ray_phi" value="0" min="0" max="360"
       step="15" style="width:4.5em"></label>
     <select id="ray_mode">
+      <option value="coating">coating &mdash; the fitted mix</option>
       <option value="specular">specular &mdash; mirror ladders</option>
       <option value="diffuse">diffuse &mdash; Monte Carlo</option>
     </select>
   </div>
-  <p class="note" style="margin:0">&rho; comes from the coating picked on the
-   left; the trace scatters from that single number, not the full fitted mix.</p>
+  <p class="note" style="margin:0">The coating picked on the left owns all four
+   numbers &mdash; &rho;, the diffuse fraction, the roughness and the IOR.
+   <b>coating</b> scatters from the same Fresnel mix the render builds;
+   <b>specular</b> and <b>diffuse</b> are its two EXTREMES, kept because a
+   mirror ladder shows the mechanism a Monte Carlo cloud hides. They are not
+   bounds on it: on honeycomb + flat base at anodised_hi, specular read 6.8x
+   the measurement at &theta;&nbsp;0 and 0.06x at &theta;&nbsp;20.</p>
   <button id="mr"><span class="lb">Trace sample rays
     <small>5 angles &times; 1 plane</small></span>
     <span class="t">~9 s</span></button>
@@ -453,7 +554,7 @@ function progressBar(btn){
 // parameter change makes every readout stale. refresh() calls this before
 // rebuilding: traced ray paths leave the overlay, the green done-lights go
 // out, and each readout returns to its "not measured" state.
-const DONE_BTNS = ['#m5','#mf','#mr'];
+const DONE_BTNS = ['#m5','#mf','#mr','#mbd'];
 function resetResults(){
   RAYS = null; SHOW_THETAS = [0]; RAYHIDE.clear();
   for(const id of DONE_BTNS){ const b = $(id); if(b) b.classList.remove('done'); }
@@ -463,6 +564,8 @@ function resetResults(){
   $('#rayhist').innerHTML = '';
   const hc = $('#rayhistcap'); if(hc) hc.style.display = 'none';
   chart([]);
+  heatmap(null);
+  $('#bdout').innerHTML = '<div><dt>not measured</dt><dd>&mdash;</dd></div>';
   for(const ax of ['#ax_total','#ax_smear','#ax_head']) axSet(ax, '&mdash;', null);
   // the ray polylines live in the overlay line buffer: rebuild it without them
   // even when the new parameters turn out invalid and no new mesh arrives
@@ -532,6 +635,14 @@ function collect(host){
   return o;
 }
 
+// Materials state lives at module scope because spec() and refresh() below are
+// module-scope too, while the inspector is built inside the async boot block.
+// Declared here and ASSIGNED there: a `function` declaration inside the boot
+// block would create its own binding and silently shadow these, so spec()
+// would attach no materials and refresh() would throw on LASTSLOTS.
+let LASTSLOTS = null, LASTMATS = null;
+let mxCollect = null, mxRows = null;
+
 function spec(){
   const floor = $('#floor').value;
   const s = { top: $('#top').value, top_params: collect($('#tp')),
@@ -540,6 +651,11 @@ function spec(){
   if(floor !== 'none'){ s.floor = floor; s.floor_params = collect($('#fp'));
                         s.floor_depth = +$('#fdepth').value; }
   else s.floor = 'none';
+  // MATERIALS RIDE ON THE SPEC. They used to live in separate DOM controls and
+  // were not saved with a design at all, so reloading a saved design silently
+  // reused whatever coating happened to be selected. Now every endpoint that
+  // takes a spec gets them, and localStorage keeps them.
+  if(mxCollect) s.materials = mxCollect();
   return s;
 }
 
@@ -564,6 +680,7 @@ function refresh(){
       MESH = new Float32Array(await r.arrayBuffer());
       upload(MESH); buildOverlay(SHOW_THETAS); draw();
       showDerived(d);
+      if(d.slots){ LASTSLOTS = d.slots; LASTMATS = d.materials || null; mxRows(); }
       $('#err').textContent = '';
       matchStudy(s);
     }catch(e){ $('#err').textContent = String(e).slice(0,400); }
@@ -634,7 +751,7 @@ function showDerived(d){
     ['exposed area', d.exposed_fraction_est != null ? (100*d.exposed_fraction_est).toFixed(2)+' %' : '—'],
     ['min feature', d.min_feature_mm != null ? d.min_feature_mm.toFixed(3)+' mm' : '—'],
     ['process', d.process || '—'],
-    ['triangles', (d.verts ? Math.round(MESH.length/18) : 0).toLocaleString()],
+    ['triangles', (d.verts ? Math.round(MESH.length/21) : 0).toLocaleString()],
     ['build', d.build_ms + ' ms'],
   ];
   const pill = d.buildable == null ? '<span class="pill wait">unknown</span>'
@@ -660,8 +777,7 @@ async function measure(thetas){
       // no phi rotation, so cross-check modes stay in the phi-0 plane
       phis: R === 'cycles' ? [0, 45, 90] : undefined,
       diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
-      coating: $('#coat').value, deep_coating: $('#deepcoat').value || null,
-      paint_depth: $('#deepcoat').value ? +$('#pd').value : null})});
+      })});
     const j = await r.json();
     if(j.error) throw new Error(j.error);
     SHOW_THETAS = thetas; buildOverlay(thetas); draw();
@@ -731,6 +847,81 @@ function chart(series){
   [-40,-20,0,20,40].forEach(t=>g.fillText(t+'°', x(t)-8, H-4));
 }
 
+// ---------- metric 08: the angle-in / angle-out map
+// A SIBLING OF chart(), NOT A GENERALISATION OF IT. chart() hardcodes the
+// theta -40..40 domain, a linear y axis and one value per theta; this needs
+// -80..80 on both axes, a log scale and a value per PAIR. Bending one function
+// to do both would leave neither readable.
+let BIDIR = null;
+function heatmap(d){
+  const c = $('#bidir'), cap = $('#bdcap');
+  c.style.display = d ? 'block' : 'none';
+  if(cap) cap.style.display = d ? 'block' : 'none';
+  BIDIR = d;
+  if(!d) return;
+  const dpr = devicePixelRatio||1, W = c.clientWidth, H = W;
+  c.width = W*dpr; c.height = H*dpr;
+  const g = c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  const pad = 30, S = Math.min(W,H) - pad - 8;
+  g.clearRect(0,0,W,H);
+
+  const flat = d.grid.flat().filter(v => v > 0);
+  if(!flat.length) return;
+  const hi = Math.max(...flat), lo = Math.max(Math.min(...flat), hi*1e-6);
+  const lg = v => Math.log(Math.max(v, lo)/lo) / Math.log(hi/lo);
+  // an inferno-like ramp: black -> purple -> orange -> pale yellow
+  const RAMP = [[0,0,4],[40,11,84],[101,21,110],[159,42,99],[212,72,66],
+                [245,125,21],[250,193,39],[252,255,164]];
+  const col = t => {
+    const x = Math.max(0, Math.min(1, t)) * (RAMP.length-1);
+    const i = Math.min(RAMP.length-2, Math.floor(x)), f = x - i;
+    const a = RAMP[i], b = RAMP[i+1];
+    return `rgb(${a.map((v,k)=>Math.round(v+(b[k]-v)*f)).join(',')})`;
+  };
+  const LIM = 90;
+  const X = t => pad + (t + LIM)/(2*LIM) * S;
+  const Y = t => (pad + S) - (t + LIM)/(2*LIM) * S;
+
+  const nx = d.ins.length, ny = d.outs.length;
+  const stepx = nx > 1 ? d.ins[1]-d.ins[0] : 10, stepy = ny > 1 ? d.outs[1]-d.outs[0] : 10;
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+    const v = d.grid[j][i];
+    if(v == null) continue;
+    g.fillStyle = col(lg(v));
+    const x0 = X(d.ins[i]-stepx/2), x1 = X(d.ins[i]+stepx/2);
+    const y0 = Y(d.outs[j]+stepy/2), y1 = Y(d.outs[j]-stepy/2);
+    g.fillRect(x0, y0, Math.ceil(x1-x0), Math.ceil(y1-y0));
+  }
+  // the working band, then the three lines the map is read against
+  g.fillStyle='rgba(255,255,255,.05)';
+  g.fillRect(X(-90), Y(40), S, Y(-40)-Y(40));
+  g.fillRect(X(-40), Y(90), X(40)-X(-40), S);
+  g.lineWidth=1; g.setLineDash([4,3]);
+  g.strokeStyle='#49c2ca'; g.beginPath(); g.moveTo(X(-80),Y(-80)); g.lineTo(X(80),Y(80)); g.stroke();
+  g.strokeStyle='#e08a2e'; g.beginPath(); g.moveTo(X(-80),Y(80)); g.lineTo(X(80),Y(-80)); g.stroke();
+  g.setLineDash([]);
+  g.strokeStyle='#8b6fd8'; g.beginPath(); g.moveTo(X(-90),Y(0)); g.lineTo(X(90),Y(0)); g.stroke();
+
+  g.font='10px ui-monospace,Menlo,monospace'; g.fillStyle='#6b7883';
+  for(const t of [-80,-40,0,40,80]){
+    g.fillText(t+'\u00b0', X(t)-9, pad+S+14);
+    g.fillText(t+'\u00b0', 2, Y(t)+3);
+  }
+  g.fillText('incidence \u2192', pad+S-70, pad+S+26);
+  g.save(); g.translate(10, pad+40); g.rotate(-Math.PI/2);
+  g.fillText('\u2190 observation', -40, 0); g.restore();
+  c.onmousemove = e => {
+    const r = c.getBoundingClientRect();
+    const ti = (e.clientX-r.left-pad)/S*(2*LIM)-LIM;
+    const to = LIM-(e.clientY-r.top-pad)/S*(2*LIM);
+    const i = d.ins.reduce((b,v,k)=>Math.abs(v-ti)<Math.abs(d.ins[b]-ti)?k:b,0);
+    const j = d.outs.reduce((b,v,k)=>Math.abs(v-to)<Math.abs(d.outs[b]-to)?k:b,0);
+    const v = d.grid[j][i];
+    c.title = v==null ? '' : `in ${d.ins[i]}\u00b0  out ${d.outs[j]}\u00b0  ` +
+      `f_r = ${(+v).toPrecision(4)} /sr`;
+  };
+}
+
 // ---------- does it agree with the published study?
 async function matchStudy(s){
   try{
@@ -756,15 +947,31 @@ const gl = $('#gl').getContext('webgl2', {antialias:true});
 const P = gl.createProgram();
 function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; }
+// EXPLICIT ATTRIBUTE LOCATIONS. This program declared `in vec3 p; in vec3 n;`
+// with no locations and relied on declaration order matching
+// enableVertexAttribArray(0/1). That happens to work for two attributes and is
+// a coin toss once there is a third -- the line program below already binds
+// explicitly, so this matches it.
 gl.attachShader(P, sh(gl.VERTEX_SHADER,`#version 300 es
-in vec3 p; in vec3 n; uniform mat4 mvp; uniform mat3 nm; out vec3 vn; out float vz;
-void main(){ vn = normalize(nm*n); gl_Position = mvp*vec4(p,1.); vz = gl_Position.z; }`));
+layout(location=0) in vec3 p; layout(location=1) in vec3 n;
+layout(location=2) in float slot;
+uniform mat4 mvp; uniform mat3 nm; out vec3 vn; out float vz; flat out float vs;
+void main(){ vn = normalize(nm*n); vs = slot;
+             gl_Position = mvp*vec4(p,1.); vz = gl_Position.z; }`));
 gl.attachShader(P, sh(gl.FRAGMENT_SHADER,`#version 300 es
-precision highp float; in vec3 vn; in float vz; out vec4 o;
+precision highp float; in vec3 vn; in float vz; flat in float vs; out vec4 o;
+uniform vec3 SCOL[4]; uniform float SMIX; uniform float SHI;
 void main(){
   vec3 L1 = normalize(vec3(.35,.75,.55)), L2 = normalize(vec3(-.5,.2,-.6));
   float d = max(dot(vn,L1),0.)*.85 + max(dot(vn,L2),0.)*.25 + .16;
   vec3 c = mix(vec3(.10,.12,.14), vec3(.80,.86,.90), clamp(d,0.,1.));
+  // SMIX is 0 unless the materials inspector is open, so the plain grey
+  // instrument view is byte-identical to what it always was. The tint is
+  // modulated by the same lambert term, or the form stops reading.
+  if(SMIX > 0.){
+    float k = SMIX * ((SHI < -0.5 || abs(SHI - vs) < 0.5) ? 1.0 : 0.22);
+    c = mix(c, SCOL[int(vs+0.5)]*(0.35+0.85*clamp(d,0.,1.)), k);
+  }
   o = vec4(c,1.);
 }`));
 gl.linkProgram(P); gl.useProgram(P);
@@ -984,17 +1191,35 @@ function traceAxes(j, phi, beam_w){
            negligible: NEG };
 }
 
+// ---- slot colour identity -------------------------------------------------
+// Same shape as THCOL for ray angles: [dark-bg hex, GL rgb, light-bg hex], so
+// ONE identity paints the viewport tint, the inspector swatch and the summary
+// list. Indexed by the slot ids in mat_slots (tips, walls, base, hidden).
+const SLOTCOL = [
+  ['#ffb08a',[1.00,0.55,0.30],'#b8501c'],   // tips  -- the accent family: the
+                                            // fraction of a percent that
+                                            // decides the answer
+  ['#5ea8e0',[0.37,0.66,0.88],'#2f6fb5'],   // inner sides
+  ['#8fd6a8',[0.56,0.84,0.66],'#2c6e49'],   // base
+  ['#8b8f94',[0.55,0.56,0.58],'#84878b'],   // hidden, never lit
+];
+const SCOLFLAT = new Float32Array(SLOTCOL.flatMap(c=>c[1]));
+let SMIX = 0;    // 0 = the plain grey instrument view, exactly as before
+let SHI = -1;    // slot id to emphasise, -1 = all equally
+
 const VAO = gl.createVertexArray(), VBO = gl.createBuffer();
 gl.bindVertexArray(VAO); gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
-gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
+// stride 28: [px,py,pz, nx,ny,nz, slot]
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,28,0);
+gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,28,12);
+gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2,1,gl.FLOAT,false,28,24);
 gl.enable(gl.DEPTH_TEST); gl.clearColor(.039,.051,.059,1);
 let NTRI = 0, CEN=[30,-25,0], RAD=60;
 function upload(a){
   gl.bindBuffer(gl.ARRAY_BUFFER, VBO); gl.bufferData(gl.ARRAY_BUFFER, a, gl.STATIC_DRAW);
-  NTRI = a.length/18;
+  NTRI = a.length/21;
   let lo=[1e9,1e9,1e9], hi=[-1e9,-1e9,-1e9];
-  for(let i=0;i<a.length;i+=6) for(let k=0;k<3;k++){ lo[k]=Math.min(lo[k],a[i+k]); hi[k]=Math.max(hi[k],a[i+k]); }
+  for(let i=0;i<a.length;i+=7) for(let k=0;k<3;k++){ lo[k]=Math.min(lo[k],a[i+k]); hi[k]=Math.max(hi[k],a[i+k]); }
   CEN = lo.map((v,k)=>(v+hi[k])/2);
   RAD = Math.max(...lo.map((v,k)=>hi[k]-v))*0.62 || 60;
 }
@@ -1069,6 +1294,11 @@ function draw(fw, fh){
   const MVP=mul(V,Pm);   // = Pm * V, see mul()
   gl.uniformMatrix4fv(gl.getUniformLocation(P,'mvp'), false, MVP);
   gl.uniformMatrix3fv(gl.getUniformLocation(P,'nm'), false, new Float32Array([1,0,0,0,1,0,0,0,1]));
+  // SLOT TINT. On only while the inspector is open -- one rule, no extra
+  // toggle, so a measurement view can never be quietly false-coloured.
+  gl.uniform3fv(gl.getUniformLocation(P,'SCOL'), SCOLFLAT);
+  gl.uniform1f(gl.getUniformLocation(P,'SMIX'), SMIX);
+  gl.uniform1f(gl.getUniformLocation(P,'SHI'), SHI);
   gl.drawArrays(gl.TRIANGLES, 0, NTRI*3);
   if(NLINE){
     gl.useProgram(LP); gl.bindVertexArray(LVAO);
@@ -1280,30 +1510,169 @@ addEventListener('resize', draw);
                $('#formout').innerHTML = '<div><dt>failed</dt><dd>&mdash;</dd></div>'; }
     finally{ b.disabled = false; setBusy(-1); prog.stop(); }
   };
-  // ---- coatings: a named product is one number, rho_dh at normal incidence
-  const CO = await (await fetch('/api/coatings')).json();
-  const opts = Object.entries(CO).map(([k,v]) =>
+  // ---- materials: per part, with sources ---------------------------------
+  // Everything the inspector needs arrives in one request: the library with
+  // all four properties per material, the slot rules with a sentence each on
+  // what the part IS, and generated widget descriptors.
+  const MATS = await (await fetch('/api/materials')).json();
+  const LIB = MATS.library, MATFIELDS = MATS.fields;
+  const SLOTRULES = MATS.slot_rules.filter(r => r.assignable);
+  const libOpts = Object.entries(LIB).map(([k,v]) =>
     `<option value="${k}">${k}  ·  ${(100*v.rho0).toFixed(2)}%</option>`).join('');
-  $('#coat').innerHTML = opts;
-  $('#coat').value = 'musou_fit';
-  $('#deepcoat').innerHTML = '<option value="">— painted all the way down —</option>' + opts;
-  const coatNote = () => {
-    const a = CO[$('#coat').value], d = CO[$('#deepcoat').value];
-    const has = !!$('#deepcoat').value;
-    $('#pdwrap').style.display = has ? '' : 'none';
-    $('#coatnote').innerHTML = a.note + (d ? `<br><br><b>Below ${$('#pd').value} mm:</b> ${d.note}` : '');
-  };
-  // the coating feeds every measurement (and the trace's rho), so changing it
-  // stales every readout exactly like a geometry change does
-  $('#coat').onchange = () => { coatNote(); resetResults(); };
-  $('#deepcoat').onchange = () => { coatNote(); resetResults(); };
-  for(const [id,lab] of [['pd','v_pd']]){
-    const r=$('#'+id), n=$('#n_'+id), L=$('#'+lab);
-    const sync = v => { fitRange(r, v); r.value=v; if(n) n.value=v;
-                        L.textContent=(+v).toFixed(1); coatNote(); resetResults(); };
-    r.oninput = e=>sync(e.target.value); if(n) n.onchange = e=>sync(e.target.value);
+  let MXSEL = SLOTRULES[0].key, MXFOCUS = null;
+
+  // One editor per part, ALL of them in the DOM, one visible. sliders()
+  // rebuilds host.innerHTML wholesale and collect() scrapes dataset, so
+  // per-part state cannot survive a rebuild unless it stays in the tree.
+  $('#mxedit').innerHTML = SLOTRULES.map(r => `
+    <div class="mxe" data-slot="${r.key}" hidden>
+      <div class="row"><label>${r.label}</label>
+        <select class="mxbase">${libOpts}</select></div>
+      <div class="grp mxprops"></div>
+      <p class="mxsrc"></p>
+    </div>`).join('');
+  for(const e of $('#mxedit').children){
+    e.querySelector('.mxbase').value = MATS.study_default;
+    sliders(e.querySelector('.mxprops'), MATFIELDS, 'm');
+    // dataset.src is to provenance what dataset.val is to value:
+    // inherited | library | edited. It drives the EDITED pill, the revert,
+    // and what the report prints.
+    for(const d of e.querySelector('.mxprops').children) d.dataset.src = 'library';
   }
-  coatNote();
+
+  // Push a library entry's own numbers into its rows, leaving anything the
+  // user overrode alone. AN OVERRIDDEN ENTRY MUST NOT GO ON CLAIMING ITS
+  // SOURCE, which is why `src` is tracked at all.
+  function mxLoadBase(e, keepEdited){
+    const m = LIB[e.querySelector('.mxbase').value];
+    if(!m) return;
+    for(const d of e.querySelector('.mxprops').children){
+      if(keepEdited && d.dataset.src === 'edited') continue;
+      const v = m[d.dataset.name];
+      if(v === undefined) continue;
+      const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]'),
+            b=d.querySelector('b');
+      const f = MATFIELDS.find(x=>x.name===d.dataset.name);
+      if(r){ fitRange(r, v); r.value=v; } if(n) n.value=v;
+      if(b) b.textContent = (+v).toFixed(f && f.dec != null ? f.dec : 3);
+      d.dataset.val = v; d.dataset.src = 'library';
+    }
+  }
+  for(const e of $('#mxedit').children) mxLoadBase(e, false);
+
+  // Any property edit marks its row, so the pill and the report can tell a
+  // cited number from one somebody typed.
+  for(const e of $('#mxedit').children){
+    for(const d of e.querySelector('.mxprops').children){
+      const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]');
+      const mark = () => { d.dataset.src = 'edited'; };
+      if(r) r.addEventListener('input', mark);
+      if(n) n.addEventListener('change', mark);
+    }
+    e.querySelector('.mxbase').onchange = () => { mxLoadBase(e, false); mxSelect(e.dataset.slot); refresh(); };
+  }
+
+  mxCollect = function(){
+    const slots = {};
+    for(const e of $('#mxedit').children){
+      const base = e.querySelector('.mxbase').value, props = {};
+      for(const d of e.querySelector('.mxprops').children)
+        if(d.dataset.src === 'edited') props[d.dataset.name] = +d.dataset.val;
+      slots[e.dataset.slot] = Object.keys(props).length ? Object.assign({base}, props) : {base};
+    }
+    return {version:1, slots,
+            defaults:{diffuse_frac:+$('#df').value, roughness:+$('#rg').value}};
+  }
+
+  function mxSelect(key){
+    MXSEL = key;
+    const rule = SLOTRULES.find(r=>r.key===key) || SLOTRULES[0];
+    SHI = rule.id;
+    for(const e of $('#mxedit').children) e.hidden = (e.dataset.slot !== key);
+    $('#mxwhy').textContent = rule.why;
+    const e = [...$('#mxedit').children].find(x=>x.dataset.slot===key);
+    if(e){
+      const m = LIB[e.querySelector('.mxbase').value] || {};
+      const edited = [...e.querySelector('.mxprops').children]
+        .filter(d=>d.dataset.src==='edited').map(d=>d.dataset.name);
+      const est = (m.estimated||[]).filter(x=>!edited.includes(x));
+      e.querySelector('.mxsrc').innerHTML =
+        `<b>Source.</b> ${m.note||''}` +
+        (est.length ? `<br><span class="mxest">Estimated, not measured: ${est.join(', ')}.</span>` : '') +
+        (edited.length ? `<br><span class="mxest">You changed ${edited.join(', ')} &mdash; this is no longer the cited product.</span>` : '');
+    }
+    mxRows(); draw();
+  }
+
+  // The slot rows, drawn twice from one source: in the inspector and in the
+  // left column. LASTSLOTS comes from X-Derived on the last /api/mesh.
+  mxRows = function(){
+    const rows = (LASTSLOTS || SLOTRULES.map(r=>({key:r.key,id:r.id,label:r.label,
+                                                  area_frac:0,assignable:r.assignable})));
+    const html = rows.map(r => {
+      const m = (LASTMATS||{})[r.key];
+      const col = (SLOTCOL[r.id]||SLOTCOL[3])[2];
+      const pill = m && m.edited ? ' <span class="pill ed">EDITED</span>'
+                 : (m && m.missing ? ' <span class="pill no">MISSING</span>' : '');
+      const desc = r.assignable
+        ? (m ? `${m.name||'custom'} &middot; ${(100*m.rho0).toFixed(2)}%${pill}` : '&mdash;')
+        : 'no light reaches these';
+      return `<li data-slot="${r.key}" ${r.assignable?'tabindex="0" role="button"':'aria-disabled="true"'}
+                 class="${r.key===MXSEL?'on':''}">
+        <i style="background:${col}"></i><span class="k">${r.label}</span>
+        <span class="a">${(100*r.area_frac).toFixed(r.area_frac<0.01?3:2)} %</span>
+        <span class="m">${desc}</span></li>`;
+    }).join('');
+    $('#mxslots').innerHTML = html;
+    $('#mxsum').innerHTML = html;
+    for(const host of ['#mxslots','#mxsum'])
+      for(const li of $(host).children){
+        if(li.getAttribute('aria-disabled')) continue;
+        li.onclick = () => { if(host==='#mxsum') mxOpen(li.dataset.slot); else mxSelect(li.dataset.slot); };
+        li.onkeydown = ev => { if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); li.click(); } };
+      }
+    const t = rows.find(r=>r.key==='tips');
+    $('#matxsum').textContent = t ? `tips ${(100*t.area_frac).toFixed(2)} % of area` : '';
+    $('#mxfoot').textContent =
+      'Areas are of the trimmed part, measured on the built mesh. The tips are '
+      + 'a fraction of a percent of the material and decide the answer.';
+  }
+
+  // The resolved material for a part, as the server decided it. Falls back to
+  // the library default before the first mesh lands.
+  function mxMat(key){
+    return (LASTMATS && LASTMATS[key])
+        || Object.assign({name: MATS.study_default},
+                         LIB[MATS.study_default] || {}, {edited:false});
+  }
+
+  function mxOpen(slot){
+    MXFOCUS = document.activeElement;
+    $('#matx').classList.add('open'); document.body.classList.add('mxopen');
+    SMIX = 0.55; mxSelect(slot || MXSEL);
+    ($('#mxslots').querySelector('li.on') || $('#matxc')).focus();
+  }
+  function mxClose(){
+    $('#matx').classList.remove('open'); document.body.classList.remove('mxopen');
+    SMIX = 0; SHI = -1; draw();
+    if(MXFOCUS && MXFOCUS.isConnected) MXFOCUS.focus();
+  }
+  $('#mxopen').onclick = () => mxOpen(MXSEL);
+  $('#matxc').onclick = mxClose;
+  // modeless, so no focus trap: trapping focus inside a panel the user is
+  // meant to look PAST would be a lie about what it is
+  addEventListener('keydown', ev => {
+    if(ev.key === 'Escape' && $('#matx').classList.contains('open')){
+      ev.preventDefault(); mxClose(); }
+  });
+  $('#mxreset').onclick = () => {
+    for(const e of $('#mxedit').children){
+      e.querySelector('.mxbase').value = MATS.study_default;
+      mxLoadBase(e, false);
+    }
+    mxSelect(MXSEL); refresh();
+  };
+  mxRows();
 
   // WHAT EACH CHOICE ACTUALLY MEASURES. Cycles runs the fitted Musou coating,
   // which is the material every published number used. Mitsuba has no identical
@@ -1340,19 +1709,72 @@ addEventListener('resize', draw);
     for(const id of ['#m5','#mf']) $(id).classList.remove('done');
   };
   $('#rendnote').innerHTML = RENDNOTE.cycles;
+  $('#mbd').onclick = async () => {
+    const b = $('#mbd'); b.disabled = true; setBusy(1);
+    const prog = progressBar(b);
+    $('#bdout').innerHTML =
+      '<div><dt>rendering 81 cells&hellip;</dt><dd>~4 min</dd></div>';
+    try{
+      const r = await fetch('/api/bidir', {method:'POST',
+        body: JSON.stringify({spec: LAST, step: 20, samples: 256,
+                              coating: $('#coat').value})});
+      const j = await r.json();
+      if(j.error) throw new Error(j.error);
+      heatmap(j);
+      const m = j.meta || {}, flat = j.grid.flat().filter(v => v > 0);
+      const at = (ti, to) => {
+        const i = j.ins.indexOf(ti), o = j.outs.indexOf(to);
+        return (i < 0 || o < 0) ? null : j.grid[o][i];
+      };
+      const f = v => v == null ? '\u2014' : (+v).toPrecision(4) + ' /sr';
+      // the numbers a person actually asks the picture for
+      const aud = j.outs.indexOf(0) < 0 ? [] : j.grid[j.outs.indexOf(0)]
+        .filter(v => v != null);
+      $('#bdout').innerHTML = [
+        ['brightest cell', f(Math.max(...flat))],
+        ['head-on, head-on lit', f(at(0, 0))],
+        ['worst the audience sees', aud.length ? f(Math.max(...aud)) : '\u2014'],
+        ['a flat 5 % wall, for scale', '0.01592 /sr'],
+        ['bin width \u00b7 material',
+         `${m.sun_angle_deg}\u00b0 \u00b7 ${m.material}`],
+        ['cells \u00b7 time', `${m.cells} \u00b7 ${m.seconds} s`],
+      ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')
+        + (m.worst_control_dev > 0.02
+           ? `<div><dt style="color:#b34700">control drift</dt><dd>` +
+             `${(100*m.worst_control_dev).toFixed(2)} % \u2014 tilt, window ` +
+             `or margin, not the panel</dd></div>` : '');
+      b.classList.add('done');
+    }catch(e){
+      $('#bdout').innerHTML =
+        `<div><dt>failed</dt><dd>${e.message}</dd></div>`;
+    }
+    finally{ setBusy(-1); b.disabled = false; prog.stop(); }
+  };
+
   $('#mr').onclick = async () => {
     const b=$('#mr'); b.disabled=true; setBusy(1);
     const prog = progressBar(b);   // trace progress is counted client-side
     try{
       const mode = $('#ray_mode').value;
-      // the coating already chosen on the left owns rho -- no second picker
-      const rho = CO[$('#coat').value].rho0;
+      // ONE SCALAR RHO, so it must say which part it is. Nearly every
+      // ray-surface interaction happens on the inner sides -- they are ~94 %
+      // of the area -- so that is the honest single number to trace with, and
+      // the readout names it rather than implying the whole assignment.
+      const rayMat = mxMat('walls');
+      const rho = rayMat.rho0;
       // real spill can come around from any compass direction; phi rotates
       // the approach out of the theta plane. The RENDER's incoming light is
       // already all azimuths at once -- only its read direction is phi 0.
       const phi = +$('#ray_phi').value || 0;
       const nr = Math.min(800, Math.max(20, +$('#ray_n').value || 200));
       const mb = mode === 'specular' ? 40 : 24;
+      // The coating is four numbers, not one. Sending only rho -- which is all
+      // this call did for its whole life -- left the trace modelling a
+      // 76%-diffuse paint as a perfect mirror, because raytrace_viz had no way
+      // to know any better. A server that has not been taught these keys yet
+      // ignores them and falls back to the published split, so sending them is
+      // safe against either version.
+      const df = +$('#df').value, rg = +$('#rg').value;
       // the SAME five angles the measurement renders, one trace per angle,
       // sequential because the server renders one request at a time anyway
       const THS = [0,-20,-40,20,40];
@@ -1360,7 +1782,9 @@ addEventListener('resize', draw);
       for(const th of THS){
         prog.set(out.length, THS.length);
         const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
-          {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode})});
+          {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode,
+           coating: rayMat.name || undefined,
+           diffuse_frac: rayMat.diffuse_frac, roughness: rayMat.roughness})});
         const j = await r.json();
         if(j.error) throw new Error(j.error);
         out.push(j);
@@ -1369,7 +1793,14 @@ addEventListener('resize', draw);
       SHOW_THETAS = THS; buildOverlay(THS); draw();
       const fmt = v => v >= 1e-4 ? (100*v).toFixed(3)+' %'
                  : v > 0 ? v.toExponential(1) : '~0';
-      const worst = Math.max(...out.map(j=>j.stats.rho_est));
+      // NAME THE ANGLE. An anonymous max over five thetas reads as a property
+      // of the design, and in specular mode on any flat-floored design it is
+      // always theta 0 and always exactly rho -- a corner reflector returns the
+      // polar angle it was given, so at 0 the retro and forward branches
+      // coincide. It is also a cliff: 0.060 at 0 deg, 0.025 at 2, 0.0039 at 5,
+      // 0.0006 at 20. Showing which angle won lets that be recognised.
+      const wj = out.reduce((a,j)=>j.stats.rho_est > a.stats.rho_est ? j : a, out[0]);
+      const worst = wj.stats.rho_est;
       const took = out.reduce((a,j)=>a+(+j.seconds||0),0);
       const s0 = out[0].stats;
       $('#rayout').innerHTML =
@@ -1378,10 +1809,11 @@ addEventListener('resize', draw);
           return `<div><dt><label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer">
             <input type="checkbox" checked data-th="${s.theta}" style="accent-color:${thc(s.theta)[2]};margin:0">
             <span style="color:${thc(s.theta)[2]};font-weight:600">${s.theta}&deg;</span></label></dt>
-            <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
+            <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${s.leak?` &middot; <span title="left through the cut side of the trimmed panel, not back into the room — excluded from out">edge leak ${(100*s.leak_frac).toFixed(1)} %</span>`:''}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
         }).join('') +
-        `<div><dt><b>worst of 5 sampled angles</b></dt><dd><b>${fmt(worst)}</b></dd></div>
-         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${$('#coat').value} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>
+        `<div><dt><b>worst of 5 sampled angles</b></dt><dd><b>${fmt(worst)}</b>
+           <span class="note">at &theta; ${wj.stats.theta}&deg;</span></dd></div>
+         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; inner sides ${mxMat('walls').name||'custom'} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;${s0.divergence_deg ? ' &middot; source '+s0.divergence_deg+'&deg;' : ''}</dd></div>
          <div><dt>took</dt><dd>${took.toFixed(2)} s</dd></div>`;
       // per-angle visibility: unchecking an angle removes its paths from the
       // viewport without re-tracing; the numbers in this table stay put
@@ -1436,6 +1868,11 @@ addEventListener('resize', draw);
     const ch = $('#chart');
     const chartImg = (ch.style.display !== 'none' && ch.width)
       ? `<img class="chart" src="${ch.toDataURL('image/png')}">` : '';
+    // metric 08's map, same treatment as the chart: a picture nobody can put
+    // beside the numbers is not part of the report
+    const bd = $('#bidir');
+    const bidirImg = (bd && bd.style.display !== 'none' && bd.width)
+      ? `<img class="chart" src="${bd.toDataURL('image/png')}">` : '';
     const d = new Date(), p2 = n => String(n).padStart(2, '0');
     const when = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
     const tp = LAST.top_params || {};
@@ -1468,16 +1905,25 @@ addEventListener('resize', draw);
                    row_offset: ' mm'};
     const pl = o => Object.entries(o || {}).map(([k, v]) =>
       `${k} ${v}${UNITS[k] || ''}`).join(' · ');
-    const co = $('#coat'), dc = $('#deepcoat');
-    const coLabel = co.selectedOptions[0].textContent;
     const rows = [['top', `${LAST.top} — ${pl(LAST.top_params)}`]];
     if(LAST.floor !== 'none')
       rows.push(['floor', `${LAST.floor} d${LAST.floor_depth} — ${pl(LAST.floor_params)}`]);
     rows.push(['panel', `${LAST.panel} mm sq · envelope depth ${LAST.depth} mm`]);
-    rows.push(['coating', coLabel
-      + (/%/.test(coLabel) ? '' : ` (ρ₀ ${(100*CO[co.value].rho0).toFixed(2)} %)`)
-      + (dc.value ? ` · below ${$('#pd').value} mm: ${dc.selectedOptions[0].textContent}` : '')]);
-    rows.push(['model', `diffuse ${$('#df').value} · roughness ${$('#rg').value} (assumed)`]);
+    // EVERY PART, AND WHAT IT WAS TAKEN ON. A reader who only ever sees the
+    // PDF must be able to tell which surface carried which finish.
+    rows.push(['materials', SLOTRULES.map(r => {
+      const m = mxMat(r.key);
+      return `${r.label} ${m.name||'custom'} ${(100*m.rho0).toFixed(2)} %`;
+    }).join(' · ')]);
+    // A SESSION OVERRIDE MUST NOT PASS AS A CITED PRODUCT.
+    const edits = SLOTRULES.filter(r => mxMat(r.key).edited)
+      .map(r => `${r.label} (${mxMat(r.key).name||'custom'})`);
+    if(edits.length) rows.push(['edited', edits.join(' · ') + ' — changed here, no longer the cited product']);
+    const est = SLOTRULES.map(r => {
+      const m = mxMat(r.key), e = (m.estimated||[]);
+      return e.length ? `${r.label}: ${e.join(', ')}` : null;
+    }).filter(Boolean);
+    if(est.length) rows.push(['estimated, not measured', est.join(' · ')]);
     rows.push(['probe', `beam ${$('#beamw').value} mm at wall · renderer ${$('#renderer').value}`]);
     for(const dv of $('#derived').querySelectorAll('div')){
       const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
@@ -1511,6 +1957,21 @@ addEventListener('resize', draw);
         + (meta.worst ? `<div class="kv wl"><dt>worst of 5 sampled angles</dt><dd>${esc(meta.worst)}</dd></div>` : '')
         + `<p class="cap">${esc((meta.mode || '') + (meta.took ? ' · took ' + meta.took : ''))} — a sample, not the measurement</p>`
       : '<p class="dim">not traced — a sample, not the measurement</p>';
+
+    let bidir = '';
+    for(const dv of $('#bdout').querySelectorAll('div')){
+      const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
+      const v = ((dv.querySelector('dd') || {}).textContent || '').trim();
+      if(/not measured|rendering/.test(k)) continue;
+      bidir += `<div class="kv sm"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`;
+    }
+    bidir = bidir
+      ? bidirImg + bidir + '<p class="cap">x = incidence, y = observation; ' +
+        'BRDF in 1/sr, log scale. y=+x retro · y=\u2212x flat-mirror ' +
+        'specular · y=0 the audience. One azimuth plane, so no hemisphere ' +
+        'total. Absolute values wait on a measured coupon \u2014 metrics/08.' +
+        '</p>'
+      : '<p class="dim">not measured</p>';
 
     const rsm = $('#rho').querySelector('small');
     const total = (rsm && !/not measured/.test(rsm.textContent))
