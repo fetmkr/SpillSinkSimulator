@@ -66,21 +66,39 @@ def read(bounces, spp=512, params=None, rho=1.0):
     except OSError: pass
     return v
 
-FLAT=dict(kind="pyramid",pitch=4.0,depth=0.001,tip_flat=0.0,face=100.0)
+# THE FLAT CONTROL WAS NOT FLAT (found 2026-08-20). It was a pyramid field
+# 0.001 mm deep, and it read 0.662 at EVERY bounce count from 1 to 256 --
+# frozen, not converging, which is the signature of rays being killed rather
+# than absorbed. One micrometre of relief is below Cycles' ray offset, so a
+# bounce leaves the surface already inside the next facet and self-terminates.
+# depth = 0 is a real plane and converges to exactly 1.000000. Keeping 0.001
+# meant the control that was supposed to separate "renderer loses energy" from
+# "cavity needs bounces" was itself losing energy, so it could never pass and
+# its failure said nothing about the renderer.
+FLAT=dict(kind="pyramid",pitch=4.0,depth=0.0,tip_flat=0.0,face=100.0)
 PYR =dict(kind="pyramid",pitch=4.0,depth=20.0,tip_flat=0.1,face=100.0)
 rows=[]
-print("=== W1: FLAT rho=1 (must read 1.000 at any bounce count) ===",flush=True)
-for b in (1,8,128):
+# The plate carries a 2 mm backing lip, so the scene is a shallow TRAY, not a
+# bare plane -- light does reflect off the surround and one bounce is genuinely
+# not enough. The bar is therefore "converges to 1.000", not "1.000 at b=1".
+print("=== W1: FLAT rho=1 (must converge to 1.000) ===",flush=True)
+for b in (1,8,128,512):
     v=read(b,params=FLAT,rho=1.0); rows.append({"g":"W1","b":b,"v":v})
     print("   bounces %5d -> %.6f   %s"
-          % (b,v,"PASS" if abs(v-1)<=0.002 else "**FAIL**"),flush=True)
+          % (b,v,"PASS" if abs(v-1)<=0.002 else ("climbing" if b<512 else "**FAIL**")),flush=True)
 print("\n=== W1b: FLAT rho=0.5 ===",flush=True)
 v=read(128,params=FLAT,rho=0.5); rows.append({"g":"W1b","v":v})
 print("   -> %.6f   %s" % (v,"PASS" if abs(v-0.5)<=0.002 else "**FAIL**"),flush=True)
 print("\n=== W2/W3: PYRAMID field rho=1, bounces swept ===",flush=True)
 prev=None
 for b in (8,32,128,512,2048):
-    v=read(b,params=PYR,rho=1.0); rows.append({"g":"W2","b":b,"v":v})
+    # the first run of this gate exited 0 with no traceback partway through
+    # the sweep, so every read is now reported even when it dies
+    try:
+        v=read(b,params=PYR,rho=1.0)
+    except BaseException as exc:
+        print("   bounces %5d -> DIED: %r" % (b, exc), flush=True); raise
+    rows.append({"g":"W2","b":b,"v":v})
     d="" if prev is None else " (%+.2f %%)"%(100*(v-prev)/max(prev,1e-9))
     print("   bounces %5d -> %.6f%s   deficit %.4f" % (b,v,d,1.0-v),flush=True)
     prev=v

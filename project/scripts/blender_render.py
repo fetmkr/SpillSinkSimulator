@@ -1056,7 +1056,46 @@ def build_scene(cfg):
                 paint_fade=cfg.get("paint_fade", 0.0))
         else:
             mat = m_s1
-        mesh_to_object(v, f, "panel_mesh", mat)
+        ob = mesh_to_object(v, f, "panel_mesh", mat)
+
+        # A SEPARATE FINISH FOR THE FLOOR (2026-08-20). Until now the only
+        # split was the paint plane at y = -paint_depth, which cuts by DEPTH
+        # and knows nothing about which layer it is cutting. That cannot say
+        # the thing a stack is actually built as: the comb is BOUGHT, anodised,
+        # and the floor is a new part that gets painted. Depth-cutting forces
+        # the paint through the comb's lower walls to reach the floor at all.
+        #
+        # `floor_coating` assigns the faces below the layer boundary their own
+        # material, so comb and floor can carry different finishes. The
+        # boundary is y = -top_depth, which is where geom_stack puts it.
+        fc = cfg.get("floor_coating")
+        tdep = cfg.get("floor_boundary_depth")
+        if fc and tdep:
+            import bmesh
+            m_floor = make_coating(
+                "coat_floor", roughness=fc.get("roughness", rough),
+                body=fc.get("body", MUSOU_BODY),
+                spec_scale=fc.get("spec_scale", MUSOU_SPEC_SCALE),
+                ior=fc.get("ior", MUSOU_IOR))
+            ob.data.materials.append(m_floor)
+            # NUDGE THE PLANE UP BY A HAIR. With floor: none the surface that
+            # faces the room from the bottom of every cell sits EXACTLY at
+            # y = -depth, and a strict "below the plane" test misses a face
+            # lying on it -- so the backing kept its top material and the
+            # control looked dead. A pyramid has no such face (its valleys
+            # meet), which is why only the honeycomb exposed this.
+            y_split = -abs(float(tdep)) + 1e-3
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
+            bmesh.ops.bisect_plane(
+                bm, geom=list(bm.verts) + list(bm.edges) + list(bm.faces),
+                plane_co=(0.0, y_split, 0.0), plane_no=(0.0, 1.0, 0.0))
+            for face in bm.faces:
+                face.material_index = (
+                    1 if face.calc_center_median().y < y_split else 0)
+            bm.to_mesh(ob.data)
+            bm.free()
+            ob.data.update()
         cs = SimpleNamespace(warnings=[], stage1=[], stage2=[], shell=[])
     else:
         # Overrun the face along the extrusion axis by the same margin the

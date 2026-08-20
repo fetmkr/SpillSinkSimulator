@@ -146,6 +146,98 @@ pyramid field with bounces swept:
 rather than argued. Note that **128 bounces is not enough at high reflectance**
 — the shipped default — though the real 1 % coating is dead in three.
 
+Re-run 2026-08-20 evening, one Blender process per point, reproduces the row
+above to five decimals: 0.467013 / 0.806381 / 0.989174 / 0.999904 / 0.999904.
+The plateau is identical at 512 and 2048, so the residual 96 ppm is the floor,
+not a climb that has not finished.
+
+### But the flat CONTROL was broken, twice, and both were mine
+
+The furnace sweep only means something next to a control that separates *the
+renderer loses energy* from *this cavity needs bounces*. That control failed
+every run, and each time the fault was in the control, not the renderer.
+
+**First: the "flat" plate was not flat.** It was a pyramid field 0.001 mm deep.
+It read 0.662 at 1, 4, 32 and 256 bounces — frozen to six figures, which is the
+signature of rays being *killed* rather than absorbed; an unfinished sum climbs.
+One micrometre of relief is below Cycles' ray offset, so a bounce departs
+already inside the neighbouring facet and self-terminates.
+
+**Second: depth = 0 stacks the geometry on one plane.** The pyramid tips and
+the backing's top face both land on y = 0. Measured on the built mesh:
+
+| plate | area lying exactly on y = 0 | layers over the 100 x 100 face | facing down or sideways |
+|---|---|---|---|
+| depth 0 (the "flat" control) | 38576 mm2 | **3.86** | 13456 mm2 |
+| depth 20 (the real field) | 22.09 mm2 | 0.00 | 0 |
+
+At rho = 1 a stack costs nothing — the sum still converges to 1.000000 — which
+is why the energy check passed anyway and hid the defect. At rho = 0.5 every
+spurious bounce halves the light, and the plate read **0.354 where 0.5 was
+predicted**. That failure was pre-registered as evidence the renderer's BSDF
+was wrong. It was not.
+
+**The BSDF control has to be a bare quad.** One face, no rig, no control plate,
+no backing, nothing that can occlude it; under a uniform sky of radiance 1 a
+Lambertian of albedo r must read exactly r at one bounce:
+
+| albedo | reads | spread across the face |
+|---|---|---|
+| 1.0 | 1.000000 | 0 |
+| 0.5 | 0.500000 | 0 |
+| 0.05 | 0.050000 | 0 |
+| 0.01 | 0.010000 | 0 |
+
+Exact at every level, with zero variation across the face. **The real geometry
+at depth 20 carries no coincident surface at all**, so neither defect ever
+touched a published measurement — but the instrument that was supposed to prove
+that had been reading its own damage for as long as it existed.
+
+### The sweep kept dying with exit code 0
+
+Three runs stopped partway through the bounce sweep with no traceback and a
+zero exit status, which reads as "finished". The crash report names it:
+
+    ccl::MetalKernelPipeline::compile()
+    ccl::path_cache_get(...)
+    BUG_IN_CLIENT_OF_LIBMALLOC: POINTER BEING FREED WAS NOT ALLOCATED
+
+[confirmed: ~/Library/Logs/DiagnosticReports/Blender-2026-08-20-161521.ips]
+
+Cycles' Metal shader-cache thread double-frees when it recompiles a kernel, and
+sweeping bounce counts inside one process forces exactly that. Nothing to do
+with the geometry. `gate_furnace_step.py` takes ONE reading per process, so the
+kernel compiles once; the driver retries a point that produces no reading,
+because the same crash also hits the first launches against a cold cache.
+
+**Any batch that varies a render setting in a loop inside one Blender is
+exposed to this, and it fails silently.** A run that stops early looks like a
+run that finished.
+
+### The render's mesh IS the exporters' mesh
+
+The STEP file declares itself "not a closed solid: 28 open edges", which raises
+the obvious question of whether the geometry the renderer traced was also
+wrong. It was not, and this is measured rather than argued: build the render
+scene, read the mesh BACK OUT of Blender — the actual triangles light hits —
+and compare it to what the exporter writes.
+
+| design | render (read from Blender) | exporter |
+|---|---|---|
+| pyramid p4/d22 | V 808  F 606  A 23344.69 | V 808  F 606  A 23344.69 |
+| pyramid p2/d18 | V 988  F 986  A 16261.76 | V 988  F 986  A 16261.76 |
+| honeycomb d50 | V 1560  F 1170  A 113445.55 | V 1560  F 1170  A 113445.55 |
+
+Identical, with no zero-area faces. Surface **area** is the quantity that
+decides how much light a face catches, so agreement there is the agreement that
+matters. The one initial mismatch was 1.05e-06 mm of bounding box, which is
+float32 round-trip on a 53 mm coordinate — the tolerance was tighter than
+Blender's own vertex storage, so the gate now sets its bar at one ulp.
+
+The open edges are a property of the *shell*, not the surfaces: the panel is
+modelled as overlapping solids, so faces meet inside the material where no
+light reaches. That blocks booleans in CAD. It does not move a photon.
+
 ---
 
 ## 4. Numbers that change
@@ -271,7 +363,16 @@ script are what caught them; they are the reason the record can be audited.
 
     Blender --background --factory-startup --python scripts/rig_v2_gates.py
     Blender --background --factory-startup --python scripts/rig_v2_gates2.py
-    Blender --background --factory-startup --python scripts/gate_furnace.py
+    Blender --background --factory-startup --python scripts/gate_render_vs_export.py
+
+    # the furnace sweep must NOT be run as one process -- Cycles' Metal
+    # shader cache double-frees on recompile and exits 0 mid-sweep. One
+    # reading per process, retrying a point that produces no reading:
+    for c in "bare 1 1.0" "bare 1 0.5" "bare 1 0.05" "flat 512 1.0" \
+             "pyr 8 1.0" "pyr 32 1.0" "pyr 128 1.0" "pyr 512 1.0" "pyr 2048 1.0"; do
+      Blender --background --factory-startup \
+        --python scripts/gate_furnace_step.py -- ${=c}
+    done
     Blender --background --factory-startup --python scripts/gate_displacement.py
     Blender --background --factory-startup --python scripts/gate_feature_px.py
     Blender --background --factory-startup --python scripts/sweep_standalone.py

@@ -119,7 +119,8 @@ def in_blender(op, **req):
                   req["roughness"], req["samples"], req.get("coating",
                   "musou_fit"), req.get("deep_coating"),
                   req.get("paint_depth"), req.get("deep_until"),
-                  req.get("paint_fade", 0.0), req.get("phis")),
+                  req.get("paint_fade", 0.0), req.get("phis"),
+                  req.get("floor_coating")),
               "lambert": lambda: measure_lambert(
                   req["spec"], req["theta"], req["rho"], req["samples"]),
               # every knob the request carries must reach form(); dropping one
@@ -765,6 +766,359 @@ def mesh_binary(verts, faces):
     return buf.getvalue()
 
 
+def weld_and_close(verts, faces, tol=5):
+    """Make a triangle soup manifold enough to be a STEP solid.
+
+    These meshes are built as OVERLAPPING SOLIDS -- the field sits on a slab and
+    the two share a coincident plane, recorded in FINDINGS_phase9v. Optically
+    that is inert (proved by measurement: the composed and cleaned meshes agree
+    to six digits), but it is not a solid: a pyramid panel comes out
+    V 197 - E 592 + F 222 = -173 where a closed shell needs 2, because half its
+    edges belong to one face instead of two.
+
+    Two operations, both general -- unlike `sweep_phase9v.clean_solid`, which is
+    hard-coded to depth 20 / backing 22 / pitch 4:
+
+      1. WELD. Round to `tol` decimals and merge; the overlap leaves separate
+         vertices at identical coordinates, so nothing shares an edge until
+         they are merged.
+      2. DROP COINCIDENT PAIRS. Where two solids meet, the same triangle exists
+         twice with opposite winding -- an interior wall that no light and no
+         cutter ever reaches. Both copies go; what is left is the outer skin.
+
+    Returns (verts, faces, euler) so the caller can say what it actually built
+    rather than assert it.
+    """
+    import collections
+    vmap, V, F = {}, [], []
+    for tri in faces:
+        idx = []
+        for i in tri:
+            p = verts[i]
+            k = (round(p[0], tol), round(p[1], tol), round(p[2], tol))
+            if k not in vmap:
+                vmap[k] = len(V)
+                V.append(list(k))
+            idx.append(vmap[k])
+        # fan-triangulate anything with more than three corners
+        for j in range(1, len(idx) - 1):
+            a, b, c = idx[0], idx[j], idx[j + 1]
+            if len({a, b, c}) == 3:
+                F.append((a, b, c))
+
+    seen = collections.defaultdict(list)
+    for fi, t in enumerate(F):
+        seen[tuple(sorted(t))].append(fi)
+    drop = set()
+    for k, ids in seen.items():
+        if len(ids) > 1:
+            # a coincident pair (or worse) is interior: remove every copy, and
+            # if an odd number survives keep exactly one so the skin stays shut
+            keep = 1 if len(ids) % 2 else 0
+            drop.update(ids[keep:])
+    F = [t for i, t in enumerate(F) if i not in drop]
+
+    # 3. DROP INTERIOR HORIZONTAL PLANES. The exact-duplicate rule above only
+    # catches a coincident pair that happens to be tessellated the SAME way.
+    # Where the field sits on its slab the two solids meet on one plane but
+    # triangulate it differently, so nothing cancels and the junction shows up
+    # as edges with three or more faces on them -- 60 of them on a pyramid
+    # panel, which is why the shell was closed and still not manifold. Any
+    # horizontal face strictly between the top and the bottom of the part is
+    # interior by construction: no light and no cutter reaches it.
+    ys = [v[1] for v in V]
+    ytop, ybot = max(ys), min(ys)
+    keep = []
+    for t in F:
+        y0, y1, y2 = V[t[0]][1], V[t[1]][1], V[t[2]][1]
+        flat = abs(y0 - y1) < 1e-6 and abs(y1 - y2) < 1e-6
+        interior = flat and (ybot + 1e-6) < y0 < (ytop - 1e-6)
+        if not interior:
+            keep.append(t)
+    F = keep
+
+    used = sorted({i for t in F for i in t})
+    remap = {o: n for n, o in enumerate(used)}
+    V2 = [V[o] for o in used]
+    F2 = [(remap[a], remap[b], remap[c]) for a, b, c in F]
+    cnt = collections.Counter()
+    for t in F2:
+        for i in range(3):
+            cnt[tuple(sorted((t[i], t[(i + 1) % 3])))] += 1
+    open_e = sum(1 for c in cnt.values() if c == 1)
+    nonman = sum(1 for c in cnt.values() if c > 2)
+    return V2, F2, {"euler": len(V2) - len(cnt) + len(F2),
+                    "open_edges": open_e, "nonmanifold_edges": nonman,
+                    "V": len(V2), "E": len(cnt), "F": len(F2)}
+
+
+def merge_coplanar(V, F):
+    """Group coplanar, edge-connected triangles into single polygon faces.
+
+    A faceted B-rep draws every triangle edge, and most of those are not real
+    edges of the part -- they are the diagonals a mesher put across a flat
+    quad. In a CAD viewer that reads as a scribble over the model, which is
+    what a STEP of this panel looked like. Merging keeps the geometric edges
+    and drops the tessellation ones: a pyramid flank is one triangle and stays
+    one face, a backing plate of hundreds of triangles becomes one.
+
+    Group by (quantised normal, plane offset), then by edge connectivity, then
+    walk each region's boundary. A region whose boundary is not one closed loop
+    -- an annulus, say -- is left as its own triangles rather than guessed at.
+    """
+    import collections
+    import math
+
+    def nrm(t):
+        a, b, c = V[t[0]], V[t[1]], V[t[2]]
+        u = (b[0]-a[0], b[1]-a[1], b[2]-a[2])
+        w = (c[0]-a[0], c[1]-a[1], c[2]-a[2])
+        n = (u[1]*w[2]-u[2]*w[1], u[2]*w[0]-u[0]*w[2], u[0]*w[1]-u[1]*w[0])
+        L = math.sqrt(sum(x*x for x in n))
+        if L < 1e-12:
+            return None, None
+        n = (n[0]/L, n[1]/L, n[2]/L)
+        return n, n[0]*a[0] + n[1]*a[1] + n[2]*a[2]
+
+    plane = {}
+    for fi, t in enumerate(F):
+        n, d = nrm(t)
+        if n is None:
+            continue
+        plane.setdefault((round(n[0], 4), round(n[1], 4),
+                          round(n[2], 4), round(d, 4)), []).append(fi)
+
+    out = []
+    for ids in plane.values():
+        e2f = collections.defaultdict(list)
+        for fi in ids:
+            t = F[fi]
+            for i in range(3):
+                e2f[tuple(sorted((t[i], t[(i+1) % 3])))].append(fi)
+        seen, groups = set(), []
+        for fi in ids:
+            if fi in seen:
+                continue
+            stack, comp = [fi], []
+            seen.add(fi)
+            while stack:
+                cur = stack.pop()
+                comp.append(cur)
+                t = F[cur]
+                for i in range(3):
+                    for nb in e2f[tuple(sorted((t[i], t[(i+1) % 3])))]:
+                        if nb not in seen:
+                            seen.add(nb)
+                            stack.append(nb)
+            groups.append(comp)
+
+        for comp in groups:
+            if len(comp) == 1:
+                out.append(list(F[comp[0]]))
+                continue
+            cnt = collections.Counter()
+            keep_dir = {}
+            for fi in comp:
+                t = F[fi]
+                for i in range(3):
+                    a, b = t[i], t[(i+1) % 3]
+                    k = tuple(sorted((a, b)))
+                    cnt[k] += 1
+                    keep_dir[k] = (a, b)
+            border = [keep_dir[e] for e, c in cnt.items() if c == 1]
+            nxt, ok = {}, bool(border)
+            for a, b in border:
+                if a in nxt:
+                    ok = False
+                    break
+                nxt[a] = b
+            if not ok:
+                out.extend(list(F[fi]) for fi in comp)
+                continue
+            start = border[0][0]
+            loop, cur, guard = [start], nxt.get(start), 0
+            while cur is not None and cur != start and guard <= len(border):
+                loop.append(cur)
+                cur = nxt.get(cur)
+                guard += 1
+            if cur != start or len(loop) < 3 or len(loop) != len(border):
+                out.extend(list(F[fi]) for fi in comp)
+            else:
+                out.append(loop)
+    return out
+
+
+def step_faceted(verts, faces, name="panel"):
+    """AP214 STEP as a faceted B-rep: one planar ADVANCED_FACE per triangle.
+
+    A mesh normally has to be APPROXIMATED to become STEP, because STEP is a
+    boundary representation of trimmed surfaces and a mesh is not. Here it does
+    not: every face of a pyramid, a comb wall or a blade IS a plane, so a
+    faceted B-rep is the exact geometry rather than a tessellation of it. What
+    is lost against a hand-built CAD model is only that coplanar triangles stay
+    separate faces -- file size, not shape.
+
+    TWO THINGS THE FIRST VERSION GOT WRONG, both of which make a reader show an
+    empty file rather than an error:
+
+    1. NO PRODUCT STRUCTURE. Geometry alone is not a STEP part. Without
+       APPLICATION_PROTOCOL_DEFINITION / PRODUCT / PRODUCT_DEFINITION /
+       PRODUCT_DEFINITION_SHAPE / SHAPE_DEFINITION_REPRESENTATION there is
+       nothing for the shape representation to hang off, and most readers
+       silently import nothing.
+
+    2. EDGES NOT SHARED. Every triangle built its own EDGE_CURVE, so two
+       neighbours meeting along one edge produced two coincident curves and the
+       shell never closed -- a CLOSED_SHELL whose edges are not shared is not
+       manifold, and a solid cannot be made from it. Edges are now keyed on
+       their vertex pair and reused with an orientation flag.
+    """
+    import math
+    verts, faces, diag = weld_and_close(verts, faces)
+    polys = merge_coplanar(verts, faces)
+    L = []
+    add = L.append
+    nid = [0]
+
+    def E(body):
+        nid[0] += 1
+        add("#%d=%s;" % (nid[0], body))
+        return nid[0]
+
+    def key(v):
+        return (round(v[0], 6), round(v[1], 6), round(v[2], 6))
+
+    pid, vpid, did, eid = {}, {}, {}, {}
+
+    def pt(v):
+        k = key(v)
+        if k not in pid:
+            pid[k] = E("CARTESIAN_POINT('',(%.6f,%.6f,%.6f))" % k)
+        return pid[k]
+
+    def vtx(v):
+        k = key(v)
+        if k not in vpid:
+            vpid[k] = E("VERTEX_POINT('',#%d)" % pt(v))
+        return vpid[k]
+
+    def dr(d):
+        k = (round(d[0], 6), round(d[1], 6), round(d[2], 6))
+        if k not in did:
+            did[k] = E("DIRECTION('',(%.6f,%.6f,%.6f))" % k)
+        return did[k]
+
+    def edge(p0, p1):
+        """One EDGE_CURVE per unordered vertex pair, plus which way it runs."""
+        a, b = key(p0), key(p1)
+        fwd = a <= b
+        k = (a, b) if fwd else (b, a)
+        if k not in eid:
+            q0, q1 = (p0, p1) if fwd else (p1, p0)
+            d = (q1[0]-q0[0], q1[1]-q0[1], q1[2]-q0[2])
+            dl = math.sqrt(sum(x*x for x in d)) or 1.0
+            vd = E("VECTOR('',#%d,%.6f)"
+                   % (dr((d[0]/dl, d[1]/dl, d[2]/dl)), dl))
+            li = E("LINE('',#%d,#%d)" % (pt(q0), vd))
+            eid[k] = E("EDGE_CURVE('',#%d,#%d,#%d,.T.)"
+                       % (vtx(q0), vtx(q1), li))
+        return eid[k], fwd
+
+    face_ids = []
+    for poly in polys:
+        if len(poly) < 3:
+            continue
+        ring = [verts[i] for i in poly]
+        a, b, c = ring[0], ring[1], ring[2]
+        u = (b[0]-a[0], b[1]-a[1], b[2]-a[2])
+        w = (c[0]-a[0], c[1]-a[1], c[2]-a[2])
+        n = (u[1]*w[2]-u[2]*w[1], u[2]*w[0]-u[0]*w[2], u[0]*w[1]-u[1]*w[0])
+        ln = math.sqrt(sum(x*x for x in n))
+        if ln < 1e-12:
+            continue
+        n = (n[0]/ln, n[1]/ln, n[2]/ln)
+        lu = math.sqrt(sum(x*x for x in u)) or 1.0
+        ax = E("AXIS2_PLACEMENT_3D('',#%d,#%d,#%d)"
+               % (pt(a), dr(n), dr((u[0]/lu, u[1]/lu, u[2]/lu))))
+        pl = E("PLANE('',#%d)" % ax)
+        oes = []
+        for i in range(len(ring)):
+            ec, fwd = edge(ring[i], ring[(i+1) % len(ring)])
+            oes.append(E("ORIENTED_EDGE('',*,*,#%d,.%s.)"
+                         % (ec, "T" if fwd else "F")))
+        el = E("EDGE_LOOP('',(%s))" % ",".join("#%d" % e for e in oes))
+        fb = E("FACE_OUTER_BOUND('',#%d,.T.)" % el)
+        face_ids.append(E("ADVANCED_FACE('',(#%d),#%d,.T.)" % (fb, pl)))
+
+    # IS IT ACTUALLY A SOLID? Euler on a closed orientable shell:
+    #     V - E + F = 2
+    # These meshes are built as OVERLAPPING SOLIDS -- FINDINGS_phase9v records
+    # a coincident double face plane at the field base and T-vertex rims -- so
+    # a pyramid panel comes out V 197, E 592, F 222, i.e. -173, and half its
+    # edges are used by one face instead of two. Declaring that a
+    # MANIFOLD_SOLID_BREP is a lie a CAD reader will either reject or repair
+    # silently. So it is declared for what it is: a closed solid when Euler
+    # says so, a SHELL_BASED_SURFACE_MODEL when it does not, and the header
+    # says which.
+    solid = (diag["euler"] == 2 and diag["open_edges"] == 0
+             and diag["nonmanifold_edges"] == 0)
+    if solid:
+        shell = E("CLOSED_SHELL('',(%s))"
+                  % ",".join("#%d" % i for i in face_ids))
+        brep = E("MANIFOLD_SOLID_BREP('%s',#%d)" % (name, shell))
+    else:
+        shell = E("OPEN_SHELL('',(%s))"
+                  % ",".join("#%d" % i for i in face_ids))
+        brep = E("SHELL_BASED_SURFACE_MODEL('%s',(#%d))" % (name, shell))
+
+    o = E("CARTESIAN_POINT('',(0.,0.,0.))")
+    zd = E("DIRECTION('',(0.,0.,1.))")
+    xd = E("DIRECTION('',(1.,0.,0.))")
+    ap = E("AXIS2_PLACEMENT_3D('',#%d,#%d,#%d)" % (o, zd, xd))
+    u1 = E("(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.))")
+    u2 = E("(NAMED_UNIT(*)PLANE_ANGLE_UNIT()SI_UNIT($,.RADIAN.))")
+    u3 = E("(NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT())")
+    ue = E("UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-06),#%d,"
+           "'distance_accuracy_value','')" % u1)
+    ctx = E("(GEOMETRIC_REPRESENTATION_CONTEXT(3)"
+            "GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#%d))"
+            "GLOBAL_UNIT_ASSIGNED_CONTEXT((#%d,#%d,#%d))"
+            "REPRESENTATION_CONTEXT('',''))" % (ue, u1, u2, u3))
+    rep = E("ADVANCED_BREP_SHAPE_REPRESENTATION('%s',(#%d,#%d),#%d)"
+            % (name, ap, brep, ctx))
+
+    # the product structure: without it a reader has geometry but no part
+    appc = E("APPLICATION_CONTEXT('automotive design')")
+    E("APPLICATION_PROTOCOL_DEFINITION('international standard',"
+      "'automotive_design',2000,#%d)" % appc)
+    prod = E("PRODUCT('%s','%s','',(#%d))"
+             % (name, name, E("PRODUCT_CONTEXT('',#%d,'mechanical')" % appc)))
+    pdf = E("PRODUCT_DEFINITION_FORMATION('','',#%d)" % prod)
+    pd = E("PRODUCT_DEFINITION('design','',#%d,#%d)"
+           % (pdf, E("PRODUCT_DEFINITION_CONTEXT('part definition',#%d,"
+                     "'design')" % appc)))
+    pds = E("PRODUCT_DEFINITION_SHAPE('','',#%d)" % pd)
+    E("SHAPE_DEFINITION_REPRESENTATION(#%d,#%d)" % (pds, rep))
+    E("PRODUCT_RELATED_PRODUCT_CATEGORY('part','',(#%d))" % prod)
+
+    kind = ("faceted solid" if solid else
+            "faceted surface model - not a closed solid: "
+            "%d non-manifold edges, %d open edges, "
+            "V %d - E %d + F %d = %d (2 expected). "
+            "The panel is modelled as overlapping solids; use for surface CAM "
+            "and reference, not for booleans"
+            % (diag["nonmanifold_edges"], diag["open_edges"],
+               diag["V"], diag["E"], diag["F"], diag["euler"]))
+    head = ("ISO-10303-21;\nHEADER;\n"
+            "FILE_DESCRIPTION(('" + kind + "'),'2;1');\n"
+            "FILE_NAME('%s.step','',('SpillSink'),(''),"
+            "'SpillSink simulator','','');\n"
+            "FILE_SCHEMA(('AUTOMOTIVE_DESIGN {1 0 10303 214 1 1 1 1}'));\n"
+            "ENDSEC;\nDATA;\n" % name)
+    return (head + "\n".join(L) + "\nENDSEC;\nEND-ISO-10303-21;\n"
+            ).encode("utf-8")
+
+
 def stl_binary(verts, faces, name="panel"):
     tris = []
     for f in faces:
@@ -1027,7 +1381,7 @@ AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
 
 def measure(spec, thetas, diffuse_frac, roughness, samples,
             coating="musou_fit", deep_coating=None, paint_depth=None,
-            deep_until=None, paint_fade=0.0, phis=None):
+            deep_until=None, paint_fade=0.0, phis=None, floor_coating=None):
     _t("measure: enter")
     import blender_render as BR
     from cone3d_sweep import COAT
@@ -1062,15 +1416,36 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
         cfg["paint_depth"] = float(paint_depth)
         cfg["deep_coating"] = _coat(deep_coating, diffuse_frac,
                                     default="anodised")
-        # a stacked design's floor is its own painted part
-        if deep_until is None and spec.get("floor", "none") != "none":
-            deep_until = float(spec.get("depth", 50.0)) \
-                - float(spec.get("floor_depth", 0.0))
+    # A FLOOR IS A DIFFERENT PART, SO IT CAN CARRY A DIFFERENT FINISH.
+    # The paint plane above cuts by DEPTH and cannot express what a stack
+    # actually is -- a bought, anodised comb over a floor that is made new and
+    # therefore easy to paint. This assigns the faces below the layer boundary
+    # their own coating; the boundary is the top layer's depth, which is where
+    # geom_stack puts it.
+    # "floor: none" does NOT mean there is nothing under the structure -- every
+    # panel still has its backing plate, and that plate is a flat surface
+    # facing the room from the bottom of every well. It can be finished
+    # separately from the walls above it, so it gets the same control.
+        # these three belong to the PAINT split above and were swallowed into
+        # the floor block by a bad insertion: with only a floor coating sent,
+        # `float(paint_depth)` ran on None and every such request 500'd.
         if deep_until is not None:
             cfg["deep_until"] = float(deep_until)
         cfg["paint_fade"] = float(paint_fade or 0.0)
         _t("measure: paint to %.1f mm, %s below" % (float(paint_depth),
                                                     deep_coating))
+
+    # "floor: none" does NOT mean there is nothing under the structure -- every
+    # panel still has its backing plate, a flat surface facing the room from
+    # the bottom of every well, and it can be finished separately.
+    if floor_coating:
+        cfg["floor_coating"] = _coat(floor_coating, diffuse_frac,
+                                     default="musou_fit")
+        cfg["floor_boundary_depth"] = (
+            float(spec.get("depth", 50.0) or 50.0)
+            - float(spec.get("floor_depth", 0.0) or 0.0)
+            if spec.get("floor", "none") != "none"
+            else float(spec.get("depth", 50.0) or 50.0))
     # The camera tilts in one plane, so one run is ONE azimuth of incidence.
     # phi rotates the panel about its normal (blender_render handles it); each
     # extra plane is a full re-run -- scene rebuilt, all thetas re-read.
@@ -1793,7 +2168,12 @@ class H(BaseHTTPRequestHandler):
                                paint_depth=req.get("paint_depth"),
                                deep_until=req.get("deep_until"),
                                paint_fade=req.get("paint_fade", 0.0),
-                               phis=req.get("phis"))
+                               phis=req.get("phis"),
+                               # dropped here until 2026-08-20: the dispatch
+                               # lambda and measure() both handled it, so it
+                               # looked wired end to end while the handler
+                               # quietly never sent it
+                               floor_coating=req.get("floor_coating"))
                 if "error" in r:
                     return self._send(200, json.dumps(r))
                 # `rho` stays the phi-0 plane so old callers keep working;
@@ -1983,6 +2363,17 @@ class H(BaseHTTPRequestHandler):
             if self.path == "/api/published":
                 return self._send(200, json.dumps(
                     {"nearest": nearest(req)}))
+            if self.path == "/api/step":
+                v, f, p = build(dict(req, margin_depths=0.0))
+                fw = float(req.get("panel", req.get("face", 100.0)))
+                v, f = clip_to_panel(v, f, fw, fw)
+                blob = step_faceted(v, f)
+                kind = "solid" if b"MANIFOLD_SOLID_BREP" in blob \
+                    else "surface model"
+                return self._send(200, blob, "application/step",
+                                  {"Content-Disposition":
+                                   'attachment; filename="panel.step"',
+                                   "X-Step-Kind": kind})
             if self.path == "/api/stl":
                 v, f, p = build(dict(req, margin_depths=0.0))
                 fw = float(req.get("panel", req.get("face", 100.0)))

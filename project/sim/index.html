@@ -180,6 +180,7 @@ details.why p{margin:.4em 0 0}
     <div class="sl"><span class="nm">envelope depth <b id="v_depth">50.0</b></span>
       <input type="range" id="depth" min="10" max="80" step="1" value="50">
       <input type="number" id="n_depth" step="1" value="50"></div>
+    <p class="note" id="nostacknote" style="display:none"></p>
     <div class="sl" id="fdwrap"><span class="nm">floor depth <b id="v_fdepth">3.0</b></span>
       <input type="range" class="f" id="fdepth" min="0.5" max="25" step="0.5" value="3">
       <input type="number" id="n_fdepth" step="0.5" value="3"></div>
@@ -192,13 +193,45 @@ details.why p{margin:.4em 0 0}
 
   <h2>Coating</h2>
   <div class="grp">
-    <div class="row"><label>Painted surface</label><select id="coat"></select></div>
-    <div class="row"><label>Below the paint (as bought)</label>
-      <select id="deepcoat"><option value="">— painted all the way down —</option></select></div>
-    <div class="sl" id="pdwrap"><span class="nm">paint reaches <b id="v_pd">10.0</b> mm</span>
-      <input type="range" id="pd" min="0" max="50" step="1" value="10">
-      <input type="number" id="n_pd" step="1" value="10"></div>
+    <!-- A PANEL ARRIVES AS ONE MATERIAL AND IS PAINTED ON TOP OF IT.
+         The controls used to say the opposite: "Paint" first, with the real
+         material demoted to "below the paint", and the coverage given only in
+         millimetres. What is actually decided is "the panel is anodised, and
+         the top 10 % of the wells are Musou". So: base first, then what goes
+         over it, then HOW MUCH of it -- as a percentage, because that is the
+         quantity chosen; the millimetres follow from the envelope and are
+         shown beside it. 0 % leaves the panel bare, 100 % paints it through,
+         and neither is a menu entry any more. -->
+    <!-- ALWAYS NAME THE LAYER. These three governed "the panel" when there was
+         no floor and "the top layer" when there was, but only said so in the
+         second case, so with a single-layer panel it was not visible what the
+         paint applied to at all. The heading now states it either way. -->
+    <div class="note" id="coatscope" style="margin:2px 0 6px"></div>
+    <div class="row"><label>Base &mdash; as bought</label>
+      <select id="deepcoat"></select></div>
+    <p class="note" id="deepnote"></p>
+
+    <div class="row"><label>Painted over it</label><select id="coat"></select></div>
     <p class="note" id="coatnote"></p>
+
+    <!-- A FLOOR IS A SEPARATE PART. The paint control above cuts by DEPTH, so
+         with a stack it drags the paint down through the comb's lower walls to
+         reach the floor at all. But that is not how the thing is made: the
+         comb is bought anodised and the floor is a new part that is easy to
+         coat. So the floor gets its own finish, and the depth control above
+         then applies only to the layer above it. -->
+    <div class="row" id="fcwrap">
+      <label>Floor finish &mdash; the layer underneath</label>
+      <select id="floorcoat"></select></div>
+    <p class="note" id="floornote"></p>
+
+    <div class="sl" id="pdwrap">
+      <span class="nm">covered from the top <b id="v_pcov">10</b> %<br>
+        <span class="note" id="pdfrac"></span></span>
+      <input type="range" id="pcov" min="0" max="100" step="1" value="10">
+      <input type="number" id="n_pcov" min="0" max="100" step="1" value="10">
+      <input type="hidden" id="pd" value="10"><input type="hidden" id="n_pd" value="10">
+      <span id="v_pd" style="display:none">10</span></div>
     <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.76</b></span>
       <input type="range" id="df" min="0" max="1" step="0.02" value="0.76">
       <input type="number" id="n_df" step="0.02" value="0.76"></div>
@@ -362,6 +395,12 @@ details.why p{margin:.4em 0 0}
 
   <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0">
     <button id="stl">Download STL <span class="t">tileable</span></button>
+    <!-- STEP as a faceted B-rep. A mesh normally has to be APPROXIMATED to
+         become STEP; here it does not, because every face of these families is
+         genuinely a plane, so the faceted solid IS the geometry. The file is
+         much larger than the STL -- roughly ten entities per triangle -- so the
+         button says so before it is pressed. -->
+    <button id="step">Download STEP <span class="t" id="stepsize">CAD · faceted</span></button>
     <button id="report" title="one A4 page: current view, parameters, and every measured number">Download report <span class="t">A4 PDF</span></button>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px">
@@ -644,8 +683,13 @@ function showDerived(d){
     + `<div><dt>${d.buildable_note||''}</dt><dd>${pill}</dd></div>`;
   showRig(d.rig, d.rig_error);
   showCost(d.rig);
+  const _pc = +($('#pcov')?$('#pcov').value:0)||0;
   $('#hud').textContent = `${$('#top').value}${LAST.floor!=='none' ? ' + '+LAST.floor : ''} · `
-    + `${LAST.depth} mm · drag to orbit, scroll to zoom`;
+    + `${LAST.depth} mm · `
+    + `분홍 = 칠한 곳 · 파랑 = 맨 재료 · `
+    + (_pc>0 ? `위에서 ${Math.round(_pc)} % 칠함 · ` : '위층 칠 안 함 · ')
+    + ($('#floor').value!=='none' ? '바닥층 따로 · ' : '등판 따로 · ')
+    + `drag to orbit, scroll to zoom`;
 }
 
 // ---------- measurement
@@ -660,8 +704,16 @@ async function measure(thetas){
       // no phi rotation, so cross-check modes stay in the phi-0 plane
       phis: R === 'cycles' ? [0, 45, 90] : undefined,
       diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
-      coating: $('#coat').value, deep_coating: $('#deepcoat').value || null,
-      paint_depth: $('#deepcoat').value ? +$('#pd').value : null})});
+      // 0 % painted means the panel IS the base material, so that is what the
+      // server is told to coat with; 100 % means there is nothing below.
+      floor_coating: ($('#floor').value !== 'none')
+                     ? $('#floorcoat').value : null,
+      coating: (+$('#pcov').value <= 0) ? $('#deepcoat').value
+                                        : $('#coat').value,
+      deep_coating: (+$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+                    ? null : ($('#deepcoat').value || null),
+      paint_depth: (+$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+                   ? null : (+$('#depth').value * +$('#pcov').value / 100)})});
     const j = await r.json();
     if(j.error) throw new Error(j.error);
     SHOW_THETAS = thetas; buildOverlay(thetas); draw();
@@ -756,16 +808,57 @@ const gl = $('#gl').getContext('webgl2', {antialias:true});
 const P = gl.createProgram();
 function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; }
+// The paint is real geometry-dependent state, so the viewport shows it: the
+// surface above y = -paint_depth is coated, everything below is the bare base.
+// Painting it BLACK would be honest and invisible -- the whole panel is already
+// near-black -- so the painted band is tinted warm red instead. It is a label,
+// not a colour measurement, and the caption says so.
 gl.attachShader(P, sh(gl.VERTEX_SHADER,`#version 300 es
-in vec3 p; in vec3 n; uniform mat4 mvp; uniform mat3 nm; out vec3 vn; out float vz;
-void main(){ vn = normalize(nm*n); gl_Position = mvp*vec4(p,1.); vz = gl_Position.z; }`));
+in vec3 p; in vec3 n; uniform mat4 mvp; uniform mat3 nm;
+out vec3 vn; out float vz; out float vy;
+void main(){ vn = normalize(nm*n); gl_Position = mvp*vec4(p,1.);
+             vz = gl_Position.z; vy = p.y; }`));
 gl.attachShader(P, sh(gl.FRAGMENT_SHADER,`#version 300 es
-precision highp float; in vec3 vn; in float vz; out vec4 o;
+precision highp float; in vec3 vn; in float vz; in float vy; out vec4 o;
+uniform float paintY;     // world y at the bottom of the paint
+uniform float paintOn;    // 0 = nothing painted
+uniform float floorY;     // world y of the layer boundary
+uniform float floorOn;      // 0 = no separate floor layer
+uniform float floorPainted; // 1 = the floor's own coating is a paint
 void main(){
   vec3 L1 = normalize(vec3(.35,.75,.55)), L2 = normalize(vec3(-.5,.2,-.6));
   float d = max(dot(vn,L1),0.)*.85 + max(dot(vn,L2),0.)*.25 + .16;
   vec3 c = mix(vec3(.10,.12,.14), vec3(.80,.86,.90), clamp(d,0.,1.));
-  o = vec4(c,1.);
+  // THREE ZONES, THREE TINTS. A stack is not one finish: the top layer can be
+  // painted down to some depth, the rest of that layer is the bare base, and
+  // the floor underneath is a separate part with its own coating. Painting all
+  // of them black would be honest and invisible -- the panel is near-black
+  // already -- so each zone gets a label colour. These are labels, not colour
+  // measurements, and the caption says so.
+  //   painted band  warm red
+  //   bare base     cool blue
+  //   floor         green
+  // tips sit at y = 0 and the well runs negative, so deeper is more negative.
+  float e = 0.002*max(abs(paintY),1.0) + 1e-4;
+  float painted = paintOn * smoothstep(paintY - e, paintY + e, vy);
+  float onFloor = floorOn * (1.0 - smoothstep(floorY - e, floorY + e, vy));
+  // COLOUR BY MATERIAL, NOT BY LAYER. The first version gave the floor its own
+  // green whatever it was coated with, so a Musou-painted floor did not read
+  // as painted -- which is the only thing the colour is there to say. Paint is
+  // pink wherever it is; bare as-bought material is blue wherever it is. The
+  // floor is a layer, not a material, so it takes whichever of the two its own
+  // coating is.
+  vec3 tPink = vec3(1.00, 0.42, 0.55);   // painted
+  vec3 tBlue = vec3(0.38, 0.62, 1.00);   // bare, as bought
+  // top layer: painted down to paintY, bare below it
+  float isPaint = (paintOn > 0.5) ? painted : 1.0;
+  // the floor overrides with its own material
+  isPaint = mix(isPaint, floorPainted, onFloor);
+  float bare = 1.0 - isPaint;
+  vec3 col = c;
+  col = mix(col, col*0.55 + tBlue*0.55, bare*0.55);
+  col = mix(col, col*0.55 + tPink*0.62, isPaint*0.72);
+  o = vec4(col, 1.);
 }`));
 gl.linkProgram(P); gl.useProgram(P);
 // --- overlay: what the illumination actually is ---------------------------
@@ -1069,6 +1162,32 @@ function draw(fw, fh){
   const MVP=mul(V,Pm);   // = Pm * V, see mul()
   gl.uniformMatrix4fv(gl.getUniformLocation(P,'mvp'), false, MVP);
   gl.uniformMatrix3fv(gl.getUniformLocation(P,'nm'), false, new Float32Array([1,0,0,0,1,0,0,0,1]));
+  // where the paint stops, in the mesh's own millimetres. Tips sit at y = 0 and
+  // the well runs negative, so the coated band is y >= -depth*coverage.
+  {
+    const pcEl = $('#pcov'), dEl = $('#depth');
+    const pc = pcEl ? Math.max(0, Math.min(100, +pcEl.value || 0)) : 0;
+    const dep = dEl ? (+dEl.value || 0) : 0;
+    const on = (pc > 0 && dep > 0) ? 1 : 0;
+    gl.uniform1f(gl.getUniformLocation(P,'paintY'), on ? -(dep*pc/100) : 1e9);
+    gl.uniform1f(gl.getUniformLocation(P,'paintOn'), on);
+    // THE BACKING COUNTS AS A FLOOR. With no floor LAYER the tint used to
+    // switch off entirely, so a painted backing showed the layer above's
+    // colour -- even though that backing was just measured to move a
+    // honeycomb's total by 5.4x. Two cases, one rule:
+    //   floor layer present -> boundary at -(envelope - floor depth)
+    //   no floor layer      -> the backing plate at the base of the wells
+    const hasF = $('#floor') && $('#floor').value !== 'none';
+    const fd = hasF ? (+$('#fdepth').value || 0) : 0;
+    const fy = hasF ? -(dep - fd) : -(dep) + Math.max(dep*0.002, 1e-3);
+    gl.uniform1f(gl.getUniformLocation(P,'floorY'), fy);
+    gl.uniform1f(gl.getUniformLocation(P,'floorOn'), dep > 0 ? 1 : 0);
+    // the floor is pink when its OWN coating is a paint, blue when it is an
+    // as-bought material -- the same rule the layer above follows
+    const fcv = $('#floorcoat') ? $('#floorcoat').value : '';
+    gl.uniform1f(gl.getUniformLocation(P,'floorPainted'),
+                 /^musou/.test(fcv) ? 1 : 0);
+  }
   gl.drawArrays(gl.TRIANGLES, 0, NTRI*3);
   if(NLINE){
     gl.useProgram(LP); gl.bindVertexArray(LVAO);
@@ -1169,9 +1288,11 @@ addEventListener('resize', draw);
     const canStack = !FAM.stackable || FAM.stackable.includes(t.value);
     f.disabled = !canStack;
     if(!canStack && f.value !== 'none') f.value = 'none';
-    $('#floornote').textContent = canStack ? ''
+    // #floornote used to carry BOTH this message and the floor-paint note, so
+    // the two overwrote each other and the paint note kept vanishing.
+    $('#nostacknote').textContent = canStack ? ''
       : `${t.value} is a 1D extruded profile — no floor layer.`;
-    $('#floornote').style.display = canStack ? 'none' : '';
+    $('#nostacknote').style.display = canStack ? 'none' : '';
     sliders($('#tp'), FAM.top[t.value], '');
     sliders($('#fp'), FAM.floor[f.value], 'f');
     const has = f.value !== 'none';
@@ -1191,14 +1312,19 @@ addEventListener('resize', draw);
     const fd = (FAM.floor_depth||{})[f.value];
     if(fd != null){ $('#fdepth').value=fd; $('#n_fdepth').value=fd; $('#v_fdepth').textContent=(+fd).toFixed(2); }
   };
-  t.onchange = () => { $('#preset').value=''; $('#presetnote').textContent=
+  t.onchange = () => { if(window.coatNote2) setTimeout(coatNote2,0);
+      $('#preset').value=''; $('#presetnote').textContent=
       'Loads the exact geometry behind a number in the reports. Then change anything.';
       resetEnvelope(); rebuild(); };
-  f.onchange = () => { $('#preset').value=''; resetEnvelope(); rebuild(); };
+  f.onchange = () => { $('#preset').value=''; resetEnvelope(); rebuild();
+                       if(window.coatNote2) coatNote2(); };
   for(const [id,lab] of [['panel','v_panel'],['depth','v_depth'],['fdepth','v_fdepth'],['df','v_df'],['rg','v_rg']]){
     const r=$('#'+id), num=$('#n_'+id), L=$('#'+lab);
     const sync = v => { fitRange(r, v); r.value=v; if(num) num.value=v;
-                        L.textContent=(+v).toFixed(2); refresh(); };
+                        L.textContent=(+v).toFixed(2);
+                        if(id === 'depth'){ if(window.pcovSync) pcovSync();
+                                           if(window.coatNote2) coatNote2(); }
+                        refresh(); };
     r.oninput = e=>sync(e.target.value); if(num) num.onchange = e=>sync(e.target.value);
   }
   $('#mf').onclick = async () => {
@@ -1282,28 +1408,138 @@ addEventListener('resize', draw);
   };
   // ---- coatings: a named product is one number, rho_dh at normal incidence
   const CO = await (await fetch('/api/coatings')).json();
+  // The three "anodised" entries are the SAME material -- black anodised
+  // aluminium -- at its optimistic, nominal and pessimistic reflectance,
+  // because the sources disagree ("below 5 % in the visible" vs "at least
+  // 5 %"). Named only "anodised" they read as three different products, so
+  // the list says what each one is.
+  const NICE = {musou_air:'Musou Black, airbrushed',
+                musou_fit:'Musou Black, as fitted here',
+                musou_brush:'Musou Black, brushed',
+                anodised_lo:'black anodised Al — optimistic',
+                anodised:'black anodised Al — nominal (as bought)',
+                anodised_hi:'black anodised Al — pessimistic',
+                wall_5pct:'plain matte black wall'};
   const opts = Object.entries(CO).map(([k,v]) =>
-    `<option value="${k}">${k}  ·  ${(100*v.rho0).toFixed(2)}%</option>`).join('');
+    `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${NICE[k]||k}</option>`).join('');
   $('#coat').innerHTML = opts;
   $('#coat').value = 'musou_fit';
-  $('#deepcoat').innerHTML = '<option value="">— painted all the way down —</option>' + opts;
-  const coatNote = () => {
+  // "AS BOUGHT" MEANS UNPAINTED. The list used to be every coating, including
+  // the three Musou entries -- so it offered "below the paint: Musou", which is
+  // a contradiction and reads as if part of the well were painted twice. Only
+  // materials a panel can arrive in belong here: anodised aluminium honeycomb
+  // as delivered, and the bare wall/urethane reference.
+  // A BASE is whatever the panel arrives as. That is not only anodised
+  // aluminium: a cast urethane panel arrives carbon-black pigmented, and the
+  // plain matte wall is the reference every measurement is quoted against.
+  // Musou is never a base -- it is the thing painted on.
+  const BOUGHT = k => !/^musou/.test(k);
+  const boughtOpts = Object.entries(CO).filter(([k]) => BOUGHT(k))
+    .map(([k,v]) => `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${NICE[k]||k}</option>`)
+    .join('');
+  $('#deepcoat').innerHTML = boughtOpts;
+  $('#deepcoat').value = 'anodised';
+  $('#floorcoat').innerHTML = opts;          // a floor can be painted or bare
+  $('#floorcoat').value = 'musou_fit';
+  // The paint-depth track ends at the envelope, and the readout says what
+  // FRACTION of the well is painted. 10 mm of a 50 mm well is a fifth, and a
+  // report printing only "10 mm" read as if most of it were covered -- which is
+  // how a comb over a 6 % as-bought floor came back at 1.31 % total and looked
+  // like a bad structure rather than an unpainted one.
+  // The slider chooses a PERCENTAGE; the server wants millimetres from the
+  // tips. One converts to the other here so there is a single source of truth
+  // and the millimetre figure can never drift from what is displayed.
+  window.pcovSync = () => {
+    const d = +($('#depth') ? $('#depth').value : 0) || 0;
+    const pc = Math.max(0, Math.min(100, +($('#pcov') ? $('#pcov').value : 0) || 0));
+    const mm = d * pc / 100;
+    if($('#pd')) $('#pd').value = mm;
+    if($('#n_pd')) $('#n_pd').value = mm;
+    if($('#v_pd')) $('#v_pd').textContent = mm.toFixed(2);
+    if($('#v_pcov')) $('#v_pcov').textContent = String(Math.round(pc));
+    if($('#n_pcov')) $('#n_pcov').value = String(Math.round(pc));
+    const el = $('#pdfrac');
+    if(el) el.innerHTML = d > 0
+      ? `= top ${mm.toFixed(2)} mm of ${d} mm`
+      : '';
+    return {pc, mm, d};
+  };
+
+  // paintFrac() was the millimetre-era writer for #pdfrac. pcovSync() owns
+  // that element now; leaving both alive printed one string interleaved with
+  // the other ("covered from10%of 50 mm . 10 % of the top the well painted").
+  window.paintFrac = () => {};
+  const coatNote = window.coatNote2 = () => {
+    const st = pcovSync();
+    draw();                    // the painted band is drawn, so repaint it
+    // "painted all the way down" is now a STATE OF THE DEPTH, not a menu
+    // entry: drag the depth to the full envelope and there is nothing below
+    // the paint, so the material menu below goes idle and says so.
+    const full = st.pc >= 100 - 1e-9, none = st.pc <= 1e-9;
     const a = CO[$('#coat').value], d = CO[$('#deepcoat').value];
-    const has = !!$('#deepcoat').value;
-    $('#pdwrap').style.display = has ? '' : 'none';
-    $('#coatnote').innerHTML = a.note + (d ? `<br><br><b>Below ${$('#pd').value} mm:</b> ${d.note}` : '');
+    // 0 % -> the paint menu is idle; 100 % -> the base menu is idle. Neither
+    // state is a menu entry any more, they are the ends of the slider.
+    const dcw = $('#deepcoat').closest('.row');
+    if(dcw){ dcw.style.opacity = full ? '0.4' : ''; }
+    $('#deepcoat').disabled = full;
+    const cw = $('#coat').closest('.row');
+    if(cw){ cw.style.opacity = none ? '0.4' : ''; }
+    $('#coat').disabled = none;
+    // EACH NOTE UNDER ITS OWN CONTROL. Both used to be printed in one block
+    // below the LAST control, so the paint's note sat directly under the
+    // "bare material below" menu and read as if it described that menu --
+    // a Musou paragraph explaining an anodised-aluminium choice.
+    $('#coatnote').innerHTML = none
+      ? '<b>Not used</b> — nothing is painted; the panel is its base material '
+        + 'throughout.'
+      : a.note;
+    $('#deepnote').innerHTML = full
+      ? '<b>Not used</b> — the paint covers the whole well depth.'
+      : (d ? d.note : '');
+    const hasFloor = $('#floor').value !== 'none';
+    // NOT HIDDEN WHEN THERE IS NO FLOOR -- a control that disappears cannot be
+    // found, and this one vanished for every single-layer panel, which is
+    // most of them. It greys out and says why instead.
+    // NEVER GREYED OUT. "floor: none" does not mean there is nothing below --
+    // every panel has a backing plate at the bottom of its wells, and that
+    // plate faces the room. It takes a finish like anything else.
+    $('#fcwrap').style.opacity = '';
+    $('#floorcoat').disabled = false;
+    const fcl = $('#fcwrap').querySelector('label');
+    if(fcl) fcl.innerHTML = hasFloor
+      ? 'Floor finish &mdash; the ' + $('#floor').value + ' layer underneath'
+      : 'Backing finish &mdash; the plate at the bottom of the wells';
+    $('#coatscope').innerHTML = hasFloor
+      ? `these three describe the <b>${$('#top').value}</b> layer &mdash; the `
+        + `floor below it has its own finish`
+      : `these three describe the whole panel &mdash; <b>${$('#top').value}</b>, `
+        + `single layer`;
+    if(hasFloor){
+      const fcv = CO[$('#floorcoat').value];
+      $('#floornote').innerHTML = (fcv ? fcv.note : '')
+        + `<br><br>Applies to the <b>${$('#floor').value}</b> floor only, `
+        + `all of it &mdash; the depth control above stops at the layer boundary.`;
+    } else {
+      const fcv = CO[$('#floorcoat').value];
+      $('#floornote').innerHTML = (fcv ? fcv.note : '')
+        + '<br><br>Applies to the <b>backing plate</b> only &mdash; the flat '
+        + 'floor at the bottom of every well. Add a floor layer under '
+        + '<i>Model &rarr; floor</i> and this switches to that layer instead.';
+    }
   };
   // the coating feeds every measurement (and the trace's rho), so changing it
   // stales every readout exactly like a geometry change does
   $('#coat').onchange = () => { coatNote(); resetResults(); };
   $('#deepcoat').onchange = () => { coatNote(); resetResults(); };
-  for(const [id,lab] of [['pd','v_pd']]){
+  $('#floorcoat').onchange = () => { coatNote(); resetResults(); };
+  for(const [id,lab] of [['pcov','v_pcov']]){
     const r=$('#'+id), n=$('#n_'+id), L=$('#'+lab);
     const sync = v => { fitRange(r, v); r.value=v; if(n) n.value=v;
-                        L.textContent=(+v).toFixed(1); coatNote(); resetResults(); };
+                        L.textContent=(+v).toFixed(1); paintFrac(); coatNote();
+                        resetResults(); };
     r.oninput = e=>sync(e.target.value); if(n) n.onchange = e=>sync(e.target.value);
   }
-  coatNote();
+  coatNote(); paintFrac();
 
   // WHAT EACH CHOICE ACTUALLY MEASURES. Cycles runs the fitted Musou coating,
   // which is the material every published number used. Mitsuba has no identical
@@ -1410,6 +1646,37 @@ addEventListener('resize', draw);
     finally{ b.disabled=false; setBusy(-1); prog.stop(); }
   };
   $('#m5').onclick = () => measure([0,-20,-40,20,40]);
+  $('#step').onclick = async () => {
+    const b = $('#step'), tag = $('#stepsize'), was = tag.textContent;
+    b.disabled = true; tag.textContent = 'building…';
+    try{
+      const r = await fetch('/api/step', {method:'POST', body: JSON.stringify(LAST)});
+      if(!r.ok) throw new Error((await r.json()).error || r.status);
+      const blob = await r.blob();
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = `${LAST.top}${LAST.floor!=='none'?'_'+LAST.floor:''}_d${LAST.depth}.step`;
+      // IN THE DOCUMENT, AND REVOKED LATE. Revoking straight after click()
+      // tore the blob URL down before the browser had started reading it and
+      // nothing downloaded at all -- the STL button works precisely because it
+      // never revokes. A detached anchor is also ignored by some browsers.
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 30000);
+      const kind = r.headers.get('X-Step-Kind') || '';
+      tag.textContent = `${(blob.size/1e6).toFixed(1)} MB · ${kind}`;
+      if(kind === 'surface model')
+        $('#err').textContent = 'STEP is a faceted SURFACE MODEL, not a closed '
+          + 'solid — these panels are modelled as overlapping solids. Fine for '
+          + 'surface CAM and reference; a mould shop wanting booleans will need '
+          + 'it healed in their CAD. The file header states the exact defect.';
+      setTimeout(()=>{ tag.textContent = was; }, 6000);
+    }catch(e){ $('#err').textContent = String(e).slice(0,400); tag.textContent = was; }
+    b.disabled = false;
+  };
+
   $('#stl').onclick = async () => {
     const r = await fetch('/api/stl', {method:'POST', body: JSON.stringify(LAST)});
     const b = await r.blob(), a = document.createElement('a');
@@ -1474,9 +1741,24 @@ addEventListener('resize', draw);
     if(LAST.floor !== 'none')
       rows.push(['floor', `${LAST.floor} d${LAST.floor_depth} — ${pl(LAST.floor_params)}`]);
     rows.push(['panel', `${LAST.panel} mm sq · envelope depth ${LAST.depth} mm`]);
-    rows.push(['coating', coLabel
-      + (/%/.test(coLabel) ? '' : ` (ρ₀ ${(100*CO[co.value].rho0).toFixed(2)} %)`)
-      + (dc.value ? ` · below ${$('#pd').value} mm: ${dc.selectedOptions[0].textContent}` : '')]);
+    // TWO COATINGS AND A DEPTH, ON THREE LINES. They used to be crushed into
+    // one "coating" row, so a two-tier panel -- musou on top, bare material
+    // below -- printed only the deep material and read as if the whole panel
+    // were that. A report showing "anodised_hi 6.00 %" for a panel whose
+    // painted surface is musou 1 % misstates the design by 6x, and the paint
+    // depth, which decides how much of the well is painted at all, did not
+    // appear anywhere.
+    // base, paint, coverage -- the same three the panel is described by
+    const pc = +$('#pcov').value, mm = LAST.depth * pc / 100;
+    rows.push(['base', dc.selectedOptions[0].textContent + ' — as bought']);
+    if(pc <= 0){
+      rows.push(['painted', 'nothing — bare base throughout']);
+    } else {
+      rows.push(['painted over it', coLabel]);
+      rows.push(['coverage', pc >= 100
+        ? 'the whole well depth (100 %)'
+        : `top ${pc} % — ${mm.toFixed(2)} mm of ${LAST.depth} mm, from the tips`]);
+    }
     rows.push(['model', `diffuse ${$('#df').value} · roughness ${$('#rg').value} (assumed)`]);
     rows.push(['probe', `beam ${$('#beamw').value} mm at wall · renderer ${$('#renderer').value}`]);
     for(const dv of $('#derived').querySelectorAll('div')){
