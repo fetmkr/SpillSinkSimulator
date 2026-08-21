@@ -91,7 +91,14 @@ subject, not a footnote.
   geometry" and conflated this with the next line; the user caught it.
 - **between the nine topologies at their own realistic process: 1.6x.** Which
   topology you pick is nearly irrelevant.
-- **coating diffuse fraction: 41x, with rank inversion.**
+- **coating diffuse fraction: measured directly 2026-08-21, sweeping 0.50-1.00
+  with the geometry held fixed.** Order spec pyramid p4/d22 moves **11.7 % at
+  theta 0 and 34.4 % at theta -40**, and the two move in OPPOSITE directions
+  (head-on falls as the fraction rises, -40 climbs). A flat plate under the same
+  sweep moves 0.2 % and 6.9 %, so **the lever is the geometry, not the coating**.
+  No rank inversion between flat and pyramid anywhere in the range — the
+  earlier "41x, with rank inversion" was withdrawn in CONTEXT.md and should not
+  have survived here. `scripts/gate_diffuse_fraction.py`.
 - **coating specular roughness: 332x on the theta=0 form peak.**
 - Honeycomb is 5th on darkness and LAST on form (smear 0.96x — narrower than a
   flat wall). Vertical-walled cells trap light but do not move it sideways.

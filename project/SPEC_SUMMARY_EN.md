@@ -109,7 +109,10 @@ the allowance, because the concave trough concentrates light back toward the sou
 
 **Extrusion is rejected for the base panel too.** Extrusion produces grooves. A
 pyramid tip is a *point* — 0.06 % of the area; a groove tip is a *line* — 2.5 %.
-At the same tip width the groove is 40× brighter head-on (measured 0.040 vs 0.894).
+At the same tip width the groove is 40x brighter head-on (measured 0.040 vs
+0.894). **Both were read at the old density, so only the RATIO is usable**: tip
+0.1 resolved properly reads 0.0677, and the groove has not been re-measured at
+the matching density. Treat 40x as an upper bound on the ratio until it is.
 
 ### 4.5 Acceptance test (first article, measured by the buyer)
 

@@ -141,8 +141,27 @@ def run_case(entry):
     if entry.get("paint_depth") is not None:
         cfg["paint_depth"] = float(entry["paint_depth"])
         cfg["deep_coating"] = entry.get("deep_coating", {})
+    # A SEPARATE FINISH FOR THE FLOOR, on the form path too (2026-08-21).
+    # `measure` has taken `floor_coating` since the stack work, but this rig
+    # never did, so smear and head-on could not be measured with a painted
+    # floor AT ALL -- only the total could. That is why a floor-finish result
+    # was reported on one axis, against the project's own rule that a
+    # comparison shows every agreed axis. `blender_render.build_scene` reads
+    # both keys; they only had to be passed.
+    if entry.get("floor_coating") is not None:
+        cfg["floor_coating"] = entry["floor_coating"]
+        fbd = entry.get("floor_boundary_depth")
+        if fbd is None:
+            fbd = (float(prm.get("top_depth", prm.get("depth", 50.0)))
+                   if "top_depth" in prm else float(prm.get("depth", 50.0)))
+        cfg["floor_boundary_depth"] = float(fbd)
     body, spec = BR.coating_split(0.76)          # the fitted nominal split
     cfg["coating"] = {"body": body, "spec_scale": spec, "roughness": rough}
+    # A CALLER-SUPPLIED TOP COATING. Without this the rig always painted the
+    # fitted Musou, so a panel specified as "5 % paint everywhere, Musou only
+    # in the top 10 mm" could not be scored on smear or head-on at all.
+    if entry.get("coating") is not None:
+        cfg["coating"] = dict(entry["coating"], roughness=rough)
     cfg.update({k: v for k, v in COAT.items() if k not in ("spec_roughness",)})
     cfg["family"] = family
     # A CROSS-CHECK NEEDS THE SAME MATERIAL IN BOTH CODES. The fitted coating is

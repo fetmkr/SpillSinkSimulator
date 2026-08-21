@@ -61,8 +61,15 @@ if CASE=="bare":
     sys.exit(0)
 
 PRM={"flat":dict(kind="pyramid",pitch=4.0,depth=0.0,tip_flat=0.0),
-     "pyr" :dict(kind="pyramid",pitch=4.0,depth=20.0,tip_flat=0.1)}[CASE]
-prm=dict(PRM); prm.update(face_w=100.0,face_h=100.0,margin_depths=2.0,backing=2.0)
+     "pyr" :dict(kind="pyramid",pitch=4.0,depth=20.0,tip_flat=0.1),
+     # the honeycomb, because a geometry check said its walls were stacked and
+     # then turned out to be reading its own broken plane key. The furnace is
+     # already validated, so ask IT: a cavity that wastes bounces cannot reach
+     # 1.000 however many it is given.
+     "comb":dict(topology="honeycomb",pitch=6.0,depth=50.0,wall_top=0.08,
+                 wall_bot=0.08,jitter=0.0)}[CASE]
+F = 60.0 if CASE=="comb" else 100.0
+prm=dict(PRM); prm.update(face_w=F,face_h=F,margin_depths=2.0,backing=2.0)
 sc=R2.build(prm,samples=SPP,lambert_rho=RHO)
 p,cx0=sc["p"],sc["ctrl_x0"]; tw=sc["total_w"]; ortho=tw*1.02
 rx,ry,mmpx,_=R2.resolution_for(ortho,p.face_h)

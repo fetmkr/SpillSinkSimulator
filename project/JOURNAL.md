@@ -49,7 +49,7 @@ number, or it ranks the box rather than the design.
 |---|---|---|
 | structure vs flat, same coating, same footing | **~30x** (6.1218% -> 0.2041%) | flat plate measured over the same 5 thetas and 3 materials |
 | between the nine topologies, each at its own process | **1.6x** | `sweep_buildable.csv` |
-| coating diffuse fraction | **41x**, rank inversion | metrics/01 |
+| coating diffuse fraction | **11.7 % at theta 0, 34.4 % at theta -40** on the order spec, opposite signs; flat plate 0.2 % / 6.9 % | `gate_diffuse_fraction.py`, 2026-08-21. The old "41x, rank inversion" was withdrawn in CONTEXT.md and is struck here too |
 | coating specular roughness, on theta=0 form peak | **332x** (0.10 -> 0.50) | `FINDINGS_form_baseline.md` |
 
 An earlier framing of mine — "coating beats geometry" — conflated the first two

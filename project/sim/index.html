@@ -84,7 +84,7 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .pill.ok{background:var(--ok);color:#06210f}
 .pill.no{background:var(--no);color:#2a0b06}
 .pill.wait{background:var(--line2);color:var(--ink2)}
-#chart{width:100%;height:96px;display:block}
+#chart{width:100%;height:150px;display:block}
 .note{font-size:11px;color:var(--ink3);line-height:1.5}
 .err{color:var(--no);font:400 11px/1.5 ui-monospace,Menlo,monospace;
   white-space:pre-wrap;max-height:120px;overflow:auto}
@@ -352,12 +352,16 @@ details.why p{margin:.4em 0 0}
     <label>azimuth &phi;&deg; <input type="number" id="ray_phi" value="0" min="0" max="360"
       step="15" style="width:4.5em"></label>
     <select id="ray_mode">
-      <option value="specular">specular &mdash; mirror ladders</option>
-      <option value="diffuse">diffuse &mdash; Monte Carlo</option>
+      <option value="fitted">fitted &mdash; same material as Render</option>
+      <option value="diffuse">diffuse only &mdash; Monte Carlo</option>
+      <option value="specular">specular only &mdash; mirror ladders</option>
     </select>
   </div>
   <p class="note" style="margin:0">&rho; comes from the coating picked on the
-   left; the trace scatters from that single number, not the full fitted mix.</p>
+   left; the trace scatters from that single number, not the full fitted mix.
+   <b>fitted</b> uses the same diffuse-fraction and roughness sliders the
+   Render uses, so the two can be compared directly. The other two modes are
+   the pure pictures: all-diffuse, or all-mirror.</p>
   <button id="mr"><span class="lb">Trace sample rays
     <small>5 angles &times; 1 plane</small></span>
     <span class="t">~9 s</span></button>
@@ -582,6 +586,34 @@ function spec(){
   return s;
 }
 
+// ---------- the finish, saved and restored with the design
+// `spec()` carries geometry only, because that is what /api/mesh needs. A
+// saved design that forgets its coating is a different panel: the same shape
+// in Musou and in 4.5 % anodised differ by 4.5x on every number here. So the
+// coating travels beside the spec, not inside it.
+function coatState(){
+  return { coat: $('#coat').value, deepcoat: $('#deepcoat').value,
+           floorcoat: $('#floorcoat') ? $('#floorcoat').value : null,
+           pcov: +$('#pcov').value, df: +$('#df').value, rg: +$('#rg').value };
+}
+function applyCoat(c){
+  if(!c) return;                       // designs saved before this existed
+  const set = (id, v) => { const e=$(id); if(e && v!=null && v!=='') e.value = v; };
+  set('#deepcoat', c.deepcoat); set('#coat', c.coat); set('#floorcoat', c.floorcoat);
+  if(c.pcov != null){
+    const r=$('#pcov'), n=$('#n_pcov');
+    if(r) r.value = c.pcov; if(n) n.value = c.pcov;
+  }
+  for(const [k,v] of [['df',c.df],['rg',c.rg]]){
+    if(v == null) continue;
+    const r=$('#'+k), n=$('#n_'+k), b=$('#v_'+k);
+    if(r) r.value = v;
+    if(n) n.value = v;
+    if(b) b.textContent = (+v).toFixed(2);
+  }
+  if(window.pcovSync) pcovSync();
+}
+
 // ---------- geometry (instant)
 let pending = null;
 function refresh(){
@@ -708,11 +740,11 @@ async function measure(thetas){
       // server is told to coat with; 100 % means there is nothing below.
       floor_coating: ($('#floor').value !== 'none')
                      ? $('#floorcoat').value : null,
-      coating: (+$('#pcov').value <= 0) ? $('#deepcoat').value
+      coating: (NOPAINT() || +$('#pcov').value <= 0) ? $('#deepcoat').value
                                         : $('#coat').value,
-      deep_coating: (+$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+      deep_coating: (NOPAINT() || +$('#pcov').value >= 100 || +$('#pcov').value <= 0)
                     ? null : ($('#deepcoat').value || null),
-      paint_depth: (+$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+      paint_depth: (NOPAINT() || +$('#pcov').value >= 100 || +$('#pcov').value <= 0)
                    ? null : (+$('#depth').value * +$('#pcov').value / 100)})});
     const j = await r.json();
     if(j.error) throw new Error(j.error);
@@ -736,11 +768,44 @@ async function measure(thetas){
       + ` · worst of 5&theta; &times; ${nPl} plane${nPl>1?'s':''}`
       + (nPl>1 ? ` (at &theta; ${wTh}&deg;, &phi; ${wPhi}&deg;)` : '')
       + ` · ${j.seconds}s`
-      + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}</small>`;
+      + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}`
+      // WHICH MATERIAL THIS NUMBER IS FOR. A reflectance with no finish named
+      // beside it is not a result -- the same panel reads 0.10 % or 0.47 %
+      // depending only on what it is painted with, and the reader cannot tell
+      // which from the number alone.
+      + `</small>`;
+    // THE NUMBER FIRST, the caption second. Building both in one template
+    // meant a throw anywhere in the caption threw away the measurement too:
+    // the readout stayed at "not measured" after a render that had actually
+    // finished, which is the worst possible failure for a tool people trust.
+    try{
+      const sub = $('#rho').querySelector('small');
+      if(sub) sub.innerHTML += '<br>' + materialLine();
+    }catch(e){ $('#err').textContent = '재질 표시 실패: ' + String(e).slice(0,200); }
     chart(series);
     $('#m5').classList.add('done');
   }catch(e){ $('#err').textContent = String(e).slice(0,600); }
   finally{ setBusy(-1); $('#m5').disabled = false; prog.stop(); }
+}
+
+// ---------- "안 칠함" 을 고른 상태인가
+function NOPAINT(){ const e=$('#coat'); return !!e && e.value === 'none'; }
+function baseNameOnly(){ return $('#deepcoat').value; }
+
+// ---------- what the panel is painted with, in one line
+function materialLine(){
+  const nm = v => (CO[v] ? (100*CO[v].rho0).toFixed(2)+'% '+v : v);
+  const pcov = +$('#pcov').value, base = $('#deepcoat').value,
+        top = $('#coat').value, fl = $('#floorcoat') ? $('#floorcoat').value : '';
+  let m;
+  if(NOPAINT()) m = '전체 ' + nm(base) + ' (무소 안 칠함)';
+  else if(!base || pcov >= 100) m = '전체 ' + nm(top);
+  else if(pcov <= 0)       m = '전체 ' + nm(base);
+  else m = '위 ' + pcov + '% ' + nm(top) + ' + 나머지 ' + nm(base);
+  const hasFloor = $('#floor') && $('#floor').value !== 'none';
+  if(hasFloor && fl) m += ' · 바닥 ' + nm(fl);
+  return '재질: ' + m + ' · 확산 ' + (+$('#df').value).toFixed(2)
+       + ' · 거칠기 ' + (+$('#rg').value).toFixed(2);
 }
 
 function drawAxis(g, W, H){
@@ -755,15 +820,18 @@ function chart(series){
   const c = $('#chart'), dpr = devicePixelRatio||1;
   // an empty 96 px canvas is not a chart, it is a hole in the layout
   c.style.display = series.length ? 'block' : 'none';
-  c.width = c.clientWidth*dpr; c.height = 96*dpr;
+  // TALLER, because the numbers go on the chart. Reading five angles off a
+  // 96 px sparkline meant squinting at pixel heights; the value at each theta
+  // is the thing being decided, so print it.
+  c.width = c.clientWidth*dpr; c.height = 150*dpr;
   const g = c.getContext('2d'); g.scale(dpr,dpr);
-  const W = c.clientWidth, H = 96, pad = 22;
+  const W = c.clientWidth, H = 150, pad = 26;
   g.clearRect(0,0,W,H);
   if(!series.length) return;
   const mx = Math.max(...series.flatMap(s=>s.vals.map(v=>v[1])))*1.15 || 1;
   g.strokeStyle='#1e262d'; g.beginPath(); g.moveTo(pad,H-16); g.lineTo(W-6,H-16); g.stroke();
   const x = t => pad + (t+40)/80*(W-pad-10);
-  const y = v => (H-16) - v/mx*(H-26);
+  const y = v => (H-16) - v/mx*(H-58);
   for(const s of series){
     const col = PHICOL[s.phi] || '#49c2ca';
     g.strokeStyle=col; g.lineWidth=2; g.beginPath();
@@ -772,6 +840,29 @@ function chart(series){
     s.vals.forEach(([t,v])=>{ g.beginPath(); g.arc(x(t),y(v),3,0,7); g.fill(); });
   }
   g.font='10px ui-monospace,Menlo,monospace';
+  // THE NUMBER AT EACH ANGLE. One plane's worth, so the labels do not stack:
+  // the worst plane if there are several, since that is what the headline
+  // number reports.
+  {
+    let show = series[0];
+    if(series.length > 1){
+      let best = -1;
+      for(const s of series){
+        const m = Math.max(...s.vals.map(v=>v[1]));
+        if(m > best){ best = m; show = s; }
+      }
+    }
+    g.fillStyle = PHICOL[show.phi] || '#49c2ca';
+    g.textAlign = 'center';
+    for(const [t,v] of show.vals){
+      const txt = (100*v).toFixed(3);
+      g.fillText(txt, Math.min(Math.max(x(t), pad+16), W-18), Math.max(y(v)-8, 22));
+    }
+    g.textAlign = 'left';
+    g.fillStyle = '#6b7883';
+    g.fillText('% · ' + (series.length>1 ? '\u03c6'+show.phi+' 평면 (가장 나쁜 쪽)' : ''),
+               pad-4, 12);
+  }
   if(series.length > 1){
     let lx = W - 6 - series.length*38;
     for(const s of series){
@@ -1168,7 +1259,9 @@ function draw(fw, fh){
     const pcEl = $('#pcov'), dEl = $('#depth');
     const pc = pcEl ? Math.max(0, Math.min(100, +pcEl.value || 0)) : 0;
     const dep = dEl ? (+dEl.value || 0) : 0;
-    const on = (pc > 0 && dep > 0) ? 1 : 0;
+    // "안 칠함" leaves the coverage slider's OLD value sitting in the DOM, so
+    // the model went on drawing a painted band after the paint was removed.
+    const on = (!NOPAINT() && pc > 0 && dep > 0) ? 1 : 0;
     gl.uniform1f(gl.getUniformLocation(P,'paintY'), on ? -(dep*pc/100) : 1e9);
     gl.uniform1f(gl.getUniformLocation(P,'paintOn'), on);
     // THE BACKING COUNTS AS A FLOOR. With no floor LAYER the tint used to
@@ -1248,6 +1341,7 @@ addEventListener('resize', draw);
     if(sp.panel != null) setTop('panel','v_panel', sp.panel);
     setTop('depth','v_depth', sp.depth);
     if(sp.floor && sp.floor!=='none') setTop('fdepth','v_fdepth', sp.floor_depth||3);
+    applyCoat(sp._coat);
     loading = false;
     refresh();
   };
@@ -1270,13 +1364,14 @@ addEventListener('resize', draw);
   $('#dsave').onclick = () => {
     const name = ($('#dname').value||'').trim();
     if(!name){ dnote('give the design a name first'); return; }
-    const d = userD(); d[name] = spec();
+    const d = userD(); d[name] = Object.assign(spec(), {_coat: coatState()});
     localStorage.setItem(LS_D, JSON.stringify(d));
     fillPresets(); $('#preset').value = 'u:'+name;
     dnote('saved "'+name+'" — it is in the design list now');
   };
   $('#dboot').onclick = () => {
-    localStorage.setItem(LS_BOOT, JSON.stringify(spec()));
+    localStorage.setItem(LS_BOOT,
+      JSON.stringify(Object.assign(spec(), {_coat: coatState()})));
     dnote('this exact design now loads at start-up');
   };
 
@@ -1336,8 +1431,22 @@ addEventListener('resize', draw);
       const BW = parseFloat($('#beamw').value) || 7.5;
       const MMPX = parseFloat($('#mmpx').value) || 0.215;
       const r = await fetch('/api/form', {method:'POST',
+        // the SAME finish the totals button sends. Without these the
+        // smear + head-on numbers were always the fitted Musou.
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
                               beam_w: BW, mm_per_px: MMPX, renderer: R,
+                              diffuse_frac: +$('#df').value,
+                              roughness: +$('#rg').value,
+                              coating: (NOPAINT() || +$('#pcov').value <= 0)
+                                       ? $('#deepcoat').value : $('#coat').value,
+                              deep_coating: (NOPAINT() || +$('#pcov').value >= 100
+                                             || +$('#pcov').value <= 0)
+                                       ? null : ($('#deepcoat').value || null),
+                              paint_depth: (NOPAINT() || +$('#pcov').value >= 100
+                                            || +$('#pcov').value <= 0)
+                                       ? null : +$('#pd').value,
+                              floor_coating: ($('#floor').value !== 'none')
+                                       ? $('#floorcoat').value : null,
                               phis: R === 'cycles' ? [0, 45, 90] : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
@@ -1422,7 +1531,12 @@ addEventListener('resize', draw);
                 wall_5pct:'plain matte black wall'};
   const opts = Object.entries(CO).map(([k,v]) =>
     `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${NICE[k]||k}</option>`).join('');
-  $('#coat').innerHTML = opts;
+  // NOT PAINTING IS A CHOICE, and it needs to be on the list. Until now the
+  // only way to say "no Musou anywhere" was to drag the coverage slider to 0,
+  // which is a hidden move: the dropdown still named a paint, so the panel
+  // looked painted when it was not.
+  $('#coat').innerHTML =
+    '<option value="none">— 안 칠함 (none) —</option>' + opts;
   $('#coat').value = 'musou_fit';
   // "AS BOUGHT" MEANS UNPAINTED. The list used to be every coating, including
   // the three Musou entries -- so it offered "below the paint: Musou", which is
@@ -1475,24 +1589,31 @@ addEventListener('resize', draw);
     // "painted all the way down" is now a STATE OF THE DEPTH, not a menu
     // entry: drag the depth to the full envelope and there is nothing below
     // the paint, so the material menu below goes idle and says so.
-    const full = st.pc >= 100 - 1e-9, none = st.pc <= 1e-9;
+    // "안 칠함" on the paint menu means the same state as coverage 0, and the
+    // coverage slider has nothing to say once it is chosen, so hide it.
+    const noPaint = NOPAINT();
+    const full = !noPaint && st.pc >= 100 - 1e-9;
+    const none = noPaint || st.pc <= 1e-9;
     const a = CO[$('#coat').value], d = CO[$('#deepcoat').value];
+    const pw = $('#pdwrap');
+    if(pw) pw.style.display = noPaint ? 'none' : '';
     // 0 % -> the paint menu is idle; 100 % -> the base menu is idle. Neither
     // state is a menu entry any more, they are the ends of the slider.
     const dcw = $('#deepcoat').closest('.row');
     if(dcw){ dcw.style.opacity = full ? '0.4' : ''; }
     $('#deepcoat').disabled = full;
     const cw = $('#coat').closest('.row');
-    if(cw){ cw.style.opacity = none ? '0.4' : ''; }
-    $('#coat').disabled = none;
+    if(cw){ cw.style.opacity = (none && !noPaint) ? '0.4' : ''; }
+    $('#coat').disabled = false;
     // EACH NOTE UNDER ITS OWN CONTROL. Both used to be printed in one block
     // below the LAST control, so the paint's note sat directly under the
     // "bare material below" menu and read as if it described that menu --
     // a Musou paragraph explaining an anodised-aluminium choice.
-    $('#coatnote').innerHTML = none
-      ? '<b>Not used</b> — nothing is painted; the panel is its base material '
-        + 'throughout.'
-      : a.note;
+    $('#coatnote').innerHTML = noPaint
+      ? '<b>안 칠함</b> — 판은 처음부터 끝까지 바탕 재료 그대로입니다.'
+      : (none
+         ? '<b>Not used</b> — coverage is 0, so nothing is painted.'
+         : (a ? a.note : ''));
     $('#deepnote').innerHTML = full
       ? '<b>Not used</b> — the paint covers the whole well depth.'
       : (d ? d.note : '');
@@ -1581,14 +1702,41 @@ addEventListener('resize', draw);
     const prog = progressBar(b);   // trace progress is counted client-side
     try{
       const mode = $('#ray_mode').value;
-      // the coating already chosen on the left owns rho -- no second picker
-      const rho = CO[$('#coat').value].rho0;
+      // THE COATING THE PANEL ACTUALLY WEARS, not just the top pick. This read
+      // `CO[$('#coat').value].rho0` and ignored both the base finish and the
+      // coverage, so setting the base to anodised and the coverage to 0 --
+      // a panel with no Musou on it anywhere -- still traced at Musou's 1 %
+      // and printed "musou_fit 1.00%" under the result. The Render above has
+      // always honoured all three; only the tracer did not.
+      const pcov = +$('#pcov').value;
+      const topN = NOPAINT() ? baseNameOnly() : $('#coat').value,
+            baseN = $('#deepcoat').value;
+      // AREA-WEIGHTED, not "whichever is on top". The first fix only swapped to
+      // the base when coverage was exactly 0, so a panel covered 1 % from the
+      // top -- 99 % of its surface bare anodised -- still traced at Musou's
+      // 1 % and reported out = 0.998 %. The tracer carries ONE rho, so the
+      // honest single number is the mix the beam actually meets.
+      let rho, rhoNote;
+      if(NOPAINT()){ rho = CO[baseN].rho0; rhoNote = baseN + ' (안 칠함)'; }
+      else if(!baseN || pcov >= 100){ rho = CO[topN].rho0; rhoNote = topN; }
+      else if(pcov <= 0){ rho = CO[baseN].rho0; rhoNote = baseN; }
+      else {
+        const f = pcov/100;
+        rho = f*CO[topN].rho0 + (1-f)*CO[baseN].rho0;
+        rhoNote = '섞음 ' + pcov + '% ' + topN + ' + ' + (100-pcov) + '% ' + baseN
+                + ' (추적기는 한 값만 씁니다)';
+      }
       // real spill can come around from any compass direction; phi rotates
       // the approach out of the theta plane. The RENDER's incoming light is
       // already all azimuths at once -- only its read direction is phi 0.
       const phi = +$('#ray_phi').value || 0;
       const nr = Math.min(800, Math.max(20, +$('#ray_n').value || 200));
-      const mb = mode === 'specular' ? 40 : 24;
+      // BOUNCES ENOUGH TO FINISH. 24 was not: a 50 mm cell traced head-on
+      // averaged 23.7 bounces -- sitting ON the limit -- and reported 0.122 %
+      // where 200 bounces gives 0.186 %. A path cut short is counted as
+      // absorbed, so the old default made every deep design look better than
+      // it is, and worst exactly where the cell is deepest.
+      const mb = mode === 'specular' ? 60 : 200;
       // the SAME five angles the measurement renders, one trace per angle,
       // sequential because the server renders one request at a time anyway
       const THS = [0,-20,-40,20,40];
@@ -1596,7 +1744,11 @@ addEventListener('resize', draw);
       for(const th of THS){
         prog.set(out.length, THS.length);
         const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
-          {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode})});
+          {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode,
+           // the SAME two sliders the Render uses. The trace ignored both
+           // until now, so it could not be compared with Render on a painted
+           // panel: one was a pure mode, the other a 76/24 mix.
+           diffuse_frac: +$('#df').value, roughness: +$('#rg').value})});
         const j = await r.json();
         if(j.error) throw new Error(j.error);
         out.push(j);
@@ -1617,7 +1769,7 @@ addEventListener('resize', draw);
             <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
         }).join('') +
         `<div><dt><b>worst of 5 sampled angles</b></dt><dd><b>${fmt(worst)}</b></dd></div>
-         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${$('#coat').value} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>
+         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${rhoNote} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>
          <div><dt>took</dt><dd>${took.toFixed(2)} s</dd></div>`;
       // per-angle visibility: unchecking an angle removes its paths from the
       // viewport without re-tracing; the numbers in this table stay put

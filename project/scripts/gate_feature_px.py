@@ -36,7 +36,18 @@ PRE-REGISTERED:
       every head-on number in the project is low, and the finer the design the
       worse: tip 0.1 is 4x further sub-pixel than tip 0.4.
 """
-import json as J, urllib.request, time, os
+import json as J, time, os, sys
+
+# IN ITS OWN BLENDER, NOT THROUGH THE APP. This gate posted to the sim server
+# and died twice on "HTTP Error 500" -- once because the server restarted under
+# it, once because a batch and the user's Render button were queued behind the
+# same single worker. A measurement that needs the app to be up is a
+# measurement that stops when the user clicks something. `form` is a plain
+# function; call it.
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import sim_server as SS  # noqa: E402
 
 OUT="/tmp/simsrv/featpx"; os.makedirs(OUT,exist_ok=True)
 BASE={"top":"pyramid","top_params":{"pitch":4.0,"tip_flat":0.4},
@@ -44,12 +55,12 @@ BASE={"top":"pyramid","top_params":{"pitch":4.0,"tip_flat":0.4},
 TIP=0.4
 
 def call(mmpx, nph=8, spp=256):
-    body=J.dumps({"spec":BASE,"renderer":"cycles","coat":"musou_fit",
-                  "n_phase":nph,"samples":spp,"beam_w":7.5,
-                  "mm_per_px":mmpx}).encode()
     t=time.time()
-    d=J.loads(urllib.request.urlopen(
-        "http://127.0.0.1:8777/api/form",body,timeout=7200).read())
+    d=SS.form(BASE, n_phase=nph, samples=spp, beam_w=7.5, mm_per_px=mmpx)
+    for k in ("peak","smear"):
+        if d.get(k) is None:
+            raise SystemExit("form() gave no %r at mm_per_px=%g -- refusing to "
+                             "report a run with a hole in it" % (k, mmpx))
     return d, time.time()-t
 
 rows=[]
@@ -76,6 +87,18 @@ for i in range(1,len(rows)):
         break
 else:
     print("  **N = 32 에서도 안 멈춤 — 픽셀로 봉우리를 재는 방식 자체가 부적합**",flush=True)
+
+# THE OTHER AXIS, ON THE SAME RENDERS. The density rule in the protocol
+# (mm_per_px = min_feature / 4) was fixed by watching head-on settle, and the
+# smear column was never read. An old server-killed log of this same sweep
+# shows smear falling 2.2377 -> 1.0082 across the same densities where head-on
+# was flat, which would mean the rule serves one axis and not the other. Print
+# both so the question cannot be dodged again.
+print("\n=== 모양 뭉개기도 같은 밀도에서 멈추는가 ===",flush=True)
+for i in range(1,len(rows)):
+    a,b=rows[i-1]["smear"],rows[i]["smear"]
+    print("  N %-3d 밀도 %.4f  뭉개기 %.4f   앞 값 대비 %+.1f %%"
+          % (rows[i]["N"], rows[i]["mmpx"], b, 100*(b-a)/a),flush=True)
 sm=[r["smear"] for r in rows]
 print("  모양 뭉개기 흩어짐 %.2f %%  %s"
       % (100*(max(sm)-min(sm))/(sum(sm)/len(sm)),

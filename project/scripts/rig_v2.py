@@ -127,12 +127,103 @@ def sky_inset_mm(mm_per_px, pixels=4.0):
     return pixels * mm_per_px
 
 
+# WHICH MODULE OWNS A SET OF PARAMETERS. `family` used to default to "floor"
+# for every caller, so a caller that forgot to name its family got the floor
+# module whatever it had asked for. Two gate scripts died on exactly that --
+#
+#   rig_v2_gates_mesh.py  kind="cone", tip_radius=0.2
+#     -> FloorParams.__init__() got an unexpected keyword argument 'tip_radius'
+#   sweep_standalone.py   wall_top=...
+#     -> FloorParams.__init__() got an unexpected keyword argument 'wall_top'
+#
+# -- and both took their whole batch down with them. The mis-routing is loud
+# rather than silent (a dataclass rejects an unknown keyword, and geom_floor
+# raises on an unknown `kind`), so no wrong shape was ever measured; but the
+# job stops, and a stopped batch looks like a finished one in a log file.
+_FAMILY_CLASS = [
+    ("floor",  "geom_floor",  "FloorParams"),
+    ("cone3d", "geom3d",      "Cone3DParams"),
+    ("topo",   "geom_topo",   "TopoParams"),
+    ("perf",   "geom_perf",   "PerfParams"),
+    ("cell",   "geom_cell",   "CellParams"),
+    ("stack",  "geom_stack",  "StackParams"),
+]
+
+
+def _infer_family(params):
+    """Name the family that can take these parameters, and the params to pass.
+
+    Returns (family, params). The second value matters: when `kind` is acting
+    as a FAMILY selector rather than a floor sub-shape it must be dropped, or
+    the class it selected rejects it -- Cone3DParams has no `kind` field, so
+    inferring "cone3d" and then handing it `kind="cone"` fails at the next
+    line for a new reason. Inference and the call have to agree on one set.
+
+    `floor` is tried FIRST and wins whenever it fits, so every call that works
+    today keeps the family it has always had -- this only rescues the calls
+    that currently crash. If nothing fits, say what each family rejected
+    instead of letting one module's TypeError stand for the whole answer.
+    """
+    import importlib
+    import dataclasses
+    rejected = []
+    for fam, mod_name, cls_name in _FAMILY_CLASS:
+        try:
+            cls = getattr(importlib.import_module(mod_name), cls_name)
+        except Exception as exc:                       # module not importable
+            rejected.append("%s: %s" % (fam, exc))
+            continue
+        allowed = {f.name for f in dataclasses.fields(cls)}
+        extra = set(params) - allowed
+        if extra:
+            rejected.append("%s: does not take %s"
+                            % (fam, ", ".join(sorted(extra))))
+            continue
+        kind = params.get("kind")
+        if fam == "floor" and kind is not None:
+            import geom_floor as GF
+            if kind not in GF._BUILDERS:
+                rejected.append("floor: no builder for kind %r" % kind)
+                continue
+        return fam, dict(params)
+    # `kind` CARRIES TWO MEANINGS. In geom_floor it names the sub-shape
+    # (pyramid, wave, boxgrid); in the gate scripts it names the family
+    # itself -- kind="cone" means the 3D cone module, which has no `kind`
+    # field at all and so rejects the whole set. Retry without it, but only
+    # for a name no floor builder claims, so a real floor kind can never be
+    # thrown away to make some other family fit.
+    kind = params.get("kind")
+    if kind is not None:
+        import geom_floor as GF
+        if kind not in GF._BUILDERS:
+            rest = {k: v for k, v in params.items() if k != "kind"}
+            for fam, mod_name, cls_name in _FAMILY_CLASS:
+                if fam == "floor":
+                    continue
+                try:
+                    cls = getattr(importlib.import_module(mod_name), cls_name)
+                except Exception:
+                    continue
+                if not set(rest) - {f.name for f in dataclasses.fields(cls)} \
+                        and fam.startswith(kind):
+                    return fam, rest
+    raise ValueError(
+        "no geometry family takes these parameters (%s).\n  %s"
+        % (", ".join(sorted(params)), "\n  ".join(rejected)))
+
+
 def build(params, samples=256, roughness=0.30, lambert_rho=None,
-          family="floor"):
+          family=None, coating=None, deep_coating=None, paint_depth=None,
+          floor_coating=None, floor_boundary_depth=None):
     """Build the scene with the control placed clear. Returns everything the
     callers need, including the geometry's real extent so overlap can be
-    asserted rather than assumed."""
+    asserted rather than assumed.
+
+    `family` may be left out; it is then inferred from the parameter names.
+    """
     import bpy
+    if family is None:
+        family, params = _infer_family(dict(params))
     cfg = {"tag": "rigv2", "out_dir": "/tmp/simsrv/rigv2",
            "results_dir": "/tmp/simsrv/rigv2", "samples": samples,
            "res_x": 1400, "res_y": 620, "gpu": True,
@@ -140,6 +231,19 @@ def build(params, samples=256, roughness=0.30, lambert_rho=None,
            "renders": [], "material_mode": "coating", "family": family}
     body, spec = BR.coating_split(0.76)
     cfg["coating"] = {"body": body, "spec_scale": spec, "roughness": roughness}
+    # A CALLER-SUPPLIED FINISH. Without these the rig always painted the fitted
+    # Musou everywhere, so a script that thought it was sweeping coatings was
+    # rendering one coating over and over. Each is a {"body","spec_scale"} dict
+    # as `sim_server._coat` returns.
+    if coating is not None:
+        cfg["coating"] = dict(coating, roughness=roughness)
+    if paint_depth is not None and deep_coating is not None:
+        cfg["paint_depth"] = float(paint_depth)
+        cfg["deep_coating"] = dict(deep_coating)
+    if floor_coating is not None:
+        cfg["floor_coating"] = dict(floor_coating)
+        if floor_boundary_depth is not None:
+            cfg["floor_boundary_depth"] = float(floor_boundary_depth)
     cfg.update({k: v for k, v in FB.COAT.items() if k != "spec_roughness"})
     if lambert_rho is not None:
         cfg["material_mode"] = "all_diffuse"

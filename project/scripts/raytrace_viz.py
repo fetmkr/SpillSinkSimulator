@@ -140,7 +140,8 @@ def _lcg(seed):
 
 
 def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
-          n_rays=120, max_bounces=12, rho=0.5, seed=23, mode="diffuse"):
+          n_rays=120, max_bounces=12, rho=0.5, seed=23, mode="diffuse",
+          diffuse_frac=None, roughness=0.30):
     """Cast `n_rays` at incidence theta and walk each until it leaves or dies.
 
     2026-08-17 upgrade toward optical-tool behaviour:
@@ -225,10 +226,33 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
             n = (n[0] / nl, n[1] / nl, n[2] / nl)
             if n[0] * d[0] + n[1] * d[1] + n[2] * d[2] > 0:
                 n = (-n[0], -n[1], -n[2])
-            if mode == "specular":
+            # THE SAME MATERIAL THE RENDER USES, when the caller asks for it.
+            # "diffuse" and "specular" are the two pure pictures; `fitted`
+            # mixes them per bounce with the panel's own diffuse fraction and
+            # blurs the mirror leg by its roughness. Until this existed the
+            # trace and the Render could not be compared on a painted panel at
+            # all: the trace was one pure mode while the Render was 76/24.
+            want_spec = (mode == "specular")
+            if mode == "fitted" and diffuse_frac is not None:
+                want_spec = next(rng) >= float(diffuse_frac)
+            if want_spec:
                 dd = d[0] * n[0] + d[1] * n[1] + d[2] * n[2]
                 d = [d[0] - 2 * dd * n[0], d[1] - 2 * dd * n[1],
                      d[2] - 2 * dd * n[2]]
+                if mode == "fitted" and roughness > 0.0:
+                    # blur the mirror leg. Not GGX -- a spherical jitter of
+                    # the reflected direction, kept in the upper hemisphere.
+                    for _ in range(8):
+                        j = [(2.0 * next(rng) - 1.0) * roughness
+                             for _ in range(3)]
+                        e = [d[0] + j[0], d[1] + j[1], d[2] + j[2]]
+                        el = math.sqrt(e[0]**2 + e[1]**2 + e[2]**2)
+                        if el < 1e-9:
+                            continue
+                        e = [e[0]/el, e[1]/el, e[2]/el]
+                        if e[0]*n[0] + e[1]*n[1] + e[2]*n[2] > 1e-4:
+                            d = e
+                            break
             else:
                 # cosine-weighted hemisphere about n
                 u1, u2 = next(rng), next(rng)
@@ -280,7 +304,9 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
                       "absorbed_frac": n_absorbed / n,
                       "escaped_frac": sum(escaped) / n,
                       "max_bounces": max_bounces, "rho": rho,
-                      "mode": mode, "hist": hist, "rho_est": rho_est,
+                      "mode": mode, "diffuse_frac": diffuse_frac,
+                      "roughness": roughness,
+                      "hist": hist, "rho_est": rho_est,
                       "missed": n_missed,
                       "theta": theta_deg,
                       "triangles": len(tris)}}

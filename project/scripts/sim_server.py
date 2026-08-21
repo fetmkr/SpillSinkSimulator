@@ -126,10 +126,21 @@ def in_blender(op, **req):
               # every knob the request carries must reach form(); dropping one
               # here is invisible -- the density control silently did nothing
               # until this was found, because the response echoed the default
+              # EVERY FINISH THE REQUEST CARRIES. This handler forwarded only
+              # `floor_coating`, so `coating`, `deep_coating` and `paint_depth`
+              # fell back to the fitted Musou: the app's "smear + head-on"
+              # button reported Musou numbers whatever coating was picked, and
+              # a 5 % painted comb read 1.64 where it should read 8.23. The
+              # totals path took all four from the start; only this one did not.
               "form": lambda: form(req["spec"], req.get("thetas"),
                                    req.get("n_phase"), req.get("samples"),
                                    req.get("beam_w"), req.get("phis"),
-                                   req.get("mm_per_px")),
+                                   req.get("mm_per_px"),
+                                   req.get("floor_coating"),
+                                   req.get("diffuse_frac"),
+                                   req.get("coating") or "musou_fit",
+                                   req.get("deep_coating"),
+                                   req.get("paint_depth")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -1328,46 +1339,100 @@ def min_feature(spec):
     return best if best else (None, None)
 
 
-# --- coatings ---------------------------------------------------------------
+# --- materials --------------------------------------------------------------
 #
-# A named coating is one number: rho_dh at normal incidence. The diffuse
-# fraction then splits it between a Lambertian body and a Fresnel lobe, and
-# `roughness` shapes that lobe. Only rho0 distinguishes the products.
+# A MATERIAL is four numbers, not one:
 #
-# EVERY VALUE HERE HAS A SOURCE, and the two that do not agree say so.
-COATINGS = {
-    "musou_air": (0.0060, "Musou Black, airbrushed \u2014 0.6 % total "
-                          "reflectance at 550 nm, AOI 8 deg integrating "
-                          "sphere [musoublack.com product spec]"),
-    "musou_fit": (0.00998, "Musou Black as fitted in this project \u2014 "
-                           "Filip & V\u00e1vra 2026 JOSA A 43, 1037, "
-                           "RGB-weighted 380\u2013700 nm. Every number in "
-                           "phases 2\u20135 uses this."),
-    "musou_brush": (0.0110, "Musou Black, brush-applied \u2014 1.1 % or "
-                            "lower [the-black-market.com]. 1.8x the airbrushed "
-                            "figure; application method is a larger lever than "
-                            "any geometry parameter measured so far."),
-    "anodised_lo": (0.030, "Black anodised aluminium, optimistic end. Sources "
-                           "disagree: 'below 5 % in the visible' vs 'at least "
-                           "5 %'. Swept, not assumed."),
-    "anodised": (0.045, "Black anodised aluminium, nominal \u2014 what bought "
-                        "honeycomb actually arrives as [arXiv 1407.8265; "
-                        "Rubin M2 baffle]."),
-    "anodised_hi": (0.060, "Black anodised aluminium, pessimistic end."),
-    "wall_5pct": (0.050, "Plain matte black wall \u2014 the control patch in "
-                         "every render."),
+#   rho0       total reflectance at normal incidence
+#   df         diffuse fraction -- how much of rho0 goes to the Lambertian
+#              body rather than the specular lobe
+#   rough      width of that lobe
+#   src        where each of the three came from
+#
+# It used to be rho0 alone, with df and rough set once for the whole panel by
+# two sliders. That is how a panel ended up "painted Musou with anodised
+# gloss": the menu changed rho0 and nothing else, and no readout said so.
+#
+# PROVENANCE, because these decide the absolute level of every number here:
+#
+#   measured   somebody put it on an instrument
+#   fitted     chosen so this project reproduces a measured total
+#   guessed    ordered against a measurement, magnitude unknown
+#
+# On df in particular: Filip & Vavra 2026 (JOSA A 43, 1037) report TIS, the
+# fraction of returned energy landing OUTSIDE a 5-degree cone about the
+# specular direction. That is NOT this df. Our specular lobe at roughness 0.30
+# is far wider than 5 degrees, so most of it counts as "diffuse" under TIS --
+# their Musou TIS of ~0.99 sits happily beside our fitted df of 0.76. What the
+# paper does give, and what the numbers below respect, is the ORDER of the
+# specular strength:
+#
+#   acrylic matte  >  chalkboard  >  Musou paint  >  velvet  >  Vantablack
+#
+# so a plain matte black wall must have a LOWER df than Musou, not a higher one.
+# THE TABLE LIVES IN A FILE, not here. `material/materials.json` is the single
+# source: edit it and the simulator changes, no code edit and no restart of the
+# reasoning about where a number came from. The dict below is only the fallback
+# for a checkout with the file missing.
+_MAT_FALLBACK = {
+    "musou_fit": dict(rho0=0.00998, df=0.76, rough=0.30,
+                      src="fallback", prov=("measured", "fitted", "fitted")),
+    "wall_5pct": dict(rho0=0.050, df=0.65, rough=0.30,
+                      src="fallback", prov=("measured", "guessed", "guessed")),
 }
 
 
+def _load_materials():
+    import os
+    import json as _j
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "material", "materials.json")
+    try:
+        raw = _j.load(open(path, encoding="utf-8"))
+    except Exception as exc:
+        print("[SIM] material/materials.json 못 읽음 (%s) -- 최소 표로 돈다"
+              % exc, flush=True)
+        return dict(_MAT_FALLBACK)
+    out = {}
+    for k, v in raw.items():
+        if k.startswith("_"):
+            continue                      # "_읽는_법" is documentation
+        out[k] = dict(rho0=float(v["rho0"]), df=float(v["df"]),
+                      rough=float(v["rough"]), src=v.get("src", ""),
+                      label=v.get("label", k),
+                      prov=tuple(v.get("prov", ("?", "?", "?"))))
+    print("[SIM] 재료 %d 종을 material/materials.json 에서 읽음" % len(out),
+          flush=True)
+    return out
+
+
+MATERIALS = _load_materials()
+
+# the old two-tuple view, kept so nothing that reads COATINGS has to change
+COATINGS = {k: (v["rho0"], v["src"]) for k, v in MATERIALS.items()}
+
+
+
 def coatings_json():
-    return {k: {"rho0": v[0], "note": v[1]} for k, v in COATINGS.items()}
+    return {k: {"rho0": v["rho0"], "df": v["df"], "rough": v["rough"],
+                "note": v["src"], "label": v.get("label", k),
+                "prov": list(v["prov"])}
+            for k, v in MATERIALS.items()}
 
 
-def _coat(name, diffuse_frac, default="musou_fit"):
+def _coat(name, diffuse_frac=None, default="musou_fit"):
+    """The material's own diffuse fraction unless the caller overrides it.
+
+    `diffuse_frac` used to be required and panel-wide, so picking Musou for
+    the top and anodised for the base gave both the SAME split -- the menu
+    moved rho0 and nothing else. Pass None to get the material's own number.
+    """
     import blender_render as BR
-    rho0 = COATINGS.get(name, COATINGS[default])[0]
-    body, spec = BR.coating_split(float(diffuse_frac), rho0=rho0)
-    return {"body": body, "spec_scale": spec}
+    m = MATERIALS.get(name, MATERIALS[default])
+    df = m["df"] if diffuse_frac is None else float(diffuse_frac)
+    body, spec = BR.coating_split(df, rho0=m["rho0"])
+    return {"body": body, "spec_scale": spec, "df": df,
+            "roughness": m["rough"], "rho0": m["rho0"]}
 
 
 # --- measurement ------------------------------------------------------------
@@ -1527,7 +1592,8 @@ def _render_params(spec):
 # --- form destruction and head-on brightness --------------------------------
 
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
-         phis=None, mm_per_px=None):
+         phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
+         coating="musou_fit", deep_coating=None, paint_depth=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1559,6 +1625,34 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
              "family": _render_family(m), "topology": topo,
              "process": min_feature(spec)[1] or "unknown",
              "params": prm, "pitch": pitch}
+    # THE FLOOR'S OWN FINISH, on this path as well as on `measure`. Without it
+    # smear and head-on could not be read with a painted floor at all, so a
+    # floor-finish comparison could only ever quote the total -- one axis of
+    # three, which is exactly the thing this project forbids.
+    # PAINT THAT ONLY REACHES SO FAR DOWN, on this path too. `measure` has
+    # taken (coating, deep_coating, paint_depth) for a while; this one always
+    # used the fitted Musou everywhere. So "Musou 10 mm from the tip, 5 %
+    # paint below" could be scored on the total and NOT on smear or head-on --
+    # and head-on is the axis a dark rim is supposed to fix.
+    # ALWAYS pass the coating, never "only when it differs from the default".
+    # The first version skipped this branch for coating="musou_fit", so
+    # `diffuse_frac` silently did nothing on that path: asking for a gloss-free
+    # Musou returned the fitted 76/24 split unchanged, to five figures. The
+    # 5 % paint moved because it took the branch; Musou did not, and the two
+    # sitting side by side in one table is what exposed it.
+    cc = _coat(coating, diffuse_frac)
+    entry["coating"] = {"body": cc["body"], "spec_scale": cc["spec_scale"]}
+    if paint_depth is not None and deep_coating:
+        entry["paint_depth"] = float(paint_depth)
+        entry["deep_coating"] = _coat(deep_coating, diffuse_frac)
+    if floor_coating:
+        entry["floor_coating"] = _coat(floor_coating, diffuse_frac,
+                                       default="musou_fit")
+        entry["floor_boundary_depth"] = (
+            float(spec.get("depth", 50.0) or 50.0)
+            - float(spec.get("floor_depth", 0.0) or 0.0)
+            if spec.get("floor", "none") != "none"
+            else float(spec.get("depth", 50.0) or 50.0))
     # The probe beam width at the wall. Phase 5.4/5.5 showed smear depends on
     # beam/pitch, so this is a first-class knob, not a protocol constant. The
     # default stays the historical 2.0 so old numbers keep reproducing.
@@ -2235,7 +2329,17 @@ class H(BaseHTTPRequestHandler):
                                      samples=req.get("samples"),
                                      beam_w=req.get("beam_w"),
                                      phis=req.get("phis"),
-                                     mm_per_px=req.get("mm_per_px"))
+                                     mm_per_px=req.get("mm_per_px"),
+                                     # THE FINISH, which this call dropped.
+                                     # Fixing the dispatch lambda alone was not
+                                     # enough: the coating has to be put into
+                                     # the request here as well, or the lambda
+                                     # never sees it.
+                                     floor_coating=req.get("floor_coating"),
+                                     diffuse_frac=req.get("diffuse_frac"),
+                                     coating=req.get("coating") or "musou_fit",
+                                     deep_coating=req.get("deep_coating"),
+                                     paint_depth=req.get("paint_depth"))
                     if "error" in out:
                         return self._send(200, json.dumps(out))
                     tries.append({"face_mm": out.get("face_mm"),
@@ -2356,7 +2460,10 @@ class H(BaseHTTPRequestHandler):
                                n_rays=int(req.get("n_rays", 120)),
                                max_bounces=int(req.get("max_bounces", 12)),
                                rho=float(req.get("rho", 0.5)),
-                               mode=str(req.get("mode", "diffuse")),
+                               mode=str(req.get("mode", "fitted")),
+                               diffuse_frac=(None if req.get("diffuse_frac") is None
+                                             else float(req["diffuse_frac"])),
+                               roughness=float(req.get("roughness", 0.30)),
                                seed=int(req.get("seed", 23)))
                 out["seconds"] = round(time.perf_counter() - t0, 2)
                 return self._send(200, json.dumps(out))
