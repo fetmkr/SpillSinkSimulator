@@ -1,0 +1,137 @@
+{
+  // Everything that MEASURES runs inside Blender's own Python, which a
+  // debugpy launch config cannot start -- so the Blender entry points live
+  // here as run targets. Run Task (Cmd-Shift-P) or Cmd-Shift-B for the default.
+  //
+  // --python-exit-code 77 IS NOT OPTIONAL. Blender returns 0 even when the
+  // script died on an exception; principles/00 section E records a 40-minute
+  // job that died in one second and was logged as a success. Every task below
+  // carries it, and so must any task added later.
+  //
+  // The binary comes from "spillsink.blenderPath" in .vscode/settings.json --
+  // change it there once, not in nine places.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // GATE FIRST, THEN SWEEP. Six checks on the angle-in/angle-out rig,
+      // including the Lambertian isotropy check that catches the azimuth class
+      // of error. Non-zero exit blocks the sweep.
+      "label": "Gate: bidir rig (gate 17)",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/gate_bidir.py"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // The headline numbers are frozen. Run this after ANY change to the
+      // geometry or the measurement chain; non-zero exit means something moved.
+      "label": "Lock: check for drift",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/lock.py", "--", "check"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // Four seeds on the same cases: this is where the lock's tolerance comes
+      // from, rather than being guessed.
+      "label": "Lock: measure the noise",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/lock.py", "--", "noise"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // METRIC 09, the top-line number: radiance factor at the audience, over
+      // the three-angle cells this room actually uses. Resumable -- it skips
+      // surfaces already complete in results/audience.csv. ~20 min cold.
+      "label": "Measure: reflectance at the audience (metric 09)",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/measure_audience.py"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // rho_dh across the band the ROOM delivers (20-70 deg), not the band the
+      // study scores (0/+-20/+-40). Writes results/rigband_hcflat.csv.
+      "label": "Probe: the room's real incidence band",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/probe_rigband.py"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // The honeycomb search: pitch x depth x foil x paint reach. Resumable,
+      // and it stops cleanly at the minute budget you give it.
+      "label": "Sweep: honeycomb search (budgeted)",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/sweep_hcflat.py", "--",
+               "--minutes", "${input:sweepMinutes}"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // Angle-in / angle-out maps. --quick is the 20 deg grid for seeing the
+      // shape today; drop it for the 5 deg protocol grid, which is a queue job.
+      "label": "Sweep: BRDF maps, quick grid",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/sweep_bidir.py", "--", "--quick"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // Blender stays resident and its main thread becomes the render worker.
+      // Use this when clicking Render many times in a row; the standalone
+      // server in launch.json spawns a worker per session instead.
+      "label": "Sim server, inside Blender (warm renderer)",
+      "type": "shell",
+      "command": "${config:spillsink.blenderPath}",
+      "args": ["--background", "--factory-startup", "--python-exit-code", "77",
+               "--python", "scripts/sim_server.py"],
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // The whole pipeline in its fixed order: gate, ranking, spec, renders,
+      // report, gate. One failure stops everything below it.
+      "label": "Build all (the six-stage pipeline)",
+      "type": "shell",
+      "command": "./scripts/build_all.sh",
+      "options": { "cwd": "${workspaceFolder}/project" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "sweepMinutes",
+      "type": "promptString",
+      "description": "Minutes to spend sweeping before stopping cleanly",
+      "default": "60"
+    }
+  ]
+}

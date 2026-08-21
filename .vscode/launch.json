@@ -1,0 +1,152 @@
+{
+  // Debug targets for SpillSinkSimulator.
+  //
+  // WHAT CAN AND CANNOT BE DEBUGGED HERE. Everything in this file runs under
+  // the SYSTEM Python (3.14, /opt/homebrew/bin/python3), which is the right
+  // interpreter for the server, the tests, the plotters and the report
+  // builders -- none of them import bpy at module scope.
+  //
+  // Anything that measures runs inside BLENDER's own Python (3.11.9, bundled
+  // in the app), and a debugpy "launch" cannot start that interpreter. Those
+  // live in .vscode/tasks.json as run targets (Cmd-Shift-B / "Run Task"), and
+  // if you need to STEP through one, use "Attach to Blender" at the bottom of
+  // this file -- it needs a one-time install, documented there.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // The workhorse. Open a file, hit F5.
+      "name": "Python: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // http://127.0.0.1:8777 -- structure picking, sliders, 3D preview, STL
+      // export and the metric 08 / audience panels all run here. Pressing a
+      // Render button hands the job to a warm Blender subprocess, so the
+      // renderer is NOT in this process and its breakpoints will not hit.
+      "name": "Sim server (standalone)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/sim_server.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // 420 checks. NEEDS THE SERVER ALREADY RUNNING -- start
+      // "Sim server (standalone)" first, or set SIM_URL at another port.
+      "name": "Sim server tests (server must be up)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/test_sim.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/project/scripts",
+        "SIM_URL": "http://127.0.0.1:8777"
+      }
+    },
+    {
+      // Reads results/*.csv and writes report/<date>/hcflat.html. Every number
+      // on the page comes out of those files, so this is safe to re-run and is
+      // the place to breakpoint if a figure looks wrong.
+      "name": "Report: build hcflat page",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/build_report_hcflat.py",
+      "args": ["${input:reportDate}"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // No args: it globs results/sweep_bidir_*.csv itself. Add paths and
+      // --out in "args" to narrow it -- launch.json does NOT expand globs.
+      "name": "Plot: BRDF maps (metric 08)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/plot_bidir.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // The honeycomb search landscape, every panel on one shared colour scale.
+      "name": "Plot: honeycomb landscape",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/plot_hcflat.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // Pure geometry, no renderer: tip/wall/base/hidden slot areas against a
+      // closed form, plus the depth-band polygon cut. Exit code = failures.
+      "name": "Audit: material slots",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/audit_slots.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // materials.py has a __main__ self-test that locks the invariants which
+      // let it replace the old scattered material code without moving a number.
+      "name": "Materials: self-test",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/project/scripts/materials.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/project",
+      "justMyCode": false,
+      "env": { "PYTHONPATH": "${workspaceFolder}/project/scripts" }
+    },
+    {
+      // STEPPING THROUGH A BLENDER SCRIPT. One-time setup, because Blender
+      // ships its own Python and debugpy is not in it:
+      //
+      //   /Applications/Blender.app/Contents/Resources/4.3/python/bin/python3.11 \
+      //       -m pip install debugpy
+      //
+      // Then run any Blender task with the debug preamble, e.g.:
+      //
+      //   Blender --background --factory-startup \
+      //     --python-expr "import debugpy;debugpy.listen(5678);debugpy.wait_for_client()" \
+      //     --python-exit-code 77 --python scripts/gate_bidir.py
+      //
+      // Blender blocks on wait_for_client(); start this config to connect.
+      "name": "Attach to Blender (port 5678)",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "127.0.0.1", "port": 5678 },
+      "justMyCode": false,
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/project/scripts",
+          "remoteRoot": "${workspaceFolder}/project/scripts"
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "reportDate",
+      "type": "promptString",
+      "description": "Report date folder under project/report/",
+      "default": "2026-08-20"
+    }
+  ]
+}

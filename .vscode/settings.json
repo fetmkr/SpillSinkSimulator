@@ -1,0 +1,43 @@
+{
+  // Where Blender lives. tasks.json reads this via ${config:spillsink.blenderPath},
+  // so it is the single place to change it. The project's own scripts honour a
+  // BLENDER_BIN environment variable for the same purpose.
+  "spillsink.blenderPath": "/Applications/Blender.app/Contents/MacOS/Blender",
+
+  // Every module imports its siblings after sys.path.insert(0, HERE), which
+  // works at runtime but leaves the editor unable to resolve them. This makes
+  // "go to definition" work on blender_render, materials, bidir and the rest.
+  "python.analysis.extraPaths": ["project/scripts"],
+  "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+  "python.terminal.activateEnvironment": false,
+
+  // `bpy` only exists inside Blender, so the editor can never resolve it and
+  // would otherwise underline it in ~90 files. Runtime is unaffected.
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportMissingModuleSource": "none"
+  },
+
+  // 300 MB of renders and 52 MB of report images, none of which anyone greps.
+  // Hidden from search only -- they stay visible in the explorer.
+  "search.exclude": {
+    "project/renders/**": true,
+    "project/report/*/shots/**": true,
+    "project/report/*/web/**": true,
+    "**/__pycache__/**": true,
+    "**/*.exr": true
+  },
+  "files.watcherExclude": {
+    "**/project/renders/**": true,
+    "**/__pycache__/**": true
+  },
+
+  // The house style in this repo: 79 columns, 4-space indent, no tabs.
+  "[python]": {
+    "editor.rulers": [79],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}
