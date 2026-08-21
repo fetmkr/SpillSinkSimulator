@@ -13,6 +13,11 @@ PRE-REGISTERED:
   P2  0.97 에서의 값은 d100 에 가깝다.
   P3  설계 사이의 순위는 0.76 과 0.97 에서 같다. 바뀌면 발표된 모든 순위를
       다시 내야 한다.
+
+2026-08-22 2차: 1차는 표본 크기가 불공평했다. 벌집 판 63.5 mm 는 셀 10 개
+뿐이고 피라미드 판 100 mm 는 25 개다. 이 연구의 기준은 25 개 이상이며,
+세 설계가 2 % 안에 붙어 있으므로 표본 크기만으로도 순위가 뒤집힐 수 있다.
+이제 모든 설계가 셀 25 개 이상을 담도록 판을 각자 정한다.
 """
 import os, sys, json
 HERE=os.path.dirname(os.path.abspath(__file__))
@@ -21,20 +26,26 @@ import sim_server as SS  # noqa: E402
 
 OUT="/tmp/simsrv/df097"; os.makedirs(OUT, exist_ok=True)
 THETAS=[0.0,-20.0,20.0,-40.0,40.0]; SPP=256
+# 판은 셀 30 개가 들어가도록 각자 정한다 (기준은 25 개 이상)
+def sq(pitch): return round(pitch*30.0, 1)
 DESIGNS=[
  ("피라미드 p4/d22/t0.4", {"top":"pyramid","top_params":{"pitch":4.0,"tip_flat":0.4},
-                          "depth":22.0,"floor":"none","panel":100.0}),
+                          "depth":22.0,"floor":"none","panel":sq(4.0)}),
  ("피라미드 p4/d20/t0.1", {"top":"pyramid","top_params":{"pitch":4.0,"tip_flat":0.1},
-                          "depth":20.0,"floor":"none","panel":100.0}),
+                          "depth":20.0,"floor":"none","panel":sq(4.0)}),
  ("벌집 6.35/d40",       {"top":"comb","top_params":{"pitch":6.35,"wall_top":0.08,
                           "wall_bot":0.08,"comb_expand":1.0,"jitter":0.0},
-                          "depth":40.0,"floor":"none","panel":63.5}),
+                          "depth":40.0,"floor":"none","panel":sq(6.35)}),
+ ("벌집 9.53/d40",       {"top":"comb","top_params":{"pitch":9.53,"wall_top":0.08,
+                          "wall_bot":0.08,"comb_expand":1.0,"jitter":0.0},
+                          "depth":40.0,"floor":"none","panel":sq(9.53)}),
  ("민판",               {"top":"flat","top_params":{},"depth":0.0,
-                          "floor":"none","panel":63.5}),
+                          "floor":"none","panel":120.0}),
 ]
 DFS=[0.0,0.76,0.97,1.00]
 rows=[]
-print("확산 비율만 바꾼다. 도료는 무소 고정. 세 평면 중 최악.\n", flush=True)
+print("확산 비율만 바꾼다. 도료는 무소 고정. 세 평면 중 최악.", flush=True)
+print("판은 설계마다 셀 30 개가 들어가는 크기.\n", flush=True)
 print("%-22s %8s %8s %8s %8s | %s" % ("설계","확산0","확산0.76","확산0.97","확산1.00","보간 오차"), flush=True)
 for lab, spec in DESIGNS:
     got={}
@@ -47,9 +58,9 @@ for lab, spec in DESIGNS:
     err = 100*(worst(0.97)-lin)/max(lin,1e-12)
     rows.append({"design":lab, **{("d%g"%d): {k: got[d][k] for k in got[d]} for d in DFS},
                  "interp_err_pct": err})
-    print("%-22s %8.4f %8.4f %8.4f %8.4f | %+6.1f %%"
+    print("%-22s %8.4f %8.4f %8.4f %8.4f | %+6.1f %%  (판 %.0f mm)"
           % (lab, 100*worst(0.0), 100*worst(0.76), 100*worst(0.97),
-             100*worst(1.00), err), flush=True)
+             100*worst(1.00), err, spec["panel"]), flush=True)
     json.dump(rows, open(os.path.join(OUT,"df097.json"),"w"), indent=1, ensure_ascii=False)
 print("\n=== 순위가 바뀌나 (최악 세타, 낮을수록 좋음) ===", flush=True)
 for df in (0.76, 0.97):

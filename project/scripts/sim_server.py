@@ -140,7 +140,8 @@ def in_blender(op, **req):
                                    req.get("diffuse_frac"),
                                    req.get("coating") or "musou_fit",
                                    req.get("deep_coating"),
-                                   req.get("paint_depth")),
+                                   req.get("paint_depth"),
+                                   req.get("roughness")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -1375,34 +1376,76 @@ def min_feature(spec):
 # reasoning about where a number came from. The dict below is only the fallback
 # for a checkout with the file missing.
 _MAT_FALLBACK = {
-    "musou_fit": dict(rho0=0.00998, df=0.76, rough=0.30,
-                      src="fallback", prov=("measured", "fitted", "fitted")),
-    "wall_5pct": dict(rho0=0.050, df=0.65, rough=0.30,
-                      src="fallback", prov=("measured", "guessed", "guessed")),
+    "musou_fit": dict(rho0=0.00998, df=0.99, rough=0.30, label="Musou (fallback)",
+                      color="#12151a", src="fallback",
+                      prov=("measured", "guessed", "guessed")),
+    "wall_5pct": dict(rho0=0.050, df=0.97, rough=0.30, label="무광 검정 (fallback)",
+                      color="#45484f", src="fallback",
+                      prov=("measured", "measured", "guessed")),
 }
 
 
 def _load_materials():
+    """One file per material, the way Unity keeps a .mat and Blender keeps a
+    datablock. `material/*.json`, one each; files starting with `_` are shared
+    documentation (`_README.json`, `_sources.json`) and are skipped.
+
+    Each carries a stable `id`. THE ID NEVER CHANGES: results on disk point at
+    a material by id, so renaming the label or the file must not break them.
+    It also carries a `color`, because which surface wears which material is a
+    thing you should be able to SEE, and the viewport used to hard-code pink
+    for painted and blue for bare.
+    """
     import os
+    import glob
     import json as _j
     here = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(here, "..", "material", "materials.json")
-    try:
-        raw = _j.load(open(path, encoding="utf-8"))
-    except Exception as exc:
-        print("[SIM] material/materials.json 못 읽음 (%s) -- 최소 표로 돈다"
-              % exc, flush=True)
-        return dict(_MAT_FALLBACK)
+    folder = os.path.join(here, "..", "material")
     out = {}
-    for k, v in raw.items():
-        if k.startswith("_"):
-            continue                      # "_읽는_법" is documentation
-        out[k] = dict(rho0=float(v["rho0"]), df=float(v["df"]),
-                      rough=float(v["rough"]), src=v.get("src", ""),
-                      label=v.get("label", k),
-                      prov=tuple(v.get("prov", ("?", "?", "?"))))
-    print("[SIM] 재료 %d 종을 material/materials.json 에서 읽음" % len(out),
-          flush=True)
+    for path in sorted(glob.glob(os.path.join(folder, "*.json"))):
+        base = os.path.basename(path)
+        if base.startswith("_"):
+            continue
+        try:
+            v = _j.load(open(path, encoding="utf-8"))
+        except Exception as exc:
+            print("[SIM] %s 못 읽음: %s" % (base, exc), flush=True)
+            continue
+        mid = v.get("id") or os.path.splitext(base)[0]
+        # SCHEMA 2 follows Speos: `scattering` says HOW MUCH comes back
+        # (wavelength x incidence angle), `bsdf` says WHICH WAY it goes.
+        # Schema 1 was three loose scalars. Both are read so old files keep
+        # working; anything written from here on is schema 2.
+        if v.get("schema") == "spillsink.material/2":
+            sc, bs = v["scattering"], v["bsdf"]
+            if sc.get("spectral"):
+                print("[SIM] %s: spectral 표가 있으나 아직 안 쓴다" % mid,
+                      flush=True)
+            if bs.get("table"):
+                print("[SIM] %s: 실측 BSDF 표가 있으나 아직 안 쓴다" % mid,
+                      flush=True)
+            pv = v.get("provenance", {})
+            out[mid] = dict(
+                rho0=float(sc["reflectance"]["value"]),
+                df=float(bs["diffuse_fraction"]),
+                rough=float(bs["lobe"]["roughness"]),
+                src=v.get("source", ""), label=v.get("label", mid),
+                color=v.get("color", "#3a3f47"),
+                band=sc.get("band", "visible_rgb"),
+                prov=(pv.get("reflectance", "?"),
+                      pv.get("diffuse_fraction", "?"),
+                      pv.get("roughness", "?")))
+        else:
+            out[mid] = dict(rho0=float(v["rho0"]), df=float(v["df"]),
+                            rough=float(v["rough"]), src=v.get("src", ""),
+                            label=v.get("label", mid),
+                            color=v.get("color", "#3a3f47"),
+                            band=v.get("band", "visible_rgb"),
+                            prov=tuple(v.get("prov", ("?", "?", "?"))))
+    if not out:
+        print("[SIM] material/ 에 재료가 없다 -- 최소 표로 돈다", flush=True)
+        return dict(_MAT_FALLBACK)
+    print("[SIM] 재료 %d 종을 material/ 에서 읽음" % len(out), flush=True)
     return out
 
 
@@ -1416,6 +1459,8 @@ COATINGS = {k: (v["rho0"], v["src"]) for k, v in MATERIALS.items()}
 def coatings_json():
     return {k: {"rho0": v["rho0"], "df": v["df"], "rough": v["rough"],
                 "note": v["src"], "label": v.get("label", k),
+                "color": v.get("color", "#3a3f47"),
+                "band": v.get("band", "visible_rgb"),
                 "prov": list(v["prov"])}
             for k, v in MATERIALS.items()}
 
@@ -1593,7 +1638,8 @@ def _render_params(spec):
 
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
          phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
-         coating="musou_fit", deep_coating=None, paint_depth=None):
+         coating="musou_fit", deep_coating=None, paint_depth=None,
+         roughness=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1642,6 +1688,15 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # sitting side by side in one table is what exposed it.
     cc = _coat(coating, diffuse_frac)
     entry["coating"] = {"body": cc["body"], "spec_scale": cc["spec_scale"]}
+    # ROUGHNESS HAD NO WAY IN. `form` took every other finish parameter and not
+    # this one, so a roughness sweep run through it changed nothing and read as
+    # "roughness does not matter" -- the numbers were identical to four
+    # decimals because the shader saw 0.30 every time. `measure` took it from
+    # the start; this path did not.
+    if roughness is not None:
+        entry["roughness"] = float(roughness)
+    elif cc.get("roughness") is not None:
+        entry["roughness"] = float(cc["roughness"])
     if paint_depth is not None and deep_coating:
         entry["paint_depth"] = float(paint_depth)
         entry["deep_coating"] = _coat(deep_coating, diffuse_frac)
@@ -2339,7 +2394,8 @@ class H(BaseHTTPRequestHandler):
                                      diffuse_frac=req.get("diffuse_frac"),
                                      coating=req.get("coating") or "musou_fit",
                                      deep_coating=req.get("deep_coating"),
-                                     paint_depth=req.get("paint_depth"))
+                                     paint_depth=req.get("paint_depth"),
+                                     roughness=req.get("roughness"))
                     if "error" in out:
                         return self._send(200, json.dumps(out))
                     tries.append({"face_mm": out.get("face_mm"),

@@ -1,0 +1,12 @@
+{
+ "device": "Wicked Lasers LaserCube Ultra 7.5 W (MK2)",
+ "lines_nm": {
+  "blue": 445,
+  "green": 520,
+  "red": 635
+ },
+ "beam_at_aperture_mm": 4.0,
+ "divergence_mrad": 1.0,
+ "beam_at_wall_mm": "약 7~14 (거리에 따라). 시뮬 기본 7.5",
+ "출처": "제품 규격 (farralane / newatlas 리뷰). 파장은 LaserCube 전 모델 공통."
+}

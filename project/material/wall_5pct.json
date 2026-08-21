@@ -1,0 +1,77 @@
+{
+ "schema": "spillsink.material/2",
+ "id": "wall_5pct",
+ "label": "무광 검정 벽 — 5% (대조판)",
+ "color": "#45484f",
+ "scattering": {
+  "band": "visible_rgb",
+  "band_note": "가시광 RGB 가중. 파장별 값이 아니다. 검정 아노다이징은 700 nm 넘으면 반사가 크게 오르므로(arXiv:1407.8265 Fig.2, 1000 nm 에서 60~70 %) 단색 레이저 파장이 정해지면 spectral 을 채워야 한다.",
+  "reflectance": {
+   "model": "constant",
+   "value": 0.05,
+   "angles_deg": null,
+   "values": null
+  },
+  "spectral": null,
+  "transmittance": 0.0,
+  "absorption": 0.95,
+  "laser_lines_nm": [
+   445,
+   520,
+   635
+  ],
+  "spectral_note": "이 재료의 파장별 값은 아직 확인 안 했다. 무소는 나노 구조라 파장 의존이 적을 것으로 보이나 [추측], 논문에서 파장별 곡선을 못 찾았다."
+ },
+ "bsdf": {
+  "model": "lambert_plus_ggx",
+  "diffuse_fraction": 0.97,
+  "lobe": {
+   "type": "ggx",
+   "roughness": 0.3,
+   "ior": 1.5
+  },
+  "table": null,
+  "anisotropic": false
+ },
+ "provenance": {
+  "reflectance": "measured",
+  "diffuse_fraction": "disputed",
+  "roughness": "bounded",
+  "_등급": "measured 장비로 잰 값 / fitted 실측 총량 재현용 / bounded 논문 실측이 범위만 묶은 값 / guessed 순서만 맞춘 값"
+ },
+ "source": "rho0 은 모든 렌더의 대조판 값. df 0.97 은 무광 검정 스프레이 실측과 같게. 실측: arXiv 1407.8265 (Texas A&M, Munnerlyn Lab). HeNe 레이저를 10·22·44도로 쏘고 정반사 방향의 광다이오드로 정반사 몫을 재고, 확산 = 1 − 정반사. 이 정의는 우리 df 와 같다. 주의: 이 논문은 좁은 꼭대기만 정반사로 센다. 우리 광택 덩어리는 거칠기 0.30 으로 훨씬 넓다. 그래서 여기 df 는 상한에 가깝다.",
+ "constraint_2026_08_22": {
+  "출처": "Filip & Vavra 2026 (arXiv 2601.05094) Fig. 6, 'acryl paint' = 알루미늄에 칠한 무광 아크릴 검정 스프레이. 정면 입사 TIS 0.87~0.90. TIS 는 정반사 방향 5도 원뿔 밖으로 나간 몫이므로, 원뿔 안에 10~13 % 가 들어간다는 뜻이다.",
+  "푸는_법": "scripts/gate_roughness_from_tis.py 가 우리 BSDF 로 거꾸로 푼다. 확산은 sin^2(5도)=0.0076 을 원뿔에 넣고, GGX 는 tan^2(2.5도)/(a^2+tan^2(2.5도)) 를 넣는다.",
+  "허용_창": {
+   "확산비율": [
+    0.5,
+    0.9
+   ],
+   "거칠기": [
+    0.012,
+    0.089
+   ]
+  },
+  "짝": {
+   "0.90": 0.012,
+   "0.80": [
+    0.034,
+    0.046
+   ],
+   "0.70": [
+    0.052,
+    0.064
+   ],
+   "0.50": [
+    0.075,
+    0.089
+   ]
+  },
+  "확산_0.97_은": "답이 아예 없다. 광택이 3 % 뿐이면 5도 원뿔 안에 10 % 를 못 넣는다. 지금 이 파일에 적힌 0.97 / 0.30 은 이 실측과 안 맞는다.",
+  "두_논문_화해": "DePoy 2014 는 무광 검정을 0.97 로 잰다. 광다이오드가 약 1 m 거리라 0.6도쯤만 본다 [추측: 구경 미기재, PH100 은 10x10 mm]. 거칠기 0.046 인 덩어리는 0.6도 안에 1.3 %, 5도 안에 47 % 를 넣는다. 그래서 DePoy 값은 상한이고, 두 논문은 확산 0.8 / 거칠기 0.04 에서 동시에 만족된다.",
+  "두번째_근거": "Shirsekar 2019 (Virginia Tech 석사, reference/papers/) Fig. 4.2, Aeroglaze Z302, 532 nm. 입사 10도에서 제일 밝은 값 2e-2 sr^-1 대 바닥 4.5e-5 sr^-1, 반값 폭 약 8도 -> 거칠기 약 0.06. Z302 는 유광이라 위쪽 한계다.",
+  "이_값이_얼마나_중요한가": "5 % 페인트 민판에서 정면 반짝임이 허용 창 안에서만 574배 벌어진다. 총량은 5.4 %, 뭉개짐은 0 % 움직인다. scripts/gate_paper_pairs.py",
+  "닫는_법": "고니오미터로 평판 쿠폰 한 장. 정면 입사, 관측 0~15도를 0.2도 간격. 적분구는 못 가른다."
+ }
+}

@@ -232,14 +232,17 @@ details.why p{margin:.4em 0 0}
       <input type="number" id="n_pcov" min="0" max="100" step="1" value="10">
       <input type="hidden" id="pd" value="10"><input type="hidden" id="n_pd" value="10">
       <span id="v_pd" style="display:none">10</span></div>
-    <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.76</b></span>
-      <input type="range" id="df" min="0" max="1" step="0.02" value="0.76">
-      <input type="number" id="n_df" step="0.02" value="0.76"></div>
+    <div class="row" style="margin:6px 0 2px">
+      <label style="display:flex;gap:8px;align-items:center;font-size:12px">
+        <input type="checkbox" id="dffollow" checked>
+        재료 값을 따른다 (끄면 직접 정함)</label></div>
+    <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.97</b></span>
+      <input type="range" id="df" min="0" max="1" step="0.01" value="0.97">
+      <input type="number" id="n_df" step="0.01" value="0.97"></div>
     <div class="sl"><span class="nm">specular roughness <b id="v_rg">0.30</b></span>
       <input type="range" id="rg" min="0.05" max="0.6" step="0.01" value="0.30">
       <input type="number" id="n_rg" step="0.01" value="0.30"></div>
-    <p class="note">Neither was measured. They set the absolute level of every
-      number; ratios between designs are robust.</p>
+    <p class="note" id="dfnote"></p>
   </div>
 </div>
 
@@ -314,7 +317,7 @@ details.why p{margin:.4em 0 0}
    in <b>three planes</b> &mdash; &phi; 0 / 45 / 90, straight-on and diagonal
    approaches. Each number is the TOTAL for light entering at that direction
    and leaving anywhere; the sky-dome lighting is how that total is captured
-   in one shot. Worst of the 15 fills <b>반사 총량</b>. (Mitsuba runs &phi; 0
+   in one shot. 이 15 개 중 가장 밝은 값이 <b>반사 총량</b>. (Mitsuba runs &phi; 0
    only.)</p>
   <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
   <canvas id="chart"></canvas>
@@ -325,7 +328,7 @@ details.why p{margin:.4em 0 0}
   <p class="note" style="margin:0">Shines a stripe beam of the width above and
    reads how much the pattern smears sideways (<b>모양 뭉개기</b>) and how much
    fires straight back at the source (<b>정면 반짝임</b>) &mdash; in three
-   planes (&phi; 0/45/90). The dashboard takes the worst plane. (Mitsuba runs
+   planes (&phi; 0/45/90). The dashboard reports the BRIGHTEST plane — the angle the panel looks worst from, not a bad design. (Mitsuba runs
    &phi; 0 only.)</p>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <details class="why"><summary>why beam width matters</summary>
@@ -752,6 +755,9 @@ async function measure(thetas){
     const planes = j.rho_planes || {'0': j.rho};
     const series = Object.entries(planes).map(([p, m]) => ({phi: +p,
       vals: Object.entries(m).map(([t,v])=>[+t,v]).sort((a,b)=>a[0]-b[0])}));
+    // THE BRIGHTEST reading, not "the worst design". Less light coming back is
+    // the goal, so the largest number is the angle the panel looks worst FROM.
+    // Calling it "worst" in the readout made people read it as a bad design.
     let worst = -1, wPhi = 0, wTh = 0;
     for(const s of series) for(const [t,v] of s.vals)
       if(v > worst){ worst = v; wPhi = s.phi; wTh = t; }
@@ -759,13 +765,13 @@ async function measure(thetas){
     let extra = '';
     if(j.diff){
       const d = Math.max(...Object.values(j.diff).map(Math.abs));
-      extra = ` · Mitsuba vs Cycles worst ${(100*d).toFixed(1)} %`
+      extra = ` · Mitsuba vs Cycles 최대 차이 ${(100*d).toFixed(1)} %`
             + (d < 0.05 ? ' — agree' : ' — DISAGREE');
     }
     const nPl = series.length;
     $('#rho').innerHTML = (100*worst).toFixed(5) + ' %'
       + `<small>${who}${R!=='cycles'?' · Lambertian &rho;=0.01':''}`
-      + ` · worst of 5&theta; &times; ${nPl} plane${nPl>1?'s':''}`
+      + ` · 가장 밝은 각도 (5&theta; &times; ${nPl} 평면)`
       + (nPl>1 ? ` (at &theta; ${wTh}&deg;, &phi; ${wPhi}&deg;)` : '')
       + ` · ${j.seconds}s`
       + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}`
@@ -792,6 +798,59 @@ async function measure(thetas){
 function NOPAINT(){ const e=$('#coat'); return !!e && e.value === 'none'; }
 function baseNameOnly(){ return $('#deepcoat').value; }
 
+// ---------- the material's own diffuse fraction and roughness
+// Until 2026-08-22 these were two panel-wide sliders sitting at 0.76 / 0.30,
+// and picking a coating moved rho0 and nothing else -- so the panel could be
+// "painted Musou with anodised gloss" and no readout said so. The diffuse
+// fraction is now MEASURED per material (DePoy et al. 2014, arXiv:1407.8265:
+// a HeNe laser at 10/22/44 deg, photodiode in the specular direction,
+// diffuse = 1 - specular, which is exactly this quantity).
+//
+// Roughness: nobody publishes it under that name, but Filip & Vavra 2026
+// (arXiv:2601.05094) Fig. 6 publish TIS with a 5 deg exclusion cone, and
+// 1 - TIS is the share of energy inside that cone -- which pins the lobe.
+// Inverted through our own BSDF (scripts/gate_roughness_from_tis.py) their
+// acrylic matte black on aluminium admits only df 0.50-0.90 with roughness
+// 0.012-0.089. Our 0.97 / 0.30 has NO solution. The head-on flash moves 574x
+// inside that window, so it is not reportable; the total moves 5.4 % and the
+// smear 0 %, so those are.
+function dfFollows(){ const e=$('#dffollow'); return !e || e.checked; }
+function activeMaterial(){
+  const pcov = +$('#pcov').value;
+  if(NOPAINT() || pcov <= 0) return $('#deepcoat').value;
+  return $('#coat').value;
+}
+function syncMaterialSliders(){
+  const KO = {measured:'실측', fitted:'맞춘값', guessed:'추측',
+              bounded:'논문이 범위만 묶음', disputed:'논문끼리 안 맞음'};
+  const name = activeMaterial(), m = CO[name];
+  const note = $('#dfnote');
+  if(!m){ if(note) note.textContent = ''; return; }
+  if(dfFollows()){
+    for(const [id,v] of [['df', m.df], ['rg', m.rough]]){
+      if(v == null) continue;
+      const r=$('#'+id), n=$('#n_'+id), b=$('#v_'+id);
+      if(r) r.value = v;
+      if(n) n.value = v;
+      if(b) b.textContent = (+v).toFixed(2);
+    }
+  }
+  const p = m.prov || ['?','?','?'];
+  if(note) note.innerHTML = dfFollows()
+    ? '<b>' + (m.label || name) + '</b> 의 값입니다 &middot; 확산 '
+      + (KO[p[1]]||p[1]) + ' &middot; 거칠기 ' + (KO[p[2]]||p[2])
+      + '<br>확산 비율 출처: DePoy et al. 2014 (arXiv:1407.8265). '
+      + '거칠기는 Filip &amp; V&aacute;vra 2026 (arXiv:2601.05094) 의 TIS 가 '
+      + '범위만 묶어 줍니다 &mdash; 무광 검정 페인트는 확산 0.50~0.90 에 '
+      + '거칠기 0.012~0.089 입니다. <b>지금 값 0.97 / 0.30 은 그 범위 밖입니다.</b>'
+      + '<br><b>이 창 안에서만 정면 반짝임이 574배 벌어집니다.</b> '
+      + '반짝임 절대값은 쿠폰을 고니오미터로 재기 전까지 못 씁니다. '
+      + '총량과 뭉개짐은 각각 5.4 %, 0 % 만 움직이므로 그대로 쓰셔도 됩니다.'
+    : '<b>직접 정한 값입니다.</b> 재료표의 값이 아닙니다. '
+      + (m.label || name) + ' 은 확산 ' + (+m.df).toFixed(2)
+      + ', 거칠기 ' + (+m.rough).toFixed(2) + ' 입니다.';
+}
+
 // ---------- what the panel is painted with, in one line
 function materialLine(){
   const nm = v => (CO[v] ? (100*CO[v].rho0).toFixed(2)+'% '+v : v);
@@ -805,7 +864,8 @@ function materialLine(){
   const hasFloor = $('#floor') && $('#floor').value !== 'none';
   if(hasFloor && fl) m += ' · 바닥 ' + nm(fl);
   return '재질: ' + m + ' · 확산 ' + (+$('#df').value).toFixed(2)
-       + ' · 거칠기 ' + (+$('#rg').value).toFixed(2);
+       + ' · 거칠기 ' + (+$('#rg').value).toFixed(2)
+       + (dfFollows() ? ' (재료 값)' : ' (직접 정함)');
 }
 
 function drawAxis(g, W, H){
@@ -885,7 +945,7 @@ async function matchStudy(s){
       `<div class="hd"><span class="nm">${n.design}</span>
         <span class="pill ${n.exact?'ok':'wait'}">${n.exact?'EXACT':pct+'% match'}</span></div>
        <dl class="kv">
-        <div><dt>published worst-&theta;</dt><dd>${(100*n.worst_rho).toFixed(5)} %</dd></div>
+        <div><dt>published, brightest &theta;</dt><dd>${(100*n.worst_rho).toFixed(5)} %</dd></div>
         <div><dt>source</dt><dd>${n.source}</dd></div>
         <div><dt>seeds</dt><dd>${n.n_seeds}</dd></div>
        </dl>
@@ -1357,7 +1417,7 @@ addEventListener('resize', draw);
     const p = named[+val.slice(2)]; if(!p) return;
     applySpec(p.spec);
     $('#presetnote').innerHTML = `<b style="color:var(--ink)">${p.design}</b> from
-      <code>${p.source}</code> · published worst-&theta; ${(100*p.worst_rho).toFixed(5)} %.
+      <code>${p.source}</code> · published, brightest &theta; ${(100*p.worst_rho).toFixed(5)} %.
       Measure and compare, or change anything.`;
   };
   const dnote = m => { const n=$('#dnote'); n.textContent=m; n.style.display=''; };
@@ -1503,8 +1563,8 @@ addEventListener('resize', draw);
         // it. It is deliberately NOT shown here: it is known wrong, and a wrong
         // number on a working instrument gets used.
         $('#formout').innerHTML =
-          `<div><dt>smear${P?' (worst of '+Object.keys(P).length+' planes)':''}</dt><dd>${smearTxt}</dd></div>
-           <div><dt>head-on brightness${P?' (worst)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
+          `<div><dt>smear${P?' (밝은 쪽 '+Object.keys(P).length+' 평면 중)':''}</dt><dd>${smearTxt}</dd></div>
+           <div><dt>head-on brightness${P?' (가장 밝은 평면)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
           + densRow + convRow + planeRows +
           `<div><dt>renderer</dt><dd>${who}</dd></div>
            <div><dt>beam</dt><dd>${(j.beam_w||BW).toFixed(1)} mm</dd></div>
@@ -1553,8 +1613,16 @@ addEventListener('resize', draw);
     .join('');
   $('#deepcoat').innerHTML = boughtOpts;
   $('#deepcoat').value = 'anodised';
+  for(const id of ['#coat','#deepcoat','#floorcoat','#dffollow','#pcov'])
+    { const e=$(id); if(e) e.addEventListener('change', () => {
+        syncMaterialSliders(); refresh(); }); }
+  for(const id of ['#df','#rg','#n_df','#n_rg']){
+    const e=$(id); if(e) e.addEventListener('input', () => {
+      const c=$('#dffollow'); if(c && c.checked){ c.checked=false; }
+      syncMaterialSliders(); }); }
   $('#floorcoat').innerHTML = opts;          // a floor can be painted or bare
   $('#floorcoat').value = 'musou_fit';
+  syncMaterialSliders();
   // The paint-depth track ends at the envelope, and the readout says what
   // FRACTION of the well is painted. 10 mm of a 50 mm well is a fifth, and a
   // report printing only "10 mm" read as if most of it were covered -- which is
@@ -1768,7 +1836,7 @@ addEventListener('resize', draw);
             <span style="color:${thc(s.theta)[2]};font-weight:600">${s.theta}&deg;</span></label></dt>
             <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
         }).join('') +
-        `<div><dt><b>worst of 5 sampled angles</b></dt><dd><b>${fmt(worst)}</b></dd></div>
+        `<div><dt><b>가장 밝은 각도 (5개 중)</b></dt><dd><b>${fmt(worst)}</b></dd></div>
          <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${rhoNote} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>
          <div><dt>took</dt><dd>${took.toFixed(2)} s</dd></div>`;
       // per-angle visibility: unchecking an angle removes its paths from the
@@ -1942,7 +2010,7 @@ addEventListener('resize', draw);
             `<tr><td style="color:${(thc(parseFloat(th)) || [])[2] || '#16181a'}">${esc(th)}</td>`
             + vs.slice(0, 4).map(v => `<td>${esc(v)}</td>`).join('') + '</tr>').join('')
         + `</tbody></table>`
-        + (meta.worst ? `<div class="kv wl"><dt>worst of 5 sampled angles</dt><dd>${esc(meta.worst)}</dd></div>` : '')
+        + (meta.worst ? `<div class="kv wl"><dt>가장 밝은 각도 (5개 중)</dt><dd>${esc(meta.worst)}</dd></div>` : '')
         + `<p class="cap">${esc((meta.mode || '') + (meta.took ? ' · took ' + meta.took : ''))} — a sample, not the measurement</p>`
       : '<p class="dim">not traced — a sample, not the measurement</p>';
 

@@ -874,6 +874,132 @@ geometry.** The geometry side passed every check it was given today.
 
 ---
 
+## 5e. 2026-08-22 late — the roughness, and the flash is not reportable
+
+### "Roughness has no effect" was wrong, and the sweep that said so was blind
+
+`scripts/sweep_coatrobust.py` and the note in §5d concluded the specular
+roughness barely moves anything. **That conclusion is withdrawn.** `form()` had
+no `roughness` parameter at all, so the sweep set a value that was never
+delivered to the renderer; every row measured the same 0.30. The claim is in
+commit `409873e` and in the `coating-diffuse-fraction` memory, and both are
+wrong.
+
+After wiring `roughness` through `form()` and `/api/form`, a 5 % painted flat
+plate at a fixed diffuse fraction of 0.97:
+
+| roughness | head-on flash |
+|---|---|
+| 0.05 | 1200.97 |
+| 0.10 | 75.98 |
+| 0.20 | 5.66 |
+| 0.30 | 1.90 |
+| 0.45 | 1.16 |
+| 0.60 | 1.04 |
+
+**1160x across the range.** It is the single most powerful knob in the model,
+and its value was never measured.
+
+### Nobody publishes "roughness", but two groups publish something that pins it
+
+The instruction was explicit: do not fit our own model to a foreign sample,
+find what other people actually do. What they do is publish TIS.
+
+**Filip & Vavra 2026 (arXiv 2601.05094), Fig. 6** report total integrated
+scatter per material with a **5 degree half-angle specular exclusion cone**
+(their §3.4). TIS is the share of reflected energy landing OUTSIDE that cone,
+so `1 - TIS` is the share landing INSIDE it — and that is a direct measurement
+of how tight the lobe is. Read off Fig. 6 at normal incidence:
+
+| material | TIS at theta = 0 | share inside the 5 deg cone |
+|---|---|---|
+| acrylic matte black spray on aluminium | ~0.87-0.90 | 10-13 % |
+| chalkboard paint | ~0.96-0.98 | 2-4 % |
+| Musou paint | ~0.985-0.995 | 0.5-1.5 % |
+| Vantablack | ~0.97-0.99 | 1-3 % |
+
+`scripts/gate_roughness_from_tis.py` inverts this through our own BSDF
+(`blender_render.coating_split`: at normal incidence the diffuse leg carries
+`df * rho0` and the glossy leg `(1 - df) * rho0`). A Lambertian puts
+`sin^2(5 deg) = 0.0076` inside the cone; a GGX lobe puts
+`tan^2(2.5 deg) / (alpha^2 + tan^2(2.5 deg))`.
+
+**For the acrylic matte spray — the closest published match to our 5 % paint —
+a diffuse fraction of 0.97 has NO solution at all.** If only 3 % of the energy
+is specular, no roughness can put 10 % inside a 5 degree cone. The measurement
+rules out the pair we have been using.
+
+| diffuse fraction | roughness that reproduces the measured TIS |
+|---|---|
+| 0.97 | impossible |
+| 0.90 | 0.012 |
+| 0.80 | 0.034 - 0.046 |
+| 0.70 | 0.052 - 0.064 |
+| 0.50 | 0.075 - 0.089 |
+
+**Every solution is 0.01-0.11. Our 0.30 is outside the range for any diffuse
+fraction.**
+
+A second, independent read agrees. **Shirsekar 2019 (Virginia Tech MS thesis,
+Fig. 4.2, Aeroglaze Z302 at 532 nm)** measures a full BRDF by goniometer. At 10
+degrees incidence the specular maximum is ~2e-2 sr^-1 against a floor of
+~4.5e-5 sr^-1 — a ratio near 440 — with a half-width of roughly 8 degrees. That
+is alpha ~ 0.06. Z302 is a *gloss* black polyurethane, so it is an upper bound
+on glossiness, and 0.06 lands inside the same window. The thesis is now in
+`reference/papers/`.
+
+### The two papers were never in conflict
+
+DePoy et al. 2014 measure black spray paint at a diffuse fraction of 0.97;
+Filip & Vavra's 5 degree cone says at most 0.90. That looked like a
+contradiction. It is not — it is the detector.
+
+DePoy put a **Gentec PH100-SiUV about 1 m from the sample**. A 10 mm detector
+at 1 m subtends about **0.57 degrees** [추측: the aperture is not stated in the
+paper; PH100 is a 10 x 10 mm head]. A lobe of alpha = 0.046 puts only ~1.3 % of
+its energy inside 0.57 degrees but ~47 % inside 5 degrees. So DePoy's
+"specular" catches the spike and misses the shoulder, and the diffuse fraction
+they report is an **upper bound**, exactly as `material/_sources.json` already
+warned. **Both papers are satisfied by roughly df = 0.8 and alpha = 0.04.**
+
+### What this does to the three axes
+
+`scripts/gate_paper_pairs.py`, 5 % painted flat plate, only the pairs the
+measurement allows:
+
+| pair (df / roughness) | total, brightest angle | smear rms | head-on flash |
+|---|---|---|---|
+| what we have been using, 0.97 / 0.30 | 5.014 % | 2.17 mm | **1.90** |
+| 0.90 / 0.012 | 5.046 % | 2.18 mm | **1 143 834** |
+| 0.80 / 0.034 | 5.098 % | 2.17 mm | 37 416 |
+| 0.80 / 0.046 | 5.098 % | 2.17 mm | 11 168 |
+| 0.70 / 0.052 | 5.155 % | 2.17 mm | 10 258 |
+| 0.70 / 0.064 | 5.155 % | 2.17 mm | 4 471 |
+| 0.50 / 0.089 | 5.287 % | 2.17 mm | 1 993 |
+
+Pre-registered R1 and R2 both hold, and the consequence is sharp:
+
+  - **Total reflectance survives.** 5.4 % across the whole allowed range. Every
+    darkness ranking in the project stands.
+  - **Smear survives.** 2.17 mm everywhere, unmoved to three figures.
+  - **The head-on flash does not survive.** 574x of spread *inside* the allowed
+    range alone, and up to 600 963x against the value we published. **No flash
+    number in this project is reportable until a real coupon is measured.**
+
+The user said this in plain words on 2026-08-21 — "정면이면 거울처럼 되돌아
+와야 하는데 무슨 저런게 나와?" — and was told the tube explains it. The tube
+does not explain it. A roughness of 0.30 was flattening the specular return of
+a painted wall, and the intuition was right.
+
+### What still cannot be answered
+
+The allowed window (df 0.5-0.9, alpha 0.01-0.11) is **574x wide on the flash**.
+Reading TIS off a published plot cannot close it. Closing it needs one
+goniometer scan of one flat painted coupon — the same measurement
+`material/_sources.json` has been asking for since 2026-08-22 morning.
+
+---
+
 ## 7. Still open
 
 1. **Cell count.** rho_dh was still falling at 50 cells a side. The study
@@ -925,6 +1051,10 @@ Kept because a reader needs to know which claims were tested and lost.
 | "the head-on flash is 8x a plain wall" | that was the 0.76 coating. At the measured 0.97 it is 1.90 |
 | "the pyramid beats the honeycomb" | at d=0.76 yes, at the measured d=0.97 the order reverses -- and all three sit within 2 %, so they are tied, not ranked |
 | "there is no model check at all" | `weld_and_close` computes Euler and open edges, but only on Export STEP, so it never sees the measurement path |
+| **"the specular roughness barely moves anything"** (in commit `409873e` and the `coating-diffuse-fraction` memory) | `form()` had no `roughness` parameter, so the sweep never varied it and every row rendered at 0.30. Wired through, the head-on flash moves **1160x** across 0.05-0.60 — the strongest knob in the model |
+| "roughness 0.30 for black paint on aluminium" (every published flash number) | Filip & Vavra 2026 Fig. 6 measures 10-13 % of the acrylic paint's energy inside a 5 deg cone. No roughness reproduces that at df 0.97, and every (df, alpha) pair that does reproduce it has alpha in 0.01-0.11. Shirsekar 2019's Z302 BRDF agrees at ~0.06 |
+| "DePoy 0.97 and Filip & Vavra disagree about black paint" | they do not — DePoy's photodiode subtends ~0.6 deg and catches the spike but not the shoulder, so their diffuse fraction is an upper bound. Both are satisfied near df 0.8, alpha 0.04 |
+| every **head-on flash** number published in this project | 574x of spread inside the range the measurements allow, up to 600 963x against what we printed. The total and the smear are unaffected |
 
 **The common cause of most of these: stating a hypothesis as a conclusion
 before testing it.** The 2026-08-21 additions have a second cause worth naming

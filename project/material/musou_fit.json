@@ -1,0 +1,55 @@
+{
+ "schema": "spillsink.material/2",
+ "id": "musou_fit",
+ "label": "Musou Black — 이 연구의 기준",
+ "color": "#12151a",
+ "scattering": {
+  "band": "visible_rgb",
+  "band_note": "가시광 RGB 가중. 파장별 값이 아니다. 검정 아노다이징은 700 nm 넘으면 반사가 크게 오르므로(arXiv:1407.8265 Fig.2, 1000 nm 에서 60~70 %) 단색 레이저 파장이 정해지면 spectral 을 채워야 한다.",
+  "reflectance": {
+   "model": "constant",
+   "value": 0.00998,
+   "angles_deg": null,
+   "values": null
+  },
+  "spectral": null,
+  "transmittance": 0.0,
+  "absorption": 0.99002,
+  "laser_lines_nm": [
+   445,
+   520,
+   635
+  ],
+  "spectral_note": "이 재료의 파장별 값은 아직 확인 안 했다. 무소는 나노 구조라 파장 의존이 적을 것으로 보이나 [추측], 논문에서 파장별 곡선을 못 찾았다."
+ },
+ "bsdf": {
+  "model": "lambert_plus_ggx",
+  "diffuse_fraction": 0.99,
+  "lobe": {
+   "type": "ggx",
+   "roughness": 0.3,
+   "ior": 1.5
+  },
+  "table": null,
+  "anisotropic": false
+ },
+ "provenance": {
+  "reflectance": "measured",
+  "diffuse_fraction": "guessed",
+  "roughness": "bounded",
+  "_등급": "measured 장비로 잰 값 / fitted 실측 총량 재현용 / bounded 논문 실측이 범위만 묶은 값 / guessed 순서만 맞춘 값"
+ },
+ "source": "rho0 실측: Filip & Vavra 2026 JOSA A 43,1037, RGB 가중 380~700 nm. df 0.99: 실측이 아니라 두 논문의 순서에서 나온 값. arXiv 1407.8265 가 무광 검정 스프레이를 0.97(정반사 0.03)로 실측했고, Filip & Vavra 2026 은 무소 페인트가 잰 도료 중 아크릴 무광보다 정반사가 뚜렷하게 낮다고 한다. 따라서 무소는 0.97보다 높아야 한다. 0.99로 둔다. 이전 값 0.76 은 이 연구가 처음부터 쓰던 가정값이었고, 그대로 두면 무소가 보통 검정 페인트보다 광택이 세다는 뜻이 되어 두 논문과 어긋난다.",
+ "constraint_2026_08_22": {
+  "출처": "Filip & Vavra 2026 Fig. 6, 'Musou paint'. 정면 입사 TIS 0.985~0.995.",
+  "뜻": "완전 확산체도 5도 원뿔 안에 0.0076 을 넣는다. 그래서 TIS 천장이 0.9924 다. 무소의 정면 TIS 는 그 천장에 붙어 있다 — 정면에서는 잴 수 있는 광택 덩어리가 없다는 뜻이다.",
+  "허용_창": {
+   "확산비율": [
+    0.95,
+    0.99
+   ],
+   "거칠기": "위로 안 묶인다. 확산 0.99 에서 거칠기 0.025 보다만 크면 다 맞는다."
+  },
+  "스치는_각은_다르다": "같은 그림에서 무소의 Rs 가 85도 근처에서 0.042 까지 오른다. 정면에서 광택이 없다고 스치는 각에서도 없는 게 아니다. 우리 판은 벽면 스침이 많으므로 이쪽이 더 중요할 수 있다. 아직 안 쟀다."
+ }
+}

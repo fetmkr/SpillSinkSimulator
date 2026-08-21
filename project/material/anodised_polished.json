@@ -1,0 +1,54 @@
+{
+ "schema": "spillsink.material/2",
+ "id": "anodised_polished",
+ "label": "검정 아노다이징 — 연마 (거울처럼 굶)",
+ "color": "#4c5f7d",
+ "scattering": {
+  "band": "visible_rgb",
+  "band_note": "가시광 RGB 가중. 파장별 값이 아니다. 검정 아노다이징은 700 nm 넘으면 반사가 크게 오르므로(arXiv:1407.8265 Fig.2, 1000 nm 에서 60~70 %) 단색 레이저 파장이 정해지면 spectral 을 채워야 한다.",
+  "reflectance": {
+   "model": "constant",
+   "value": 0.045,
+   "angles_deg": null,
+   "values": null
+  },
+  "spectral": null,
+  "transmittance": 0.0,
+  "absorption": 0.955,
+  "laser_lines_nm": [
+   445,
+   520,
+   635
+  ],
+  "spectral_note": "레이저 세 선(445/520/635 nm)이 모두 이 값이 유효한 구간에 있다. arXiv:1407.8265 Fig.2 에서 검정 아노다이징은 250~650 nm 에서 5 % 안팎이고 650~700 nm 부터 급상승해 800 nm 에서 55 %, 1000 nm 이상에서 65~70 % 가 된다. 빨강 635 nm 는 그 절벽 바로 앞이라 여유가 작다 — 다른 레이저나 다른 아노다이징 공정을 쓰면 다시 확인할 것.",
+  "spectral_read": {
+   "445": 0.04,
+   "520": 0.04,
+   "635": 0.05,
+   "_출처": "arXiv:1407.8265 Fig.2 (Black Anodized 6061) 그래프에서 읽음. 눈으로 읽은 값이라 ±1 %p 정도 오차. 우리가 쓰는 0.045 와 맞는다."
+  }
+ },
+ "bsdf": {
+  "model": "lambert_plus_ggx",
+  "diffuse_fraction": 0.3,
+  "lobe": {
+   "type": "ggx",
+   "roughness": 0.1,
+   "ior": 1.5
+  },
+  "table": null,
+  "anisotropic": false
+ },
+ "provenance": {
+  "reflectance": "measured",
+  "diffuse_fraction": "measured",
+  "roughness": "guessed",
+  "_등급": "measured 장비로 잰 값 / fitted 실측 총량 재현용 / bounded 논문 실측이 범위만 묶은 값 / guessed 순서만 맞춘 값"
+ },
+ "source": "df 0.30 실측 (정반사 0.70). 실측: arXiv 1407.8265 (Texas A&M, Munnerlyn Lab). HeNe 레이저를 10·22·44도로 쏘고 정반사 방향의 광다이오드로 정반사 몫을 재고, 확산 = 1 − 정반사. 이 정의는 우리 df 와 같다. 연마한 것만 거울처럼 군다. 나머지 표면 처리는 전부 0.95 이상이다. rough 0.10 은 추측 — 좁은 제일 밝은 값라는 것만 안다.",
+ "constraint_2026_08_22": {
+  "출처": null,
+  "상태": "[모름] 이 재료의 광택 덩어리 폭을 잰 논문을 못 찾았다. 검정 아노다이징은 Filip & Vavra 2026 이 안 쟀고, DePoy 2014 는 세 각도만 재서 폭을 못 낸다.",
+  "쓸_수_있는_것": "DePoy 2014 의 정반사 몫은 상한이다(위 페인트 항목의 화해 참고). 거칠기는 페인트 창 0.01~0.11 을 빌려 쓸 수밖에 없고, 그건 근거가 아니라 유추다."
+ }
+}

@@ -1,121 +1,92 @@
-# NEXT — what to do when the overnight queue lands
+# NEXT — 2026-08-22 부터 할 일
 
-Written 2026-08-13 ~00:15. Delete this file once the report is out.
+이 파일은 2026-08-13 판을 갈아엎은 것이다. 그때 적힌 할 일은 다 끝났거나
+그 뒤에 뒤집혔다. 뒤집힌 것은 `results/FINDINGS_rig_audit_2026_08_20.md`
+8절 표에 그대로 남아 있다.
 
-**Promised deliverable:** two rankings (darkness, form) + 3D images of each +
-comparison report, in **`report/2026-08-13/`**. The user asked for it explicitly
-and asked twice not to let it drop.
+---
 
-## Wait for these to be true
+## 지금 서 있는 자리
 
-| file | condition |
-|---|---|
-| `results/sweep_buildable.csv` | ~11,700 rows (180 designs x 12 seeds x 5 thetas x 3 materials) |
-| `results/form_buildable.json` | 11 cases — **already done** |
-| `results/form_roughness.json` | 20 records (5 roughness x [1 flat + 3 designs]) |
+이틀 동안 나온 결함은 **전부 재질 쪽**이다. 형상 쪽은 받은 검사를 다 통과했다.
 
-`logs/queue.log` shows START/END per job. `logs/keepalive.log` shows restarts
-and any STALL.
-
-## Then, in order
-
-1. **Darkness ranking, WITH ERROR BARS.** Group `sweep_buildable.csv` by tag
-   ignoring seed; report mean +/- SEM over the 12 seeds. **The single-seed
-   ranking put the top 13 designs inside 1.09x against a realisation spread of
-   ~3.5%, so most of that order was noise.** Collapse everything inside the
-   error into one equivalence class and say so, rather than printing an order
-   that cannot be defended.
-
-2. **Re-normalise the form numbers** against the flat plate of the same
-   coating, from `form_roughness.json` at roughness 0.30. `metrics/04` uses the
-   0.05 matte wall, which is not the baseline `metrics/01` mandates, and against
-   the right one the theta=0 result inverts from "worse than plain black paint"
-   (1.34) to "better than its own coating" (0.81). See
-   `results/FINDINGS_form_baseline.md`.
-
-3. **Form ranking** from `form_buildable.json`. Use rms smear (metric 02, no
-   known defect) as the headline and peak ratio (metric 04) beside it. MTF
-   (metric 07) is supporting only — it discards phase and under-reports
-   azimuthal spreading, which is the 3D families' whole mechanism.
-   **theta = 0 only after step 2.**
-
-4. **Roughness sensitivity** from `form_roughness.json` — this is probably the
-   report's most important figure. 332x across 0.10-0.50 against 1.6x for the
-   entire nine-topology search.
-
-5. **3D renders**: `scripts/report_top10.py` pattern, but driven from
-   `results/form_candidates.json` so the same 11 designs appear in both
-   rankings. Remember `margin_depths` 0.2 for pictures, and say in the caption
-   that no optical number comes from those renders.
-
-6. **Report** to `report/2026-08-13/`, then publish as an Artifact.
-
-## The report is already built and dry-run. Two commands.
-
-    Blender --background --factory-startup --python scripts/report_buildable.py
-    python3 scripts/build_report_2rank.py 2026-08-13
-
-Machinery, all three stages exercised on partial data 2026-08-13 00:5x:
-
-| script | does | verified |
+| 축 | 상태 | 근거 |
 |---|---|---|
-| `analyze_buildable.py` | both rankings, mean +/- SEM over seeds, **process floor check** | yes |
-| `report_buildable.py` | 11 renders + `report/<date>/data.json` | yes, 11/11 |
-| `build_report_2rank.py` + `report_2rank_template.html` | self-contained HTML | yes, 1.9 MB, no unresolved fields |
+| 반사 총량 | **쓸 수 있다** | 논문이 허용하는 재질 값을 전부 넣어도 5.4 % 안에서만 움직인다 |
+| 모양 뭉개기 | **쓸 수 있다** | 같은 조건에서 2.17 mm 붙박이 |
+| 정면 반짝임 | **못 쓴다** | 같은 조건에서 574배 벌어진다. 우리가 낸 값과는 최대 60만배 차이 |
 
-The 11 renders are already in `report/2026-08-13/shots/` and are reused, so a
-rebuild is fast. `webify()` makes the web JPEGs once.
+그러니 지금 낼 수 있는 보고서는 **총량과 뭉개짐까지**다. 반짝임 칸은
+숫자 대신 "실측 전까지 못 냄"이라고 적어야 한다.
 
-**Ordering trap, already handled but know about it:** `data.json` snapshots the
-roughness records that existed when `report_buildable.py` ran. If that is before
-`form_roughness` finishes, the 332x figure vanishes from the page. The builder
-now re-reads `results/form_roughness.json` directly and **prints a WARN if there
-are none** — do not ignore that line.
+---
 
-Dry run on partial data (6 seeds) gave, darkness rank -> form rank:
+## 1. 반짝임을 되살리려면 — 쿠폰 하나를 재는 것 말고 길이 없다
 
-     1 -> 6   CELLNEST        cannot be made (0.1 mm wall, print)
-     2 -> 1   SHIN_t02_az180  sheet, lanced   <- only design high on BOTH
-     3 -> 9   CELLSQUA        cannot be made
-     4 -> 11  HONE_p5.2       bought foil     <- darkest bought, WORST on form
-     6 -> 2   CONE_p5.5       moulded
-    11 -> 4   SLNT_ln30       bought foil
+논문 그림에서 읽어낸 창은 확산비율 0.5~0.9, 거칠기 0.01~0.11 이다.
+이 창 안에서만 반짝임이 574배 벌어진다. 그림을 더 읽어도 안 좁혀진다.
 
-Six of eleven cross by four places or more. That crossing is the report's
-subject, not a footnote.
+**필요한 것:** 평평한 쿠폰 한 장, 고니오미터 한 번.
+- 5 % 무광 페인트를 알루미늄 판에 우리가 쓸 방식 그대로 칠한다
+- 정면 입사, 관측각을 0~15도까지 0.2도 간격으로 훑는다
+- 광택 덩어리의 반값 폭 하나만 나오면 거칠기가 확정된다
+- 같은 스캔의 넓은 각도 쪽이 확산비율을 준다
 
-## Numbers that must appear, and must not be misstated
+적분구로는 안 된다. 총량만 주고 확산과 광택을 못 가른다.
+이건 `material/_sources.json` 이 아침부터 요청하던 그 측정이다.
 
-- **structure vs flat, same coating, same footing: 6.1218% -> 0.2028%, i.e.
-  ~30x.** Geometry is decisive. An earlier framing of mine said "coating beats
-  geometry" and conflated this with the next line; the user caught it.
-- **between the nine topologies at their own realistic process: 1.6x.** Which
-  topology you pick is nearly irrelevant.
-- **coating diffuse fraction: measured directly 2026-08-21, sweeping 0.50-1.00
-  with the geometry held fixed.** Order spec pyramid p4/d22 moves **11.7 % at
-  theta 0 and 34.4 % at theta -40**, and the two move in OPPOSITE directions
-  (head-on falls as the fraction rises, -40 climbs). A flat plate under the same
-  sweep moves 0.2 % and 6.9 %, so **the lever is the geometry, not the coating**.
-  No rank inversion between flat and pyramid anywhere in the range — the
-  earlier "41x, with rank inversion" was withdrawn in CONTEXT.md and should not
-  have survived here. `scripts/gate_diffuse_fraction.py`.
-- **coating specular roughness: 332x on the theta=0 form peak.**
-- Honeycomb is 5th on darkness and LAST on form (smear 0.96x — narrower than a
-  flat wall). Vertical-walled cells trap light but do not move it sideways.
-- Shingle is the only design in the top 3 of both, and it is sheet metal
-  (laser-cut, lanced, bent, spot-welded), not printed.
+**대신 쓸 수 있는 것:** 못 재면, 논문 창의 양 끝을 둘 다 내고 "이 사이
+어딘가"라고 적는다. 한 값만 골라 내면 안 된다.
 
-## Carry the caveats into the report, do not bury them
+## 2. 재료 기본값을 바꿀지 결정해야 한다 — 내 맘대로 안 바꿨다
 
-- `results/PEER_REVIEW.md` — verdict is reject-as-is, and the fatal objection
-  was a feature-size confound that inverted the headline. That is why
-  `sweep_buildable` exists.
-- `results/FINDINGS_control_overlap.md` — the flat control sits inside the panel
-  field; absolute rho_dh is unaffected (measured), ratios against the control
-  are not.
-- Kaster 2025 (JAP 138 174904, Carl Zeiss AG) is direct prior art, simulation-
-  only, and reports 0.65x average where we report ~0.03x. That gap needs
-  explaining before any comparison is published.
-- US 11,209,577 B2 (Ocean Insight) claims slanted mm-scale macro structures,
-  periodic and irregular, hexagonal/triangular/square/conical. The geometry
-  space is not open.
+지금 `material/*.json` 은 확산 0.97 / 거칠기 0.30 그대로 두었다.
+공개된 66,426 줄이 그 값 위에 서 있어서 조용히 바꾸면 안 됐다.
+
+각 파일에 `constraint` 칸을 새로 넣어 논문이 허용하는 창을 적어 두었다.
+바꿀지 말지는 결정할 문제다. 두 갈래다.
+
+| 갈래 | 뜻 | 대가 |
+|---|---|---|
+| 0.80 / 0.04 로 옮긴다 | 두 논문이 동시에 만족되는 지점 | 반짝임 칸 전부 다시 내야 한다. 총량은 1.7 % 만 움직여서 순위는 그대로 |
+| 0.97 / 0.30 을 둔다 | 지금 발표된 숫자와 이어진다 | 논문 실측과 안 맞는 값을 계속 쓰는 것이다 |
+
+내 권고는 **옮기는 쪽**이다. 총량 순위가 안 뒤집히므로 잃는 게 없고,
+반짝임은 어차피 지금도 못 쓰는 숫자다.
+
+## 3. 벌집 32가지 보고서 다시 내기
+
+`report/comb/comb_musou_2026-08-21.html` 은 반짝임 칸을 실은 채로 나가 있다.
+그 칸이 틀렸다. 고칠 것:
+
+1. 반짝임 열을 빼거나 "실측 전까지 못 냄"으로 바꾼다
+2. 총량과 뭉개짐만으로 순위를 다시 낸다 (이 둘은 안 흔들린다)
+3. 재료표에 논문 창을 같이 싣는다
+4. 같은 링크로 다시 올린다 (`https://claude.ai/code/artifact/76342af1-b6fd-400d-a9d8-52c46c838341`)
+
+## 4. 아직 안 끝난 앞선 일들
+
+- **2~5 단계 숫자를 실측 확산비율로 다시 내기.** 값보간으로 되고 0.0~0.1 %
+  까지 맞는 걸 확인했다. 66,426 줄을 다시 렌더할 필요 없다.
+- **32가지 순위를 셀 개수 맞춰서 다시 보기.** 지금은 설계마다 셀 수가 다르다.
+- **재료 편집기 UI.** 고르기·고치기·만들기·저장, 재료마다 색. 지금 3D 뷰의
+  분홍/파랑은 코드에 박혀 있다.
+- **무소의 파장별 반사율.** 아직 아무 근거가 없다. 445 / 520 / 635 nm 각각.
+- **Cycles 대 Mitsuba 27 % 차이.** 피라미드 정면. 아직 이유 모른다.
+- **실물 측정 0회.** CIE 171:2006 은 기준 자료의 절반을 실험에서 가져온다.
+  시뮬레이터를 시뮬레이터로만 검사하면 공통 오류를 못 잡는다.
+
+---
+
+## 이번에 배운 것, 다음에 또 안 당하려면
+
+1. **파라미터가 렌더러까지 실제로 가는지 확인하고 훑는다.** 거칠기 훑기가
+   아무것도 안 움직인 이유는 재질이 둔해서가 아니라 `form()` 에 그 인자가
+   아예 없었기 때문이다. 훑기 전에 두 끝값이 다른 그림을 내는지 본다.
+2. **"아무도 안 쟀다"는 대개 틀리다.** 거칠기를 직접 주는 논문은 없지만
+   TIS 를 주는 논문이 있었고, TIS 는 거칠기를 바로 묶는다. 원하는 이름의
+   숫자가 없으면, 그 숫자를 담고 있는 다른 이름을 찾는다.
+3. **논문 둘이 어긋나 보이면 장비를 먼저 본다.** DePoy 0.97 과 Filip 0.90 은
+   싸우는 게 아니라 광다이오드가 0.6도만 보고 있었던 것이다.
+4. **사용자가 물리로 이상하다고 하면 대개 맞다.** "정면이면 거울처럼
+   되돌아 와야지"가 맞았고, 거칠기 0.30 이 그걸 눌러 감추고 있었다.

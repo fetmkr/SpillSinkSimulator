@@ -86,7 +86,7 @@ for i in range(1,len(rows)):
               % (rows[i]["N"], rows[i]["mmpx"], b),flush=True)
         break
 else:
-    print("  **N = 32 에서도 안 멈춤 — 픽셀로 봉우리를 재는 방식 자체가 부적합**",flush=True)
+    print("  **N = 32 에서도 안 멈춤 — 픽셀로 제일 밝은 값를 재는 방식 자체가 부적합**",flush=True)
 
 # THE OTHER AXIS, ON THE SAME RENDERS. The density rule in the protocol
 # (mm_per_px = min_feature / 4) was fixed by watching head-on settle, and the
