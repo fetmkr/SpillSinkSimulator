@@ -1,0 +1,556 @@
+<title>어떤 벌집을 살 것인가</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+</style>
+<style>.hi td{background:color-mix(in srgb,var(--good) 14%,transparent)}figure{margin:0;display:flex;flex-direction:column;gap:8px}figcaption{color:var(--muted);font-size:13px}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.big{font-family:var(--mono);font-size:26px;font-weight:700}.unit{font-weight:400;color:var(--muted);font-size:11px;font-family:var(--kr);letter-spacing:0}thead th{vertical-align:bottom;line-height:1.35}.chg{border-left:4px solid var(--warn)}</style>
+<div class="wrap">
+<header><div class="eyebrow">2026-08-22 · 2 판 · 재질 정정</div><h1>어떤 벌집을 살 것인가</h1><p class="sub">셀 두 가지, 깊이 네 가지, 무소 네 가지. 32 가지를 다 재고, 사는 데 필요한 것만 남겼습니다. 1 판(8월 21일)의 재질 값이 틀려서 전부 다시 쟀습니다.</p></header>
+<section class="card verdict ok"><h2 style="margin:0">먼저 결론</h2><div class="grid2"><div><div class="eyebrow">가장 어두운 것</div><div class="big">0.2009 %</div><p class="sub">셀 9.53 · 깊이 40 · 무소 15 mm</p></div><div><div class="eyebrow">거의 같으면서 더 얕고 싼 것</div><div class="big">0.2158 %</div><p class="sub">셀 9.53 · 깊이 40 · 무소 10 mm — 7.4 % 차이</p></div></div><p>깊이 60 mm 대신 40 mm 를 쓰고도 되돌아오는 빛은 7.4 % 밖에 안 늘어납니다. 판이 20 mm 얇아지고 벌집 값이 내려갑니다.</p><p><b>정면 반짝임은 벌집으로 못 잡습니다.</b> 어떤 깊이든 어떤 셀이든 민판과 2 % 안에서 같습니다. 팁에 무소를 15 mm 칠해도 안 바뀝니다. 정면을 잡으려면 면을 기울여야 합니다.</p></section>
+<section><h2>1 판에서 무엇이 바뀌었나</h2><div class="card chg"><p>1 판은 재질 값 두 개가 틀린 채로 나갔습니다. 둘 다 제가 논문을 잘못 읽은 것입니다.</p><div class="scroll"><table><thead><tr><th>값</th><th>1 판</th><th>2 판</th><th>왜</th></tr></thead><tbody><tr><td>페인트 확산 비율</td><td>0.97</td><td>0.99</td><td>DePoy 2014 그림 6 의 세로축이 퍼센트인데 분수로 읽었습니다. 100 배 틀렸습니다.</td></tr><tr><td>페인트 거칠기 α</td><td>0.09</td><td>0.039</td><td>아무 근거 없이 쓰던 값이었습니다. MERL 실측 맞춤값으로 바꿨습니다.</td></tr></tbody></table></div><p><b>어둡기 숫자와 순위는 안 바뀝니다.</b> 32 가지 전부 최대 1.7 % 만 움직였고 순서는 그대로입니다. 바뀐 것은 정면 반짝임뿐입니다.</p><p class="sub">1 판 차트 캡션에 적혀 있던 "확산 0.76" 도 틀린 표기였습니다. 실제 측정은 0.97 로 돌았습니다.</p></div></section>
+<section><h2>쓴 재료</h2><p>값마다 출처를 답니다. <b>실측</b>은 장비로 잰 값, <b>범위</b>는 논문이 위아래만 묶어 준 값, <b>유추</b>는 비슷한 재료에서 빌려 온 값입니다.</p><div class="scroll"><table><thead><tr><th>재료</th><th>반사율</th><th>확산 비율</th><th>α</th><th>출처</th></tr></thead><tbody><tr><td>5 % 무광 검정 페인트</td><td>5.000 %</td><td>0.99 <span class="sub">실측</span></td><td>0.039 <span class="sub">실측</span></td><td>확산: Zeng 2019 (NASA GSFC) Z307 — 0/45도 밝기를 8도 총반사로 나누면 1.008, 즉 정면에서 완전 확산체와 1 % 안에서 같습니다. α: MERL 실측 BRDF 의 paint-black 에 미세면 모델을 맞춘 값 (Ward 0.0367 / Cook-Torrance 0.0392).</td></tr><tr><td>무소블랙</td><td>0.998 %</td><td>0.993 <span class="sub">범위</span></td><td>0.039 <span class="sub">모름</span></td><td>확산: Filip &amp; Vávra 2026 의 정면 TIS 0.985~0.995 에서 나온 한계 중 광택이 제일 센 쪽. α: 무소의 광택 덩어리 폭을 잰 자료가 없어 페인트 값을 빌렸습니다.</td></tr><tr><td>포일</td><td>0.08 mm</td><td colspan="3">알루미늄 벌집. 겉면은 위 두 도료로 칠해집니다.</td></tr></tbody></table></div><p class="sub">무광 검정 페인트의 정반사는 논문마다 백 배 갈립니다 (TAMU 0.1 %, Zeng 1 % 이하, Filip 10 %). 검출기 크기 차이로는 설명이 안 됩니다. <b>도장 공정이 정하는 값입니다.</b> 그래서 발주서에 도장 횟수와 표면 준비를 적어야 합니다.</p></section>
+<section><h2>무엇을 재었나 — 설계도</h2><figure><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="벌집 · 셀 6.35 mm · 깊이 40 mm · 포일 0.08 mm">
+<rect x="249.4" y="30.0" width="199.3" height="44.3" fill="var(--cy)" opacity="0.16"/>
+<text x="456.6" y="56.1" fill="var(--cy)" font-size="11">무소 10 mm</text>
+<line x1="251.39" y1="30.00" x2="252.10" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="252.10" y1="207.14" x2="251.39" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="251.39" y1="207.14" x2="251.39" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="252.10" y1="207.14" x2="252.10" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="247.32" y1="30.00" x2="246.61" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="246.61" y1="207.14" x2="247.32" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="247.32" y1="207.14" x2="247.32" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="246.61" y1="207.14" x2="246.61" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="279.52" y1="30.00" x2="280.22" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="280.22" y1="207.14" x2="279.52" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="279.52" y1="207.14" x2="279.52" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="280.22" y1="207.14" x2="280.22" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="275.44" y1="30.00" x2="274.73" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="274.73" y1="207.14" x2="275.44" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="275.44" y1="207.14" x2="275.44" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="274.73" y1="207.14" x2="274.73" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="307.64" y1="30.00" x2="308.35" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="308.35" y1="207.14" x2="307.64" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="307.64" y1="207.14" x2="307.64" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="308.35" y1="207.14" x2="308.35" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="303.56" y1="30.00" x2="302.85" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="302.85" y1="207.14" x2="303.56" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="303.56" y1="207.14" x2="303.56" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="302.85" y1="207.14" x2="302.85" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="335.76" y1="30.00" x2="336.47" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="336.47" y1="207.14" x2="335.76" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="335.76" y1="207.14" x2="335.76" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="336.47" y1="207.14" x2="336.47" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="331.68" y1="30.00" x2="330.98" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="330.98" y1="207.14" x2="331.68" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="331.68" y1="207.14" x2="331.68" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="330.98" y1="207.14" x2="330.98" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="363.88" y1="30.00" x2="364.59" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="364.59" y1="207.14" x2="363.88" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="363.88" y1="207.14" x2="363.88" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="364.59" y1="207.14" x2="364.59" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="359.81" y1="30.00" x2="359.10" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="359.10" y1="207.14" x2="359.81" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="359.81" y1="207.14" x2="359.81" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="359.10" y1="207.14" x2="359.10" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="392.00" y1="30.00" x2="392.71" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="392.71" y1="207.14" x2="392.00" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="392.00" y1="207.14" x2="392.00" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="392.71" y1="207.14" x2="392.71" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="387.93" y1="30.00" x2="387.22" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="387.22" y1="207.14" x2="387.93" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="387.93" y1="207.14" x2="387.93" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="387.22" y1="207.14" x2="387.22" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="420.12" y1="30.00" x2="420.83" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="420.83" y1="207.14" x2="420.12" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="420.12" y1="207.14" x2="420.12" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="420.83" y1="207.14" x2="420.83" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="416.05" y1="30.00" x2="415.34" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="415.34" y1="207.14" x2="416.05" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="416.05" y1="207.14" x2="416.05" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="415.34" y1="207.14" x2="415.34" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="448.24" y1="30.00" x2="448.95" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="448.95" y1="207.14" x2="448.24" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="448.24" y1="207.14" x2="448.24" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="448.95" y1="207.14" x2="448.95" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="444.17" y1="30.00" x2="443.46" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="443.46" y1="207.14" x2="444.17" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="444.17" y1="207.14" x2="444.17" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="443.46" y1="207.14" x2="443.46" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="252.10" y1="30.00" x2="251.39" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="251.39" y1="207.14" x2="252.10" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="252.10" y1="207.14" x2="252.10" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="251.39" y1="207.14" x2="251.39" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="336.47" y1="30.00" x2="335.76" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="335.76" y1="207.14" x2="336.47" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="336.47" y1="207.14" x2="336.47" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="335.76" y1="207.14" x2="335.76" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<text x="8" y="18" fill="var(--muted)" font-size="12">벌집 · 셀 6.35 mm · 깊이 40 mm · 포일 0.08 mm</text>
+<text x="8" y="40" fill="var(--muted)" font-size="11">입구에서부터 무소를 칠한 띠가 파란 칸입니다.</text>
+<line x1="249.4" y1="236" x2="293.6" y2="236" stroke="var(--cy)" stroke-width="3"/>
+<text x="299.6" y="240" fill="var(--cy)" font-size="11">10 mm</text>
+</svg><figcaption>사려는 것. 셀 6.35 mm, 포일 0.08 mm, 판 200 mm.</figcaption></figure><figure><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="벌집 · 셀 9.53 mm · 깊이 40 mm">
+<rect x="249.4" y="30.0" width="199.3" height="44.3" fill="var(--cy)" opacity="0.16"/>
+<text x="456.6" y="56.1" fill="var(--cy)" font-size="11">무소 10 mm</text>
+<line x1="249.00" y1="30.00" x2="249.71" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="249.71" y1="207.14" x2="249.00" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="249.00" y1="207.14" x2="249.00" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="249.71" y1="207.14" x2="249.71" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="291.21" y1="30.00" x2="291.92" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="291.92" y1="207.14" x2="291.21" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="291.21" y1="207.14" x2="291.21" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="291.92" y1="207.14" x2="291.92" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="333.41" y1="30.00" x2="334.12" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="334.12" y1="207.14" x2="333.41" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="333.41" y1="207.14" x2="333.41" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="334.12" y1="207.14" x2="334.12" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="375.62" y1="30.00" x2="376.32" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="376.32" y1="207.14" x2="375.62" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="375.62" y1="207.14" x2="375.62" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="376.32" y1="207.14" x2="376.32" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="417.82" y1="30.00" x2="418.53" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="418.53" y1="207.14" x2="417.82" y2="207.14" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="417.82" y1="207.14" x2="417.82" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="418.53" y1="207.14" x2="418.53" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<text x="8" y="18" fill="var(--muted)" font-size="12">벌집 · 셀 9.53 mm · 깊이 40 mm</text>
+<text x="8" y="40" fill="var(--muted)" font-size="11">같은 깊이에 셀만 큰 경우.</text>
+<line x1="249.4" y1="236" x2="293.6" y2="236" stroke="var(--cy)" stroke-width="3"/>
+<text x="299.6" y="240" fill="var(--cy)" font-size="11">10 mm</text>
+</svg><figcaption>다른 한 가지. 셀 9.53 mm.</figcaption></figure><figure><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="맨 벽 · 구조 없는 민판">
+<text x="8" y="18" fill="var(--muted)" font-size="12">맨 벽 · 구조 없는 민판</text>
+<text x="8" y="40" fill="var(--muted)" font-size="11">여기에 5% 페인트 또는 무소를 칠합니다.</text>
+<line x1="88.0" y1="236" x2="204.0" y2="236" stroke="var(--cy)" stroke-width="3"/>
+<text x="210.0" y="240" fill="var(--cy)" font-size="11">10 mm</text>
+</svg><figcaption>비교군 1. 구조 없는 민판에 같은 페인트만.</figcaption></figure><figure><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="피라미드 · 간격 4 mm · 깊이 22 mm · 팁 0.4 mm">
+<line x1="174.62" y1="200.50" x2="143.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="191.68" y1="30.00" x2="188.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="191.68" y1="30.00" x2="205.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="188.57" y1="30.00" x2="174.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="205.62" y1="200.50" x2="174.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="222.68" y1="30.00" x2="219.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="222.68" y1="30.00" x2="236.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="219.57" y1="30.00" x2="205.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="236.62" y1="200.50" x2="205.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="253.68" y1="30.00" x2="250.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="253.68" y1="30.00" x2="267.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="250.57" y1="30.00" x2="236.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="267.62" y1="200.50" x2="236.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="284.68" y1="30.00" x2="281.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="284.68" y1="30.00" x2="298.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="281.57" y1="30.00" x2="267.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="298.62" y1="200.50" x2="267.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="315.67" y1="30.00" x2="312.58" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="315.67" y1="30.00" x2="329.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="312.58" y1="30.00" x2="298.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="329.62" y1="200.50" x2="298.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="346.67" y1="30.00" x2="343.58" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="346.67" y1="30.00" x2="360.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="343.58" y1="30.00" x2="329.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="360.62" y1="200.50" x2="329.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="377.67" y1="30.00" x2="374.58" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="377.67" y1="30.00" x2="391.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="374.58" y1="30.00" x2="360.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="391.62" y1="200.50" x2="360.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="408.67" y1="30.00" x2="405.58" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="408.67" y1="30.00" x2="422.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="405.58" y1="30.00" x2="391.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="422.62" y1="200.50" x2="391.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="439.68" y1="30.00" x2="436.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="439.68" y1="30.00" x2="453.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="436.57" y1="30.00" x2="422.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="453.62" y1="200.50" x2="422.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="470.68" y1="30.00" x2="467.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="470.68" y1="30.00" x2="484.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="467.57" y1="30.00" x2="453.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="484.62" y1="200.50" x2="453.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="501.68" y1="30.00" x2="498.57" y2="30.00" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="501.68" y1="30.00" x2="515.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="498.57" y1="30.00" x2="484.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="515.62" y1="200.50" x2="484.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<line x1="529.58" y1="30.00" x2="515.62" y2="200.50" stroke="var(--ink)" stroke-width="1.1"/>
+<text x="8" y="18" fill="var(--muted)" font-size="12">피라미드 · 간격 4 mm · 깊이 22 mm · 팁 0.4 mm</text>
+<text x="8" y="40" fill="var(--muted)" font-size="11">지금 발주 사양입니다. 비교용.</text>
+<line x1="174.6" y1="236" x2="252.1" y2="236" stroke="var(--cy)" stroke-width="3"/>
+<text x="258.1" y="240" fill="var(--cy)" font-size="11">10 mm</text>
+</svg><figcaption>비교군 2. 피라미드. 면이 기울어 있습니다.</figcaption></figure></section>
+<section><h2>숫자 읽는 법</h2><div class="card"><p><b>반사 총량 (%)</b> — 빔이 한 각도로 들어왔을 때 되돌아 나가는 몫입니다. 민판이 5 % 이므로 0.2 % 면 25 배 어둡습니다. 한 설계에 값이 여러 개 나오므로(각도 다섯 · 방향 셋) 그 중 <b>제일 밝게 나온 값</b>을 그 설계의 성적으로 씁니다. 제일 나쁜 경우로 보수적으로 잡는다는 뜻입니다. 설계끼리 견줄 때는 이 값이 작은 쪽이 이깁니다.</p><p><b>정면 반짝임 (배)</b> — 정면으로 쏜 빔이 그대로 되돌아오는 밝기를 완전 확산체 기준으로 잰 것입니다. 1 이면 확산체와 같고, 크면 눈에 번쩍입니다. 총량과 다른 값입니다 — 총량은 모든 방향의 합, 반짝임은 한 방향의 세기입니다.</p></div></section>
+<section><h2>1 단계 — 셀과 깊이. 무소는 아직 안 칠함</h2><p>먼저 페인트만 칠한 벌집을 봅니다. 벌집 자체가 얼마나 하는지 알아야 무소가 얼마나 보태는지 알 수 있습니다.</p><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="셀 6.35 mm · 무소 안 칠함">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">셀 6.35 mm · 무소 안 칠함</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">전체 5% 페인트 · 확산 0.99 · α 0.039 · 판 200 mm · 포일 0.08 mm · 세 방향 중 제일 밝게 나온 값(φ0/45/90)</text>
+<line x1="66" y1="276.0" x2="620" y2="276.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="280.0" fill="var(--muted)" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="204.0" x2="620" y2="204.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="208.0" fill="var(--muted)" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="132.0" x2="620" y2="132.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="136.0" fill="var(--muted)" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="60.0" x2="620" y2="60.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="64.0" fill="var(--muted)" font-size="12" text-anchor="end">1.5</text>
+<text x="66.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-40°</text>
+<text x="204.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-20°</text>
+<text x="343.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">0°</text>
+<text x="481.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">20°</text>
+<text x="620.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">40°</text>
+<text x="343" y="318" fill="var(--muted)" font-size="12" text-anchor="middle">빛이 들어오는 각도 (0 = 정면)</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">%</text>
+<path d="M66.0,114.3 L204.5,180.0 L343.0,240.7 L481.5,180.0 L620.0,114.0" fill="none" stroke="#4ec9c0" stroke-width="2.5"/>
+<circle cx="66.0" cy="114.3" r="3.5" fill="#4ec9c0"/>
+<text x="66.0" y="105.3" fill="#4ec9c0" font-size="11" text-anchor="middle">1.123</text>
+<circle cx="204.5" cy="180.0" r="3.5" fill="#4ec9c0"/>
+<text x="204.5" y="171.0" fill="#4ec9c0" font-size="11" text-anchor="middle">0.667</text>
+<circle cx="343.0" cy="240.7" r="3.5" fill="#4ec9c0"/>
+<text x="343.0" y="231.7" fill="#4ec9c0" font-size="11" text-anchor="middle">0.245</text>
+<circle cx="481.5" cy="180.0" r="3.5" fill="#4ec9c0"/>
+<text x="481.5" y="171.0" fill="#4ec9c0" font-size="11" text-anchor="middle">0.666</text>
+<circle cx="620.0" cy="114.0" r="3.5" fill="#4ec9c0"/>
+<text x="620.0" y="105.0" fill="#4ec9c0" font-size="11" text-anchor="middle">1.125</text>
+<text x="628.0" y="118.0" fill="#4ec9c0" font-size="12">깊이 30</text>
+<path d="M66.0,115.2 L204.5,180.7 L343.0,245.2 L481.5,180.4 L620.0,115.4" fill="none" stroke="#7fc98a" stroke-width="2.5"/>
+<circle cx="66.0" cy="115.2" r="3.5" fill="#7fc98a"/>
+<circle cx="204.5" cy="180.7" r="3.5" fill="#7fc98a"/>
+<circle cx="343.0" cy="245.2" r="3.5" fill="#7fc98a"/>
+<circle cx="481.5" cy="180.4" r="3.5" fill="#7fc98a"/>
+<circle cx="620.0" cy="115.4" r="3.5" fill="#7fc98a"/>
+<text x="628.0" y="119.4" fill="#7fc98a" font-size="12">깊이 40</text>
+<path d="M66.0,116.3 L204.5,182.0 L343.0,247.6 L481.5,181.5 L620.0,116.6" fill="none" stroke="#e0a44e" stroke-width="2.5"/>
+<circle cx="66.0" cy="116.3" r="3.5" fill="#e0a44e"/>
+<circle cx="204.5" cy="182.0" r="3.5" fill="#e0a44e"/>
+<circle cx="343.0" cy="247.6" r="3.5" fill="#e0a44e"/>
+<circle cx="481.5" cy="181.5" r="3.5" fill="#e0a44e"/>
+<circle cx="620.0" cy="116.6" r="3.5" fill="#e0a44e"/>
+<text x="628.0" y="120.6" fill="#e0a44e" font-size="12">깊이 50</text>
+<path d="M66.0,113.8 L204.5,180.2 L343.0,248.8 L481.5,180.3 L620.0,114.0" fill="none" stroke="#d98aa4" stroke-width="2.5"/>
+<circle cx="66.0" cy="113.8" r="3.5" fill="#d98aa4"/>
+<circle cx="204.5" cy="180.2" r="3.5" fill="#d98aa4"/>
+<circle cx="343.0" cy="248.8" r="3.5" fill="#d98aa4"/>
+<circle cx="481.5" cy="180.3" r="3.5" fill="#d98aa4"/>
+<circle cx="620.0" cy="114.0" r="3.5" fill="#d98aa4"/>
+<text x="628.0" y="118.0" fill="#d98aa4" font-size="12">깊이 60</text>
+</svg><figcaption>셀 6.35 mm. 깊이를 늘리면 정면은 좋아지지만 40도는 거의 그대로입니다.</figcaption></figure><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="셀 9.53 mm · 무소 안 칠함">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">셀 9.53 mm · 무소 안 칠함</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">전체 5% 페인트 · 확산 0.99 · α 0.039 · 판 200 mm · 포일 0.08 mm · 세 방향 중 제일 밝게 나온 값(φ0/45/90)</text>
+<line x1="66" y1="276.0" x2="620" y2="276.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="280.0" fill="var(--muted)" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="204.0" x2="620" y2="204.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="208.0" fill="var(--muted)" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="132.0" x2="620" y2="132.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="136.0" fill="var(--muted)" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="60.0" x2="620" y2="60.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="64.0" fill="var(--muted)" font-size="12" text-anchor="end">1.5</text>
+<text x="66.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-40°</text>
+<text x="204.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-20°</text>
+<text x="343.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">0°</text>
+<text x="481.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">20°</text>
+<text x="620.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">40°</text>
+<text x="343" y="318" fill="var(--muted)" font-size="12" text-anchor="middle">빛이 들어오는 각도 (0 = 정면)</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">%</text>
+<path d="M66.0,128.2 L204.5,191.9 L343.0,237.8 L481.5,190.5 L620.0,126.3" fill="none" stroke="#4ec9c0" stroke-width="2.5"/>
+<circle cx="66.0" cy="128.2" r="3.5" fill="#4ec9c0"/>
+<text x="66.0" y="119.2" fill="#4ec9c0" font-size="11" text-anchor="middle">1.026</text>
+<circle cx="204.5" cy="191.9" r="3.5" fill="#4ec9c0"/>
+<text x="204.5" y="182.9" fill="#4ec9c0" font-size="11" text-anchor="middle">0.584</text>
+<circle cx="343.0" cy="237.8" r="3.5" fill="#4ec9c0"/>
+<text x="343.0" y="228.8" fill="#4ec9c0" font-size="11" text-anchor="middle">0.266</text>
+<circle cx="481.5" cy="190.5" r="3.5" fill="#4ec9c0"/>
+<text x="481.5" y="181.5" fill="#4ec9c0" font-size="11" text-anchor="middle">0.594</text>
+<circle cx="620.0" cy="126.3" r="3.5" fill="#4ec9c0"/>
+<text x="620.0" y="117.3" fill="#4ec9c0" font-size="11" text-anchor="middle">1.039</text>
+<text x="628.0" y="130.3" fill="#4ec9c0" font-size="12">깊이 30</text>
+<path d="M66.0,129.9 L204.5,192.4 L343.0,246.1 L481.5,192.0 L620.0,128.9" fill="none" stroke="#7fc98a" stroke-width="2.5"/>
+<circle cx="66.0" cy="129.9" r="3.5" fill="#7fc98a"/>
+<circle cx="204.5" cy="192.4" r="3.5" fill="#7fc98a"/>
+<circle cx="343.0" cy="246.1" r="3.5" fill="#7fc98a"/>
+<circle cx="481.5" cy="192.0" r="3.5" fill="#7fc98a"/>
+<circle cx="620.0" cy="128.9" r="3.5" fill="#7fc98a"/>
+<text x="628.0" y="132.9" fill="#7fc98a" font-size="12">깊이 40</text>
+<path d="M66.0,125.6 L204.5,190.1 L343.0,250.4 L481.5,190.1 L620.0,126.0" fill="none" stroke="#e0a44e" stroke-width="2.5"/>
+<circle cx="66.0" cy="125.6" r="3.5" fill="#e0a44e"/>
+<circle cx="204.5" cy="190.1" r="3.5" fill="#e0a44e"/>
+<circle cx="343.0" cy="250.4" r="3.5" fill="#e0a44e"/>
+<circle cx="481.5" cy="190.1" r="3.5" fill="#e0a44e"/>
+<circle cx="620.0" cy="126.0" r="3.5" fill="#e0a44e"/>
+<text x="628.0" y="130.0" fill="#e0a44e" font-size="12">깊이 50</text>
+<path d="M66.0,123.3 L204.5,188.7 L343.0,252.8 L481.5,188.7 L620.0,123.1" fill="none" stroke="#d98aa4" stroke-width="2.5"/>
+<circle cx="66.0" cy="123.3" r="3.5" fill="#d98aa4"/>
+<circle cx="204.5" cy="188.7" r="3.5" fill="#d98aa4"/>
+<circle cx="343.0" cy="252.8" r="3.5" fill="#d98aa4"/>
+<circle cx="481.5" cy="188.7" r="3.5" fill="#d98aa4"/>
+<circle cx="620.0" cy="123.1" r="3.5" fill="#d98aa4"/>
+<text x="628.0" y="127.1" fill="#d98aa4" font-size="12">깊이 60</text>
+</svg><figcaption>셀 9.53 mm. 셀이 넓으면 관이 얕은 셈이라 정면이 더 밝습니다.</figcaption></figure><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="깊이를 늘리면 40도가 얼마나 좋아지나">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">깊이를 늘리면 40도가 얼마나 좋아지나</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">전체 5% 페인트 · 확산 0.99 · α 0.039 · 판 200 mm · 포일 0.08 mm · 세 방향 중 제일 밝게 나온 값(φ0/45/90)</text>
+<line x1="66" y1="276.0" x2="620" y2="276.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="280.0" fill="var(--muted)" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="204.0" x2="620" y2="204.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="208.0" fill="var(--muted)" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="132.0" x2="620" y2="132.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="136.0" fill="var(--muted)" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="60.0" x2="620" y2="60.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="64.0" fill="var(--muted)" font-size="12" text-anchor="end">1.5</text>
+<text x="66.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">30</text>
+<text x="250.7" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">40</text>
+<text x="435.3" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">50</text>
+<text x="620.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">60</text>
+<text x="343" y="318" fill="var(--muted)" font-size="12" text-anchor="middle">셀 깊이 (mm)</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">%</text>
+<path d="M66.0,114.0 L250.7,115.4 L435.3,116.6 L620.0,114.0" fill="none" stroke="#4ec9c0" stroke-width="2.5"/>
+<circle cx="66.0" cy="114.0" r="3.5" fill="#4ec9c0"/>
+<text x="66.0" y="105.0" fill="#4ec9c0" font-size="11" text-anchor="middle">1.125</text>
+<circle cx="250.7" cy="115.4" r="3.5" fill="#4ec9c0"/>
+<text x="250.7" y="106.4" fill="#4ec9c0" font-size="11" text-anchor="middle">1.115</text>
+<circle cx="435.3" cy="116.6" r="3.5" fill="#4ec9c0"/>
+<text x="435.3" y="107.6" fill="#4ec9c0" font-size="11" text-anchor="middle">1.107</text>
+<circle cx="620.0" cy="114.0" r="3.5" fill="#4ec9c0"/>
+<text x="620.0" y="105.0" fill="#4ec9c0" font-size="11" text-anchor="middle">1.125</text>
+<text x="628.0" y="118.0" fill="#4ec9c0" font-size="12">셀 6.35</text>
+<path d="M66.0,126.3 L250.7,128.9 L435.3,126.0 L620.0,123.1" fill="none" stroke="#7fc98a" stroke-width="2.5"/>
+<circle cx="66.0" cy="126.3" r="3.5" fill="#7fc98a"/>
+<text x="66.0" y="117.3" fill="#7fc98a" font-size="11" text-anchor="middle">1.039</text>
+<circle cx="250.7" cy="128.9" r="3.5" fill="#7fc98a"/>
+<text x="250.7" y="119.9" fill="#7fc98a" font-size="11" text-anchor="middle">1.022</text>
+<circle cx="435.3" cy="126.0" r="3.5" fill="#7fc98a"/>
+<text x="435.3" y="117.0" fill="#7fc98a" font-size="11" text-anchor="middle">1.041</text>
+<circle cx="620.0" cy="123.1" r="3.5" fill="#7fc98a"/>
+<text x="620.0" y="114.1" fill="#7fc98a" font-size="11" text-anchor="middle">1.062</text>
+<text x="628.0" y="127.1" fill="#7fc98a" font-size="12">셀 9.53</text>
+</svg><figcaption>깊이가 40도에 하는 일. 거의 없습니다. 깊이는 정면만 바꿉니다.</figcaption></figure></section>
+<section><h2>2 단계 — 무소를 얼마나 깊이 칠할까</h2><p>무소는 팁에서 아래로 칠합니다. 깊이 들어갈수록 비쌉니다.</p><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="셀 6.35 mm · 깊이 60 mm · 무소를 얼마나 깊이">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">셀 6.35 mm · 깊이 60 mm · 무소를 얼마나 깊이</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">전체 5% 페인트 · 확산 0.99 · α 0.039 · 판 200 mm · 포일 0.08 mm · 세 방향 중 제일 밝게 나온 값(φ0/45/90)</text>
+<line x1="66" y1="276.0" x2="620" y2="276.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="280.0" fill="var(--muted)" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="204.0" x2="620" y2="204.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="208.0" fill="var(--muted)" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="132.0" x2="620" y2="132.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="136.0" fill="var(--muted)" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="60.0" x2="620" y2="60.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="64.0" fill="var(--muted)" font-size="12" text-anchor="end">1.5</text>
+<text x="66.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-40°</text>
+<text x="204.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-20°</text>
+<text x="343.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">0°</text>
+<text x="481.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">20°</text>
+<text x="620.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">40°</text>
+<text x="343" y="318" fill="var(--muted)" font-size="12" text-anchor="middle">빛이 들어오는 각도 (0 = 정면)</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">%</text>
+<path d="M66.0,113.8 L204.5,180.2 L343.0,248.8 L481.5,180.3 L620.0,114.0" fill="none" stroke="#4ec9c0" stroke-width="2.5"/>
+<circle cx="66.0" cy="113.8" r="3.5" fill="#4ec9c0"/>
+<text x="66.0" y="104.8" fill="#4ec9c0" font-size="11" text-anchor="middle">1.126</text>
+<circle cx="204.5" cy="180.2" r="3.5" fill="#4ec9c0"/>
+<text x="204.5" y="171.2" fill="#4ec9c0" font-size="11" text-anchor="middle">0.665</text>
+<circle cx="343.0" cy="248.8" r="3.5" fill="#4ec9c0"/>
+<text x="343.0" y="239.8" fill="#4ec9c0" font-size="11" text-anchor="middle">0.189</text>
+<circle cx="481.5" cy="180.3" r="3.5" fill="#4ec9c0"/>
+<text x="481.5" y="171.3" fill="#4ec9c0" font-size="11" text-anchor="middle">0.665</text>
+<circle cx="620.0" cy="114.0" r="3.5" fill="#4ec9c0"/>
+<text x="620.0" y="105.0" fill="#4ec9c0" font-size="11" text-anchor="middle">1.125</text>
+<text x="628.0" y="118.0" fill="#4ec9c0" font-size="12">무소 0 mm</text>
+<path d="M66.0,234.7 L204.5,246.5 L343.0,267.5 L481.5,246.3 L620.0,234.8" fill="none" stroke="#7fc98a" stroke-width="2.5"/>
+<circle cx="66.0" cy="234.7" r="3.5" fill="#7fc98a"/>
+<circle cx="204.5" cy="246.5" r="3.5" fill="#7fc98a"/>
+<circle cx="343.0" cy="267.5" r="3.5" fill="#7fc98a"/>
+<circle cx="481.5" cy="246.3" r="3.5" fill="#7fc98a"/>
+<circle cx="620.0" cy="234.8" r="3.5" fill="#7fc98a"/>
+<text x="628.0" y="238.8" fill="#7fc98a" font-size="12">무소 5 mm</text>
+<path d="M66.0,244.2 L204.5,254.9 L343.0,267.5 L481.5,254.8 L620.0,244.2" fill="none" stroke="#e0a44e" stroke-width="2.5"/>
+<circle cx="66.0" cy="244.2" r="3.5" fill="#e0a44e"/>
+<circle cx="204.5" cy="254.9" r="3.5" fill="#e0a44e"/>
+<circle cx="343.0" cy="267.5" r="3.5" fill="#e0a44e"/>
+<circle cx="481.5" cy="254.8" r="3.5" fill="#e0a44e"/>
+<circle cx="620.0" cy="244.2" r="3.5" fill="#e0a44e"/>
+<text x="628.0" y="248.2" fill="#e0a44e" font-size="12">무소 10 mm</text>
+<path d="M66.0,244.2 L204.5,256.9 L343.0,267.5 L481.5,256.9 L620.0,244.2" fill="none" stroke="#d98aa4" stroke-width="2.5"/>
+<circle cx="66.0" cy="244.2" r="3.5" fill="#d98aa4"/>
+<circle cx="204.5" cy="256.9" r="3.5" fill="#d98aa4"/>
+<circle cx="343.0" cy="267.5" r="3.5" fill="#d98aa4"/>
+<circle cx="481.5" cy="256.9" r="3.5" fill="#d98aa4"/>
+<circle cx="620.0" cy="244.2" r="3.5" fill="#d98aa4"/>
+<text x="628.0" y="248.2" fill="#d98aa4" font-size="12">무소 15 mm</text>
+</svg><figcaption>깊이 60 mm 벌집. 5 mm 만 칠해도 대부분이 잡히고, 그 뒤로는 거의 안 좋아집니다.</figcaption></figure><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="셀 9.53 mm · 깊이 40 mm · 무소를 얼마나 깊이">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">셀 9.53 mm · 깊이 40 mm · 무소를 얼마나 깊이</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">전체 5% 페인트 · 확산 0.99 · α 0.039 · 판 200 mm · 포일 0.08 mm · 세 방향 중 제일 밝게 나온 값(φ0/45/90)</text>
+<line x1="66" y1="276.0" x2="620" y2="276.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="280.0" fill="var(--muted)" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="204.0" x2="620" y2="204.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="208.0" fill="var(--muted)" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="132.0" x2="620" y2="132.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="136.0" fill="var(--muted)" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="60.0" x2="620" y2="60.0" stroke="var(--grid)" stroke-width="1"/>
+<text x="58" y="64.0" fill="var(--muted)" font-size="12" text-anchor="end">1.5</text>
+<text x="66.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-40°</text>
+<text x="204.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">-20°</text>
+<text x="343.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">0°</text>
+<text x="481.5" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">20°</text>
+<text x="620.0" y="296" fill="var(--muted)" font-size="12" text-anchor="middle">40°</text>
+<text x="343" y="318" fill="var(--muted)" font-size="12" text-anchor="middle">빛이 들어오는 각도 (0 = 정면)</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">%</text>
+<path d="M66.0,129.9 L204.5,192.4 L343.0,246.1 L481.5,192.0 L620.0,128.9" fill="none" stroke="#4ec9c0" stroke-width="2.5"/>
+<circle cx="66.0" cy="129.9" r="3.5" fill="#4ec9c0"/>
+<text x="66.0" y="120.9" fill="#4ec9c0" font-size="11" text-anchor="middle">1.015</text>
+<circle cx="204.5" cy="192.4" r="3.5" fill="#4ec9c0"/>
+<text x="204.5" y="183.4" fill="#4ec9c0" font-size="11" text-anchor="middle">0.581</text>
+<circle cx="343.0" cy="246.1" r="3.5" fill="#4ec9c0"/>
+<text x="343.0" y="237.1" fill="#4ec9c0" font-size="11" text-anchor="middle">0.208</text>
+<circle cx="481.5" cy="192.0" r="3.5" fill="#4ec9c0"/>
+<text x="481.5" y="183.0" fill="#4ec9c0" font-size="11" text-anchor="middle">0.584</text>
+<circle cx="620.0" cy="128.9" r="3.5" fill="#4ec9c0"/>
+<text x="620.0" y="119.9" fill="#4ec9c0" font-size="11" text-anchor="middle">1.022</text>
+<text x="628.0" y="132.9" fill="#4ec9c0" font-size="12">무소 0 mm</text>
+<path d="M66.0,223.7 L204.5,242.0 L343.0,258.5 L481.5,241.3 L620.0,223.1" fill="none" stroke="#7fc98a" stroke-width="2.5"/>
+<circle cx="66.0" cy="223.7" r="3.5" fill="#7fc98a"/>
+<circle cx="204.5" cy="242.0" r="3.5" fill="#7fc98a"/>
+<circle cx="343.0" cy="258.5" r="3.5" fill="#7fc98a"/>
+<circle cx="481.5" cy="241.3" r="3.5" fill="#7fc98a"/>
+<circle cx="620.0" cy="223.1" r="3.5" fill="#7fc98a"/>
+<text x="628.0" y="227.1" fill="#7fc98a" font-size="12">무소 5 mm</text>
+<path d="M66.0,245.3 L204.5,253.4 L343.0,258.5 L481.5,253.0 L620.0,244.9" fill="none" stroke="#e0a44e" stroke-width="2.5"/>
+<circle cx="66.0" cy="245.3" r="3.5" fill="#e0a44e"/>
+<circle cx="204.5" cy="253.4" r="3.5" fill="#e0a44e"/>
+<circle cx="343.0" cy="258.5" r="3.5" fill="#e0a44e"/>
+<circle cx="481.5" cy="253.0" r="3.5" fill="#e0a44e"/>
+<circle cx="620.0" cy="244.9" r="3.5" fill="#e0a44e"/>
+<text x="628.0" y="248.9" fill="#e0a44e" font-size="12">무소 10 mm</text>
+<path d="M66.0,247.3 L204.5,257.2 L343.0,258.6 L481.5,257.1 L620.0,247.1" fill="none" stroke="#d98aa4" stroke-width="2.5"/>
+<circle cx="66.0" cy="247.3" r="3.5" fill="#d98aa4"/>
+<circle cx="204.5" cy="257.2" r="3.5" fill="#d98aa4"/>
+<circle cx="343.0" cy="258.6" r="3.5" fill="#d98aa4"/>
+<circle cx="481.5" cy="257.1" r="3.5" fill="#d98aa4"/>
+<circle cx="620.0" cy="247.1" r="3.5" fill="#d98aa4"/>
+<text x="628.0" y="251.1" fill="#d98aa4" font-size="12">무소 15 mm</text>
+</svg><figcaption>깊이 40 mm 벌집, 셀 9.53. 이 조합이 가격 대비 제일 낫습니다.</figcaption></figure></section>
+<section><h2>정면 반짝임 — 벌집으로는 못 잡습니다</h2><p>이번 판에서 가장 분명해진 결과입니다.</p><figure><svg viewBox="0 0 760 330" width="100%" role="img" aria-label="정면 반짝임 — 구조는 아무것도 안 한다">
+<text x="66" y="18" fill="var(--ink)" font-size="13" font-weight="700">정면 반짝임 — 구조는 아무것도 안 한다</text>
+<text x="66" y="33" fill="var(--muted)" font-size="11">민판을 1 로 놓았을 때 정면으로 되돌아오는 밝기. 5 % 페인트, 확산 0.99, α 0.039</text>
+<line x1="66" y1="260.0" x2="660" y2="260.0" stroke="var(--line)" stroke-width="1"/>
+<rect x="94.5" y="92.2" width="61.8" height="167.8" fill="var(--muted)" rx="2"/>
+<text x="125.4" y="84.2" fill="var(--muted)" font-size="12" font-weight="700" text-anchor="middle">2.644</text>
+<text x="125.4" y="278" fill="var(--muted)" font-size="11" text-anchor="middle">민판</text>
+<text x="125.4" y="292" fill="var(--muted)" font-size="11" text-anchor="middle">구조 없음</text>
+<text x="125.4" y="310" fill="var(--ink)" font-size="11" text-anchor="middle" font-weight="700">기준</text>
+<rect x="213.3" y="92.8" width="61.8" height="167.2" fill="#e0655c" rx="2"/>
+<text x="244.2" y="84.8" fill="#e0655c" font-size="12" font-weight="700" text-anchor="middle">2.635</text>
+<text x="244.2" y="278" fill="var(--muted)" font-size="11" text-anchor="middle">벌집 6.35</text>
+<text x="244.2" y="292" fill="var(--muted)" font-size="11" text-anchor="middle">깊이 30·무소 0</text>
+<text x="244.2" y="310" fill="var(--ink)" font-size="11" text-anchor="middle" font-weight="700">0.997배</text>
+<rect x="332.1" y="95.5" width="61.8" height="164.5" fill="#e0655c" rx="2"/>
+<text x="363.0" y="87.5" fill="#e0655c" font-size="12" font-weight="700" text-anchor="middle">2.591</text>
+<text x="363.0" y="278" fill="var(--muted)" font-size="11" text-anchor="middle">벌집 6.35</text>
+<text x="363.0" y="292" fill="var(--muted)" font-size="11" text-anchor="middle">깊이 60·무소 15</text>
+<text x="363.0" y="310" fill="var(--ink)" font-size="11" text-anchor="middle" font-weight="700">0.980배</text>
+<rect x="450.9" y="94.4" width="61.8" height="165.6" fill="#e0655c" rx="2"/>
+<text x="481.8" y="86.4" fill="#e0655c" font-size="12" font-weight="700" text-anchor="middle">2.608</text>
+<text x="481.8" y="278" fill="var(--muted)" font-size="11" text-anchor="middle">벌집 9.53</text>
+<text x="481.8" y="292" fill="var(--muted)" font-size="11" text-anchor="middle">깊이 60·무소 15</text>
+<text x="481.8" y="310" fill="var(--ink)" font-size="11" text-anchor="middle" font-weight="700">0.987배</text>
+<rect x="569.7" y="256.4" width="61.8" height="3.6" fill="#3f8f57" rx="2"/>
+<text x="600.6" y="248.4" fill="#3f8f57" font-size="12" font-weight="700" text-anchor="middle">0.056</text>
+<text x="600.6" y="278" fill="var(--muted)" font-size="11" text-anchor="middle">피라미드</text>
+<text x="600.6" y="292" fill="var(--muted)" font-size="11" text-anchor="middle">간격 4·깊이 22</text>
+<text x="600.6" y="310" fill="var(--ink)" font-size="11" text-anchor="middle" font-weight="700">0.021배</text>
+<text x="10" y="20" fill="var(--muted)" font-size="12">배</text>
+</svg><figcaption>민판을 기준으로 놓았습니다. 벌집은 어떤 깊이·셀·무소 조합이든 민판의 0.98~1.00 배입니다. 피라미드만 0.021 배로 떨어집니다.</figcaption></figure><div class="card"><p><b>왜 그런가.</b> 관 속을 정면으로 들여다보면 보이는 것은 바닥과 벽이 아니라 관 입구의 테두리입니다. 그 테두리는 기울어 있지 않으므로 민판과 똑같이 빛을 되돌립니다. 관을 깊게 파도 테두리는 그대로입니다.</p><p>피라미드는 면이 기울어 있어 정면으로 온 빔을 옆으로 보냅니다. 그래서 48 배 어둡습니다.</p><p class="sub">확인 방법 세 가지가 같은 답을 냈습니다 — 포일 테두리 넓이를 직접 센 것, 민판 식과 견준 것, 그리고 무소를 칠하고 안 칠하고를 비교한 것입니다. 무소가 총량은 다섯 배 낮추면서 반짝임은 1.7 % 밖에 못 낮춥니다.</p></div></section>
+<section><h2>32 가지 전부</h2><p><b>어두운 순입니다. 맨 위가 1위, 가장 어두운 설계입니다.</b> 되돌아오는 빛이 적을수록 좋으므로 반사 총량이 작은 쪽이 앞섭니다.</p><p>칸 이름의 “제일 밝은 각도에서” 는 그 설계의 값을 다섯 각도 중 어디서 골랐는지를 말합니다. 설계끼리의 순위가 아닙니다.</p><p>1 판 값을 나란히 두어 재질 정정이 얼마나 움직였는지 볼 수 있게 했습니다.</p><div class="scroll"><table><thead><tr><th>순위<br><span class="unit">어두운 순</span></th><th>셀<br><span class="unit">mm</span></th><th>깊이<br><span class="unit">mm</span></th><th>무소<br><span class="unit">mm</span></th><th>정면<br><span class="unit">%</span></th><th>40도<br><span class="unit">%</span></th><th>반사 총량<br><span class="unit">% · 제일 밝은 각도에서</span></th><th>1 판<br><span class="unit">같은 칸</span></th><th>차이</th><th>정면 반짝임<br><span class="unit">배</span></th></tr></thead><tbody>
+<tr class="hi"><td>1</td><td>9.53</td><td>40</td><td>15</td><td>0.1211</td><td>0.2009</td><td><b>0.2009</b></td><td>0.2004</td><td>+0.3%</td><td>2.599</td></tr>
+<tr><td>2</td><td>9.53</td><td>30</td><td>15</td><td>0.1793</td><td>0.2042</td><td><b>0.2042</b></td><td>0.2037</td><td>+0.2%</td><td>2.599</td></tr>
+<tr><td>3</td><td>9.53</td><td>50</td><td>15</td><td>0.0912</td><td>0.2046</td><td><b>0.2051</b></td><td>0.2047</td><td>+0.2%</td><td>2.598</td></tr>
+<tr><td>4</td><td>9.53</td><td>60</td><td>15</td><td>0.0742</td><td>0.2086</td><td><b>0.2086</b></td><td>0.2081</td><td>+0.2%</td><td>2.608</td></tr>
+<tr><td>5</td><td>9.53</td><td>40</td><td>10</td><td>0.1213</td><td>0.2158</td><td><b>0.2158</b></td><td>0.2150</td><td>+0.4%</td><td>2.599</td></tr>
+<tr><td>6</td><td>6.35</td><td>50</td><td>15</td><td>0.0682</td><td>0.2175</td><td><b>0.2179</b></td><td>0.2174</td><td>+0.2%</td><td>2.579</td></tr>
+<tr><td>7</td><td>6.35</td><td>50</td><td>10</td><td>0.0682</td><td>0.2175</td><td><b>0.2179</b></td><td>0.2175</td><td>+0.2%</td><td>2.579</td></tr>
+<tr><td>8</td><td>9.53</td><td>30</td><td>10</td><td>0.1796</td><td>0.2184</td><td><b>0.2184</b></td><td>0.2175</td><td>+0.4%</td><td>2.599</td></tr>
+<tr><td>9</td><td>6.35</td><td>40</td><td>15</td><td>0.0838</td><td>0.2189</td><td><b>0.2192</b></td><td>0.2187</td><td>+0.2%</td><td>2.580</td></tr>
+<tr><td>10</td><td>6.35</td><td>40</td><td>10</td><td>0.0838</td><td>0.2190</td><td><b>0.2193</b></td><td>0.2188</td><td>+0.2%</td><td>2.580</td></tr>
+<tr><td>11</td><td>9.53</td><td>50</td><td>10</td><td>0.0913</td><td>0.2200</td><td><b>0.2200</b></td><td>0.2191</td><td>+0.4%</td><td>2.598</td></tr>
+<tr><td>12</td><td>6.35</td><td>30</td><td>15</td><td>0.1138</td><td>0.2209</td><td><b>0.2209</b></td><td>0.2204</td><td>+0.2%</td><td>2.580</td></tr>
+<tr><td>13</td><td>6.35</td><td>30</td><td>10</td><td>0.1139</td><td>0.2210</td><td><b>0.2210</b></td><td>0.2204</td><td>+0.2%</td><td>2.580</td></tr>
+<tr><td>14</td><td>6.35</td><td>60</td><td>15</td><td>0.0593</td><td>0.2208</td><td><b>0.2211</b></td><td>0.2206</td><td>+0.2%</td><td>2.591</td></tr>
+<tr><td>15</td><td>6.35</td><td>60</td><td>10</td><td>0.0593</td><td>0.2209</td><td><b>0.2211</b></td><td>0.2207</td><td>+0.2%</td><td>2.591</td></tr>
+<tr><td>16</td><td>9.53</td><td>60</td><td>10</td><td>0.0743</td><td>0.2236</td><td><b>0.2236</b></td><td>0.2227</td><td>+0.4%</td><td>2.608</td></tr>
+<tr><td>17</td><td>6.35</td><td>50</td><td>5</td><td>0.0682</td><td>0.2826</td><td><b>0.2826</b></td><td>0.2806</td><td>+0.7%</td><td>2.579</td></tr>
+<tr><td>18</td><td>6.35</td><td>40</td><td>5</td><td>0.0839</td><td>0.2845</td><td><b>0.2846</b></td><td>0.2825</td><td>+0.7%</td><td>2.580</td></tr>
+<tr><td>19</td><td>6.35</td><td>30</td><td>5</td><td>0.1141</td><td>0.2858</td><td><b>0.2858</b></td><td>0.2836</td><td>+0.8%</td><td>2.580</td></tr>
+<tr><td>20</td><td>6.35</td><td>60</td><td>5</td><td>0.0593</td><td>0.2859</td><td><b>0.2865</b></td><td>0.2845</td><td>+0.7%</td><td>2.591</td></tr>
+<tr><td>21</td><td>9.53</td><td>40</td><td>5</td><td>0.1214</td><td>0.3674</td><td><b>0.3674</b></td><td>0.3630</td><td>+1.2%</td><td>2.599</td></tr>
+<tr><td>22</td><td>9.53</td><td>30</td><td>5</td><td>0.1800</td><td>0.3716</td><td><b>0.3716</b></td><td>0.3668</td><td>+1.3%</td><td>2.599</td></tr>
+<tr><td>23</td><td>9.53</td><td>50</td><td>5</td><td>0.0914</td><td>0.3725</td><td><b>0.3736</b></td><td>0.3692</td><td>+1.2%</td><td>2.598</td></tr>
+<tr><td>24</td><td>9.53</td><td>60</td><td>5</td><td>0.0743</td><td>0.3773</td><td><b>0.3773</b></td><td>0.3728</td><td>+1.2%</td><td>2.608</td></tr>
+<tr><td>25</td><td>9.53</td><td>40</td><td>0</td><td>0.2075</td><td>1.0217</td><td><b>1.0217</b></td><td>1.0037</td><td>+1.8%</td><td>2.635</td></tr>
+<tr><td>26</td><td>9.53</td><td>30</td><td>0</td><td>0.2656</td><td>1.0393</td><td><b>1.0393</b></td><td>1.0203</td><td>+1.9%</td><td>2.635</td></tr>
+<tr><td>27</td><td>9.53</td><td>50</td><td>0</td><td>0.1779</td><td>1.0414</td><td><b>1.0442</b></td><td>1.0257</td><td>+1.8%</td><td>2.629</td></tr>
+<tr><td>28</td><td>9.53</td><td>60</td><td>0</td><td>0.1614</td><td>1.0621</td><td><b>1.0621</b></td><td>1.0432</td><td>+1.8%</td><td>2.574</td></tr>
+<tr><td>29</td><td>6.35</td><td>50</td><td>0</td><td>0.1976</td><td>1.1069</td><td><b>1.1092</b></td><td>1.0906</td><td>+1.7%</td><td>2.617</td></tr>
+<tr><td>30</td><td>6.35</td><td>40</td><td>0</td><td>0.2137</td><td>1.1151</td><td><b>1.1164</b></td><td>1.0974</td><td>+1.7%</td><td>2.634</td></tr>
+<tr><td>31</td><td>6.35</td><td>30</td><td>0</td><td>0.2449</td><td>1.1249</td><td><b>1.1249</b></td><td>1.1061</td><td>+1.7%</td><td>2.635</td></tr>
+<tr><td>32</td><td>6.35</td><td>60</td><td>0</td><td>0.1892</td><td>1.1248</td><td><b>1.1262</b></td><td>1.1071</td><td>+1.7%</td><td>2.548</td></tr>
+</tbody></table></div><p class="sub">차이 칸이 전부 2 % 안입니다. <b>어둡기 결론은 재질 정정에 안 흔들립니다.</b></p></section>
+<section><h2>그래서 사려면</h2><div class="card"><p><b>셀 9.53 mm · 깊이 40 mm · 무소 10 mm.</b> 가장 어두운 조합보다 7.4 % 밝을 뿐인데 판이 20 mm 얇고 벌집이 쌉니다.</p><p><b>발주서에 도장을 적으십시오.</b> 남은 불확실성은 형상이 아니라 도장입니다. 도장 횟수, 표면 준비, 그리고 쿠폰 한 장으로 확인하는 절차를 적어야 합니다.</p><p><b>정면 반짝임이 문제라면 벌집이 아니라 기울어진 면을 쓰십시오.</b> 벌집으로는 못 잡습니다.</p></div></section>
+<section><h2>이 보고서를 다시 지으려면</h2><div class="card"><p style="font-family:var(--mono);font-size:13px">Blender --background --factory-startup --python scripts/sweep_comb_musou_v2.py<br>python3 scripts/build_comb_report.py</p><p class="sub">1 판은 손으로 짰고 차트만 저장돼 있어서 재질이 바뀌었을 때 고칠 방법이 없었습니다. 2 판은 데이터에서 짓습니다.</p></div></section>
+</div>

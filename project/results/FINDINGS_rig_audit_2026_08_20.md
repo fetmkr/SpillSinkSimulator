@@ -1000,6 +1000,292 @@ goniometer scan of one flat painted coupon — the same measurement
 
 ---
 
+## 5f. 2026-08-22 night — four more papers, and I had misread the axis by 100x
+
+### The specular fractions everyone actually publishes
+
+Searched for measured specular values for the three coatings this project uses.
+Four papers, all visible-wavelength, all now in `reference/papers/`.
+
+**Black anodised aluminium — TAMU 2018, SPIE 10706, Table 2.** MADLaSR: a HeNe
+at 633 nm and a Gentec photodiode on motorised arms, stepped every 2 degrees,
+specular fraction averaged over 10-44 degrees.
+
+| sample | specular fraction | diffuse fraction |
+|---|---|---|
+| bead-blasted cast Al, anodised black (CBB) | 0.07 % | **0.9993** |
+| machined cast Al, anodised black (CMB) | 0.15 % | 0.9985 |
+| raw cast Al, anodised black (CRB) | 0.57 % | 0.9943 |
+| polished 6061, anodised non-dyed (APH) | 0.59 % | 0.9941 |
+| polished cast Al, anodised black (2014 Fig. 7) | ~3 % | 0.97 |
+| *for scale:* polished stainless, electroless nickel (SPN) | 76.3 % | 0.237 |
+
+**Matte black paint — three papers, and they disagree by 100x.**
+
+| source | what was measured | diffuse fraction |
+|---|---|---|
+| TAMU 2014 Fig. 6, matte black spraypaint | specular ~0.1 % at 633 nm | 0.999 |
+| Zeng 2019 Table 1A, Z307 flat black at 600 nm | BRF(0/45) / THR(8) = **1.008** | >= 0.99 |
+| Filip & Vavra 2026 Fig. 6, acrylic matte spray | 10-13 % inside a 5 deg cone | <= 0.90 |
+
+**Musou Black — one measurement exists, and it is Filip & Vavra's TIS.** Normal
+incidence TIS 0.985-0.995, i.e. 0.5-1.5 % inside the 5 degree cone. A perfect
+Lambertian already puts 0.76 % there, so the most specular Musou can be is
+0.74 %, giving **diffuse fraction >= 0.9926**. Nobody else has measured it:
+TAMU measured neither Musou nor Vantablack, and the product sheet gives total
+reflectance only (8 deg, integrating sphere), which cannot separate the two.
+
+### The 100x error was mine
+
+**DePoy 2014's Figure 6 y-axis reads "Specular Reflectance Ratio (%)" and the
+scale runs 0 to 1. It is per cent.** I read the bars as fractions. "0.03" is
+0.03 %, not 3 %. So every diffuse fraction I entered from that figure is wrong
+by a factor of 100:
+
+| material | I wrote | the paper says |
+|---|---|---|
+| black anodised, raw | 0.97 | 0.9997 |
+| black anodised, bead-blasted | 0.98 | 0.9998 |
+| black anodised, machined | 0.95 | 0.9995 |
+| black anodised, **polished** | **0.30** | **0.993** |
+| matte black spraypaint | 0.97 | 0.999 |
+
+TAMU's own 2018 sequel confirms the reading: it reports the same materials at
+0.07-0.59 % and says the two papers agree "with a small positive systematic
+offset". They only agree if 2014 is read as per cent.
+
+All eleven material files are corrected. `_sources.json` records the error
+under `내가_틀렸던_것`.
+
+### The detector-size reconciliation in §5e is also withdrawn
+
+§5e argued DePoy's 0.97 and Filip's 0.90 differ because DePoy's photodiode
+subtends ~0.6 degrees and misses the shoulder. **That cannot be the whole
+story, and now it is not even the right comparison** — DePoy's number is 0.999,
+not 0.97.
+
+A single GGX lobe can put at most `tan^2(2.5 deg)/tan^2(0.3 deg) = 69.5x` more
+energy inside a 5 degree cone than inside a 0.6 degree one, in the limit of
+infinite roughness. Satisfying TAMU's 0.1 % and Filip's 10 % at once needs
+92.6x. **No lobe does that. The surfaces are different, not the detectors.**
+
+Filip's paper says its acrylic sample is thin enough that "partial reflection
+from the underlying polished aluminum substrate" may show through. Shirsekar
+2019 says the same thing from the other side: one coat of Z302 is grainy,
+three coats are glossy, and their specular peaks differ by an order of
+magnitude.
+
+**So the specular fraction of matte black paint on aluminium is not a constant
+to look up. It is set by the coating process, and it belongs in the build
+spec, not in a lookup table.** The honest range is 0.90 to 0.999.
+
+### What the published values do to the three axes
+
+`scripts/gate_specular_published.py`, 5 % painted flat plate, every published
+diffuse fraction at both ends of the allowed roughness:
+
+| diffuse fraction | flash at roughness 0.012 | flash at roughness 0.30 |
+|---|---|---|
+| 0.9993 (bead-blasted anodised) | 8 440 | 1.02 |
+| 0.9990 (matte spraypaint) | 12 057 | 1.03 |
+| 0.9943 (raw anodised) | 68 709 | 1.17 |
+| 0.9900 (Z307) | 120 498 | 1.30 |
+| 0.9700 (my wrong value) | 359 897 | 1.90 |
+| 0.9000 (Filip acrylic) | 1 143 834 | 4.01 |
+
+**Total reflectance moves 0.9 % across that entire table.** Pre-registered R1
+holds and the darkness ranking is untouchable by any of this.
+
+### A clean law fell out, and it is the way to fix the flash without re-rendering
+
+The excess over a Lambertian goes as
+
+    flash - 1  =  (1 - diffuse_fraction) / roughness^4
+
+Checked against all twelve rows: linear in `1 - df` to 5 % (142.9x in df gives
+135.5x in flash), and quartic in roughness to 3 % (the ratio `(0.30/0.012)^4 =
+390 625` predicts 398 400, 379 819 and 399 967 at three different diffuse
+fractions). Quartic, not quadratic, because a head-on return concentrates
+twice: the lobe narrows the angles AND keeps the returned spot the size of the
+beam instead of spreading it across the panel.
+
+**Consequence: one goniometer scan of one coupon gives both numbers, and every
+flash in the project can then be computed rather than re-rendered.** That is
+the same relief the diffuse-fraction interpolation gave for the 66 426 rows.
+
+---
+
+## 5g. 2026-08-22 night, later — the roughness IS published, and my §5e numbers were a unit error
+
+### MERL measured it, and somebody fitted microfacet models to all of it
+
+Nobody publishes "roughness" for black paint under that name — but **Ngan,
+Durand & Matusik (EGSR 2005)** fitted seven microfacet models to MERL's
+goniometer data for 100 isotropic materials, ~10^6 measurements each, and the
+supplemental lists every fitted parameter. Cook-Torrance's `m` and Ward's `a`
+are both the RMS microfacet slope, which is what GGX calls alpha.
+
+| MERL material | Ward a | Cook-Torrance m |
+|---|---|---|
+| **paint-black** | 0.0367 | **0.0392** |
+| black-phenolic | 0.0257 | 0.0230 |
+| black-obsidian | 0.0227 | 0.0239 |
+| **black-oxidized-steel** | 0.1980 | **0.1900** |
+| black-plastic-soft | 0.3310 | 0.3250 |
+| black-bball | 0.0078 | 0.0074 |
+| fabric-black | 0.5000 | 0.6500 |
+| *for scale:* aluminium (mirror) | 0.00845 | 0.00776 |
+| *for scale:* chrome (mirror) | 0.0101 | 0.00935 |
+
+**Black paint: alpha 0.037-0.039, with Ward and Cook-Torrance agreeing.** That
+lands in the middle of the 0.012-0.089 window §5e derived from Filip & Vavra's
+5-degree TIS. **Two unrelated methods, the same answer.** For matte black metal
+the closest MERL analogue is black-oxidized-steel at 0.19 — a steel blackening,
+not anodising, so it is an analogy and is labelled `analogue` in the files.
+
+### And §5e's dramatic numbers were a unit error of mine
+
+**Cycles' Glossy node squares its roughness input to get GGX alpha.** I fed the
+paper alphas straight into the slider, so asking for 0.012 rendered 0.000144 —
+83x too sharp. Every "1 143 834" and "574x of spread" in §5e came from that.
+
+Twelve already-measured points settle it. Against `1 + (1-df)/(4 s^4)` the
+error is 0.00-5.4 %; against `1 + (1-df)/(4 s^2)` it is 100 %. The slider is
+`sqrt(alpha)`, so the physics is just the textbook microfacet peak:
+
+    head-on flash  =  1 + (1 - diffuse_fraction) / (4 alpha^2)
+
+The "quartic, because it concentrates twice" story in §5e is withdrawn. The
+quartic was in the slider, not in the physics.
+
+**So roughness 0.30 was never outside the published range.** Slider 0.30 is
+alpha 0.09, and Filip's window tops out at 0.089. It was sitting on the edge.
+
+### The three axes, with the units right
+
+`scripts/gate_alpha_units.py`, 5 % painted flat plate, renderer against the law:
+
+| material model | df | alpha | total, brightest | flash measured | law |
+|---|---|---|---|---|---|
+| bead-blasted black anodised | 0.9993 | 0.190 | 5.000 % | **1.004** | 1.005 |
+| raw black anodised | 0.9943 | 0.190 | 5.003 % | 1.035 | 1.040 |
+| matte black spraypaint | 0.9990 | 0.039 | 5.000 % | 1.164 | 1.164 |
+| 5 % matte paint (Zeng) | 0.9900 | 0.039 | 5.004 % | **2.636** | 2.644 |
+| thin acrylic on polished Al (Filip) | 0.9000 | 0.039 | 5.046 % | 17.36 | 17.44 |
+| Filip window, sharpest end | 0.9000 | 0.012 | 5.046 % | 174.5 | 174.6 |
+| Filip window, bluntest end | 0.5000 | 0.089 | 5.289 % | 16.42 | 16.78 |
+| Musou (alpha borrowed) | 0.9930 | 0.039 | 5.003 % | 2.145 | 2.151 |
+
+**Renderer and law agree to 2.2 % worst case**, which is the check that the
+unit reading is right rather than merely self-consistent.
+
+The honest picture is now: a 5 % painted wall flashes about **2.6x** a
+Lambertian head-on, somewhere between 1.2x for a well-applied flat black and
+17x for a thin coat over polished metal. Black anodised barely flashes at all
+(1.00-1.04) because its lobe is five times broader.
+
+### What survives from §5e
+
+  - the retraction of "roughness has no effect" — `form()` really did have no
+    roughness parameter, and roughness really is the dominant knob
+  - Filip & Vavra's TIS really does bound alpha to 0.012-0.089, and MERL
+    independently confirms 0.039
+  - total reflectance really is untouchable: 5.8 % across everything here
+
+### What does not
+
+  - "no roughness reproduces the measurement at df 0.97" — that inversion was
+    in alpha and was right; what was wrong was calling our slider 0.30 an alpha
+  - "574x of spread inside the allowed window" — it is 10.4x with the units
+    right
+  - "the flash is not reportable" — it is reportable to within the coating
+    spec, and the coating spec is the real uncertainty, not the renderer
+
+---
+
+## 5h. 2026-08-22 night — the corrected materials, applied and cross-checked
+
+`scripts/gate_apply_new_materials.py`. Six designs, old material values against
+new, all three axes. The gate refuses to compare anything until its old arm
+reproduces the stored 32-case study.
+
+### V0: the instrument, checked first — and it caught my own bug
+
+First run: total reproduced to 0.00 %, but the flash on every Musou-painted
+comb was **31.5 % low**. The gate stopped and printed nothing else.
+
+The fault was mine, not the data. Passing a `diffuse_frac` makes it panel-wide,
+so forcing Musou's 0.99 also overwrote the 5 % paint underneath the tip. The
+32-case sweep passes `None` and lets each material carry its own. Fixed by
+swapping `SS.MATERIALS` between arms instead of overriding the argument.
+
+Second run: **0.00 % on every stored value, total and flash both.** The
+comparison below is therefore against a rig that reproduces the published study
+exactly.
+
+### The comparison
+
+| design | total, old | total, new | change | flash, old | flash, new |
+|---|---|---|---|---|---|
+| flat, 5 % paint | 5.01361 % | 5.00443 % | -0.2 % | 1.9033 | 2.6358 |
+| pyramid p4/d22 | 0.23150 % | 0.23204 % | +0.2 % | 0.0402 | 0.0560 |
+| comb 6.35/d30/no Musou | 1.10614 % | 1.12495 % | +1.7 % | 1.9028 | 2.6349 |
+| comb 6.35/d60/Musou 15 | 0.22063 % | 0.22108 % | +0.2 % | 1.8728 | 2.5914 |
+| comb 9.53/d40/Musou 10 | 0.21500 % | 0.21580 % | +0.4 % | 1.8761 | 2.5990 |
+| comb 9.53/d60/Musou 15 | 0.20806 % | 0.20856 % | +0.2 % | 1.8852 | 2.6085 |
+
+**V1 holds and then some.** Total moves at most 1.7 %, and the darkness order
+is character-for-character identical under both material sets:
+
+    comb 9.53/d60/M15 < comb 9.53/d40/M10 < comb 6.35/d60/M15
+      < pyramid p4/d22 < comb 6.35/d30/no Musou < flat
+
+**Every published darkness number and ranking survives the material
+correction.** The 66 426 rows do not need re-rendering for the total axis.
+
+**V2 was wrong and is recorded as wrong.** I predicted the flash would fall.
+It rose, by 1.38x on every single design. Both changes push it: alpha narrows
+from 0.09 to 0.039 (raises it 5.3x) while the diffuse fraction rises from 0.97
+to 0.99 (lowers it 3x). The narrowing wins. The uniformity of the 1.38x across
+six very different geometries is itself the tell — see V3.
+
+### V3: the flat-plate law, and what structure actually does
+
+Flat-plate law at alpha 0.039: **2.6437** for the 5 % paint, **2.1506** for
+Musou.
+
+| design | flash | / paint law | / Musou law |
+|---|---|---|---|
+| flat, 5 % paint | 2.6358 | **0.997** | 1.226 |
+| pyramid p4/d22 | 0.0560 | **0.021** | 0.026 |
+| comb 6.35/d30/no Musou | 2.6349 | **0.997** | 1.225 |
+| comb 6.35/d60/Musou 15 | 2.5914 | **0.980** | 1.205 |
+| comb 9.53/d40/Musou 10 | 2.5990 | **0.983** | 1.209 |
+| comb 9.53/d60/Musou 15 | 2.6085 | **0.987** | 1.213 |
+
+**Every honeycomb flashes exactly like a flat painted wall, to within 2 %.**
+Depth from 30 to 60 mm does nothing. Cell size does nothing. **And painting
+Musou 15 mm down from the tip does nothing** — the comb with no Musou at all
+reads 2.6349 and the one with 15 mm of it reads 2.5914, a 1.7 % difference,
+while the same Musou drops the *total* from 1.125 % to 0.221 %, a factor of 5.
+
+The pyramid is 0.021 of the law — **48x below a flat wall.** Its tilted facets
+send the head-on beam sideways; a tube sends it straight back.
+
+This is the same conclusion the honeycomb study reached and the same one §5c
+reached from the foil-rim analysis, now derived a third way and reduced to one
+sentence: **a vertical-walled cell cannot change the head-on flash, because head-on
+into a tube is optically a flat wall. Only tilting the surface changes it.**
+
+### The one caveat I introduced and then removed
+
+My first V3 table assigned the Musou diffuse fraction to `comb 6.35/d30/
+Musou 0` because the design's NAME contains the string "무소". That design has
+no Musou on it. Corrected above; the script now prints both laws rather than
+choosing one.
+
+---
+
 ## 7. Still open
 
 1. **Cell count.** rho_dh was still falling at 50 cells a side. The study
@@ -1055,6 +1341,15 @@ Kept because a reader needs to know which claims were tested and lost.
 | "roughness 0.30 for black paint on aluminium" (every published flash number) | Filip & Vavra 2026 Fig. 6 measures 10-13 % of the acrylic paint's energy inside a 5 deg cone. No roughness reproduces that at df 0.97, and every (df, alpha) pair that does reproduce it has alpha in 0.01-0.11. Shirsekar 2019's Z302 BRDF agrees at ~0.06 |
 | "DePoy 0.97 and Filip & Vavra disagree about black paint" | they do not — DePoy's photodiode subtends ~0.6 deg and catches the spike but not the shoulder, so their diffuse fraction is an upper bound. Both are satisfied near df 0.8, alpha 0.04 |
 | every **head-on flash** number published in this project | 574x of spread inside the range the measurements allow, up to 600 963x against what we printed. The total and the smear are unaffected |
+| **every diffuse fraction I took from DePoy 2014 Fig. 6** (0.97 / 0.98 / 0.95 / 0.30) | I read a per-cent axis as fractions. The paper says 0.9997 / 0.9998 / 0.9995 / 0.993. TAMU's own 2018 sequel gives the same materials at 0.07-0.59 % and calls the two papers consistent |
+| "black anodised, polished, is 70 % specular" | 0.59 % non-dyed, ~3 % dyed black. Nothing anodised in either TAMU paper is anywhere near a mirror; the 76.3 % sample is polished stainless with electroless nickel |
+| "DePoy and Filip & Vavra are reconciled by the photodiode acceptance angle" (§5e) | a single GGX lobe can only produce 69.5x more energy in a 5 deg cone than in a 0.6 deg one; reconciling 0.1 % with 10 % needs 92.6x. The samples differ, not the instruments |
+| "Musou's diffuse fraction is 0.99, by an ordering argument against matte spray at 0.97" | the anchor was the misread. Filip & Vavra's own TIS bounds Musou directly at >= 0.9926, and 0.993 is now used as the conservative end |
+| **"our roughness 0.30 is outside the published range for any diffuse fraction"** (§5e) | Cycles squares its roughness input. Slider 0.30 is alpha 0.09; Filip's window tops out at 0.089. It was on the edge, not outside |
+| **"574x of flash spread inside the allowed window", "up to 600 963x", "1 143 834"** | all from feeding paper alphas into a slider that expects sqrt(alpha), rendering lobes 83x too sharp. With units right the window spans 10.4x and a 5 % painted wall flashes 2.6x |
+| "the flash goes as 1/alpha^4 because a head-on return concentrates twice" | the quartic was in the slider. The physics is the textbook `1 + (1-df)/(4 alpha^2)`, confirmed against the renderer to 2.2 % |
+| "nobody publishes a roughness for black paint" | Ngan/Durand/Matusik 2005 fitted microfacet models to all 100 MERL materials; `paint-black` is Ward a 0.0367 / Cook-Torrance m 0.0392 |
+| "no flash number in this project is reportable" | reportable to within the coating spec. The uncertainty is which paint job, not the renderer |
 
 **The common cause of most of these: stating a hypothesis as a conclusion
 before testing it.** The 2026-08-21 additions have a second cause worth naming
