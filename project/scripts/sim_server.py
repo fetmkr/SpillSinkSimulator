@@ -225,6 +225,7 @@ NORMAL = {
                       depth=50.0),
     "nested":   dict(pitch=11.0, wall_top=0.1, wall_bot=0.1, depth=50.0),
     "flat":     dict(depth=10.0),
+    "none":     dict(depth=10.0),   # no structure: a plain panel
     "pyramid":  dict(pitch=2.0, tip_flat=0.1, depth=3.0),
     "wave":     dict(pitch=2.0, depth=3.0),
     "gap":      dict(depth=3.0),
@@ -237,7 +238,10 @@ NORMAL = {
 # tilted camera reads world background). Offering a control that cannot be
 # measured as if it were a candidate is worse than not offering it.
 GROUPS = [
-    ("Candidates", ["pyramid", "comb", "shingle", "cone", "flat"]),
+    # `flat` is deliberately absent: it is the same geometry as `none` and
+    # offering both is two names for one thing. Loading an old spec that says
+    # `flat` still works -- FAMILIES keeps it.
+    ("Candidates", ["pyramid", "comb", "shingle", "cone", "none"]),
     ("Reference and controls", ["honeycomb", "vgroove", "square", "triangle",
                                 "mixed", "reentrant", "nested"]),
 ]
@@ -269,6 +273,12 @@ FAMILIES = {
     # broken overlapping chunks, and pyramid with tip_flat == pitch kept
     # hairline grooves between the tiles. No parameters of its own.
     "flat":     ("geom_floor", "FloorParams", {"kind": "gap"}),
+    # NOTHING ON TOP (2026-08-24). The panel is always a bottom panel with a
+    # structure on it, so "no structure" is a real, common choice -- it is the
+    # flat control every ranking is measured against. It builds exactly what
+    # `flat` builds; `flat` stays registered so every stored spec, preset and
+    # result that names it still loads.
+    "none":     ("geom_floor", "FloorParams", {"kind": "gap"}),
     "slat":     ("profile2d",  "PanelParams",  {}),
     "trough":   ("profile_scatter", "ScatterParams", {}),
 }
@@ -1430,6 +1440,7 @@ def _load_materials():
                 df=float(bs["diffuse_fraction"]),
                 rough=float(bs["lobe"]["roughness"]),
                 src=v.get("source", ""), label=v.get("label", mid),
+                label_en=v.get("label_en", v.get("label", mid)),
                 color=v.get("color", "#3a3f47"),
                 band=sc.get("band", "visible_rgb"),
                 prov=(pv.get("reflectance", "?"),
@@ -1439,6 +1450,7 @@ def _load_materials():
             out[mid] = dict(rho0=float(v["rho0"]), df=float(v["df"]),
                             rough=float(v["rough"]), src=v.get("src", ""),
                             label=v.get("label", mid),
+                            label_en=v.get("label_en", v.get("label", mid)),
                             color=v.get("color", "#3a3f47"),
                             band=v.get("band", "visible_rgb"),
                             prov=tuple(v.get("prov", ("?", "?", "?"))))
@@ -1459,25 +1471,38 @@ COATINGS = {k: (v["rho0"], v["src"]) for k, v in MATERIALS.items()}
 def coatings_json():
     return {k: {"rho0": v["rho0"], "df": v["df"], "rough": v["rough"],
                 "note": v["src"], "label": v.get("label", k),
+            # the simulator UI is English and the reports are Korean, so the
+            # material carries both names and each side picks its own
+            "label_en": v.get("label_en", v.get("label", k)),
                 "color": v.get("color", "#3a3f47"),
                 "band": v.get("band", "visible_rgb"),
                 "prov": list(v["prov"])}
             for k, v in MATERIALS.items()}
 
 
-def _coat(name, diffuse_frac=None, default="musou_fit"):
+def _coat(name, diffuse_frac=None, default="musou_fit", roughness=None):
     """The material's own diffuse fraction unless the caller overrides it.
 
     `diffuse_frac` used to be required and panel-wide, so picking Musou for
     the top and anodised for the base gave both the SAME split -- the menu
     moved rho0 and nothing else. Pass None to get the material's own number.
+
+    `roughness` follows the SAME rule, and until 2026-08-23 it did not.
+    The top coat took the caller's panel-wide value while the floor coat kept
+    the material's own, so one panel ran two different rules. Painting the
+    backing with the SAME material as the base then moved a honeycomb's
+    head-on by 4.56 % (`scripts/gate_backing_slot.py`), because `anodised`
+    stores 0.4359 and the request was asking for 0.1975. Pass a number to
+    force every surface to it -- which is what every published batch did, so
+    those rows still reproduce -- or None to let each material carry its own.
     """
     import blender_render as BR
     m = MATERIALS.get(name, MATERIALS[default])
     df = m["df"] if diffuse_frac is None else float(diffuse_frac)
     body, spec = BR.coating_split(df, rho0=m["rho0"])
+    rg = m["rough"] if roughness is None else float(roughness)
     return {"body": body, "spec_scale": spec, "df": df,
-            "roughness": m["rough"], "rho0": m["rho0"]}
+            "roughness": rg, "rho0": m["rho0"]}
 
 
 # --- measurement ------------------------------------------------------------
@@ -1495,7 +1520,8 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     _t("measure: enter")
     import blender_render as BR
     from cone3d_sweep import COAT
-    cc = _coat(coating, diffuse_frac)
+    # ONE ROUGHNESS RULE FOR THE WHOLE PANEL. See `_coat`.
+    cc = _coat(coating, diffuse_frac, roughness=roughness)
     body, sspec = cc["body"], cc["spec_scale"]
     # measurement margin, NOT the preview margin: a tilted camera reads world
     # background otherwise and the number is quietly wrong.
@@ -1525,7 +1551,8 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     if paint_depth is not None and deep_coating:
         cfg["paint_depth"] = float(paint_depth)
         cfg["deep_coating"] = _coat(deep_coating, diffuse_frac,
-                                    default="anodised")
+                                    default="anodised",
+                                    roughness=roughness)
     # A FLOOR IS A DIFFERENT PART, SO IT CAN CARRY A DIFFERENT FINISH.
     # The paint plane above cuts by DEPTH and cannot express what a stack
     # actually is -- a bought, anodised comb over a floor that is made new and
@@ -1550,7 +1577,8 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     # the bottom of every well, and it can be finished separately.
     if floor_coating:
         cfg["floor_coating"] = _coat(floor_coating, diffuse_frac,
-                                     default="musou_fit")
+                                     default="musou_fit",
+                                     roughness=roughness)
         cfg["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
             - float(spec.get("floor_depth", 0.0) or 0.0)
@@ -1606,6 +1634,10 @@ def _render_family(spec):
     return {"cone": "cone3d", "comb": "topo", "honeycomb": "topo",
             "shingle": "topo", "truss": "topo", "vgroove": "ridge",
             "flat": "floor", "slat": "slat", "trough": "scatter",
+            # `none` is the same geometry as `flat` -- a plain panel -- and
+            # needs the same renderer family. Without this line it fell
+            # through to "cell" and CellParams rejected the `kind` argument.
+            "none": "floor",
             "pyramid": "floor"}.get(spec["top"], "cell")
 
 
@@ -1686,7 +1718,7 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # Musou returned the fitted 76/24 split unchanged, to five figures. The
     # 5 % paint moved because it took the branch; Musou did not, and the two
     # sitting side by side in one table is what exposed it.
-    cc = _coat(coating, diffuse_frac)
+    cc = _coat(coating, diffuse_frac, roughness=roughness)
     entry["coating"] = {"body": cc["body"], "spec_scale": cc["spec_scale"]}
     # ROUGHNESS HAD NO WAY IN. `form` took every other finish parameter and not
     # this one, so a roughness sweep run through it changed nothing and read as
@@ -1699,10 +1731,12 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
         entry["roughness"] = float(cc["roughness"])
     if paint_depth is not None and deep_coating:
         entry["paint_depth"] = float(paint_depth)
-        entry["deep_coating"] = _coat(deep_coating, diffuse_frac)
+        entry["deep_coating"] = _coat(deep_coating, diffuse_frac,
+                                      roughness=roughness)
     if floor_coating:
         entry["floor_coating"] = _coat(floor_coating, diffuse_frac,
-                                       default="musou_fit")
+                                       default="musou_fit",
+                                       roughness=roughness)
         entry["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
             - float(spec.get("floor_depth", 0.0) or 0.0)

@@ -40,6 +40,11 @@ select,input[type=number],input[type=text]{width:100%;background:var(--sunk);
   color:var(--ink);border:1px solid var(--line2);border-radius:3px;
   padding:6px 7px;font:inherit}
 select:focus,input:focus{outline:1px solid var(--a)}
+/* The browser's own [hidden]{display:none} loses to any class rule that sets
+   display, so `.row{display:flex}` kept the three coating menus on screen
+   after they were marked hidden -- the user saw two places offering the same
+   choice. State it once, loudly, for everything. */
+[hidden]{display:none!important}
 .row{display:flex;flex-direction:column;gap:3px}
 .sl{display:grid;grid-template-columns:1fr 60px;gap:6px;align-items:center}
 .sl .nm{font:400 11px/1.3 ui-monospace,Menlo,monospace;color:var(--ink2);
@@ -86,6 +91,57 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .pill.wait{background:var(--line2);color:var(--ink2)}
 #chart{width:100%;height:150px;display:block}
 .note{font-size:11px;color:var(--ink3);line-height:1.5}
+/* ---- materials: three slot rows you click, then a library you pick from --
+   THE SIDEBAR IS LIGHT (--bg #dedbd4). The first version used 20 %-alpha
+   pastel chips with pale text, invisible on it -- they had been designed
+   against the dark viewport by mistake. Everything here is solid and sized
+   to be read.
+   The column is ~230 px and material labels are long Korean phrases, so no
+   row may depend on a horizontal number column: the name gets a line of its
+   own and the numbers sit under it. */
+.slot{display:grid;grid-template-columns:6px 1fr;gap:9px;align-items:stretch;
+  padding:7px 8px;border:1px solid var(--line);border-radius:4px;
+  margin-bottom:5px;cursor:pointer;background:var(--sunk)}
+.slot:hover{border-color:var(--line2)}
+.slot.sel{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.slot .zone{border-radius:2px;background:var(--line2)}
+/* no uppercase: the line now carries the part name and what sets its edge,
+   which is mixed Korean and English and reads worse shouted */
+.slot .who{font-size:10px;color:var(--ink2);letter-spacing:.02em;
+  font-weight:700;line-height:1.4}
+/* the paint depth is a measurement, so it keeps its lower-case unit -- the
+   `who` class uppercases, which turned "2.2 mm" into "2.2 MM" */
+.slot .depth{font-size:11px;color:var(--ink2);font-family:var(--mono)}
+.slot .nm2{font-size:12.5px;line-height:1.35;margin:2px 0;font-weight:600}
+.slot .num{font-family:var(--mono);font-size:11px;color:var(--ink2);
+  font-variant-numeric:tabular-nums}
+.slot.off .nm2,.slot.off .num{opacity:.5;font-weight:400}
+.mrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
+  padding:5px 8px;font-size:12px;line-height:1.35;cursor:pointer;
+  border-radius:3px;border:1px solid transparent}
+.mrow:hover{background:var(--sunk);border-color:var(--line)}
+.mrow.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.mrow.on .rho{color:var(--panel);opacity:.85}
+.mrow.on .tag{background:#fff;color:var(--ink)}
+.mrow .rho{font-family:var(--mono);font-size:11px;color:var(--ink2);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{font-size:10px;padding:1px 5px;border-radius:3px;white-space:nowrap;
+  display:inline-block;font-weight:700;color:#fff;background:#8a5a00}
+.pickhead{font-size:11px;color:var(--ink2);margin:11px 0 5px;font-weight:700}
+.slot.drop{border-color:var(--a);box-shadow:inset 0 0 0 2px var(--a)}
+.mrow[draggable]{cursor:grab}
+.mrow.drag{opacity:.45}
+#matdiagram{margin:2px 0 10px}
+#matdiagram svg{width:100%;height:auto;display:block}
+/* the coverage slider is moved here from Coating at runtime; `.sl` is a
+   two-column grid built for that narrower context and its five children
+   reflowed badly. Give it its own rows: caption, then track + number. */
+#pdwrap{grid-template-columns:1fr 56px;row-gap:4px}
+/* `.nm` is a flexbox elsewhere, which laid the caption and its note side by
+   side and swallowed the <br>. Block here so they stack. */
+#pdwrap .nm{grid-column:1 / -1;font-size:11.5px;line-height:1.5;
+  display:block!important}
+#pdwrap .nm .note{display:block;margin-top:1px}
 .err{color:var(--no);font:400 11px/1.5 ui-monospace,Menlo,monospace;
   white-space:pre-wrap;max-height:120px;overflow:auto}
 #illum{position:absolute;left:12px;top:10px;max-width:330px;
@@ -168,7 +224,7 @@ details.why p{margin:.4em 0 0}
 
   <h2>Structure</h2>
   <div class="row"><label>Top layer</label><select id="top"></select></div>
-  <div class="row"><label>Floor</label><select id="floor"></select></div>
+  <div class="row"><label>Bottom panel</label><select id="floor"></select></div>
   <div id="floornote" class="note" style="display:none"></div>
 
   <div class="grp">
@@ -191,8 +247,46 @@ details.why p{margin:.4em 0 0}
   <h2 id="floorh">Floor parameters</h2>
   <div class="grp f" id="fp"></div>
 
-  <h2>Coating</h2>
+  <!-- MATERIALS. A library, and three slots that POINT AT it.
+       Blender, Maya and Unity all separate "what it is made of" from "where
+       it is": the material is an asset, the object has slots, and a slot
+       references a material rather than copying it. `material/*.json` was
+       already built that way -- one file per material, stable id, results on
+       disk point at the id -- but nothing on screen ever showed it, so which
+       material was on which surface was invisible. On 2026-08-22 the server
+       served a stale table for hours and nobody could see it.
+
+       Read-only for now. Editing, duplicating and locking published materials
+       come next; see NEXT.md. -->
+  <h2>Materials</h2>
   <div class="grp">
+    <!-- WHAT CARVES THE THREE SLOTS. The boundaries live in other controls --
+         the paint band is set by the coverage slider and the floor band by
+         `floor depth` up in Structure -- so three named cards on their own
+         never said what decided them. The section draws the cell in profile
+         with the real millimetres on it. -->
+    <div id="matdiagram"></div>
+    <!-- moved out of Coating on 2026-08-23: it explains which layer the three
+         slots describe, so it belongs beside them, and it used to open with
+         "these three" pointing at menus that are no longer on screen. -->
+    <div class="note" id="coatscope" style="margin:0 0 8px"></div>
+    <div id="matslots"></div>
+    <div class="pickhead" id="pickhead"></div>
+    <div id="matlist"></div>
+    <p class="note" id="matprovnote"></p>
+  </div>
+
+  <!-- WHAT IS LEFT HERE IS AN OVERRIDE, NOT A COATING. Picking materials
+       moved to the Materials section above. These two sliders force ONE
+       diffuse fraction and ONE roughness onto all three slots at once, which
+       is the defect NEXT.md step 3 removes; until then it is at least
+       labelled for what it does. -->
+  <h2>Override</h2>
+  <div class="grp">
+    <p class="note" style="margin:0 0 8px">Rarely needed &mdash; picking a
+      material fills these in from its own record.
+      <b>Changing them here forces ONE value onto all three slots</b>;
+      per-slot values are not built yet.</p>
     <!-- A PANEL ARRIVES AS ONE MATERIAL AND IS PAINTED ON TOP OF IT.
          The controls used to say the opposite: "Paint" first, with the real
          material demoted to "below the paint", and the coverage given only in
@@ -206,13 +300,19 @@ details.why p{margin:.4em 0 0}
          no floor and "the top layer" when there was, but only said so in the
          second case, so with a single-layer panel it was not visible what the
          paint applied to at all. The heading now states it either way. -->
-    <div class="note" id="coatscope" style="margin:2px 0 6px"></div>
-    <div class="row"><label>Base &mdash; as bought</label>
-      <select id="deepcoat"></select></div>
-    <p class="note" id="deepnote"></p>
 
-    <div class="row"><label>Painted over it</label><select id="coat"></select></div>
-    <p class="note" id="coatnote"></p>
+    <!-- HIDDEN, NOT DELETED (2026-08-23). Picking a material now happens in
+         the Materials section, where the three slots and the library sit
+         together. These selects stay in the DOM because they are the single
+         source of truth that spec(), every request builder and design
+         save/load already read; showing the same choice in two places on one
+         screen is how the two drift apart. -->
+    <div class="row" hidden><label>Base &mdash; as bought</label>
+      <select id="deepcoat"></select></div>
+    <p class="note" id="deepnote" hidden></p>
+
+    <div class="row" hidden><label>Painted over it</label><select id="coat"></select></div>
+    <p class="note" id="coatnote" hidden></p>
 
     <!-- A FLOOR IS A SEPARATE PART. The paint control above cuts by DEPTH, so
          with a stack it drags the paint down through the comb's lower walls to
@@ -220,10 +320,10 @@ details.why p{margin:.4em 0 0}
          comb is bought anodised and the floor is a new part that is easy to
          coat. So the floor gets its own finish, and the depth control above
          then applies only to the layer above it. -->
-    <div class="row" id="fcwrap">
+    <div class="row" id="fcwrap" hidden>
       <label>Floor finish &mdash; the layer underneath</label>
       <select id="floorcoat"></select></div>
-    <p class="note" id="floornote"></p>
+    <p class="note" id="floornote" hidden></p>
 
     <div class="sl" id="pdwrap">
       <span class="nm">covered from the top <b id="v_pcov">10</b> %<br>
@@ -235,7 +335,7 @@ details.why p{margin:.4em 0 0}
     <div class="row" style="margin:6px 0 2px">
       <label style="display:flex;gap:8px;align-items:center;font-size:12px">
         <input type="checkbox" id="dffollow" checked>
-        재료 값을 따른다 (끄면 직접 정함)</label></div>
+        follow the material (uncheck to set by hand)</label></div>
     <div class="sl"><span class="nm">diffuse fraction <b id="v_df">0.97</b></span>
       <input type="range" id="df" min="0" max="1" step="0.01" value="0.97">
       <input type="number" id="n_df" step="0.01" value="0.97"></div>
@@ -317,7 +417,7 @@ details.why p{margin:.4em 0 0}
    in <b>three planes</b> &mdash; &phi; 0 / 45 / 90, straight-on and diagonal
    approaches. Each number is the TOTAL for light entering at that direction
    and leaving anywhere; the sky-dome lighting is how that total is captured
-   in one shot. 이 15 개 중 가장 밝은 값이 <b>반사 총량</b>. (Mitsuba runs &phi; 0
+   in one shot. The brightest of those 15 is <b>반사 총량 total reflectance</b>. (Mitsuba runs &phi; 0
    only.)</p>
   <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
   <canvas id="chart"></canvas>
@@ -532,6 +632,12 @@ function fitRange(rng, v){
 // ---------- parameter widgets, generated from the server's dataclass fields
 function sliders(host, fields, cls){
   host.innerHTML = '';
+  // A family the server does not know gives `undefined` here, and reading
+  // `.length` off it threw during boot -- which kills every line after it,
+  // including the one that draws the model. Say so instead of dying.
+  if(!fields){ host.innerHTML =
+      '<span class="note">unknown family &mdash; pick one from the list</span>';
+    return; }
   if(!fields.length){ host.innerHTML = '<span class="note">no parameters</span>'; return; }
   for(const f of fields){
     if(f.name === 'depth' || f.name === 'backing') continue;   // owned above
@@ -621,6 +727,11 @@ function applyCoat(c){
 let pending = null;
 function refresh(){
   clearTimeout(pending);
+  // The Materials legend answers "what is on each surface", which depends on
+  // the floor, the depth and the coverage as well as the three menus. Hooking
+  // it here means it follows EVERY control that can change the model, rather
+  // than a hand-kept list of ids that will fall behind.
+  try{ renderMaterials(); }catch(e){ console.error('materials legend', e); }
   pending = setTimeout(async () => {
     const s = spec(); LAST = s;
     resetResults();
@@ -721,9 +832,16 @@ function showDerived(d){
   const _pc = +($('#pcov')?$('#pcov').value:0)||0;
   $('#hud').textContent = `${$('#top').value}${LAST.floor!=='none' ? ' + '+LAST.floor : ''} · `
     + `${LAST.depth} mm · `
-    + `분홍 = 칠한 곳 · 파랑 = 맨 재료 · `
-    + (_pc>0 ? `위에서 ${Math.round(_pc)} % 칠함 · ` : '위층 칠 안 함 · ')
-    + ($('#floor').value!=='none' ? '바닥층 따로 · ' : '등판 따로 · ')
+    // THE CAPTION IS THE COLOUR KEY, so it must name exactly the slots that
+    // exist for THIS combination -- the same list the Materials legend shows.
+    // It went on saying "pink = painted · green = bottom panel · painted 10 %
+    // from the tip" for a plain flat panel, which has none of those things.
+    + (NOTOP()
+        ? `one surface · `
+        : (`blue = top layer · pink = painted · `
+           + (SEALED_TOP() ? '' : 'green = bottom panel · ')
+           + (_pc>0 ? `painted ${Math.round(_pc)} % from the tip · `
+                    : 'top layer not painted · ')))
     + `drag to orbit, scroll to zoom`;
 }
 
@@ -741,13 +859,23 @@ async function measure(thetas){
       diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
       // 0 % painted means the panel IS the base material, so that is what the
       // server is told to coat with; 100 % means there is nothing below.
-      floor_coating: ($('#floor').value !== 'none')
-                     ? $('#floorcoat').value : null,
-      coating: (NOPAINT() || +$('#pcov').value <= 0) ? $('#deepcoat').value
-                                        : $('#coat').value,
-      deep_coating: (NOPAINT() || +$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+      // ALWAYS SENT (2026-08-23). `floor: none` does not mean there is
+      // nothing below: every panel has a backing plate at the bottom of its
+      // wells and that plate faces the room. The server has always handled
+      // it -- floor_boundary_depth falls back to the full depth -- and this
+      // line was the only thing refusing to ask. `__same` means "whatever
+      // the base is", which reproduces the old numbers exactly
+      // (scripts/gate_backing_slot.py: 0.017 %, measurement noise).
+      // A plain panel has one surface; sending a paint plane or a floor plane
+      // for it either does nothing or quietly repaints the whole thing.
+      floor_coating: NOTOP() ? null : FLOORMAT(),
+      coating: (NOTOP() || NOPAINT() || +$('#pcov').value <= 0)
+                 ? $('#deepcoat').value : $('#coat').value,
+      deep_coating: (NOTOP() || NOPAINT() || +$('#pcov').value >= 100
+                     || +$('#pcov').value <= 0)
                     ? null : ($('#deepcoat').value || null),
-      paint_depth: (NOPAINT() || +$('#pcov').value >= 100 || +$('#pcov').value <= 0)
+      paint_depth: (NOTOP() || NOPAINT() || +$('#pcov').value >= 100
+                    || +$('#pcov').value <= 0)
                    ? null : (+$('#depth').value * +$('#pcov').value / 100)})});
     const j = await r.json();
     if(j.error) throw new Error(j.error);
@@ -798,6 +926,16 @@ async function measure(thetas){
 function NOPAINT(){ const e=$('#coat'); return !!e && e.value === 'none'; }
 function baseNameOnly(){ return $('#deepcoat').value; }
 
+// ---------- the material table, at TOP LEVEL on purpose
+// `CO` used to be declared `const` inside boot(), which is fine for the code
+// inside boot() but invisible to every function declared out here. On
+// 2026-08-22 `syncMaterialSliders` and `materialLine` were added out here and
+// both read CO, so boot() threw `ReferenceError: CO is not defined` on its
+// very first call and every line after it -- including the one that draws the
+// model -- never ran. The viewport was simply empty, with no message.
+// Filled by boot(); read by anything.
+let CO = {};
+
 // ---------- the material's own diffuse fraction and roughness
 // Until 2026-08-22 these were two panel-wide sliders sitting at 0.76 / 0.30,
 // and picking a coating moved rho0 and nothing else -- so the panel could be
@@ -821,8 +959,7 @@ function activeMaterial(){
   return $('#coat').value;
 }
 function syncMaterialSliders(){
-  const KO = {measured:'실측', fitted:'맞춘값', guessed:'추측',
-              bounded:'논문이 범위만 묶음', disputed:'논문끼리 안 맞음'};
+  const KO = PROV_KO;
   const name = activeMaterial(), m = CO[name];
   const note = $('#dfnote');
   if(!m){ if(note) note.textContent = ''; return; }
@@ -837,28 +974,381 @@ function syncMaterialSliders(){
   }
   const p = m.prov || ['?','?','?'];
   if(note) note.innerHTML = dfFollows()
-    ? '<b>' + (m.label || name) + '</b> 의 값입니다 &middot; 확산 '
-      + (KO[p[1]]||p[1]) + ' &middot; 거칠기 ' + (KO[p[2]]||p[2])
-      + '<br>확산 비율 출처: 검정 아노다이징은 TAMU 2018 (SPIE 10706) 실측, '
-      + '무광 페인트는 Zeng 2019 (NASA GSFC), 무소는 Filip &amp; V&aacute;vra 2026 '
-      + '의 TIS 한계입니다. 거칠기는 아무도 그 이름으로 안 주고, '
-      + 'Filip 의 TIS 가 0.012~0.089 로 범위만 묶습니다.'
-      + '<br><b>정면 반짝임 초과분 = (1 &minus; 확산) &divide; 거칠기<sup>4</sup> 입니다.</b> '
-      + '거칠기 0.012 와 0.30 사이에서 반짝임이 만 배 넘게 벌어지므로, '
-      + '반짝임 절대값은 쿠폰을 고니오미터로 재기 전까지 못 씁니다. '
-      + '총량은 발표된 값 전체에서 0.9 %, 뭉개짐은 0 % 만 움직이므로 그대로 쓰셔도 됩니다.'
-    : '<b>직접 정한 값입니다.</b> 재료표의 값이 아닙니다. '
-      + (m.label || name) + ' 은 확산 ' + (+m.df).toFixed(2)
-      + ', 거칠기 ' + (+m.rough).toFixed(2) + ' 입니다.';
+    ? '<b>' + MATNAME(m, name) + '</b> &middot; diffuse ' + (KO[p[1]]||p[1])
+      + ' &middot; roughness ' + (KO[p[2]]||p[2])
+      + '<br>Diffuse fraction: black anodising from TAMU 2018 (SPIE 10706), '
+      + 'matte paint from Zeng 2019 (NASA GSFC), Musou from the TIS bound in '
+      + 'Filip &amp; V&aacute;vra 2026. Roughness: nobody publishes it under '
+      + 'that name; MERL\'s paint-black fits at &alpha; 0.039 '
+      + '(Ngan 2005) and Filip\'s TIS brackets it to 0.012&ndash;0.089.'
+      + '<br><b>head-on flash = 1 + (1 &minus; diffuse) &divide; (4&thinsp;&alpha;&sup2;)</b>'
+      + ' &mdash; the textbook microfacet peak, within 2.2 % of the renderer. '
+      + 'The slider is &radic;&alpha;: Cycles squares it.'
+    : '<b>Set by hand.</b> Not the material\'s own numbers &mdash; '
+      + MATNAME(m, name) + ' has diffuse ' + (+m.df).toFixed(4)
+      + ', roughness ' + (+m.rough).toFixed(4) + '.';
 }
 
 // ---------- what the panel is painted with, in one line
+// ---------- the material library, and the three slots that point at it
+// ZONE colours are a schematic, not a measurement. Every material in the
+// library is near-black -- musou_fit is #2a2d33 -- so tinting the viewport
+// with the real colours would make all three surfaces identical and say
+// nothing. So the viewport gets one fixed colour per SLOT, and the legend
+// below carries that same colour plus the material's own swatch, so the map
+// from colour to material is always on screen next to the picture.
+const ZONE = { base:  [0.38, 0.62, 1.00],   // 바탕 -- cool blue
+               paint: [1.00, 0.42, 0.55],   // 덧칠 -- warm red
+               floor: [0.30, 0.82, 0.52] }; // 바닥 -- green
+// The viewport is dark and the sidebar is light, so the same slot needs two
+// lightnesses of the same hue. Using the viewport's bright tints in the
+// sidebar is what made the first version unreadable.
+const ZONE_CSS = { base:'#2f6fd0', paint:'#d63e63', floor:'#1f8f52' };
+// which slot the library list is currently assigning to
+let MATSEL = 'paint';
+// the <select> that actually holds each slot's value. They stay in the DOM as
+// the single source of truth -- spec(), the request builders and design
+// save/load all read them -- but are hidden, because having the same choice
+// in two places on one screen is how they drift apart.
+const SLOT_SEL = { base:'#deepcoat', paint:'#coat', floor:'#floorcoat' };
+// "바탕과 같게" is a real choice, not a placeholder: a comb bonded to a panel
+// that was painted in the same pass is one finish, and it is the default
+// because it reproduces every number measured before the slot was opened.
+const SAME = '__same';
+// The simulator's chrome is English and the reports are Korean, so every
+// material carries both names. Fall back down the chain rather than showing
+// an id, which means nothing to a reader.
+function MATNAME(m, id){ return (m && (m.label_en || m.label)) || id; }
+function FLOORMAT(){
+  const f = $('#floorcoat'); if(!f) return null;
+  return f.value === SAME ? $('#deepcoat').value : f.value;
+}
+// HOW GOOD EACH NUMBER IS -- and WHY. A two-word badge that names a problem
+// without saying what the problem is only tells the reader to worry. Each
+// grade carries its own sentence, shown under the list for whatever is in use
+// and as the badge's tooltip.
+const PROV_KO = { measured:'measured', fitted:'fitted', bounded:'bounded',
+                  analogue:'analogue', disputed:'papers disagree',
+                  guessed:'guess' };
+const PROV_WHY = {
+  measured: 'read off an instrument, on this material.',
+  fitted:   'chosen so the model reproduces a measured total.',
+  bounded:  'no paper gives the number itself; a published measurement pins '
+          + 'it to a range and we take the conservative end.',
+  analogue: 'borrowed from a similar material -- nobody measured ours.',
+  disputed: 'published measurements of this material disagree by 100x. '
+          + 'TAMU 2014 puts matte black spray at 0.1 % specular (diffuse '
+          + '0.999); Zeng 2019 finds Z307 Lambertian to within 1 % at normal '
+          + 'incidence; Filip & Vavra 2026 measure 10 % inside a 5 deg cone '
+          + '(diffuse 0.90 or less). Detector size does not reconcile them, '
+          + 'so the surfaces differ -- the coating process decides it. '
+          + 'We use Zeng\'s 0.99 and the spread belongs in the build spec.',
+  guess:    'no measurement and no bound. Treat as unknown.' };
+function PROV_TIP(g){ return PROV_WHY[PROV_KO[g]] || PROV_WHY[g] || ''; }
+
+/** Which material each slot is actually using, given the current controls.
+ *  Returns null for a slot that is switched off. This is the ONE place that
+ *  answers "what is on this surface", so the legend, the viewport tint and
+ *  the request builder cannot drift apart. */
+/** No top structure means ONE lit surface, so one slot.
+ *  Measured 2026-08-24, and both of the other two were worse than useless on
+ *  a plain panel: painting Musou 1 mm or 9 mm down left the number at
+ *  4.99650 % either way (the face sits BELOW the paint plane, so it keeps the
+ *  deep material), while the backing -- which I had captioned "not lit" --
+ *  took over the WHOLE panel: 5 % paint with a Musou backing read 0.99772 %,
+ *  exactly Musou. Three slots, one of them silently in charge. */
+function NOTOP(){ const e = $('#top');
+  return !!e && (e.value === 'none' || e.value === 'flat'); }
+/** A top whose valleys meet closes over its own backing plate, so nothing of
+ *  that plate is lit and it has no finish worth choosing. Measured per
+ *  combination in scripts/gate_slot_matrix.py: swapping the backing from 5 %
+ *  paint to Musou moves a pyramid or a cone by 0.000 %, and a comb by 20 %. */
+function SEALED_TOP(){
+  const hasFloor = $('#floor') && $('#floor').value !== 'none';
+  return !hasFloor && /^(pyramid|cone|wave|vgroove)$/.test($('#top').value);
+}
+
+function slotMaterials(){
+  if(NOTOP()) return { base: $('#deepcoat').value, paint: null, floor: null };
+  const pcov = +$('#pcov').value;
+  const painted = !NOPAINT() && pcov > 0;
+  return {
+    base:  (painted && pcov >= 100) ? null : $('#deepcoat').value,
+    paint: painted ? $('#coat').value : null,
+    floor: FLOORMAT() };
+}
+
+/** The cell drawn in profile, with the two boundaries that carve the three
+ *  slots and the millimetres that set them. Tips sit at y = 0 and the well
+ *  runs negative, which is the same convention the shader and the renderer
+ *  use, so the picture and the measurement cannot disagree about which way
+ *  is down. */
+function materialDiagram(){
+  const dep = +$('#depth').value || 0;
+  const pcov = +$('#pcov').value || 0;
+  const hasFloor = $('#floor') && $('#floor').value !== 'none';
+  const fdep = hasFloor ? (+$('#fdepth').value || 0) : 0;
+  const use = slotMaterials();
+  if(!dep) return '';
+  const W = 232, H = 132, x0 = 40, x1 = 150, top = 14, bot = H - 20;
+  const y = mm => top + (bot - top) * (mm / dep);          // mm below the tip
+  // The floor is a LAYER: the renderer assigns it after the depth split, so
+  // where the two overlap the floor wins. Draw it that way.
+  const fTop = hasFloor ? dep - fdep : dep;
+  const pEnd = Math.min(dep * pcov / 100, fTop);
+  const painted = !NOPAINT() && pcov > 0 && pEnd > 0;
+  const o = ['<svg viewBox="0 0 '+W+' '+H+'" role="img" '
+    + 'aria-label="cross-section: where the slots divide">'];
+  if(NOTOP()){
+    // nothing to divide: one surface, drawn as one band
+    o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'
+      + (bot-top)+'" fill="'+ZONE_CSS.base+'" opacity="0.92"/>');
+    o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'
+      + (bot-top)+'" fill="none" stroke="var(--ink)" stroke-width="1"/>');
+    o.push('<text x="'+(x1+9)+'" y="'+((top+bot)/2+3.5).toFixed(1)
+      + '" font-size="9.5" font-weight="700" fill="'+ZONE_CSS.base
+      + '">panel</text>');
+    o.push('<text x="'+x0+'" y="'+(H-6)+'" font-size="9" fill="var(--ink2)">'
+      + 'one surface, nothing to divide</text>');
+    o.push('</svg>');
+    return o.join('');
+  }
+  const band = (a, b, col, on) => (b - a < 0.05) ? '' :
+    '<rect x="'+x0+'" y="'+y(a).toFixed(1)+'" width="'+(x1-x0)+'" height="'
+    + (y(b)-y(a)).toFixed(1)+'" fill="'+col+'" opacity="'+(on?0.92:0.30)+'"/>';
+  o.push(band(0, painted ? pEnd : 0, ZONE_CSS.paint, !!use.paint));
+  o.push(band(painted ? pEnd : 0, fTop, ZONE_CSS.base, !!use.base));
+  // With no floor LAYER there is still a backing plate at the bottom of the
+  // wells. Draw it as a thin band, and give it the floor colour only when it
+  // is actually a different material -- colouring it apart when it is the
+  // same as the base would claim a split that is not there.
+  const fSame = use.floor === use.base;
+  if(hasFloor) o.push(band(fTop, dep, ZONE_CSS.floor, !!use.floor));
+  else {
+    const bTop = dep - Math.max(dep*0.05, 0.8);
+    o.push(band(bTop, dep, fSame ? ZONE_CSS.base : ZONE_CSS.floor, true));
+  }
+  o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'+(bot-top)
+    + '" fill="none" stroke="var(--ink)" stroke-width="1"/>');
+  const tick = (mm, txt, strong) => '<line x1="'+(x0-4)+'" y1="'+y(mm).toFixed(1)
+    + '" x2="'+(x1+4)+'" y2="'+y(mm).toFixed(1)+'" stroke="var(--ink)" '
+    + 'stroke-width="'+(strong?1.4:0.8)+'" stroke-dasharray="'+(strong?'':'2 2')
+    + '"/><text x="'+(x0-7)+'" y="'+(y(mm)+3.5).toFixed(1)+'" text-anchor="end" '
+    + 'font-size="9" fill="var(--ink2)">'+txt+'</text>';
+  o.push(tick(0, '0'));
+  if(painted) o.push(tick(pEnd, pEnd.toFixed(1), true));
+  if(hasFloor) o.push(tick(fTop, fTop.toFixed(1), true));
+  o.push(tick(dep, dep.toFixed(0)));
+  const lab = (mm, t, col) => '<text x="'+(x1+9)+'" y="'+(y(mm)+3.5).toFixed(1)
+    + '" font-size="9.5" font-weight="700" fill="'+col+'">'+t+'</text>';
+  if(painted) o.push(lab(pEnd/2, 'painted', ZONE_CSS.paint));
+  o.push(lab((painted?pEnd:0)/2 + fTop/2, 'bare', ZONE_CSS.base));
+  if(hasFloor) o.push(lab((fTop+dep)/2, 'bottom', ZONE_CSS.floor));
+  else if(!fSame) o.push(lab(dep, 'bottom', ZONE_CSS.floor));
+  o.push('<text x="'+x0+'" y="'+(H-6)+'" font-size="9" fill="var(--ink2)">'
+    + 'mm below the tip</text>');
+  o.push('</svg>');
+  return o.join('');
+}
+
+function renderMaterials(){
+  const host = $('#matslots'), list = $('#matlist');
+  if(!host || !list || !Object.keys(CO).length) return;
+  const use = slotMaterials();
+  const pcov = +$('#pcov').value, dep = +$('#depth').value || 0;
+  const hasFloor = $('#floor') && $('#floor').value !== 'none';
+  // NAME THE PART, NOT THE ROLE. "바탕 / 덧칠 / 바닥" says what each slot is
+  // FOR but not what it IS on this particular panel, and the boundaries that
+  // carve them live in other controls. Each card now also says which surface
+  // it covers and what sets its edge, so the diagram above and the cards say
+  // the same thing.
+  const topName = $('#top') ? $('#top').value : '';
+  const flName = $('#floor') ? $('#floor').value : 'none';
+  // SAME THING, SAME WORD. Structure calls the geometry "Top layer" and
+  // Materials used to call its finish "Base" -- two names for one surface.
+  // Both are "Top layer" now, split by bare vs painted. And the floor is the
+  // panel underneath, so it is named for that.
+  // WITH NO TOP LAYER THERE IS NO TOP SLOT TO NAME. Choosing "none" means the
+  // panel IS the bottom panel, so calling its finish "Top layer — bare" says
+  // the opposite of what was just picked. The slots keep their internal keys
+  // (`base` is still what the request calls `coating`); only the words change.
+  const noTop = topName === 'none' || topName === 'flat';
+  const WHERE = noTop
+    ? { base:  ['Panel', 'one flat surface, no structure'],
+        paint: ['—', ''], floor: ['—', ''] }
+    : { base:  ['Top layer — bare', topName + ', as bought'],
+        paint: ['Top layer — painted', 'from the tip down, set by coverage'],
+        floor: ['Bottom panel', hasFloor ? (flName + ' layer, set by floor depth')
+                                         : 'the plate the structure sits on'] };
+  // EVERY SLOT IS LIVE. `floor: none` still has a backing plate at the bottom
+  // of the wells facing the room, and it takes a finish like anything else --
+  // the server has always accepted one (floor_boundary_depth falls back to
+  // the full depth). Greying the slot out was my mistake, not a limitation.
+
+  // THE CARD MUST NOT PROMISE A COLOUR THE MODEL DOES NOT DRAW. The backing
+  // is only tinted apart when it is a different material from the base -- so
+  // when it is the same, the card's bar has to be the base colour too, and
+  // say why. A green bar beside a blue floor is what made this read as a bug.
+  const floorSame = use.floor && use.floor === use.base;
+  // one lit surface -> one card, and the coverage slider has nothing to set
+  // WHICH SLOTS ARE REAL, MEASURED PER COMBINATION (gate_slot_matrix.py).
+  // A slot that cannot change the number must not be on screen, and one that
+  // quietly repaints another slot's surface is worse. Swapping 5 % paint for
+  // Musou on each slot in turn moved the head-on by:
+  //     none    + flat   base 80 %   paint  0 %   floor 80 % but HIJACKS base
+  //     pyramid + any    base 80 %   paint 33 %   floor  0 %
+  //     cone    + flat   base 80 %   paint 38 %   floor  0 %
+  //     comb    + any    base 80 %   paint 61 %   floor 20 %
+  // DO NOT REMOVE THE CHOICE. An earlier version hid the bottom slot for a
+  // pyramid or a cone because the measurement said it moved nothing -- which
+  // is exactly the kind of invented rule that has caused every UI bug today.
+  // The slot stays; the card says what the measurement found. The only slots
+  // that go are the ones that would be a lie: with no top layer there is one
+  // surface, and sending a paint plane or a floor plane for it either does
+  // nothing or silently repaints the whole panel.
+  const SLOTS = NOTOP() ? ['base'] : ['base','paint','floor'];
+  if(!SLOTS.includes(MATSEL)) MATSEL = 'base';
+  const pdEl = $('#pdwrap'); if(pdEl) pdEl.hidden = NOTOP();
+  host.innerHTML = SLOTS.map(k => {
+    const id = use[k], m = id ? CO[id] : null;
+    const zoneCol = (k === 'floor' && floorSame) ? ZONE_CSS.base : ZONE_CSS[k];
+    let num = '&mdash;', extra = '';
+    if(m){
+      // alpha is the physical lobe width. The stored `rough` is the value the
+      // renderer's slider takes and Cycles SQUARES it, so printing `rough`
+      // here would be a number no paper can be compared against.
+      num = (100*m.rho0).toFixed(3)+' % · diffuse '+(+m.df).toFixed(4)
+          + '<br>&alpha; '+((+m.rough)*(+m.rough)).toFixed(4);
+      if(k === 'paint')
+        extra = '<div class="depth">'+(dep*pcov/100).toFixed(1)
+              + ' mm from the tip ('+pcov+'%)</div>';
+    }
+    return '<div class="slot'+(m?'':' off')+(MATSEL===k?' sel':'')+'"'
+      + ' data-slot="'+k+'">'
+      + '<div class="zone" style="background:'+(m?zoneCol:'var(--line2)')+'"></div>'
+      + '<div><div class="who">'+WHERE[k][0]+' &middot; '+WHERE[k][1]+'</div>'
+      // With `floor: none` the request does NOT carry a floor_coating, so the
+      // plate at the bottom of the wells is measured as the BASE material.
+      // The old control said "Backing finish" there and offered a menu, which
+      // promised a choice the measurement never received. Say what is
+      // actually used instead. (The label/measurement mismatch is logged in
+      // FINDINGS; fixing it changes numbers, so it is not done here.)
+      + '<div class="nm2">'+(m ? MATNAME(m, id) : 'none')+'</div>'
+      + extra
+      + ((k === 'floor' && SEALED_TOP())
+         ? '<div class="depth">measured: no effect on this shape &mdash; the '
+           + 'valleys meet and close over it</div>'
+         : '')
+      + ((k === 'floor' && floorSame)
+         ? '<div class="depth">same as the top layer &mdash; not tinted apart</div>'
+         : '')
+      + '<div class="num">'+num+'</div></div></div>';
+  }).join('');
+  // TWO WAYS IN, because neither alone was obvious: click the surface then
+  // pick, or drag a material straight onto the surface. Unity and Maya both
+  // let you drop a material on the thing it goes on, and that is the gesture
+  // that says "this goes HERE" without a caption.
+  const assign = (slot, id) => {
+    const s = $(SLOT_SEL[slot]); if(!s) return;
+    if(!Array.from(s.options).some(o => o.value === id)) return;  // not offered
+    MATSEL = slot; s.value = id;
+    s.dispatchEvent(new Event('change', {bubbles:true}));
+  };
+  for(const el of host.querySelectorAll('[data-slot]')){
+    el.addEventListener('click', () => { MATSEL = el.dataset.slot;
+                                         renderMaterials(); });
+    el.addEventListener('dragover', ev => {
+      ev.preventDefault(); el.classList.add('drop'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drop'));
+    el.addEventListener('drop', ev => {
+      ev.preventDefault(); el.classList.remove('drop');
+      const id = ev.dataTransfer.getData('text/plain');
+      if(id) assign(el.dataset.slot, id);
+    });
+  }
+
+  // THE LIBRARY LISTS EXACTLY WHAT THIS SLOT MAY HOLD. `#deepcoat` offers
+  // only bought finishes and `#coat` offers "안 칠함"; reading the options off
+  // the select keeps those rules in one place instead of copying them here.
+  const sel = $(SLOT_SEL[MATSEL]);
+  // Say the gesture out loud. Drag-and-drop that nobody is told about is a
+  // feature nobody uses, and the click path needs the same sentence anyway.
+  const head = $('#pickhead');
+  if(NOTOP()) MATSEL = 'base';
+  if(head) head.innerHTML = 'pick a material for <b>' + WHERE[MATSEL][0]
+    + '</b><br><span style="font-weight:400">or drag one onto a card above'
+    + '</span>';
+  const cur = sel ? sel.value : '';
+  const rank = ['guessed','disputed','analogue','bounded','fitted','measured'];
+  list.innerHTML = Array.from(sel ? sel.options : []).map(o => {
+    const m = CO[o.value];
+    if(!m) return '<div class="mrow'+(o.value===cur?' on':'')
+      + '" data-mat="'+o.value+'">'+o.textContent.replace(/^\s*[\d.]+%\s*·\s*/,'')
+      + '</div>';
+    // name the WEAKEST grade in one word. "근거 약함" said something was
+    // wrong without saying what, and broke across two lines in this column.
+    const p = m.prov || [];
+    const worst = p.slice().sort((a,b) => rank.indexOf(a) - rank.indexOf(b))[0];
+    const weak = rank.indexOf(worst) >= 0 && rank.indexOf(worst) <= 2
+      ? ' <span class="tag" title="'+PROV_TIP(worst).replace(/"/g,'&quot;')
+        + '">'+(PROV_KO[worst]||worst)+'</span>' : '';
+    return '<div class="mrow'+(o.value===cur?' on':'')+'" data-mat="'+o.value+'">'
+      + '<div>'+MATNAME(m, o.value)+weak+'</div>'
+      + '<div class="rho">'+(100*m.rho0).toFixed(3)+'%</div></div>';
+  }).join('');
+  for(const el of list.querySelectorAll('[data-mat]')){
+    el.setAttribute('draggable', 'true');
+    el.addEventListener('click', () => assign(MATSEL, el.dataset.mat));
+    el.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('text/plain', el.dataset.mat);
+      ev.dataTransfer.effectAllowed = 'copy';
+      el.classList.add('drag');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('drag'));
+  }
+  const dg = $('#matdiagram');
+  if(dg) dg.innerHTML = materialDiagram();
+
+  // THE CONTROL THAT SETS THE PAINT BOUNDARY BELONGS BESIDE THE PICTURE OF
+  // THAT BOUNDARY. The coverage slider lived down in Coating, below this
+  // whole section, so the diagram pointed at a number the reader could not
+  // reach. Moved, not copied -- the node keeps its id and its listeners, and
+  // there is still exactly one of it.
+  const pd = $('#pdwrap');
+  if(pd && pd.parentElement !== host.parentElement){
+    host.insertAdjacentElement('afterend', pd);
+    pd.style.margin = '10px 0 2px';
+  }
+
+  // Spell out where each number came from, for the slots actually in use.
+  // A roughness marked `guessed` must not read like a measured one.
+  const note = $('#matprovnote');
+  if(note){
+    const seen = [];
+    for(const k of ['base','paint','floor']){
+      const id = use[k]; if(!id || seen.some(s => s.id === id)) continue;
+      seen.push({id, m:CO[id]});
+    }
+    note.innerHTML = seen.map(({id,m}) => {
+      const p = m.prov || ['?','?','?'];
+      const f = x => PROV_KO[x] || x;
+      // spell out any grade that is not a plain measurement, once each
+      const weak = [...new Set(p.filter(x => x !== 'measured'))];
+      const why = weak.map(x => '<br><span style="opacity:.85">&mdash; <b>'
+                    + (PROV_KO[x]||x) + '</b>: ' + PROV_TIP(x) + '</span>')
+                  .join('');
+      return '<b>'+MATNAME(m, id)+'</b> &mdash; rho '+f(p[0])
+           + ' · diffuse '+f(p[1])+' · roughness '+f(p[2]) + why;
+    }).join('<br>');
+  }
+}
+
 function materialLine(){
   const nm = v => (CO[v] ? (100*CO[v].rho0).toFixed(2)+'% '+v : v);
   const pcov = +$('#pcov').value, base = $('#deepcoat').value,
         top = $('#coat').value, fl = $('#floorcoat') ? $('#floorcoat').value : '';
   let m;
-  if(NOPAINT()) m = '전체 ' + nm(base) + ' (무소 안 칠함)';
+  if(NOPAINT()) m = 'all ' + nm(base) + ' (not painted)';
   else if(!base || pcov >= 100) m = '전체 ' + nm(top);
   else if(pcov <= 0)       m = '전체 ' + nm(base);
   else m = '위 ' + pcov + '% ' + nm(top) + ' + 나머지 ' + nm(base);
@@ -976,7 +1466,10 @@ uniform float paintY;     // world y at the bottom of the paint
 uniform float paintOn;    // 0 = nothing painted
 uniform float floorY;     // world y of the layer boundary
 uniform float floorOn;      // 0 = no separate floor layer
-uniform float floorPainted; // 1 = the floor's own coating is a paint
+// one colour per SLOT, fed from the Materials legend so the two always agree
+uniform vec3 cBase;         // 바탕 -- the panel as bought
+uniform vec3 cPaint;        // 덧칠 -- what is painted over it
+uniform vec3 cFloor;        // 바닥 -- the layer underneath, a separate part
 void main(){
   vec3 L1 = normalize(vec3(.35,.75,.55)), L2 = normalize(vec3(-.5,.2,-.6));
   float d = max(dot(vn,L1),0.)*.85 + max(dot(vn,L2),0.)*.25 + .16;
@@ -994,22 +1487,23 @@ void main(){
   float e = 0.002*max(abs(paintY),1.0) + 1e-4;
   float painted = paintOn * smoothstep(paintY - e, paintY + e, vy);
   float onFloor = floorOn * (1.0 - smoothstep(floorY - e, floorY + e, vy));
-  // COLOUR BY MATERIAL, NOT BY LAYER. The first version gave the floor its own
-  // green whatever it was coated with, so a Musou-painted floor did not read
-  // as painted -- which is the only thing the colour is there to say. Paint is
-  // pink wherever it is; bare as-bought material is blue wherever it is. The
-  // floor is a layer, not a material, so it takes whichever of the two its own
-  // coating is.
-  vec3 tPink = vec3(1.00, 0.42, 0.55);   // painted
-  vec3 tBlue = vec3(0.38, 0.62, 1.00);   // bare, as bought
-  // top layer: painted down to paintY, bare below it
-  float isPaint = (paintOn > 0.5) ? painted : 1.0;
-  // the floor overrides with its own material
-  isPaint = mix(isPaint, floorPainted, onFloor);
-  float bare = 1.0 - isPaint;
+  // ONE COLOUR PER SLOT, NOT PER MATERIAL (2026-08-23).
+  // The previous rule was "pink wherever paint is, blue wherever bare metal
+  // is", with the floor picking whichever its own coating was. That was the
+  // best available answer while nothing on screen named the materials. It has
+  // two faults: two different bought finishes are the same blue, and the floor
+  // has no colour of its own even though it is a separate part with its own
+  // material. Colouring by the material's REAL colour is not the fix either --
+  // every material in the library is near-black, so all three surfaces would
+  // come out identical.
+  // So: the viewport is a schematic with one colour per slot, and the
+  // Materials legend carries the same three colours next to the material
+  // names and their real swatches. The map is always on screen.
+  float isPaint = (paintOn > 0.5) ? painted : 0.0;
+  vec3 tint = mix(cBase, cPaint, isPaint);
+  tint = mix(tint, cFloor, onFloor);
   vec3 col = c;
-  col = mix(col, col*0.55 + tBlue*0.55, bare*0.55);
-  col = mix(col, col*0.55 + tPink*0.62, isPaint*0.72);
+  col = mix(col, col*0.55 + tint*0.60, 0.66);
   o = vec4(col, 1.);
 }`));
 gl.linkProgram(P); gl.useProgram(P);
@@ -1336,11 +1830,22 @@ function draw(fw, fh){
     const fy = hasF ? -(dep - fd) : -(dep) + Math.max(dep*0.002, 1e-3);
     gl.uniform1f(gl.getUniformLocation(P,'floorY'), fy);
     gl.uniform1f(gl.getUniformLocation(P,'floorOn'), dep > 0 ? 1 : 0);
-    // the floor is pink when its OWN coating is a paint, blue when it is an
-    // as-bought material -- the same rule the layer above follows
-    const fcv = $('#floorcoat') ? $('#floorcoat').value : '';
-    gl.uniform1f(gl.getUniformLocation(P,'floorPainted'),
-                 /^musou/.test(fcv) ? 1 : 0);
+    // ONE COLOUR PER SLOT. `slotMaterials()` is the single answer to "what is
+    // on this surface"; the legend reads the same function, so the picture and
+    // the list cannot disagree. A slot that is switched off falls back to the
+    // slot underneath it rather than going grey, because the surface is still
+    // made of something.
+    const use = (typeof slotMaterials === 'function') ? slotMaterials() : {};
+    const zc = k => ZONE[k];
+    gl.uniform3fv(gl.getUniformLocation(P,'cBase'),  new Float32Array(zc('base')));
+    gl.uniform3fv(gl.getUniformLocation(P,'cPaint'),
+                  new Float32Array(use.paint ? zc('paint') : zc('base')));
+    // The floor slot is never empty now, so "is it set" no longer separates
+    // a real second finish from the backing simply being the base material.
+    // Tint it apart only when it actually differs.
+    const fDiff = use.floor && use.floor !== use.base;
+    gl.uniform3fv(gl.getUniformLocation(P,'cFloor'),
+                  new Float32Array(fDiff ? zc('floor') : zc('base')));
   }
   gl.drawArrays(gl.TRIANGLES, 0, NTRI*3);
   if(NLINE){
@@ -1359,9 +1864,26 @@ addEventListener('resize', draw);
   FAM = await (await fetch('/api/families')).json();
   const t = $('#top'), f = $('#floor');
   // grouped, so a candidate is not offered on the same footing as a control
+  // `none` on the top layer means no structure at all -- the bare panel,
+  // which is the control every ranking is measured against. It replaced
+  // `flat`, which was the same geometry under a second name.
+  const TOPNAME = k => (k === 'none' ? 'none — no structure' : k);
   t.innerHTML = (FAM.groups||[['',Object.keys(FAM.top)]]).map(([g,ks]) =>
-    `<optgroup label="${g}">` + ks.map(k=>`<option ${k==='comb'?'selected':''}>${k}</option>`).join('') + '</optgroup>').join('');
-  f.innerHTML = Object.keys(FAM.floor).map(k=>`<option ${k==='pyramid'?'selected':''}>${k}</option>`).join('');
+    `<optgroup label="${g}">` + ks.map(k=>`<option value="${k}" ${k==='comb'?'selected':''}>${TOPNAME(k)}</option>`).join('') + '</optgroup>').join('');
+  // `none` READS AS "THERE IS NOTHING THERE", AND THERE IS. Every panel keeps
+  // a backing plate at the bottom of its wells and that plate faces the room;
+  // it takes its own finish and moves a comb's head-on by 7 %. The VALUE stays
+  // `none` -- saved designs, presets and every stored result use it -- and only
+  // the label says what it means. Calling it "flat" would be a different lie:
+  // a pyramid's valleys meet at a line, so there is no flat plate down there.
+  f.innerHTML = Object.keys(FAM.floor).map(k =>
+    `<option value="${k}" ${k==='pyramid'?'selected':''}>`
+    // THE PANEL IS ALWAYS THERE. `none` used to read as "there is nothing
+    // underneath", and there is: the plate the structure sits on. Named for
+    // what it is. The VALUE stays `none` -- saved designs, presets and every
+    // stored result use it -- and only the label changed.
+    + (k === 'none' ? 'flat — plain panel' : k)
+    + '</option>').join('');
   // ---- presets: open on something real, not on dataclass defaults
   const PRE = (await (await fetch('/api/presets')).json()).presets;
   const named = PRE.filter(p => p.headline)
@@ -1387,7 +1909,13 @@ addEventListener('resize', draw);
   const setTop=(id,lab,v)=>{ $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
   const applySpec = sp => {
     loading = true;
-    $('#top').value = sp.top; $('#floor').value = sp.floor || 'none';
+    // OLD SPECS STILL SAY `flat`. It is the same geometry as `none` and was
+    // dropped from the list on 2026-08-24; without this a stored design set
+    // the select to a value it no longer has, which left it blank and made
+    // `sliders()` read fields off an undefined family.
+    $('#top').value = (sp.top === 'flat') ? 'none' : sp.top;
+    if(!$('#top').value) $('#top').value = 'none';
+    $('#floor').value = sp.floor || 'none';
     rebuild(true);
     for(const [host, src] of [['#tp', sp.top_params], ['#fp', sp.floor_params]]){
       for(const d of $(host).children){
@@ -1498,16 +2026,18 @@ addEventListener('resize', draw);
                               beam_w: BW, mm_per_px: MMPX, renderer: R,
                               diffuse_frac: +$('#df').value,
                               roughness: +$('#rg').value,
-                              coating: (NOPAINT() || +$('#pcov').value <= 0)
+                              coating: (NOTOP() || NOPAINT()
+                                        || +$('#pcov').value <= 0)
                                        ? $('#deepcoat').value : $('#coat').value,
-                              deep_coating: (NOPAINT() || +$('#pcov').value >= 100
+                              deep_coating: (NOTOP() || NOPAINT()
+                                             || +$('#pcov').value >= 100
                                              || +$('#pcov').value <= 0)
                                        ? null : ($('#deepcoat').value || null),
-                              paint_depth: (NOPAINT() || +$('#pcov').value >= 100
+                              paint_depth: (NOTOP() || NOPAINT()
+                                            || +$('#pcov').value >= 100
                                             || +$('#pcov').value <= 0)
                                        ? null : +$('#pd').value,
-                              floor_coating: ($('#floor').value !== 'none')
-                                       ? $('#floorcoat').value : null,
+                              floor_coating: NOTOP() ? null : FLOORMAT(),
                               phis: R === 'cycles' ? [0, 45, 90] : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
@@ -1577,42 +2107,38 @@ addEventListener('resize', draw);
     finally{ b.disabled = false; setBusy(-1); prog.stop(); }
   };
   // ---- coatings: a named product is one number, rho_dh at normal incidence
-  const CO = await (await fetch('/api/coatings')).json();
+  // Assignment, NOT a declaration. See the `let CO = {}` note up top.
+  CO = await (await fetch('/api/coatings')).json();
   // The three "anodised" entries are the SAME material -- black anodised
   // aluminium -- at its optimistic, nominal and pessimistic reflectance,
   // because the sources disagree ("below 5 % in the visible" vs "at least
   // 5 %"). Named only "anodised" they read as three different products, so
   // the list says what each one is.
-  const NICE = {musou_air:'Musou Black, airbrushed',
-                musou_fit:'Musou Black, as fitted here',
-                musou_brush:'Musou Black, brushed',
-                anodised_lo:'black anodised Al — optimistic',
-                anodised:'black anodised Al — nominal (as bought)',
-                anodised_hi:'black anodised Al — pessimistic',
-                wall_5pct:'plain matte black wall'};
+  // The English names used to live HERE, in a hand-kept map, while the Korean
+  // ones lived in material/*.json -- so a new material got an id for a name
+  // until somebody remembered to edit this line, and the two could disagree.
+  // Every material now carries `label_en` beside `label`; the map is gone.
   const opts = Object.entries(CO).map(([k,v]) =>
-    `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${NICE[k]||k}</option>`).join('');
+    `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${MATNAME(v,k)}</option>`).join('');
   // NOT PAINTING IS A CHOICE, and it needs to be on the list. Until now the
   // only way to say "no Musou anywhere" was to drag the coverage slider to 0,
   // which is a hidden move: the dropdown still named a paint, so the panel
   // looked painted when it was not.
   $('#coat').innerHTML =
-    '<option value="none">— 안 칠함 (none) —</option>' + opts;
+    '<option value="none">— not painted —</option>' + opts;
   $('#coat').value = 'musou_fit';
-  // "AS BOUGHT" MEANS UNPAINTED. The list used to be every coating, including
-  // the three Musou entries -- so it offered "below the paint: Musou", which is
-  // a contradiction and reads as if part of the well were painted twice. Only
-  // materials a panel can arrive in belong here: anodised aluminium honeycomb
-  // as delivered, and the bare wall/urethane reference.
-  // A BASE is whatever the panel arrives as. That is not only anodised
-  // aluminium: a cast urethane panel arrives carbon-black pigmented, and the
-  // plain matte wall is the reference every measurement is quoted against.
-  // Musou is never a base -- it is the thing painted on.
-  const BOUGHT = k => !/^musou/.test(k);
-  const boughtOpts = Object.entries(CO).filter(([k]) => BOUGHT(k))
-    .map(([k,v]) => `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${NICE[k]||k}</option>`)
+  // EVERY SLOT OFFERS EVERY MATERIAL (2026-08-24).
+  // There used to be a `BOUGHT` filter here with the comment "Musou is never
+  // a base -- it is the thing painted on". I wrote that; no measurement said
+  // it. It made "flat panel painted Musou" -- one of this study's own
+  // controls -- unpickable, and then needed a special case to undo.
+  // Whether a combination means anything is a question for the measurement,
+  // not for a menu: `scripts/gate_slot_matrix.py` answers it by swapping the
+  // material and watching the number. Rules that forbid instead of measure
+  // have cost more than they saved every time.
+  $('#deepcoat').innerHTML = Object.entries(CO)
+    .map(([k,v]) => `<option value="${k}">${(100*v.rho0).toFixed(2)}%  ·  ${MATNAME(v,k)}</option>`)
     .join('');
-  $('#deepcoat').innerHTML = boughtOpts;
   $('#deepcoat').value = 'anodised';
   for(const id of ['#coat','#deepcoat','#floorcoat','#dffollow','#pcov'])
     { const e=$(id); if(e) e.addEventListener('change', () => {
@@ -1621,8 +2147,12 @@ addEventListener('resize', draw);
     const e=$(id); if(e) e.addEventListener('input', () => {
       const c=$('#dffollow'); if(c && c.checked){ c.checked=false; }
       syncMaterialSliders(); }); }
-  $('#floorcoat').innerHTML = opts;          // a floor can be painted or bare
-  $('#floorcoat').value = 'musou_fit';
+  // The backing plate is a surface like any other, but usually it is the
+  // same part as the base -- so "바탕과 같게" leads and is the default. It
+  // reproduces every number measured before this slot was opened.
+  $('#floorcoat').innerHTML =
+    '<option value="' + SAME + '">— same as the top layer —</option>' + opts;
+  $('#floorcoat').value = SAME;
   syncMaterialSliders();
   // The paint-depth track ends at the envelope, and the readout says what
   // FRACTION of the well is painted. 10 mm of a 50 mm well is a fifth, and a
@@ -1679,7 +2209,8 @@ addEventListener('resize', draw);
     // "bare material below" menu and read as if it described that menu --
     // a Musou paragraph explaining an anodised-aluminium choice.
     $('#coatnote').innerHTML = noPaint
-      ? '<b>안 칠함</b> — 판은 처음부터 끝까지 바탕 재료 그대로입니다.'
+      ? '<b>Not painted</b> — the panel stays the bare top-layer material '
+        + 'all the way through.'
       : (none
          ? '<b>Not used</b> — coverage is 0, so nothing is painted.'
          : (a ? a.note : ''));
@@ -1697,13 +2228,14 @@ addEventListener('resize', draw);
     $('#floorcoat').disabled = false;
     const fcl = $('#fcwrap').querySelector('label');
     if(fcl) fcl.innerHTML = hasFloor
-      ? 'Floor finish &mdash; the ' + $('#floor').value + ' layer underneath'
-      : 'Backing finish &mdash; the plate at the bottom of the wells';
+      ? 'Bottom panel &mdash; the ' + $('#floor').value + ' layer underneath'
+      : 'Bottom panel &mdash; the plate at the bottom of the wells';
     $('#coatscope').innerHTML = hasFloor
-      ? `these three describe the <b>${$('#top').value}</b> layer &mdash; the `
-        + `floor below it has its own finish`
-      : `these three describe the whole panel &mdash; <b>${$('#top').value}</b>, `
-        + `single layer`;
+      ? `The first two slots are the <b>${$('#top').value}</b> top layer. `
+        + `The <b>${$('#floor').value}</b> layer under it has its own finish.`
+      : (/^(none|flat)$/.test($('#top').value)
+         ? `No structure &mdash; a plain panel, the flat control.`
+         : `A <b>${$('#top').value}</b> top layer on a plain flat panel.`);
     if(hasFloor){
       const fcv = CO[$('#floorcoat').value];
       $('#floornote').innerHTML = (fcv ? fcv.note : '')
@@ -1786,7 +2318,7 @@ addEventListener('resize', draw);
       // 1 % and reported out = 0.998 %. The tracer carries ONE rho, so the
       // honest single number is the mix the beam actually meets.
       let rho, rhoNote;
-      if(NOPAINT()){ rho = CO[baseN].rho0; rhoNote = baseN + ' (안 칠함)'; }
+      if(NOPAINT()){ rho = CO[baseN].rho0; rhoNote = baseN + ' (not painted)'; }
       else if(!baseN || pcov >= 100){ rho = CO[topN].rho0; rhoNote = topN; }
       else if(pcov <= 0){ rho = CO[baseN].rho0; rhoNote = baseN; }
       else {

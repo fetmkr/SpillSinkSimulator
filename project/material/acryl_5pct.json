@@ -69,5 +69,7 @@
    "출처": "Filip & Vavra 2026 TIS 역산, scripts/gate_roughness_from_tis.py"
   },
   "반짝임_법칙": "정면 반짝임 초과분 = (1 - 확산비율) / 거칠기^4. 확산 6 값 x 거칠기 2 값에서 3 % 안으로 맞음 (scripts/gate_specular_published.py). 즉 쿠폰으로 두 값만 재면 반짝임은 계산된다."
- }
+ },
+ "label_en": "matte black acrylic spray — 5%",
+ "_label_note": "label 은 보고서용 한국어, label_en 은 시뮬레이터 화면용. 시뮬레이터 UI 는 영어이고 보고서는 한국어라 둘 다 있어야 한다. id 는 어느 쪽도 아니고 절대 안 바뀐다."
 }
