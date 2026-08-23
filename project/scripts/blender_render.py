@@ -278,7 +278,8 @@ def coating_split(diffuse_frac, rho0=MUSOU_RHO0):
 
 
 def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
-                     ior=MUSOU_IOR, deep_until=None, paint_fade=0.0):
+                     ior=MUSOU_IOR, deep_until=None, paint_fade=0.0,
+                     roughness_deep=None):
     """`make_coating`, but its two constants switch at a depth plane.
 
     Musou Black and black anodising differ only in `body` and `spec_scale`, so
@@ -290,6 +291,13 @@ def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
 
     `shallow` and `deep` are (body, spec_scale). The boundary is the plane
     y = -paint_depth: paint above it, as-bought below.
+
+    ROUGHNESS SWITCHES AT THE SAME PLANE (2026-08-24). It used to be one value
+    for both sides, so Musou over anodised rendered the anodised part at
+    Musou's roughness -- the menu moved rho0 and the diffuse split and left the
+    lobe width behind, which is the same class of defect as the panel-wide
+    diffuse fraction. `roughness_deep=None` keeps the single value, so every
+    measurement taken before this reproduces.
     """
     m = bpy.data.materials.new(name)
     m.use_nodes = True
@@ -354,6 +362,9 @@ def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
     fac = below.outputs[0]
     body_out = switch(shallow[0], deep[0])
     spec_out = switch(shallow[1], deep[1])
+    rough_deep = roughness if roughness_deep is None else float(roughness_deep)
+    rough_out = (None if abs(rough_deep - float(roughness)) < 1e-9
+                 else switch(float(roughness), rough_deep))
 
     fres = nt.nodes.new("ShaderNodeFresnel")
     fres.inputs["IOR"].default_value = ior
@@ -378,6 +389,11 @@ def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
             else nt.nodes.new("ShaderNodeBsdfGlossy"))
     spec.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
     spec.inputs["Roughness"].default_value = roughness
+    # Only wire the switch when the two sides actually differ: leaving the
+    # socket at its literal keeps the node tree byte-identical to the one
+    # every published measurement was taken with.
+    if rough_out is not None:
+        nt.links.new(rough_out, spec.inputs["Roughness"])
 
     mix = nt.nodes.new("ShaderNodeMixShader")
     nt.links.new(scale.outputs[0], mix.inputs["Fac"])
@@ -1052,6 +1068,7 @@ def build_scene(cfg):
                  cc.get("spec_scale", MUSOU_SPEC_SCALE)),
                 (dp.get("body", 0.05), dp.get("spec_scale", 0.05)),
                 roughness=cc.get("roughness", rough),
+                roughness_deep=dp.get("roughness"),
                 deep_until=cfg.get("deep_until"),
                 paint_fade=cfg.get("paint_fade", 0.0))
         else:

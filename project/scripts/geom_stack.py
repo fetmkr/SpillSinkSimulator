@@ -131,6 +131,16 @@ class StackParams:
             return G3.Cone3DParams(**p).tip_fraction()
         if self.top in ("comb", "honeycomb", "shingle", "truss"):
             return GT.TopoParams(topology=self.top, **p).exposed_fraction_est()
+        # `geom_floor` FAMILIES HAVE NO ESTIMATOR, and the mesh builder above
+        # already knows that -- it routes pyramid/wave/gap through FloorParams.
+        # This line did not, so it handed their parameters to CellParams and
+        # every stacked pyramid died with
+        #     CellParams.__init__() got an unexpected keyword argument 'tip_flat'
+        # before a single triangle was built. The UI offers that combination.
+        # There is no number to give here, so say so; the readout already
+        # renders a missing exposed fraction as a dash.
+        if self.top in ("pyramid", "wave", "gap", "flat", "none"):
+            return None
         return GC.CellParams(variant=self.top, **p).exposed_fraction_est()
 
 

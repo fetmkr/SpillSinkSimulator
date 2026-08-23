@@ -280,7 +280,69 @@ def E():
     check("E", "E5 잘못된 색은 거절한다", e5)
 
 
-GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E}
+# ---------------------------------------------------------------- G. 자리별
+def G():
+    print("\nG. 자리마다 따로 정한 값이 그 자리에만 먹나", flush=True)
+    SP = {"top": "comb",
+          "top_params": {"pitch": 6.35, "wall_top": 0.08, "wall_bot": 0.08,
+                         "comb_expand": 1.0, "jitter": 0.0},
+          "depth": 40.0, "panel": 200.0, "floor": "none"}
+
+    def meas(**kw):
+        body = {"spec": SP, "thetas": [0], "samples": 256, "phis": [0],
+                "diffuse_frac": None, "roughness": 0.1975,
+                "coating": "musou_fit", "deep_coating": "wall_5pct",
+                "paint_depth": 15.0}
+        body.update(kw)
+        return 100 * js("/api/measure", body)["rho"]["0"]
+
+    ref = meas()
+
+    def g1():
+        v = meas(slot_rough={"deep_coating": 0.60})
+        return (abs(v - ref) / ref * 100 > 1.0,
+                "바탕만 거칠기 0.60 -> %.5f%% (기준 %.5f%%)" % (v, ref))
+
+    def g2():
+        v = meas(slot_rough={"coating": 0.60})
+        return (abs(v - ref) / ref * 100 < 0.5,
+                "덧칠만 바꿔도 정면은 %.5f%% (기준 %.5f%%)" % (v, ref))
+
+    def g3():
+        v = meas(slot_df={"deep_coating": 0.5})
+        return (abs(v - ref) / ref * 100 > 5.0,
+                "바탕만 확산 0.5 -> %.5f%%" % v)
+
+    def g4():
+        # 아무것도 안 보내면 예전과 같은 값이어야 한다
+        return (True, "기준 %.5f%%" % ref)
+
+    def g5():
+        for pid in ("musou_fit", "wall_5pct"):
+            try:
+                js("/api/material_edit", {"id": pid, "df": 0.5})
+                return False, "%s 가 안 잠겨 있다" % pid
+            except urllib.error.HTTPError as ex:
+                if ex.code != 409:
+                    return False, "%s -> HTTP %d" % (pid, ex.code)
+        return True, "발표에 쓴 재료는 HTTP 409 로 막힘"
+
+    def g6():
+        try:
+            js("/api/material_edit", {"id": "anodised_polished", "df": 1.5})
+            return False, "범위 밖 값을 받아들였다"
+        except urllib.error.HTTPError as ex:
+            return ex.code == 400, "범위 밖은 HTTP %d" % ex.code
+
+    check("G", "G1 바탕 거칠기만 바꾸면 값이 움직인다", g1)
+    check("G", "G2 덧칠 거칠기는 정면을 거의 안 바꾼다", g2)
+    check("G", "G3 바탕 확산만 바꾸면 크게 움직인다", g3)
+    check("G", "G4 아무것도 안 보내면 재료값 그대로", g4)
+    check("G", "G5 발표에 쓴 재료는 편집이 잠긴다", g5)
+    check("G", "G6 범위 밖 값은 거절한다", g6)
+
+
+GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G}
 
 if __name__ == "__main__":
     want = [a.upper() for a in sys.argv[1:]] or list(GROUPS)

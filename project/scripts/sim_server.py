@@ -121,7 +121,13 @@ def in_blender(op, **req):
                   "musou_fit"), req.get("deep_coating"),
                   req.get("paint_depth"), req.get("deep_until"),
                   req.get("paint_fade", 0.0), req.get("phis"),
-                  req.get("floor_coating")),
+                  # KEYWORDS FROM HERE ON. This lambda is the place where
+                  # `coating`, `deep_coating` and `paint_depth` were silently
+                  # dropped for months; adding an argument positionally to a
+                  # call this long is how that happens again.
+                  req.get("floor_coating"),
+                  slot_df=req.get("slot_df"),
+                  slot_rough=req.get("slot_rough")),
               "lambert": lambda: measure_lambert(
                   req["spec"], req["theta"], req["rho"], req["samples"]),
               # every knob the request carries must reach form(); dropping one
@@ -142,7 +148,9 @@ def in_blender(op, **req):
                                    req.get("coating") or "musou_fit",
                                    req.get("deep_coating"),
                                    req.get("paint_depth"),
-                                   req.get("roughness")),
+                                   req.get("roughness"),
+                                   slot_df=req.get("slot_df"),
+                                   slot_rough=req.get("slot_rough")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -1464,6 +1472,38 @@ def _load_materials():
 
 MATERIALS = _load_materials()
 
+
+def _published_ids():
+    """Which materials a stored result names, and therefore must not change.
+
+    Not a hand-kept list: it reads the results themselves. A material nobody
+    published with is free to edit; one that 66 426 rows point at is not,
+    because the number on disk would silently stop describing the record.
+    Scanning is cheap and happens once at import.
+    """
+    import glob
+    hits = set()
+    pats = (os.path.join(ROOT, "results", "**", "*.json"),
+            os.path.join(ROOT, "results", "*.csv"),
+            os.path.join(ROOT, "report", "**", "*.json"))
+    for pat in pats:
+        for f in glob.glob(pat, recursive=True):
+            try:
+                with open(f, "r", errors="ignore") as fh:
+                    blob = fh.read(4_000_000)
+            except Exception:
+                continue
+            for mid in MATERIALS:
+                if mid in blob:
+                    hits.add(mid)
+    return hits
+
+
+PUBLISHED_IDS = _published_ids()
+print("[SIM] 발표된 결과가 가리키는 재료 %d 종은 잠근다: %s"
+      % (len(PUBLISHED_IDS), ", ".join(sorted(PUBLISHED_IDS)) or "없음"),
+      flush=True)
+
 # the old two-tuple view, kept so nothing that reads COATINGS has to change
 COATINGS = {k: (v["rho0"], v["src"]) for k, v in MATERIALS.items()}
 
@@ -1517,12 +1557,24 @@ AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
 
 def measure(spec, thetas, diffuse_frac, roughness, samples,
             coating="musou_fit", deep_coating=None, paint_depth=None,
-            deep_until=None, paint_fade=0.0, phis=None, floor_coating=None):
+            deep_until=None, paint_fade=0.0, phis=None, floor_coating=None,
+            slot_df=None, slot_rough=None):
+    """`diffuse_frac`/`roughness` are PANEL-WIDE and stay for the batches that
+    published with them. `slot_df`/`slot_rough` are per-slot dicts keyed
+    'coating' / 'deep_coating' / 'floor_coating'; anything they name wins for
+    that slot only. Neither given, each material carries its own."""
+    slot_df = slot_df or {}
+    slot_rough = slot_rough or {}
+
+    def _pick(slot, panel, per):
+        v = per.get(slot)
+        return panel if v is None else v
     _t("measure: enter")
     import blender_render as BR
     from cone3d_sweep import COAT
     # ONE ROUGHNESS RULE FOR THE WHOLE PANEL. See `_coat`.
-    cc = _coat(coating, diffuse_frac, roughness=roughness)
+    cc = _coat(coating, _pick("coating", diffuse_frac, slot_df),
+               roughness=_pick("coating", roughness, slot_rough))
     body, sspec = cc["body"], cc["spec_scale"]
     # measurement margin, NOT the preview margin: a tilted camera reads world
     # background otherwise and the number is quietly wrong.
@@ -1551,9 +1603,10 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     # coating there is no split and the whole mesh keeps one finish.
     if paint_depth is not None and deep_coating:
         cfg["paint_depth"] = float(paint_depth)
-        cfg["deep_coating"] = _coat(deep_coating, diffuse_frac,
-                                    default="anodised",
-                                    roughness=roughness)
+        cfg["deep_coating"] = _coat(
+            deep_coating, _pick("deep_coating", diffuse_frac, slot_df),
+            default="anodised",
+            roughness=_pick("deep_coating", roughness, slot_rough))
     # A FLOOR IS A DIFFERENT PART, SO IT CAN CARRY A DIFFERENT FINISH.
     # The paint plane above cuts by DEPTH and cannot express what a stack
     # actually is -- a bought, anodised comb over a floor that is made new and
@@ -1577,9 +1630,10 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     # panel still has its backing plate, a flat surface facing the room from
     # the bottom of every well, and it can be finished separately.
     if floor_coating:
-        cfg["floor_coating"] = _coat(floor_coating, diffuse_frac,
-                                     default="musou_fit",
-                                     roughness=roughness)
+        cfg["floor_coating"] = _coat(
+            floor_coating, _pick("floor_coating", diffuse_frac, slot_df),
+            default="musou_fit",
+            roughness=_pick("floor_coating", roughness, slot_rough))
         cfg["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
             - float(spec.get("floor_depth", 0.0) or 0.0)
@@ -1672,7 +1726,7 @@ def _render_params(spec):
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
          phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
          coating="musou_fit", deep_coating=None, paint_depth=None,
-         roughness=None):
+         roughness=None, slot_df=None, slot_rough=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1719,7 +1773,15 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # Musou returned the fitted 76/24 split unchanged, to five figures. The
     # 5 % paint moved because it took the branch; Musou did not, and the two
     # sitting side by side in one table is what exposed it.
-    cc = _coat(coating, diffuse_frac, roughness=roughness)
+    slot_df = slot_df or {}
+    slot_rough = slot_rough or {}
+
+    def _pick(slot, panel, per):
+        v = per.get(slot)
+        return panel if v is None else v
+
+    cc = _coat(coating, _pick("coating", diffuse_frac, slot_df),
+               roughness=_pick("coating", roughness, slot_rough))
     entry["coating"] = {"body": cc["body"], "spec_scale": cc["spec_scale"]}
     # ROUGHNESS HAD NO WAY IN. `form` took every other finish parameter and not
     # this one, so a roughness sweep run through it changed nothing and read as
@@ -1732,12 +1794,14 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
         entry["roughness"] = float(cc["roughness"])
     if paint_depth is not None and deep_coating:
         entry["paint_depth"] = float(paint_depth)
-        entry["deep_coating"] = _coat(deep_coating, diffuse_frac,
-                                      roughness=roughness)
+        entry["deep_coating"] = _coat(
+            deep_coating, _pick("deep_coating", diffuse_frac, slot_df),
+            roughness=_pick("deep_coating", roughness, slot_rough))
     if floor_coating:
-        entry["floor_coating"] = _coat(floor_coating, diffuse_frac,
-                                       default="musou_fit",
-                                       roughness=roughness)
+        entry["floor_coating"] = _coat(
+            floor_coating, _pick("floor_coating", diffuse_frac, slot_df),
+            default="musou_fit",
+            roughness=_pick("floor_coating", roughness, slot_rough))
         entry["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
             - float(spec.get("floor_depth", 0.0) or 0.0)
@@ -2295,6 +2359,100 @@ class H(BaseHTTPRequestHandler):
                 MATERIALS[mid]["color"] = col
                 return self._send(200, json.dumps({"ok": True, "id": mid,
                                                    "color": col}))
+            # ---- MATERIAL VALUES: EDIT, DUPLICATE, LOCK ---------------
+            # rho0 / df / roughness DO move measured numbers, and 66 426
+            # published rows point at a material by id. So a material that any
+            # result on disk names is locked: duplicate it and edit the copy.
+            # Colour is not here -- it is a label and has its own free path.
+            if self.path == "/api/material_edit":
+                mid = str(req.get("id", ""))
+                if mid not in MATERIALS:
+                    return self._send(404, json.dumps(
+                        {"error": "no such material: %s" % mid}))
+                fp = os.path.join(ROOT, "material", "%s.json" % mid)
+                if not os.path.exists(fp):
+                    return self._send(404, json.dumps(
+                        {"error": "no file for %s" % mid}))
+                if mid in PUBLISHED_IDS and not req.get("unlock"):
+                    return self._send(409, json.dumps(
+                        {"error": "locked", "id": mid,
+                         "why": "published results name this material by id. "
+                                "Duplicate it and edit the copy, or pass "
+                                "unlock:true and accept that stored numbers "
+                                "no longer describe this record."}))
+                fields = {}
+                for k, lo, hi in (("rho0", 0.0, 1.0), ("df", 0.0, 1.0),
+                                  ("alpha", 1e-6, 1.0)):
+                    if k not in req or req[k] is None:
+                        continue
+                    try:
+                        v = float(req[k])
+                    except Exception:
+                        return self._send(400, json.dumps(
+                            {"error": "%s must be a number" % k}))
+                    if not (lo <= v <= hi):
+                        return self._send(400, json.dumps(
+                            {"error": "%s must be between %g and %g" % (k, lo, hi)}))
+                    fields[k] = v
+                if not fields:
+                    return self._send(400, json.dumps(
+                        {"error": "nothing to change"}))
+                with open(fp) as fh:
+                    doc = json.load(fh)
+                if "rho0" in fields:
+                    doc["scattering"]["reflectance"]["value"] = fields["rho0"]
+                    doc["scattering"]["absorption"] = 1.0 - fields["rho0"]
+                if "df" in fields:
+                    doc["bsdf"]["diffuse_fraction"] = fields["df"]
+                if "alpha" in fields:
+                    # the file stores BOTH: alpha is the physical lobe width,
+                    # `roughness` is what the renderer's slider takes and
+                    # Cycles squares it
+                    doc["bsdf"]["lobe"]["alpha_ggx"] = fields["alpha"]
+                    doc["bsdf"]["lobe"]["roughness"] = round(
+                        fields["alpha"] ** 0.5, 6)
+                # an edited number is no longer whatever grade it inherited
+                pv = doc.setdefault("provenance", {})
+                for k, key in (("rho0", "reflectance"), ("df", "diffuse_fraction"),
+                               ("alpha", "roughness")):
+                    if k in fields:
+                        pv[key] = "hand-set"
+                doc.setdefault("history", []).append(
+                    {"when": time.strftime("%Y-%m-%d %H:%M:%S"),
+                     "changed": fields, "by": "simulator UI"})
+                with open(fp, "w") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                MATERIALS.clear()
+                MATERIALS.update(_load_materials())
+                return self._send(200, json.dumps(
+                    {"ok": True, "id": mid, "changed": fields}))
+
+            if self.path == "/api/material_duplicate":
+                src = str(req.get("id", ""))
+                new_id = str(req.get("new_id", "")).strip()
+                if src not in MATERIALS:
+                    return self._send(404, json.dumps(
+                        {"error": "no such material: %s" % src}))
+                if not re.match(r"^[a-z0-9_]{2,40}$", new_id):
+                    return self._send(400, json.dumps(
+                        {"error": "id must be a-z, 0-9 and _ only"}))
+                if new_id in MATERIALS:
+                    return self._send(409, json.dumps(
+                        {"error": "%s already exists" % new_id}))
+                sp = os.path.join(ROOT, "material", "%s.json" % src)
+                with open(sp) as fh:
+                    doc = json.load(fh)
+                doc["id"] = new_id
+                doc["label"] = (doc.get("label", src) + " (사본)")
+                doc["label_en"] = (doc.get("label_en", src) + " (copy)")
+                doc["copied_from"] = src
+                with open(os.path.join(ROOT, "material", "%s.json" % new_id),
+                          "w") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                MATERIALS.clear()
+                MATERIALS.update(_load_materials())
+                return self._send(200, json.dumps({"ok": True, "id": new_id}))
+
             if self.path == "/api/mesh":
                 t0 = time.perf_counter()
                 try:
@@ -2386,7 +2544,10 @@ class H(BaseHTTPRequestHandler):
                                # lambda and measure() both handled it, so it
                                # looked wired end to end while the handler
                                # quietly never sent it
-                               floor_coating=req.get("floor_coating"))
+                               floor_coating=req.get("floor_coating"),
+                               # per-slot overrides; absent = the material's own
+                               slot_df=req.get("slot_df"),
+                               slot_rough=req.get("slot_rough"))
                 if "error" in r:
                     return self._send(200, json.dumps(r))
                 # `rho` stays the phi-0 plane so old callers keep working;
@@ -2455,6 +2616,8 @@ class H(BaseHTTPRequestHandler):
                                      # the request here as well, or the lambda
                                      # never sees it.
                                      floor_coating=req.get("floor_coating"),
+                                     slot_df=req.get("slot_df"),
+                                     slot_rough=req.get("slot_rough"),
                                      diffuse_frac=req.get("diffuse_frac"),
                                      coating=req.get("coating") or "musou_fit",
                                      deep_coating=req.get("deep_coating"),

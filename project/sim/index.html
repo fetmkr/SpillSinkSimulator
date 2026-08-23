@@ -112,6 +112,14 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 /* the paint depth is a measurement, so it keeps its lower-case unit -- the
    `who` class uppercases, which turned "2.2 mm" into "2.2 MM" */
 .slot .depth{font-size:11px;color:var(--ink2);font-family:var(--mono)}
+.slot .ovr{margin-top:3px;font-size:10.5px;color:var(--ink2);
+  font-family:var(--mono);display:flex;align-items:center;gap:4px;
+  flex-wrap:wrap}
+.slot .ovr input{width:58px;padding:1px 3px;font-size:10.5px;
+  font-family:var(--mono);border:1px solid var(--line);border-radius:2px;
+  background:var(--panel);color:var(--ink)}
+.slot .ovr .rst{font-size:9.5px;padding:1px 5px;border:1px solid var(--line);
+  border-radius:2px;background:none;color:var(--ink2);cursor:pointer}
 .slot .nm2{font-size:12.5px;line-height:1.35;margin:2px 0;font-weight:600}
 .slot .num{font-family:var(--mono);font-size:11px;color:var(--ink2);
   font-variant-numeric:tabular-nums}
@@ -119,6 +127,15 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .mrow{display:block;padding:5px 8px;font-size:12px;line-height:1.35;
   cursor:pointer;border-radius:3px;border:1px solid transparent}
 .mrow .mname{font-weight:600}
+#matedit{margin:10px 0 4px;display:flex;flex-direction:column;gap:5px}
+#matedit .edrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  font-size:11px;font-family:var(--mono);color:var(--ink2)}
+#matedit input{width:66px;padding:1px 4px;font-size:11px;
+  font-family:var(--mono);border:1px solid var(--line);border-radius:2px;
+  background:var(--panel);color:var(--ink)}
+#matedit input#ed_newid{width:96px}
+#matedit button{font-size:11px;padding:2px 8px;border:1px solid var(--line);
+  border-radius:3px;background:var(--sunk);color:var(--ink);cursor:pointer}
 .mrow .mname input.sw{display:inline-block;width:13px;height:13px;padding:0;
   border-radius:2px;border:1px solid rgba(0,0,0,.35);margin-right:6px;
   vertical-align:-2px;background:none;cursor:pointer}
@@ -285,6 +302,10 @@ details.why p{margin:.4em 0 0}
     <div id="matslots"></div>
     <div class="pickhead" id="pickhead"></div>
     <div id="matlist"></div>
+    <!-- EDIT AND DUPLICATE. Colour has its own free path on every row; these
+         three numbers move measured results, so a material that a stored
+         result names by id is locked and the server says so. -->
+    <div id="matedit"></div>
     <p class="note" id="matprovnote"></p>
   </div>
 
@@ -293,8 +314,13 @@ details.why p{margin:.4em 0 0}
        diffuse fraction and ONE roughness onto all three slots at once, which
        is the defect NEXT.md step 3 removes; until then it is at least
        labelled for what it does. -->
-  <h2>Override</h2>
-  <div class="grp">
+  <!-- HIDDEN, NOT CUT (2026-08-24). This held one diffuse fraction and one
+       roughness that were forced onto all three slots. Each slot card in
+       Materials now carries its own pair. The inputs stay in the DOM because
+       syncMaterialSliders() and design save/load still reference them; no
+       measurement reads their values any more. -->
+  <h2 hidden>Override</h2>
+  <div class="grp" hidden>
     <p class="note" style="margin:0 0 8px">Rarely needed &mdash; picking a
       material fills these in from its own record.
       <b>Changing them here forces ONE value onto all three slots</b>;
@@ -868,7 +894,11 @@ async function measure(thetas){
       // three azimuth planes for the published path; the Mitsuba worker has
       // no phi rotation, so cross-check modes stay in the phi-0 plane
       phis: R === 'cycles' ? [0, 45, 90] : undefined,
-      diffuse_frac:+$('#df').value, roughness:+$('#rg').value, samples:64,
+      // PANEL-WIDE VALUES ARE GONE (2026-08-24): they forced one diffuse
+      // fraction and one roughness onto all three slots. `slotOverrides()`
+      // above carries whatever the user changed, per slot; null lets each
+      // material use its own numbers.
+      diffuse_frac: null, roughness: null, samples: 64,
       // 0 % painted means the panel IS the base material, so that is what the
       // server is told to coat with; 100 % means there is nothing below.
       // ALWAYS SENT (2026-08-23). `floor: none` does not mean there is
@@ -881,6 +911,7 @@ async function measure(thetas){
       // A plain panel has one surface; sending a paint plane or a floor plane
       // for it either does nothing or quietly repaints the whole thing.
       floor_coating: NOTOP() ? null : FLOORMAT(),
+      ...slotOverrides(),
       coating: (NOTOP() || NOPAINT() || +$('#pcov').value <= 0)
                  ? $('#deepcoat').value : $('#coat').value,
       deep_coating: (NOTOP() || NOPAINT() || +$('#pcov').value >= 100
@@ -1023,6 +1054,38 @@ let MATSEL = 'paint';
 // save/load all read them -- but are hidden, because having the same choice
 // in two places on one screen is how they drift apart.
 const SLOT_SEL = { base:'#deepcoat', paint:'#coat', floor:'#floorcoat' };
+// PER-SLOT OVERRIDES (2026-08-24). One diffuse fraction and one roughness
+// used to be forced onto the whole panel, so choosing three materials was not
+// choosing three materials -- the menu moved rho0 and the other two numbers
+// came from a slider. `null` means "use this slot's material".
+const SLOT_KEY = { base:'deep_coating', paint:'coating', floor:'floor_coating' };
+let SLOTOVR = { base:{df:null,a:null}, paint:{df:null,a:null},
+                floor:{df:null,a:null} };
+// alpha is the physical lobe width; the stored `rough` is the renderer's
+// slider and Cycles squares it, so alpha = rough^2 and slider = sqrt(alpha).
+function slotAlpha(k, id){
+  const o = SLOTOVR[k] && SLOTOVR[k].a;
+  if(o != null) return +o;
+  const m = CO[id]; return m ? (+m.rough)*(+m.rough) : null;
+}
+function slotDF(k, id){
+  const o = SLOTOVR[k] && SLOTOVR[k].df;
+  if(o != null) return +o;
+  const m = CO[id]; return m ? +m.df : null;
+}
+// Only slots the user actually changed appear, so a panel with no overrides
+// sends nothing new and reproduces every earlier measurement exactly.
+function slotOverrides(){
+  const df = {}, rg = {}, use = slotMaterials();
+  for(const k of ['base','paint','floor']){
+    if(!use[k]) continue;
+    const o = SLOTOVR[k];
+    if(o.df != null) df[SLOT_KEY[k]] = +o.df;
+    if(o.a  != null) rg[SLOT_KEY[k]] = Math.sqrt(+o.a);
+  }
+  return {slot_df: Object.keys(df).length ? df : null,
+          slot_rough: Object.keys(rg).length ? rg : null};
+}
 // "바탕과 같게" is a real choice, not a placeholder: a comb bonded to a panel
 // that was painted in the same pass is one finish, and it is the default
 // because it reproduces every number measured before the slot was opened.
@@ -1229,8 +1292,16 @@ function renderMaterials(){
       // alpha is the physical lobe width. The stored `rough` is the value the
       // renderer's slider takes and Cycles SQUARES it, so printing `rough`
       // here would be a number no paper can be compared against.
-      num = (100*m.rho0).toFixed(3)+' % · diffuse '+(+m.df).toFixed(4)
-          + '<br>&alpha; '+((+m.rough)*(+m.rough)).toFixed(4);
+      const dfv = slotDF(k, id), av = slotAlpha(k, id);
+      const ovr = SLOTOVR[k].df != null || SLOTOVR[k].a != null;
+      num = (100*m.rho0).toFixed(3)+' %'
+          + '<div class="ovr">diffuse <input type="number" step="0.001" '
+          + 'min="0" max="1" data-ovr="'+k+'" data-f="df" value="'
+          + dfv.toFixed(4)+'"> &alpha; <input type="number" step="0.001" '
+          + 'min="0.0001" max="1" data-ovr="'+k+'" data-f="a" value="'
+          + av.toFixed(4)+'">'
+          + (ovr ? ' <button class="rst" data-rst="'+k+'">reset</button>' : '')
+          + '</div>';
       if(k === 'paint')
         extra = '<div class="depth">'+(dep*pcov/100).toFixed(1)
               + ' mm from the tip ('+pcov+'%)</div>';
@@ -1266,6 +1337,22 @@ function renderMaterials(){
     MATSEL = slot; s.value = id;
     s.dispatchEvent(new Event('change', {bubbles:true}));
   };
+  // the number boxes are controls, not part of "select this slot"
+  for(const inp of host.querySelectorAll('[data-ovr]')){
+    for(const ev of ['click','mousedown'])
+      inp.addEventListener(ev, e => e.stopPropagation());
+    inp.addEventListener('change', e => {
+      e.stopPropagation();
+      const v = inp.value === '' ? null : +inp.value;
+      SLOTOVR[inp.dataset.ovr][inp.dataset.f] =
+        (v == null || !isFinite(v)) ? null : v;
+      renderMaterials(); refresh();
+    });
+  }
+  for(const b of host.querySelectorAll('[data-rst]'))
+    b.addEventListener('click', e => { e.stopPropagation();
+      SLOTOVR[b.dataset.rst] = {df:null, a:null};
+      renderMaterials(); refresh(); });
   for(const el of host.querySelectorAll('[data-slot]')){
     el.addEventListener('click', () => { MATSEL = el.dataset.slot;
                                          renderMaterials(); });
@@ -1354,6 +1441,56 @@ function renderMaterials(){
       el.classList.add('drag');
     });
     el.addEventListener('dragend', () => el.classList.remove('drag'));
+  }
+  const ed = $('#matedit'), em = CO[cur];
+  if(ed){
+    ed.innerHTML = !em ? '' :
+      '<div class="edrow"><b>' + MATNAME(em, cur) + '</b></div>'
+      + '<div class="edrow">rho <input id="ed_rho" type="number" step="0.001" '
+      + 'min="0" max="100" value="' + (100*em.rho0).toFixed(3) + '"> %'
+      + ' diffuse <input id="ed_df" type="number" step="0.0001" min="0" max="1" '
+      + 'value="' + (+em.df).toFixed(4) + '">'
+      + ' &alpha; <input id="ed_a" type="number" step="0.001" min="0.0001" '
+      + 'max="1" value="' + ((+em.rough)*(+em.rough)).toFixed(4) + '">'
+      + '</div><div class="edrow">'
+      + '<button id="ed_save">save</button>'
+      + '<input id="ed_newid" placeholder="new id" size="14">'
+      + '<button id="ed_dup">duplicate</button>'
+      + '<span class="note" id="ed_msg"></span></div>';
+    const msg = m => { const e=$('#ed_msg'); if(e) e.innerHTML = m; };
+    const reload = async () => {
+      CO = await (await fetch('/api/coatings')).json();
+      // a duplicate is a new material, so every menu has to learn about it
+      for(const [k,sel] of Object.entries(SLOT_SEL)){
+        const s=$(sel); if(!s) continue;
+        for(const id of Object.keys(CO))
+          if(!Array.from(s.options).some(o=>o.value===id)){
+            const o=document.createElement('option');
+            o.value=id; o.textContent=(100*CO[id].rho0).toFixed(2)+'  ·  '
+              +MATNAME(CO[id],id); s.appendChild(o);
+          }
+      }
+      renderMaterials(); refresh();
+    };
+    const post = async (path, body) => {
+      const r = await fetch('/api/'+path, {method:'POST',
+                            body: JSON.stringify(body)});
+      return [r.status, await r.json()];
+    };
+    if($('#ed_save')) $('#ed_save').onclick = async () => {
+      const [st, j] = await post('material_edit', {id: cur,
+        rho0: +$('#ed_rho').value/100, df: +$('#ed_df').value,
+        alpha: +$('#ed_a').value});
+      if(st === 409){ msg('<b>locked</b> — ' + j.why); return; }
+      if(j.error){ msg('failed: ' + j.error); return; }
+      msg('saved to material/' + cur + '.json'); await reload();
+    };
+    if($('#ed_dup')) $('#ed_dup').onclick = async () => {
+      const [st, j] = await post('material_duplicate',
+        {id: cur, new_id: ($('#ed_newid').value||'').trim()});
+      if(j.error){ msg('failed: ' + j.error); return; }
+      msg('made ' + j.id); await reload();
+    };
   }
   const dg = $('#matdiagram');
   if(dg) dg.innerHTML = materialDiagram();
@@ -2073,8 +2210,7 @@ addEventListener('resize', draw);
         // smear + head-on numbers were always the fitted Musou.
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
                               beam_w: BW, mm_per_px: MMPX, renderer: R,
-                              diffuse_frac: +$('#df').value,
-                              roughness: +$('#rg').value,
+                              diffuse_frac: null, roughness: null,
                               coating: (NOTOP() || NOPAINT()
                                         || +$('#pcov').value <= 0)
                                        ? $('#deepcoat').value : $('#coat').value,
@@ -2087,6 +2223,7 @@ addEventListener('resize', draw);
                                             || +$('#pcov').value <= 0)
                                        ? null : +$('#pd').value,
                               floor_coating: NOTOP() ? null : FLOORMAT(),
+                              ...slotOverrides(),
                               phis: R === 'cycles' ? [0, 45, 90] : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
@@ -2398,7 +2535,14 @@ addEventListener('resize', draw);
            // the SAME two sliders the Render uses. The trace ignored both
            // until now, so it could not be compared with Render on a painted
            // panel: one was a pure mode, the other a 76/24 mix.
-           diffuse_frac: +$('#df').value, roughness: +$('#rg').value})});
+           // THE TRACER TAKES ONE PAIR, so it takes the surface the beam hits
+           // first: the top slot, painted if there is paint.
+           diffuse_frac: (()=>{ const u=slotMaterials();
+             const k = u.paint ? 'paint' : 'base'; return slotDF(k, u[k]); })(),
+           roughness: (()=>{ const u=slotMaterials();
+             const k = u.paint ? 'paint' : 'base';
+             const a = slotAlpha(k, u[k]);
+             return a == null ? null : Math.sqrt(a); })()})});
         const j = await r.json();
         if(j.error) throw new Error(j.error);
         out.push(j);
