@@ -196,11 +196,15 @@ def build():
     MC = material_colours()
 
     def chip(mid):
+        # The ring is `--muted`, not a dark hairline. Every material in the
+        # library is near-black, so on the dark theme a black-bordered black
+        # chip disappears entirely -- and a chip you cannot see does not do
+        # the one job it has.
         c = MC.get(mid, {}).get("color", "#3a3f47")
-        return ('<span style="display:inline-block;width:11px;height:11px;'
-                'border-radius:2px;border:1px solid rgba(0,0,0,.3);'
-                'background:%s;margin-right:6px;vertical-align:-1px"></span>'
-                % c)
+        return ('<span title="%s" style="display:inline-block;width:12px;'
+                'height:12px;border-radius:2px;background:%s;'
+                'box-shadow:0 0 0 1px var(--muted);margin-right:7px;'
+                'vertical-align:-2px"></span>' % (c, c))
     law_paint = 1.0 + (1.0 - DF_PAINT) / (4.0 * ALPHA * ALPHA)
     law_musou = 1.0 + (1.0 - DF_MUSOU) / (4.0 * ALPHA * ALPHA)
 
@@ -281,6 +285,11 @@ def build():
 
     H = []
     A = H.append
+    # WITHOUT THIS THE FILE IS UNREADABLE ON ITS OWN. The artifact host sends
+    # charset in the HTTP header so it looks fine there, but this report is
+    # also a file in report/comb/ that someone opens by double-clicking, and
+    # then every Korean character is mojibake.
+    A('<meta charset="utf-8">')
     A('<title>어떤 벌집을 살 것인가</title>')
     A(css)
     A('<style>.hi td{background:color-mix(in srgb,var(--good) 14%,transparent)}'

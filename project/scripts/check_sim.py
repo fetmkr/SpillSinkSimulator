@@ -1,0 +1,298 @@
+# -*- coding: utf-8 -*-
+"""시뮬레이터가 제대로 도는지 항목별로 확인한다.
+
+돌고 있는 서버에 HTTP 로 말을 건다. 블렌더 안에서 도는 게 아니므로 빠르고,
+서버가 실제로 사람에게 내주는 것과 같은 경로를 쓴다.
+
+    python3 scripts/check_sim.py            전부
+    python3 scripts/check_sim.py A B        고른 묶음만
+
+항목은 통과/실패를 스스로 판정한다. 판정 못 하면 실패로 센다 -- "확인 못
+했다" 를 "괜찮다" 로 세는 것이 이 프로젝트에서 가장 비쌌던 실수다.
+화면 쪽(누르기·끌기·색 고르개)은 여기서 안 본다. 브라우저가 필요하고,
+그건 따로 돌린다.
+"""
+import sys, json, time, urllib.request, urllib.error, os
+
+BASE = "http://127.0.0.1:8777"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS = []
+
+
+def call(path, payload=None, timeout=180):
+    url = BASE + path
+    if payload is None:
+        req = urllib.request.Request(url)
+    else:
+        req = urllib.request.Request(
+            url, data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        body = r.read()
+        return r.headers, body
+
+
+def js(path, payload=None, timeout=180):
+    _, body = call(path, payload, timeout)
+    return json.loads(body or b"{}")
+
+
+def check(group, name, fn):
+    t0 = time.time()
+    try:
+        ok, note = fn()
+    except Exception as exc:
+        ok, note = False, "%s: %s" % (type(exc).__name__, str(exc)[:160])
+    RESULTS.append((group, name, ok, note, time.time() - t0))
+    print("  [%s] %-46s %s%s"
+          % ("PASS" if ok else "FAIL", name, note,
+             "" if ok else "   <-- 실패"), flush=True)
+    return ok
+
+
+SPEC_FLAT = {"top": "none", "top_params": {}, "depth": 10.0, "panel": 120.0,
+             "floor": "none", "margin_depths": 0.2}
+SPEC_COMB = {"top": "comb",
+             "top_params": {"pitch": 6.35, "wall_top": 0.08, "wall_bot": 0.08,
+                            "comb_expand": 1.0, "jitter": 0.0},
+             "depth": 40.0, "panel": 200.0, "floor": "none",
+             "margin_depths": 0.2}
+
+
+# ---------------------------------------------------------------- A. 부팅
+def A():
+    print("\nA. 서버가 살아 있고 기본 자료를 내주나", flush=True)
+
+    def a1():
+        h, b = call("/")
+        return (len(b) > 50000 and b"Spill Sink" in b,
+                "%d 바이트" % len(b))
+
+    def a2():
+        co = js("/api/coatings")
+        need = ("rho0", "df", "rough", "color", "label_en", "prov")
+        miss = [k for k, v in co.items() if any(n not in v for n in need)]
+        return (len(co) >= 11 and not miss,
+                "재료 %d 종%s" % (len(co), "" if not miss else ", 빠진 칸 " + str(miss)))
+
+    def a3():
+        fam = js("/api/families")
+        tops = [k for g, ks in fam["groups"] for k in ks]
+        return ("none" in tops and "flat" not in tops and "none" in fam["floor"],
+                "위층 %d, 아래층 %d, none 있고 flat 없음"
+                % (len(tops), len(fam["floor"])))
+
+    def a4():
+        p = js("/api/presets")
+        return (len(p.get("presets", [])) > 0, "프리셋 %d 개" % len(p["presets"]))
+
+    check("A", "A1 페이지가 내려온다", a1)
+    check("A", "A2 재료표에 필요한 칸이 다 있다", a2)
+    check("A", "A3 계열 목록에 none 이 있고 flat 은 없다", a3)
+    check("A", "A4 프리셋이 있다", a4)
+
+
+# ---------------------------------------------------------------- B. 형상
+def B():
+    print("\nB. 형상이 다 만들어지나", flush=True)
+    fam = js("/api/families")
+    tops = [k for g, ks in fam["groups"] for k in ks]
+    stack = set(fam["stackable"])
+
+    def mesh(spec):
+        h, b = call("/api/mesh", spec)
+        d = json.loads(h.get("X-Derived") or "{}")
+        return d, len(b)
+
+    def one_top(t):
+        def f():
+            spec = dict(SPEC_FLAT, top=t, top_params={},
+                        depth=fam["normal_depth"].get(t, 50.0))
+            d, n = mesh(spec)
+            if d.get("invalid"):
+                return False, d.get("why", "invalid")
+            return (n > 0 and d.get("verts", 0) > 0,
+                    "%d 꼭짓점, %d 바이트" % (d.get("verts", 0), n))
+        return f
+
+    for t in tops:
+        check("B", "B1 위층 %-10s 이 만들어진다" % t, one_top(t))
+
+    def one_floor(fl):
+        def f():
+            spec = dict(SPEC_COMB, floor=fl, floor_depth=4.0,
+                        floor_params={})
+            d, n = mesh(spec)
+            if d.get("invalid"):
+                return False, d.get("why", "invalid")
+            return (n > 0, "%d 꼭짓점" % d.get("verts", 0))
+        return f
+
+    for fl in [k for k in fam["floor"] if k != "none"]:
+        check("B", "B2 벌집 + 아래층 %-8s" % fl, one_floor(fl))
+
+    def b3():
+        r1 = js("/api/measure", {"spec": SPEC_FLAT, "thetas": [0], "samples": 256,
+                                 "diffuse_frac": None, "roughness": 0.1975,
+                                 "phis": [0], "coating": "wall_5pct"})
+        r2 = js("/api/measure", {"spec": dict(SPEC_FLAT, top="flat"),
+                                 "thetas": [0], "samples": 256,
+                                 "diffuse_frac": None, "roughness": 0.1975,
+                                 "phis": [0], "coating": "wall_5pct"})
+        a, b = 100 * r1["rho"]["0"], 100 * r2["rho"]["0"]
+        d = abs(a - b) / a * 100
+        return d < 0.01, "none %.5f%% vs 옛 flat %.5f%% (%.4f%% 차이)" % (a, b, d)
+
+    check("B", "B3 top:none 이 옛 top:flat 과 같은 값", b3)
+
+
+# ---------------------------------------------------------------- C. 재질
+def C():
+    print("\nC. 재질이 실제로 숫자를 바꾸나", flush=True)
+
+    def meas(**kw):
+        body = {"spec": kw.pop("spec"), "thetas": [0], "samples": 256,
+                "diffuse_frac": None, "roughness": 0.1975, "phis": [0]}
+        body.update(kw)
+        return 100 * js("/api/measure", body)["rho"]["0"]
+
+    def c1():
+        lo = meas(spec=SPEC_FLAT, coating="musou_fit")
+        hi = meas(spec=SPEC_FLAT, coating="wall_5pct")
+        return (hi / lo > 4.0, "무소 %.4f%% 대 5%% 페인트 %.4f%% (%.1f 배)"
+                % (lo, hi, hi / lo))
+
+    def c2():
+        base = meas(spec=SPEC_COMB, coating="wall_5pct")
+        pt = meas(spec=SPEC_COMB, coating="musou_fit",
+                  deep_coating="wall_5pct", paint_depth=8.0)
+        return (abs(pt - base) / base * 100 > 1.0,
+                "덧칠 없이 %.4f%% -> 8mm 칠하면 %.4f%%" % (base, pt))
+
+    def c3():
+        base = meas(spec=SPEC_COMB, coating="wall_5pct")
+        fl = meas(spec=SPEC_COMB, coating="wall_5pct",
+                  floor_coating="musou_fit")
+        return (abs(fl - base) / base * 100 > 1.0,
+                "받침판 바꾸면 %.4f%% -> %.4f%%" % (base, fl))
+
+    def c4():
+        # 같은 재료를 받침판에 주면 안 준 것과 같아야 한다 (거칠기 규칙 하나)
+        a = meas(spec=SPEC_COMB, coating="anodised")
+        b = meas(spec=SPEC_COMB, coating="anodised", floor_coating="anodised")
+        d = abs(a - b) / a * 100
+        return d < 0.5, "같은 재료면 %.4f%% vs %.4f%% (%.3f%% 차이)" % (a, b, d)
+
+    def c5():
+        rough = []
+        for rg in (0.10, 0.30):
+            f = js("/api/form", {"spec": dict(SPEC_FLAT, panel=63.5),
+                                 "thetas": [0], "n_phase": 6, "samples": 192,
+                                 "beam_w": 7.5, "coating": "wall_5pct",
+                                 "diffuse_frac": 0.97, "roughness": rg})
+            rough.append(f.get("peak"))
+        if any(v is None for v in rough):
+            return False, "번쩍임이 비어 있다"
+        return (rough[0] / rough[1] > 5.0,
+                "거칠기 0.10 -> %.2f, 0.30 -> %.2f (%.1f 배)"
+                % (rough[0], rough[1], rough[0] / rough[1]))
+
+    check("C", "C1 재료를 바꾸면 총량이 바뀐다", c1)
+    check("C", "C2 덧칠이 총량을 바꾼다 (벌집)", c2)
+    check("C", "C3 받침판이 총량을 바꾼다 (벌집)", c3)
+    check("C", "C4 같은 재료면 받침판을 줘도 같은 값", c4)
+    check("C", "C5 거칠기가 번쩍임을 바꾼다", c5)
+
+
+# ---------------------------------------------------------------- D. 발표값
+def D():
+    print("\nD. 발표된 값을 그대로 재현하나", flush=True)
+    f = os.path.join(ROOT, "results/comb_musou/comb_musou_v2.json")
+    rows = {(r["pitch"], r["depth"], r["musou"]): r for r in json.load(open(f))}
+
+    def one(key):
+        def g():
+            st = rows[key]
+            pitch, depth, mus = key
+            spec = {"top": "comb",
+                    "top_params": {"pitch": pitch, "wall_top": 0.08,
+                                   "wall_bot": 0.08, "comb_expand": 1.0,
+                                   "jitter": 0.0},
+                    "depth": depth, "floor": "none", "panel": 200.0}
+            body = {"spec": spec, "thetas": [0.0, -20.0, 20.0, -40.0, 40.0],
+                    "samples": 256, "diffuse_frac": None, "roughness": 0.1975,
+                    "phis": [0, 45, 90]}
+            if mus > 0:
+                body.update(coating="musou_fit", deep_coating="wall_5pct",
+                            paint_depth=mus)
+            else:
+                body.update(coating="wall_5pct")
+            r = js("/api/measure", body)
+            pl = r.get("rho_planes") or {"0": r["rho"]}
+            got = max(max(v.values()) for v in pl.values())
+            want = max(st["total"].values())
+            d = abs(got - want) / want * 100
+            return d < 0.5, "저장 %.5f%% 지금 %.5f%% (%.3f%% 차이)" % (
+                100 * want, 100 * got, d)
+        return g
+
+    for key in [(6.35, 30.0, 0.0), (9.53, 40.0, 15.0), (6.35, 60.0, 15.0)]:
+        check("D", "D1 32가지 %s 재현" % (key,), one(key))
+
+
+# ---------------------------------------------------------------- E. 내보내기
+def E():
+    print("\nE. 내보내기와 도구", flush=True)
+
+    def e1():
+        h, b = call("/api/step", SPEC_COMB, timeout=300)
+        return (len(b) > 1000 and b"ISO-10303" in b[:400],
+                "%d 바이트" % len(b))
+
+    def e2():
+        h, b = call("/api/stl", SPEC_COMB, timeout=300)
+        return len(b) > 1000, "%d 바이트" % len(b)
+
+    def e3():
+        r = js("/api/rays", {"spec": dict(SPEC_COMB, panel=63.5),
+                             "theta": 0.0, "n": 24, "coating": "wall_5pct",
+                             "diffuse_frac": None, "roughness": 0.1975,
+                             "mode": "fitted"}, timeout=300)
+        paths = r.get("paths") or r.get("rays") or []
+        return len(paths) > 0, "광선 %d 줄" % len(paths)
+
+    def e4():
+        col = js("/api/material_color", {"id": "wall_5pct",
+                                         "color": "#45484f"})
+        return col.get("ok") is True, "색 쓰기 %s" % col.get("color")
+
+    def e5():
+        try:
+            js("/api/material_color", {"id": "wall_5pct", "color": "red"})
+            return False, "잘못된 색을 받아들였다"
+        except urllib.error.HTTPError as ex:
+            return ex.code == 400, "HTTP %d 로 거절" % ex.code
+
+    check("E", "E1 STEP 이 나온다", e1)
+    check("E", "E2 STL 이 나온다", e2)
+    check("E", "E3 광선 추적이 돈다", e3)
+    check("E", "E4 재료 색 쓰기가 된다", e4)
+    check("E", "E5 잘못된 색은 거절한다", e5)
+
+
+GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E}
+
+if __name__ == "__main__":
+    want = [a.upper() for a in sys.argv[1:]] or list(GROUPS)
+    t0 = time.time()
+    print("시뮬레이터 점검 -- %s" % BASE, flush=True)
+    for g in want:
+        if g in GROUPS:
+            GROUPS[g]()
+    n = len(RESULTS)
+    bad = [r for r in RESULTS if not r[2]]
+    print("\n%d 항목 중 %d 통과, %d 실패 (%.0f 초)"
+          % (n, n - len(bad), len(bad), time.time() - t0), flush=True)
+    for g, name, ok, note, sec in bad:
+        print("   실패: %s -- %s" % (name, note), flush=True)
+    sys.exit(1 if bad else 0)
