@@ -22,6 +22,27 @@ OLDF = os.path.join(ROOT, "results/comb_musou/comb_musou.json")
 BPF = os.path.join(ROOT, "results/comb_musou/blueprints.json")
 OUTF = os.path.join(ROOT, "report/comb/comb_musou_2026-08-22.html")
 
+# THE MATERIAL FILES CARRY THE COLOUR, so the report reads it from there
+# rather than keeping a second palette. Changing a material's colour in the
+# simulator now relabels it here too. Nothing optical depends on it -- the
+# renderer never sees these -- it is purely how a reader tells them apart.
+def material_colours():
+    import glob
+    out = {}
+    for f in sorted(glob.glob(os.path.join(ROOT, "material", "*.json"))):
+        b = os.path.basename(f)[:-5]
+        if b.startswith("_"):
+            continue
+        d = json.load(open(f))
+        out[b] = {"color": d.get("color", "#3a3f47"),
+                  "label": d.get("label", b),
+                  "rho": d.get("scattering", {}).get("reflectance", {})
+                          .get("value"),
+                  "df": d.get("bsdf", {}).get("diffuse_fraction"),
+                  "alpha": d.get("bsdf", {}).get("lobe", {}).get("alpha_ggx")}
+    return out
+
+
 ALPHA = 0.039
 DF_PAINT, DF_MUSOU = 0.99, 0.993
 THETAS = ["-40", "-20", "0", "20", "40"]
@@ -172,6 +193,14 @@ def curve(r):
 def build():
     rows = load()
     bp = json.load(open(BPF))
+    MC = material_colours()
+
+    def chip(mid):
+        c = MC.get(mid, {}).get("color", "#3a3f47")
+        return ('<span style="display:inline-block;width:11px;height:11px;'
+                'border-radius:2px;border:1px solid rgba(0,0,0,.3);'
+                'background:%s;margin-right:6px;vertical-align:-1px"></span>'
+                % c)
     law_paint = 1.0 + (1.0 - DF_PAINT) / (4.0 * ALPHA * ALPHA)
     law_musou = 1.0 + (1.0 - DF_MUSOU) / (4.0 * ALPHA * ALPHA)
 
@@ -317,20 +346,23 @@ def build():
       '논문이 위아래만 묶어 준 값, <b>유추</b>는 비슷한 재료에서 빌려 온 값입니다.</p>'
       '<div class="scroll"><table><thead><tr><th>재료</th><th>반사율</th>'
       '<th>확산 비율</th><th>α</th><th>출처</th></tr></thead><tbody>'
-      '<tr><td>5 % 무광 검정 페인트</td><td>5.000 %</td><td>0.99 <span '
+      '<tr><td>' + chip('wall_5pct') + '5 % 무광 검정 페인트</td><td>5.000 %</td><td>0.99 <span '
       'class="sub">실측</span></td><td>0.039 <span class="sub">실측</span></td>'
       '<td>확산: Zeng 2019 (NASA GSFC) Z307 — 0/45도 밝기를 8도 총반사로 나누면 '
       '1.008, 즉 정면에서 완전 확산체와 1 % 안에서 같습니다. '
       'α: MERL 실측 BRDF 의 paint-black 에 미세면 모델을 맞춘 값 '
       '(Ward 0.0367 / Cook-Torrance 0.0392).</td></tr>'
-      '<tr><td>무소블랙</td><td>0.998 %</td><td>0.993 <span class="sub">범위'
+      '<tr><td>' + chip('musou_fit') + '무소블랙</td><td>0.998 %</td><td>0.993 <span class="sub">범위'
       '</span></td><td>0.039 <span class="sub">모름</span></td>'
       '<td>확산: Filip &amp; Vávra 2026 의 정면 TIS 0.985~0.995 에서 나온 한계 중 '
       '광택이 제일 센 쪽. α: 무소의 광택 덩어리 폭을 잰 자료가 없어 페인트 값을 '
       '빌렸습니다.</td></tr>'
-      '<tr><td>포일</td><td>0.08 mm</td><td colspan="3">알루미늄 벌집. 겉면은 '
+      '<tr><td>' + chip('anodised') + '포일</td><td>0.08 mm</td><td colspan="3">알루미늄 벌집. 겉면은 '
       '위 두 도료로 칠해집니다.</td></tr>'
       '</tbody></table></div>'
+      '<p class="sub">왼쪽 색 네모는 시뮬레이터의 재료표에서 정합니다. '
+      '<b>계산과는 아무 상관이 없습니다</b> &mdash; 렌더러는 이 색을 안 봅니다. '
+      '읽는 사람이 구분하라고 붙인 이름표입니다.</p>'
       '<p class="sub">무광 검정 페인트의 정반사는 논문마다 백 배 갈립니다 '
       '(TAMU 0.1 %, Zeng 1 % 이하, Filip 10 %). 검출기 크기 차이로는 설명이 '
       '안 됩니다. <b>도장 공정이 정하는 값입니다.</b> 그래서 발주서에 도장 횟수와 '

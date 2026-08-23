@@ -34,6 +34,7 @@ import sys
 import os
 import io
 import json
+import re
 import math
 import time
 import struct
@@ -2265,6 +2266,35 @@ class H(BaseHTTPRequestHandler):
         except Exception as e:
             return self._send(400, json.dumps({"error": str(e)}))
         try:
+            # ---- MATERIAL COLOUR, EDITABLE (2026-08-24) -------------
+            # Colour is a LABEL: `coatings_json` is the only thing that reads
+            # it, the renderer never sees it, and no measured number can move
+            # because of it. So it needs no lock and no confirmation -- unlike
+            # rho0/df/roughness, which 66 426 published rows point at by id.
+            # Writes the file AND updates the table in memory: reading the
+            # files only at import is exactly why the server served stale
+            # material values for hours on 2026-08-22.
+            if self.path == "/api/material_color":
+                mid = str(req.get("id", ""))
+                col = str(req.get("color", ""))
+                if mid not in MATERIALS:
+                    return self._send(404, json.dumps(
+                        {"error": "no such material: %s" % mid}))
+                if not re.match(r"^#[0-9a-fA-F]{6}$", col):
+                    return self._send(400, json.dumps(
+                        {"error": "colour must be #rrggbb, got %r" % col}))
+                fp = os.path.join(ROOT, "material", "%s.json" % mid)
+                if not os.path.exists(fp):
+                    return self._send(404, json.dumps(
+                        {"error": "no file for %s" % mid}))
+                with open(fp) as fh:
+                    doc = json.load(fh)
+                doc["color"] = col
+                with open(fp, "w") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                MATERIALS[mid]["color"] = col
+                return self._send(200, json.dumps({"ok": True, "id": mid,
+                                                   "color": col}))
             if self.path == "/api/mesh":
                 t0 = time.perf_counter()
                 try:

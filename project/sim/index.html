@@ -116,9 +116,21 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .slot .num{font-family:var(--mono);font-size:11px;color:var(--ink2);
   font-variant-numeric:tabular-nums}
 .slot.off .nm2,.slot.off .num{opacity:.5;font-weight:400}
-.mrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
-  padding:5px 8px;font-size:12px;line-height:1.35;cursor:pointer;
-  border-radius:3px;border:1px solid transparent}
+.mrow{display:block;padding:5px 8px;font-size:12px;line-height:1.35;
+  cursor:pointer;border-radius:3px;border:1px solid transparent}
+.mrow .mname{font-weight:600}
+.mrow .mname input.sw{display:inline-block;width:13px;height:13px;padding:0;
+  border-radius:2px;border:1px solid rgba(0,0,0,.35);margin-right:6px;
+  vertical-align:-2px;background:none;cursor:pointer}
+.mrow .mname input.sw::-webkit-color-swatch-wrapper{padding:0}
+.mrow .mname input.sw::-webkit-color-swatch{border:none;border-radius:1px}
+#matedit{display:flex;align-items:center;gap:8px;margin:10px 0 2px;
+  flex-wrap:wrap}
+#matedit input[type=color]{width:34px;height:22px;padding:0;border:1px solid
+  var(--line);border-radius:3px;background:none;cursor:pointer}
+.mrow .mnum{font-family:var(--mono);font-size:10.5px;color:var(--ink2);
+  font-variant-numeric:tabular-nums;margin-top:1px}
+.mrow.on .mnum{color:var(--panel);opacity:.85}
 .mrow:hover{background:var(--sunk);border-color:var(--line)}
 .mrow.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 .mrow.on .rho{color:var(--panel);opacity:.85}
@@ -1292,10 +1304,47 @@ function renderMaterials(){
     const weak = rank.indexOf(worst) >= 0 && rank.indexOf(worst) <= 2
       ? ' <span class="tag" title="'+PROV_TIP(worst).replace(/"/g,'&quot;')
         + '">'+(PROV_KO[worst]||worst)+'</span>' : '';
+    // EVERY MATERIAL SHOWS ITS NUMBERS. The list used to give a name and the
+    // reflectance only, so choosing between eleven near-identical black
+    // finishes meant clicking each one to see what it actually was -- and the
+    // two numbers that decide the head-on flash were the hidden ones.
+    // alpha, not the stored slider: Cycles squares the slider, so the slider
+    // is a number no paper can be compared against.
+    const a = (+m.rough) * (+m.rough);
     return '<div class="mrow'+(o.value===cur?' on':'')+'" data-mat="'+o.value+'">'
-      + '<div>'+MATNAME(m, o.value)+weak+'</div>'
-      + '<div class="rho">'+(100*m.rho0).toFixed(3)+'%</div></div>';
+      + '<div class="mname"><input type="color" class="sw" value="'+m.color
+      + '" data-col="'+o.value+'" title="colour of '+MATNAME(m, o.value)
+      + '">'+MATNAME(m, o.value)+weak+'</div>'
+      + '<div class="mnum">'+(100*m.rho0).toFixed(3)+' %'
+      + ' &middot; diffuse '+(+m.df).toFixed(4)
+      + ' &middot; &alpha; '+a.toFixed(4)+'</div></div>';
   }).join('');
+  // COLOUR IS EDITABLE ON EVERY ROW, not just on whichever one happens to be
+  // selected. It is a label: nothing in the renderer reads it and no measured
+  // number can move, so it needs no lock -- unlike rho0/df/roughness, which
+  // 66 426 published rows point at by id. The swatch IS the control, and it
+  // must not also count as "put this material in the slot", hence the
+  // stopPropagation and the draggable=false on it.
+  for(const c of list.querySelectorAll('[data-col]')){
+    c.draggable = false;
+    for(const ev of ['click','mousedown','dragstart'])
+      c.addEventListener(ev, e => e.stopPropagation());
+    c.addEventListener('change', async e => {
+      e.stopPropagation();
+      const id = c.dataset.col;
+      try{
+        const r = await fetch('/api/material_color', {method:'POST',
+          body: JSON.stringify({id: id, color: c.value})});
+        const j = await r.json();
+        if(j.error) throw new Error(j.error);
+        CO[id].color = j.color;      // keep the page and the file in step
+        renderMaterials(); draw();
+      }catch(err){
+        const n = $('#matprovnote');
+        if(n) n.innerHTML = 'colour save failed: ' + err.message;
+      }
+    });
+  }
   for(const el of list.querySelectorAll('[data-mat]')){
     el.setAttribute('draggable', 'true');
     el.addEventListener('click', () => assign(MATSEL, el.dataset.mat));
