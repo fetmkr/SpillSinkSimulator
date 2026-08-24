@@ -12,7 +12,7 @@
 화면 쪽(누르기·끌기·색 고르개)은 여기서 안 본다. 브라우저가 필요하고,
 그건 따로 돌린다.
 """
-import sys, json, time, urllib.request, urllib.error, os
+import sys, json, re, time, urllib.request, urllib.error, os
 
 BASE = "http://127.0.0.1:8777"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -342,7 +342,57 @@ def G():
     check("G", "G6 범위 밖 값은 거절한다", g6)
 
 
-GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G}
+def H():
+    """브라우저 쪽 코드는 서버에서 못 재 본다. 서버가 내주는 HTML 을 읽어서
+    이미 한 번 당한 실수가 다시 들어왔나만 본다.
+
+    H1 은 2026-08-24 에 사용자 화면이 까맣던 진짜 원인이다.
+    `addEventListener('resize', draw)` 라고 쓰면 브라우저가 draw 에
+    resize 이벤트를 첫 인자로 넘긴다. 그 자리는 `draw(fw, fh)` 의 fw --
+    보고서 스냅숏용 명시 크기다. `w = fw || cv.clientWidth` 가 이벤트
+    객체가 되고 `cv.width = w * dpr` 가 NaN 이 되어 캔버스 폭이 0 이 된다.
+    창을 한 번 조절하면 3D 화면이 까맣고, 아무 에러도 안 나고,
+    삼각형 수와 build 시간은 멀쩡히 찍힌다. 그래서 못 찾았다.
+    """
+    print("\n H. 브라우저 코드에 옛 실수가 다시 들어왔나", flush=True)
+    _, raw = call("/")
+    src = raw.decode("utf-8", "replace")
+    lines = src.split("\n")
+
+    def live(pat):
+        # 주석 줄은 뺀다 -- H1 의 설명 주석 자체가 걸리면 안 된다
+        return [(i + 1, l) for i, l in enumerate(lines)
+                if re.search(pat, l) and not l.lstrip().startswith(("//", "*", "/*"))]
+
+    def h1():
+        hits = live(r"addEventListener\([^,]+,\s*[A-Za-z_$][\w$]*\s*\)")
+        return (not hits, "맨 함수를 콜백으로 넘긴 곳 %d" % len(hits)
+                + ("" if not hits else " -- %d 줄" % hits[0][0]))
+
+    def h2():
+        # 캔버스 크기를 정하는 줄은 하나뿐이어야 하고, 거기서만 dpr 을 곱한다
+        hits = live(r"cv\.width\s*=")
+        return (len(hits) == 1, "cv.width 를 정하는 곳 %d 군데" % len(hits))
+
+    def h3():
+        # 창 조절은 인자 없이 불러야 한다
+        hits = live(r"addEventListener\(\s*['\"]resize['\"]")
+        ok = len(hits) == 1 and "=> draw()" in hits[0][1]
+        return (ok, "resize 핸들러 %d 개%s"
+                % (len(hits), "" if ok else " -- 인자 없이 부르지 않는다"))
+
+    def h4():
+        return ("[hidden]{display:none!important}" in src.replace(" ", ""),
+                "[hidden] 을 !important 로 눌렀나")
+
+    check("H", "H1 이벤트가 함수 첫 인자로 새는 곳이 없다", h1)
+    check("H", "H2 캔버스 크기는 한 곳에서만 정한다", h2)
+    check("H", "H3 창 조절은 draw() 를 인자 없이 부른다", h3)
+    check("H", "H4 hidden 이 진짜로 숨긴다", h4)
+
+
+GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H}
+
 
 if __name__ == "__main__":
     want = [a.upper() for a in sys.argv[1:]] or list(GROUPS)

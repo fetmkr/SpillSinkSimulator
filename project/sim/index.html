@@ -1628,6 +1628,49 @@ async function matchStudy(s){
 
 // ---------- WebGL, flat-shaded, orbit
 const gl = $('#gl').getContext('webgl2', {antialias:true});
+
+// A LOST CONTEXT MUST NOT LOOK LIKE AN EMPTY PANEL. The browser can take the
+// 3D context away -- another process leaning on the GPU is enough, and this
+// machine renders in Blender constantly -- and when it does, every draw call
+// becomes a no-op. The canvas stays exactly as it was: black, with the rest of
+// the page still working, the triangle count still printed, and nothing
+// anywhere saying the picture is stale. Say it, and take the browser's offer
+// to restore it.
+(function watchContext(){
+  const cvEl = $('#gl');
+  const say = (msg, bad) => {
+    let n = $('#gllost');
+    if(!n){
+      n = document.createElement('div'); n.id = 'gllost';
+      n.style.cssText = 'position:absolute;left:12px;top:12px;z-index:40;'
+        + 'padding:7px 11px;border-radius:4px;font:12px/1.5 var(--mono);'
+        + 'max-width:340px';
+      cvEl.parentElement.appendChild(n);
+    }
+    n.style.background = bad ? '#5b1d16' : '#14351f';
+    n.style.color = bad ? '#ffd9d2' : '#c8f0d6';
+    n.innerHTML = msg;
+    n.hidden = false;
+  };
+  cvEl.addEventListener('webglcontextlost', ev => {
+    // preventDefault is what makes the browser willing to give it back
+    ev.preventDefault();
+    say('<b>3D view lost its GPU context.</b><br>The picture below is stale. '
+      + 'Measurements are unaffected &mdash; they run on the server. '
+      + 'Waiting for the browser to restore it; reload if it does not.', true);
+  }, false);
+  cvEl.addEventListener('webglcontextrestored', () => {
+    say('3D context restored &mdash; reload the page to rebuild the view.', false);
+  }, false);
+  // A context can also be already-lost by the time a draw runs, with no event
+  // (it fires once, and a page that missed it never hears again). Check.
+  setInterval(() => {
+    if(gl.isContextLost()){
+      say('<b>3D view lost its GPU context.</b><br>The picture is stale. '
+        + 'Reload the page.', true);
+    }
+  }, 4000);
+})();
 const P = gl.createProgram();
 function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; }
@@ -2038,7 +2081,15 @@ function draw(fw, fh){
     gl.useProgram(P); gl.bindVertexArray(VAO);
   }
 }
-addEventListener('resize', draw);
+// NOT `addEventListener('resize', draw)`. The listener is handed the resize
+// Event as its first argument, which lands in `draw(fw, fh)` as the explicit
+// framebuffer width -- so `w = fw || cv.clientWidth` becomes the Event object,
+// `cv.width = w * dpr` becomes NaN, and the canvas collapses to zero width.
+// One window resize and the 3D view is black for good: every later draw sizes
+// the buffer from the same clientWidth but the canvas is already 0. Nothing
+// errors, the mesh still loads, the triangle count still prints. Pass no
+// arguments; the explicit size is only for offscreen report snapshots.
+addEventListener('resize', () => draw());
 
 // ---------- boot
 (async () => {
