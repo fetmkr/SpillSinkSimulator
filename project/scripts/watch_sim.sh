@@ -1,9 +1,21 @@
 #!/bin/zsh
 # Keep the simulator up, and keep checking that it still works.
 #
-# Two jobs, because two things have gone wrong repeatedly:
-#   the server dies or gets wedged and nothing notices for hours
-#   an edit quietly breaks something and nobody finds out until it is shipped
+# Two jobs, and only one of them has ever been needed.
+#
+#   CHECKING is what earns its keep: an edit quietly breaks something and
+#   nobody finds out until it ships. Ten-odd edits on 2026-08-24 were each
+#   confirmed clean within three minutes by this loop.
+#
+#   RESTARTING has never fired. 332 consecutive checks over 19 hours, zero
+#   restarts; the server sat at 0.0 % CPU the whole time. The first version of
+#   this comment claimed "the server dies or gets wedged and nothing notices
+#   for hours" -- that was written without checking, and it is not true of the
+#   server. What did die silently were BATCH jobs (the Cycles Metal shader
+#   cache, in their own Blender), and what stalled for eight hours was the JOB
+#   QUEUE. I moved someone else's failure onto the server's record.
+#   The restart path stays because it costs nothing and a wedged server would
+#   otherwise be invisible -- but it is insurance, not experience.
 #
 # So: every INTERVAL seconds, ping the server; restart it if it is not
 # answering, and run the checklist. Anything that fails is written to
