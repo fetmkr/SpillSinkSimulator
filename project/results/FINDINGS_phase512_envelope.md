@@ -28,7 +28,7 @@ yet) and beam azimuth (never controlled). Worst-over-(φ × roughness):
 
 1. The pre-coupon honest claim for EITHER finalist, worst-over-φ:
    **"3× to 5× darker than a flat Musou wall; which end depends on the
-   paint's lobe width, which one 도장 쿠폰 measurement fixes."**
+   paint's lobe width, which one 도장 시험 조각 measurement fixes."**
    (1.141/0.390 = 2.9× at r0.50; 1.141/0.212 = 5.4× at r≤0.30. The
    5.6 figure of up to 11.6× survives only if the azimuth happens to be
    aligned — it is a φ0 number, not a claimable one.)

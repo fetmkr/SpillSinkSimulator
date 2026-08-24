@@ -338,7 +338,7 @@ profile that was designed"* 이고, `:56-77` 은 0.649 % 무지지 면적 결함
 
 **나쁘게 풀리면.** 발주가 불가능하거나, 설계와 다른 물건이 나옵니다.
 `SAMPLES.md:110` 이 인용하는 "실측 최소 단면 0.437 mm" 도 **d30/p7.5, hseg 3**
-쿠폰에서 잰 값입니다 — 같은 파일 §1이 *"any profile claim requires
+시험 조각에서 잰 값입니다 — 같은 파일 §1이 *"any profile claim requires
 height_seg ≥ 16"* 이라고 무효 선언한 그 설정입니다.
 
 ---
