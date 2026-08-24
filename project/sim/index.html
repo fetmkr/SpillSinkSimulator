@@ -1111,15 +1111,8 @@ const PROV_WHY = {
   bounded:  'no paper gives the number itself; a published measurement pins '
           + 'it to a range and we take the conservative end.',
   analogue: 'borrowed from a similar material -- nobody measured ours.',
-  disputed: 'one published sample sits far off the rest. TAMU 2014 measured '
-          + 'twenty-odd paints, tapes, flocks and felts and every one is under '
-          + '0.2 % specular; Zeng 2019 finds Z307 Lambertian to within 1 % at '
-          + 'normal incidence; Nextel 811-21 is spec\'d at 2 gloss units. '
-          + 'Filip & Vavra 2026 measure one acrylic spray at 10 % -- four to '
-          + 'ten times their OWN chalkboard and Musou samples -- and the paper '
-          + 'says that coat may be thin enough to show the polished aluminium '
-          + 'under it. Several coats is standard practice for stray-light '
-          + 'black. We use 0.99, which is a properly applied coat.',
+  disputed: 'published measurements of this material do not agree. Check '
+          + 'material/_sources.json before quoting it.',
   guess:    'no measurement and no bound. Treat as unknown.' };
 function PROV_TIP(g){ return PROV_WHY[PROV_KO[g]] || PROV_WHY[g] || ''; }
 

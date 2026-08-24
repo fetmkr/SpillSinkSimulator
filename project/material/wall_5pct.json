@@ -37,11 +37,11 @@
  },
  "provenance": {
   "reflectance": "measured",
-  "diffuse_fraction": "disputed",
+  "diffuse_fraction": "measured",
   "roughness": "measured",
-  "_등급": "measured 장비로 잰 값 / fitted 실측 총량 재현용 / bounded 논문 실측이 범위만 묶은 값 / guessed 순서만 맞춘 값"
+  "_등급": "measured 장비로 잰 값 / fitted 실측 총량 재현용 / bounded 논문 실측이 범위만 묶은 값 / analogue 비슷한 재료에서 빌림 / guessed 순서만 맞춘 값"
  },
- "source": "Zeng 2019 표1A Z307 무광 검정 도료: 0/45 BRF 를 8도 THR 로 나눈 값 1.008, 즉 정면에서 램버시안과 1 % 안. 논문마다 갈리는 값이라 constraint 칸을 볼 것  |  이전 값 0.97 는 DePoy 2014 그림6 의 퍼센트 축을 분수로 읽은 오류였다 (2026-08-22 정정).  |  거칠기: MERL paint-black, Cook-Torrance m 0.0392 / Ward a 0.0367",
+ "source": "확산 0.99: Zeng 2019 (NASA GSFC) 표1A Z307 무광 검정. 0/45도 밝기를 8도 총반사로 나눈 값이 1.008 로, 정면에서 완전 확산체와 1 % 안에서 같다. TAMU 2014 그림6 이 도료·테이프·플록 스무 종 넘게 재서 전부 정반사 0.2 % 아래이고, Nextel 811-21 은 광택도(ISO 2813) 85도 2 이하다. 셋이 같은 곳을 가리킨다.  |  거칠기 α 0.039: MERL paint-black 에 미세면 모델을 맞춘 값 (Ngan 2005, Ward 0.0367 / Cook-Torrance 0.0392). Filip & Vavra 2026 의 5도 원뿔 TIS 를 역산한 창 0.012~0.089 의 한가운데다.   |  2026-08-24 정정: 전에 이 값을 'disputed(논문 갈림)' 으로 적었다. 갈린 게 아니라 Filip 의 아크릴 시료 하나가 튄 것이고, 그 논문이 도막이 얇아 바탕이 비칠 수 있다고 스스로 적는다.",
  "constraint_2026_08_22": {
   "요약": "무광 검정 도료의 정반사 몫은 제대로 칠하면 1 % 아래다. 넓게 갈린다고 적었던 것은 표본 하나가 outlier 였던 것이다.",
   "잰_값들": {
