@@ -255,6 +255,13 @@ details.why p{margin:.4em 0 0}
   <div class="row"><label>Top layer</label><select id="top"></select></div>
   <div class="row"><label>Bottom panel</label><select id="floor"></select></div>
   <div id="floornote" class="note" style="display:none"></div>
+  <!-- HOW it is made, not WHAT shape it is. The two were the same field until
+       2026-08-25: a square grid was always "print" (0.40 mm floor), so a
+       0.08 mm slotted metal blade read BELOW FLOOR even though the app's own
+       table already lists "sheet, grid" at 0.05 mm. The shape does not decide
+       the process; the workshop does. Blank = the family's usual process. -->
+  <div class="row"><label>Made how</label><select id="proc"></select></div>
+  <div id="procnote" class="note" style="display:none"></div>
 
   <div class="grp">
     <div class="sl"><span class="nm">panel size <b id="v_panel">100.0</b> mm sq</span>
@@ -295,6 +302,7 @@ details.why p{margin:.4em 0 0}
          never said what decided them. The section draws the cell in profile
          with the real millimetres on it. -->
     <div id="matdiagram"></div>
+  <p class="note" id="matclash" hidden></p>
     <!-- moved out of Coating on 2026-08-23: it explains which layer the three
          slots describe, so it belongs beside them, and it used to open with
          "these three" pointing at menus that are no longer on screen. -->
@@ -727,6 +735,10 @@ function spec(){
   const s = { top: $('#top').value, top_params: collect($('#tp')),
               depth: +$('#depth').value, panel: +$('#panel').value,
               margin_depths: 0.2 };
+  // empty string means "whatever this family is usually made by", which is
+  // what every published measurement assumed, so it must stay the default
+  const pv = $('#proc') ? $('#proc').value : '';
+  if(pv) s.process = pv;
   if(floor !== 'none'){ s.floor = floor; s.floor_params = collect($('#fp'));
                         s.floor_depth = +$('#fdepth').value; }
   else s.floor = 'none';
@@ -874,12 +886,25 @@ function showDerived(d){
     // exist for THIS combination -- the same list the Materials legend shows.
     // It went on saying "pink = painted · green = bottom panel · painted 10 %
     // from the tip" for a plain flat panel, which has none of those things.
-    + (NOTOP()
-        ? `one surface · `
-        : (`blue = top layer · pink = painted · `
-           + (SEALED_TOP() ? '' : 'green = bottom panel · ')
-           + (_pc>0 ? `painted ${Math.round(_pc)} % from the tip · `
-                    : 'top layer not painted · ')))
+    // THE CAPTION NAMED COLOURS while the colours were fixed per slot. They
+    // now come from the material, so "blue = top layer" would be a lie the
+    // moment someone recolours a material. It names the MATERIAL on each
+    // surface instead, which is the thing the colour is standing for.
+    + (() => {
+        const use = slotMaterials();
+        const nm = id => (id && CO[id]) ? MATNAME(CO[id], id) : null;
+        const seen = [];
+        const add = (k, what) => { const n = nm(use[k]);
+          if(n && !seen.some(s => s.n === n)) seen.push({n, what}); };
+        add('base', NOTOP() ? 'panel' : 'top layer');
+        if(!NOTOP()) add('paint', 'painted over it');
+        if(!NOTOP() && !SEALED_TOP()) add('floor', 'bottom panel');
+        return seen.map(s => `${s.what} = ${s.n}`).join(' · ')
+          + (seen.length ? ' · ' : '')
+          + (NOTOP() ? ''
+             : (_pc>0 ? `painted ${Math.round(_pc)} % from the tip · `
+                      : 'top layer not painted · '));
+      })()
     + `drag to orbit, scroll to zoom`;
 }
 
@@ -978,6 +1003,9 @@ function baseNameOnly(){ return $('#deepcoat').value; }
 // model -- never ran. The viewport was simply empty, with no message.
 // Filled by boot(); read by anything.
 let CO = {};
+// same reason as CO: top-level functions read it, so it cannot be a
+// `const` inside boot(). That mistake blanked the 3D view once already.
+let PROCS = {floors:{}, default_for:{}};
 
 // ---------- the material's own diffuse fraction and roughness
 // Until 2026-08-22 these were two panel-wide sliders sitting at 0.76 / 0.30,
@@ -1034,19 +1062,87 @@ function syncMaterialSliders(){
 
 // ---------- what the panel is painted with, in one line
 // ---------- the material library, and the three slots that point at it
-// ZONE colours are a schematic, not a measurement. Every material in the
-// library is near-black -- musou_fit is #2a2d33 -- so tinting the viewport
-// with the real colours would make all three surfaces identical and say
-// nothing. So the viewport gets one fixed colour per SLOT, and the legend
-// below carries that same colour plus the material's own swatch, so the map
-// from colour to material is always on screen next to the picture.
+// THE PICTURE FOLLOWS THE MATERIAL, NOT THE SLOT (2026-08-25).
+//
+// It used to be one fixed colour per slot: blue top, red paint, green floor.
+// That answered "which slot is this" and nothing else. Put the same material
+// in two slots and the picture drew two colours; put two different materials
+// in and it drew the same two colours it always did. The colour said where
+// a surface sat, never what it was made of.
+//
+// So the colour now comes from the material's own `color`, which the library
+// list already lets you set, and which the reports already use for labelling.
+// Change a material's colour once and the viewport, the section drawing, the
+// legend and the report all move together.
+//
+// The catch, and why the fixed scheme existed: every material in the library
+// is a near-black blue-grey. Measured 2026-08-25 they run hue 217-224 deg,
+// value 10-49 %. Painted into a dark viewport at their real lightness all
+// three surfaces are black. So the HUE is kept exactly as authored -- that is
+// the part a person chooses and recognises -- and only the LIGHTNESS is
+// lifted into a band the screen can show. A material set to a real colour
+// stays that colour; a material left near-black becomes a legible tint of the
+// same hue, and the darker material still draws darker.
+//
+// None of this reaches the renderer. Cycles never sees these numbers.
+// ZONE stays as the fallback for a slot whose material cannot be read.
 const ZONE = { base:  [0.38, 0.62, 1.00],   // 바탕 -- cool blue
                paint: [1.00, 0.42, 0.55],   // 덧칠 -- warm red
                floor: [0.30, 0.82, 0.52] }; // 바닥 -- green
-// The viewport is dark and the sidebar is light, so the same slot needs two
-// lightnesses of the same hue. Using the viewport's bright tints in the
-// sidebar is what made the first version unreadable.
 const ZONE_CSS = { base:'#2f6fd0', paint:'#d63e63', floor:'#1f8f52' };
+
+function hex2rgb(h){
+  const s = String(h||'').replace('#','');
+  if(s.length !== 6) return null;
+  const n = parseInt(s,16);
+  if(!isFinite(n)) return null;
+  return [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+}
+function rgb2hsl(r,g,b){
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2;
+  if(mx===mn) return [0,0,l];
+  const d=mx-mn, s = l>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+  let h;
+  if(mx===r) h=((g-b)/d + (g<b?6:0));
+  else if(mx===g) h=(b-r)/d + 2;
+  else h=(r-g)/d + 4;
+  return [h/6, s, l];
+}
+function hsl2rgb(h,s,l){
+  if(s===0) return [l,l,l];
+  const q = l<0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+  const f = tt => { let x=tt; if(x<0)x+=1; if(x>1)x-=1;
+    if(x<1/6) return p+(q-p)*6*x;
+    if(x<1/2) return q;
+    if(x<2/3) return p+(q-p)*(2/3-x)*6;
+    return p; };
+  return [f(h+1/3), f(h), f(h-1/3)];
+}
+// `dark` = the viewport (needs light tints); otherwise the light sidebar.
+// The lightness band is wide enough that a 10 % material and a 49 % one still
+// draw different, and never so dark or so pale that either end vanishes.
+function tintOf(id, dark){
+  const c = (CO && CO[id]) ? hex2rgb(CO[id].color) : null;
+  if(!c) return null;
+  let [h,s,l] = rgb2hsl(c[0],c[1],c[2]);
+  // a grey stays grey rather than turning into an arbitrary hue
+  const sat = s < 0.04 ? 0 : Math.min(0.72, Math.max(s, 0.30));
+  const lo = dark ? 0.46 : 0.28, hi = dark ? 0.80 : 0.52;
+  return hsl2rgb(h, sat, lo + (hi-lo)*Math.max(0, Math.min(1, l/0.55)));
+}
+function tintCss(id, dark){
+  const c = tintOf(id, dark);
+  if(!c) return null;
+  return '#' + c.map(v =>
+    Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,'0')).join('');
+}
+// how far apart two slots look on screen. Two materials the eye cannot
+// separate is a fact worth SAYING, not a reason to override the choice.
+function tintGap(a, b){
+  const x = tintOf(a, true), y = tintOf(b, true);
+  if(!x || !y) return 1;
+  return Math.hypot(x[0]-y[0], x[1]-y[1], x[2]-y[2]);
+}
 // which slot the library list is currently assigning to
 let MATSEL = 'paint';
 // the <select> that actually holds each slot's value. They stay in the DOM as
@@ -1154,6 +1250,10 @@ function slotMaterials(){
  *  use, so the picture and the measurement cannot disagree about which way
  *  is down. */
 function materialDiagram(){
+  // The section drawing and the 3D view must agree, so both read the
+  // material's colour through the same function. `ZC` falls back to
+  // the old fixed slot colour when the material cannot be read.
+  const ZC = k => (tintCss(slotMaterials()[k], false) || ZONE_CSS[k]);
   const dep = +$('#depth').value || 0;
   const pcov = +$('#pcov').value || 0;
   const hasFloor = $('#floor') && $('#floor').value !== 'none';
@@ -1172,11 +1272,11 @@ function materialDiagram(){
   if(NOTOP()){
     // nothing to divide: one surface, drawn as one band
     o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'
-      + (bot-top)+'" fill="'+ZONE_CSS.base+'" opacity="0.92"/>');
+      + (bot-top)+'" fill="'+ZC('base')+'" opacity="0.92"/>');
     o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'
       + (bot-top)+'" fill="none" stroke="var(--ink)" stroke-width="1"/>');
     o.push('<text x="'+(x1+9)+'" y="'+((top+bot)/2+3.5).toFixed(1)
-      + '" font-size="9.5" font-weight="700" fill="'+ZONE_CSS.base
+      + '" font-size="9.5" font-weight="700" fill="'+ZC('base')
       + '">panel</text>');
     o.push('<text x="'+x0+'" y="'+(H-6)+'" font-size="9" fill="var(--ink2)">'
       + 'one surface, nothing to divide</text>');
@@ -1186,17 +1286,17 @@ function materialDiagram(){
   const band = (a, b, col, on) => (b - a < 0.05) ? '' :
     '<rect x="'+x0+'" y="'+y(a).toFixed(1)+'" width="'+(x1-x0)+'" height="'
     + (y(b)-y(a)).toFixed(1)+'" fill="'+col+'" opacity="'+(on?0.92:0.30)+'"/>';
-  o.push(band(0, painted ? pEnd : 0, ZONE_CSS.paint, !!use.paint));
-  o.push(band(painted ? pEnd : 0, fTop, ZONE_CSS.base, !!use.base));
+  o.push(band(0, painted ? pEnd : 0, ZC('paint'), !!use.paint));
+  o.push(band(painted ? pEnd : 0, fTop, ZC('base'), !!use.base));
   // With no floor LAYER there is still a backing plate at the bottom of the
   // wells. Draw it as a thin band, and give it the floor colour only when it
   // is actually a different material -- colouring it apart when it is the
   // same as the base would claim a split that is not there.
   const fSame = use.floor === use.base;
-  if(hasFloor) o.push(band(fTop, dep, ZONE_CSS.floor, !!use.floor));
+  if(hasFloor) o.push(band(fTop, dep, ZC('floor'), !!use.floor));
   else {
     const bTop = dep - Math.max(dep*0.05, 0.8);
-    o.push(band(bTop, dep, fSame ? ZONE_CSS.base : ZONE_CSS.floor, true));
+    o.push(band(bTop, dep, fSame ? ZC('base') : ZC('floor'), true));
   }
   o.push('<rect x="'+x0+'" y="'+top+'" width="'+(x1-x0)+'" height="'+(bot-top)
     + '" fill="none" stroke="var(--ink)" stroke-width="1"/>');
@@ -1211,10 +1311,10 @@ function materialDiagram(){
   o.push(tick(dep, dep.toFixed(0)));
   const lab = (mm, t, col) => '<text x="'+(x1+9)+'" y="'+(y(mm)+3.5).toFixed(1)
     + '" font-size="9.5" font-weight="700" fill="'+col+'">'+t+'</text>';
-  if(painted) o.push(lab(pEnd/2, 'painted', ZONE_CSS.paint));
-  o.push(lab((painted?pEnd:0)/2 + fTop/2, 'bare', ZONE_CSS.base));
-  if(hasFloor) o.push(lab((fTop+dep)/2, 'bottom', ZONE_CSS.floor));
-  else if(!fSame) o.push(lab(dep, 'bottom', ZONE_CSS.floor));
+  if(painted) o.push(lab(pEnd/2, 'painted', ZC('paint')));
+  o.push(lab((painted?pEnd:0)/2 + fTop/2, 'bare', ZC('base')));
+  if(hasFloor) o.push(lab((fTop+dep)/2, 'bottom', ZC('floor')));
+  else if(!fSame) o.push(lab(dep, 'bottom', ZC('floor')));
   o.push('<text x="'+x0+'" y="'+(H-6)+'" font-size="9" fill="var(--ink2)">'
     + 'mm below the tip</text>');
   o.push('</svg>');
@@ -1281,7 +1381,10 @@ function renderMaterials(){
   const pdEl = $('#pdwrap'); if(pdEl) pdEl.hidden = NOTOP();
   host.innerHTML = SLOTS.map(k => {
     const id = use[k], m = id ? CO[id] : null;
-    const zoneCol = (k === 'floor' && floorSame) ? ZONE_CSS.base : ZONE_CSS[k];
+    // the card's stripe is the SAME colour the 3D view paints that
+    // surface, so the picture and the list can be matched by eye
+    const zoneCol = tintCss((k === 'floor' && floorSame) ? use.base : id, false)
+                    || ((k === 'floor' && floorSame) ? ZONE_CSS.base : ZONE_CSS[k]);
     let num = '&mdash;', extra = '';
     if(m){
       // alpha is the physical lobe width. The stored `rough` is the value the
@@ -1489,6 +1592,28 @@ function renderMaterials(){
   }
   const dg = $('#matdiagram');
   if(dg) dg.innerHTML = materialDiagram();
+
+  // TWO SURFACES THE EYE CANNOT SEPARATE. Every material in the library is a
+  // near-black blue-grey, so two DIFFERENT materials can still draw almost
+  // the same tint. That is worth SAYING; it is not worth overriding the
+  // colours the user chose, and it is certainly not a reason to refuse a
+  // combination. Say it, name the fix, and leave the choice alone.
+  const warn = $('#matclash');
+  if(warn){
+    const pairs = [['base','paint'], ['base','floor'], ['paint','floor']];
+    const bad = pairs.filter(([a,b]) => use[a] && use[b] && use[a] !== use[b]
+                                        && tintGap(use[a], use[b]) < 0.10);
+    if(!bad.length){ warn.hidden = true; warn.textContent = ''; }
+    else {
+      warn.hidden = false;
+      warn.innerHTML = bad.map(([a,b]) =>
+        `<b>${MATNAME(CO[use[a]],use[a])}</b> and <b>${MATNAME(CO[use[b]],use[b])}</b>`
+        ).join(', ')
+        + ' draw almost the same colour, so the picture cannot tell them apart.'
+        + ' Give one of them a different colour in the list below —'
+        + ' colour changes nothing that is measured.';
+    }
+  }
 
   // THE CONTROL THAT SETS THE PAINT BOUNDARY BELONGS BESIDE THE PICTURE OF
   // THAT BOUNDARY. The coverage slider lived down in Coating, below this
@@ -2060,13 +2185,17 @@ function draw(fw, fh){
     // slot underneath it rather than going grey, because the surface is still
     // made of something.
     const use = (typeof slotMaterials === 'function') ? slotMaterials() : {};
-    const zc = k => ZONE[k];
+    // The material's own colour, lifted to something the screen can show.
+    // Falls back to the old fixed slot colour only if the material cannot be
+    // read -- a surface with no colour at all would be worse than a wrong one.
+    const zc = k => tintOf(use[k], true) || ZONE[k];
     gl.uniform3fv(gl.getUniformLocation(P,'cBase'),  new Float32Array(zc('base')));
     gl.uniform3fv(gl.getUniformLocation(P,'cPaint'),
                   new Float32Array(use.paint ? zc('paint') : zc('base')));
     // The floor slot is never empty now, so "is it set" no longer separates
     // a real second finish from the backing simply being the base material.
-    // Tint it apart only when it actually differs.
+    // The same material must draw the same colour, so compare the MATERIAL,
+    // not the slot: a floor that is the base material takes the base's tint.
     const fDiff = use.floor && use.floor !== use.base;
     gl.uniform3fv(gl.getUniformLocation(P,'cFloor'),
                   new Float32Array(fDiff ? zc('floor') : zc('base')));
@@ -2116,6 +2245,33 @@ addEventListener('resize', () => draw());
     // stored result use it -- and only the label changed.
     + (k === 'none' ? 'flat — plain panel' : k)
     + '</option>').join('');
+  // ---- how it is made. The floors come from analyze_buildable.PROCESS_FLOOR
+  // so there is one table, not two. Blank keeps the family's usual process,
+  // which is what every published measurement assumed.
+  PROCS = await (await fetch('/api/processes')).json();
+  const ps = $('#proc');
+  if(ps){
+    const fl = PROCS.floors || {};
+    ps.innerHTML = '<option value="">as usual for this shape</option>'
+      + Object.keys(fl).sort().map(k =>
+          `<option value="${k}">${k} — ${fl[k].floor_mm.toFixed(2)} mm</option>`
+        ).join('');
+    const note = () => {
+      const n = $('#procnote'); if(!n) return;
+      const k = ps.value, d = $('#top') ? PROCS.default_for[$('#top').value] : null;
+      if(!k){ n.style.display = d ? '' : 'none';
+              n.textContent = d ? `usually made by: ${d}` + (fl[d]
+                ? ` (${fl[d].floor_mm.toFixed(2)} mm floor)` : '') : ''; }
+      else { n.style.display = ''; n.textContent = fl[k] ? fl[k].why : ''; }
+    };
+    ps.addEventListener('change', () => { note(); refresh(); });
+    // not `addEventListener('change', note)` -- see the resize note
+    // near draw(). `note` takes no arguments today, so the leaked
+    // event would be harmless, but the rule is what makes it stay so.
+    if($('#top')) $('#top').addEventListener('change', () => note());
+    note();
+  }
+
   // ---- presets: open on something real, not on dataclass defaults
   const PRE = (await (await fetch('/api/presets')).json()).presets;
   const named = PRE.filter(p => p.headline)

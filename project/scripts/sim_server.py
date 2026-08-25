@@ -484,6 +484,18 @@ def field_spec(mod, cname, fixed, key=None):
     return out
 
 
+def processes_json():
+    """만들 수 있는 공정과 각 공정의 살 두께 한계.
+
+    표는 `analyze_buildable.PROCESS_FLOOR` 가 정본이다. 여기서 다시 적지
+    않는다 -- 두 군데에 적으면 한 군데만 고치게 된다.
+    """
+    import analyze_buildable as AB
+    return {"floors": {k: {"floor_mm": v[0], "why": v[1]}
+                       for k, v in AB.PROCESS_FLOOR.items()},
+            "default_for": dict(PROC_OF)}
+
+
 def families_json():
     out = {"top": {}, "floor": {}}
     for k, v in FAMILIES.items():
@@ -1335,6 +1347,22 @@ PROC_OF = {"comb": "expanded foil", "honeycomb": "expanded foil",
 
 
 def min_feature(spec):
+    """(가장 작은 살 두께 mm, 그걸 만드는 공정).
+
+    공정은 원래 모양에 붙어 있었다 -- `PROC_OF` 가 가족 이름으로 공정을
+    정했다. 그런데 같은 모양을 두 가지로 만들 수 있다. 사각 격자는
+    3D 프린트로도 만들고 (한계 0.40 mm), 홈 낸 띠를 끼워서도 만든다
+    ("sheet, grid", 한계 0.05 mm). 2026-08-25 에 사용자가 끼워 맞추는
+    쪽을 물었는데 앱은 0.08 mm 날을 "BELOW FLOOR" 라고 했다. 만드는
+    방법이 정할 일을 모양이 정하고 있었다.
+
+    그래서 `spec["process"]` 로 덮어쓸 수 있게 한다. 안 보내면 예전대로
+    가족 기본값을 쓴다. 발표된 결과는 이 값을 안 보내므로 그대로다.
+
+    한계: 덮어쓰기는 판 전체에 걸린다. 위층과 받침판이 서로 다른 공정인
+    경우는 아직 못 나타낸다.
+    """
+    override = (spec.get("process") or "").strip() or None
     best = None
     for kind, prm in ((spec["top"], spec.get("top_params") or {}),
                       (spec.get("floor", "none"),
@@ -1355,7 +1383,7 @@ def min_feature(spec):
             continue
         v = min(vals)
         if best is None or v < best[0]:
-            best = (v, PROC_OF.get(kind, "print"))
+            best = (v, override or PROC_OF.get(kind, "print"))
     return best if best else (None, None)
 
 
@@ -2313,6 +2341,8 @@ class H(BaseHTTPRequestHandler):
                               {"Cache-Control": "no-store"})
         if p == "/api/families":
             return self._send(200, json.dumps(families_json()))
+        if p == "/api/processes":
+            return self._send(200, json.dumps(processes_json()))
         if p == "/api/coatings":
             return self._send(200, json.dumps(coatings_json()))
         if p == "/api/presets":
