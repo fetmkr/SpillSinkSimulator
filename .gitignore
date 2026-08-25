@@ -9,8 +9,20 @@ project/results/crops.npz
 
 # Published papers used as references. Left out because they are other
 # people's copyrighted PDFs, not this project's work; the citations are in the
-# report and in the script docstrings. Drop this line if you want them tracked.
+# report and in the script docstrings. Drop these lines if you want them tracked.
+#
+# The pattern used to be `project/reference/*.pdf` alone, which does NOT reach
+# a subdirectory -- a `*` never crosses a `/`. So six PDFs under
+# reference/papers/ were committed while the rule said they were excluded, and
+# the thirteen added on 2026-08-25 were about to follow. `**` covers the whole
+# tree. The six already in the index stay there: .gitignore does not untrack,
+# and dropping them would not shrink the repository either, since the blobs are
+# already in history. What this stops is adding more.
+#
+# `reference/INDEX.md` IS tracked, and it is the part that matters: it says
+# what every paper is, what we took from it, and where to get it again.
 project/reference/*.pdf
+project/reference/**/*.pdf
 
 __pycache__/
 *.pyc

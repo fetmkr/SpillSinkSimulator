@@ -56,7 +56,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FloorParams:
-    kind: str = "pyramid"            # cone | pyramid | wave | gap
+    kind: str = "pyramid"            # cone | pyramid | pyramid_inv | wave | gap
     face_w: float = 60.0
     face_h: float = 60.0
     depth: float = 3.0               # how deep the shaping runs
@@ -197,6 +197,118 @@ def _build_pyramid(p: FloorParams):
     if p.valley_round > 0:
         _valley_beads(verts, faces, p)
     _slab(verts, faces, p, -p.depth - abs(p.row_offset))
+    return verts, faces
+
+
+def _build_pyramid_inv(p: FloorParams):
+    """Square pyramids, apex DOWN -- pits cut into a block. The mould form.
+
+    Why this exists. 2026-08-25: the user pointed out that pressing a sheet
+    into pyramids gives pits on the other face for free -- the same part,
+    turned over. And the photovoltaic literature has already compared the two
+    for exactly the reason that matters here: **light takes one or two more
+    bounces in an inverted pyramid than on an upright one**, because a pit
+    converges the ray while a peak deflects it away. Measured on silicon,
+    solar-weighted reflectance 400-1000 nm is 12-14 % upright against under
+    7 % inverted [Solar Energy 2023, doi:10.1016/j.solener.2023.03.049].
+
+    One extra bounce is worth far more to us than to a solar cell. Musou keeps
+    0.998 % per bounce, so an extra bounce on a path divides it by a hundred.
+
+    Registered as its own kind rather than a flag on `pyramid`, so not one
+    byte of the published pyramid path changes.
+
+    Geometry, in this family's convention (y = 0 is the top plane, everything
+    below is negative): the OPENING is at y = 0 and the apex is the point at
+    y = -depth. Pits tile edge to edge, so the top plane has no flat area at
+    all -- the ridges between pits are lines. That is the whole point: on a
+    honeycomb it is the flat rim that returns half the head-on light.
+
+    THE FIRST VERSION LEFT 9,604 OPEN EDGES and `gate_model_fitness` said so
+    on the first run (the upright pyramid scores 0 in the same table). It gave
+    each cell its own four corner vertices, so every opening edge belonged to
+    one triangle instead of two and the whole top plane was a sieve. The pit
+    walls now share ONE grid of corner vertices, which is what makes adjacent
+    pits meet along a real edge. The field is then closed as a single solid --
+    a skirt down the outside and one bottom quad -- which overlaps the slab,
+    the same "overlap is free, the union is the geometry" convention the
+    upright pyramid uses where its bases meet the slab.
+
+    `tip_flat` truncates the BOTTOM of the pit here, not the top. A press
+    cannot drive a mathematical point into steel any more than it can raise
+    one, so the same honesty applies at the other end.
+    """
+    verts, faces = [], []
+    a = p.pitch / 2.0
+    t = max(0.0, min(p.tip_flat, p.pitch * 0.8)) / 2.0
+
+    x = (p.seed * 1103515245 + 12345) & 0x7FFFFFFF
+
+    def rng():
+        nonlocal x
+        x = (x * 1103515245 + 12345) & 0x7FFFFFFF
+        return x / 2147483648.0
+
+    jmax = max(0.0, min(p.apex_jitter, 0.9)) * (a - t)
+    # `tip_drop` raises the pit bottom (a shallower pit), the same physical
+    # thing it does upright: the apex wanders toward the slab.
+    dmax = max(0.0, min(p.tip_drop, 0.6)) * p.depth
+
+    m = p.margin()
+    n_x = int((p.face_w + 2 * m) / p.pitch) + 2
+    n_z = int((p.face_h + 2 * m) / p.pitch) + 2
+    x0, z0 = -m, -(p.face_h / 2.0 + m)
+
+    # ONE shared grid of corner vertices. Index (ix, iz) -> ix + iz*(n_x+1).
+    for iz in range(n_z + 1):
+        for ix in range(n_x + 1):
+            verts.append((x0 + ix * p.pitch, 0.0, z0 + iz * p.pitch))
+
+    def corner(ix, iz):
+        return ix + iz * (n_x + 1)
+
+    for iz in range(n_z):
+        for ix in range(n_x):
+            cx = x0 + (ix + 0.5) * p.pitch
+            cz = z0 + (iz + 0.5) * p.pitch
+            jx = (2.0 * rng() - 1.0) * jmax
+            jz = (2.0 * rng() - 1.0) * jmax
+            ay = -p.depth + rng() * dmax
+            c = [corner(ix, iz), corner(ix + 1, iz),
+                 corner(ix + 1, iz + 1), corner(ix, iz + 1)]
+            if t > 0:
+                b = len(verts)
+                verts += [(cx + jx - t, ay, cz + jz - t),
+                          (cx + jx + t, ay, cz + jz - t),
+                          (cx + jx + t, ay, cz + jz + t),
+                          (cx + jx - t, ay, cz + jz + t)]
+                faces.append((b + 3, b + 2, b + 1, b))          # pit bottom
+                for i in range(4):
+                    k = (i + 1) % 4
+                    faces.append((b + i, b + k, c[k], c[i]))
+            else:
+                b = len(verts)
+                verts.append((cx + jx, ay, cz + jz))
+                for i in range(4):
+                    faces.append((b, c[(i + 1) % 4], c[i]))
+
+    # Close the field into one solid: a skirt down the four sides and a bottom.
+    # It sits inside the slab, which is wider; overlap is the union.
+    yb = -p.depth
+    ring = ([corner(ix, 0) for ix in range(n_x + 1)]
+            + [corner(n_x, iz) for iz in range(1, n_z + 1)]
+            + [corner(ix, n_z) for ix in range(n_x - 1, -1, -1)]
+            + [corner(0, iz) for iz in range(n_z - 1, 0, -1)])
+    base = len(verts)
+    for i in ring:
+        verts.append((verts[i][0], yb, verts[i][2]))
+    n = len(ring)
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((ring[i], ring[j], base + j, base + i))
+    faces.append(tuple(base + i for i in range(n - 1, -1, -1)))
+
+    _slab(verts, faces, p, yb)
     return verts, faces
 
 
@@ -575,7 +687,7 @@ def _build_boxgrid(p: FloorParams):
     return verts, faces
 
 
-_BUILDERS = {"boxpanel": _build_boxpanel, "boxgrid": _build_boxgrid, "pyramid": _build_pyramid, "pillars": _build_pillars, "wave": _build_wave, "gap": _build_gap,
+_BUILDERS = {"boxpanel": _build_boxpanel, "boxgrid": _build_boxgrid, "pyramid": _build_pyramid, "pyramid_inv": _build_pyramid_inv, "pillars": _build_pillars, "wave": _build_wave, "gap": _build_gap,
              "pyrmix": _build_pyrmix}
 
 

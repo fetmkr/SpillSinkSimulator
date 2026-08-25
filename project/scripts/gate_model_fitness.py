@@ -217,6 +217,13 @@ DESIGNS = [
                             wall_top=0.08, wall_bot=0.08, jitter=0.0), 60.0),
     ("벌집 간격3 깊이30", dict(topology="honeycomb", pitch=3.0, depth=30.0,
                             wall_top=0.08, wall_bot=0.08, jitter=0.0), 60.0),
+    # 2026-08-25 에 새로 만든 뒤집힌 피라미드. 선 피라미드와 **같은 인자**로
+    # 나란히 둔다 -- 새 모양의 숫자는 옛 모양이 같은 표에서 통과할 때만 뜻이
+    # 있다. 판 옆면을 안 막았을 가능성이 있어서 열린 모서리를 특히 본다.
+    ("피라미드 간격4 깊이22 (기준)", dict(kind="pyramid", pitch=4.0,
+                                     depth=22.0, tip_flat=0.1), 100.0),
+    ("뒤집힌 피라미드 간격4 깊이22", dict(kind="pyramid_inv", pitch=4.0,
+                                    depth=22.0, tip_flat=0.1), 100.0),
 ]
 
 HDR = ("%-34s %7s %8s %7s %8s %9s %9s"

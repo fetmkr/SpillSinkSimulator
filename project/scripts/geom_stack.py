@@ -51,7 +51,7 @@ def _build_layer(kind: str, prm: dict):
     if kind == "cone":
         import geom3d as M
         v, f = M.build_mesh(M.Cone3DParams(**prm))
-    elif kind in ("pyramid", "wave", "gap"):
+    elif kind in ("pyramid", "pyramid_inv", "wave", "gap"):
         # phase 4 floors: a 2-5 mm shaped bottom for a full-depth cell. They
         # honour the same slab contract, so they need no special case beyond
         # this line -- and `gap` legitimately returns an EMPTY layer.
@@ -139,7 +139,8 @@ class StackParams:
         # before a single triangle was built. The UI offers that combination.
         # There is no number to give here, so say so; the readout already
         # renders a missing exposed fraction as a dash.
-        if self.top in ("pyramid", "wave", "gap", "flat", "none"):
+        if self.top in ("pyramid", "pyramid_inv", "wave", "gap", "flat",
+                        "none"):
             return None
         return GC.CellParams(variant=self.top, **p).exposed_fraction_est()
 
@@ -165,7 +166,7 @@ def build_mesh(p: StackParams):
         need = max(max(xs) - p.face_w, -min(xs),
                    max(zs) - p.face_h / 2.0, -min(zs) - p.face_h / 2.0)
         bot_p = dict(p.bot_params)
-        if p.bot in ("pyramid", "wave", "gap"):
+        if p.bot in ("pyramid", "pyramid_inv", "wave", "gap"):
             # Both, and they say the same thing two ways. `margin_depth_ref` is
             # a RATIO that `FloorParams.margin` multiplies by `margin_depths`,
             # so it vanishes when that is zero -- the preview and STL path,

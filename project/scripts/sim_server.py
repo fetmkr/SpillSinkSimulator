@@ -213,6 +213,8 @@ RENDER_LOCK = threading.Lock()
 # `scripts/audit_normal.py` compares this table against params_json and fails
 # if they ever diverge again.
 NORMAL = {
+    "pyramid_inv": dict(pitch=5.5, tip_flat=0.0, apex_jitter=0.0,
+                        tip_drop=0.0, depth=22.0),
     "pyramid":  dict(pitch=5.5, tip_flat=0.0, apex_jitter=0.0, tip_drop=0.0,
                      depth=50.0),
     "comb":     dict(pitch=6.5, wall_top=0.08, wall_bot=0.08, comb_expand=1.0,
@@ -236,6 +238,7 @@ NORMAL = {
     "flat":     dict(depth=10.0),
     "none":     dict(depth=10.0),   # no structure: a plain panel
     "pyramid":  dict(pitch=2.0, tip_flat=0.1, depth=3.0),
+    "pyramid_inv": dict(pitch=2.0, tip_flat=0.1, depth=3.0),
     "wave":     dict(pitch=2.0, depth=3.0),
     "gap":      dict(depth=3.0),
 }
@@ -250,7 +253,8 @@ GROUPS = [
     # `flat` is deliberately absent: it is the same geometry as `none` and
     # offering both is two names for one thing. Loading an old spec that says
     # `flat` still works -- FAMILIES keeps it.
-    ("Candidates", ["pyramid", "comb", "shingle", "cone", "none"]),
+    ("Candidates", ["pyramid", "pyramid_inv", "comb", "shingle", "cone",
+                    "none"]),
     ("Reference and controls", ["honeycomb", "vgroove", "square", "triangle",
                                 "mixed", "reentrant", "nested"]),
 ]
@@ -263,6 +267,12 @@ FAMILIES = {
     # depth). Registered here so depth-vs-pitch and jitter questions can be
     # asked live instead of via a sweep script.
     "pyramid":  ("geom_floor", "FloorParams",  {"kind": "pyramid"}),
+    # The mould form of the pyramid: pits, not peaks. Press a sheet and you
+    # get this on the other face for free -- the same part, turned over.
+    # Photovoltaics has measured the pair: a ray takes one or two more bounces
+    # in a pit than on a peak, and with Musou keeping 0.998 % per bounce an
+    # extra bounce divides that path by a hundred. See _build_pyramid_inv.
+    "pyramid_inv": ("geom_floor", "FloorParams", {"kind": "pyramid_inv"}),
     "cone":     ("geom3d",     "Cone3DParams", {}),
     "comb":     ("geom_topo",  "TopoParams",   {"topology": "comb"}),
     "honeycomb": ("geom_topo", "TopoParams",   {"topology": "honeycomb"}),
@@ -294,6 +304,7 @@ FAMILIES = {
 FLOORS = {
     "none":    None,
     "pyramid": ("geom_floor", "FloorParams", {"kind": "pyramid"}),
+    "pyramid_inv": ("geom_floor", "FloorParams", {"kind": "pyramid_inv"}),
     "wave":    ("geom_floor", "FloorParams", {"kind": "wave"}),
     "gap":     ("geom_floor", "FloorParams", {"kind": "gap"}),
     "cone":    ("geom3d",     "Cone3DParams", {}),
@@ -304,7 +315,8 @@ STACK_KIND = {"cone": "cone", "comb": "comb", "honeycomb": "honeycomb",
               "shingle": "shingle", "truss": "truss", "square": "square",
               "triangle": "triangle", "mixed": "mixed",
               "reentrant": "reentrant", "nested": "nested",
-              "pyramid": "pyramid", "wave": "wave", "gap": "gap"}
+              "pyramid": "pyramid", "pyramid_inv": "pyramid_inv",
+              "wave": "wave", "gap": "gap"}
 
 # Slider ranges, by field-name suffix. Written down rather than guessed at
 # render time so that a field nobody thought about shows up as a number box
@@ -1340,7 +1352,7 @@ FEATURE_KEYS = ("wall_top", "wall_bot", "plate_t_top", "plate_t_bot",
                 "tip_width", "thickness", "tip_flat", "strut_r")
 PROC_OF = {"comb": "expanded foil", "honeycomb": "expanded foil",
            "shingle": "sheet, grid", "truss": "sheet, lanced",
-           "cone": "mould", "pyramid": "press", "wave": "press",
+           "cone": "mould", "pyramid": "press", "pyramid_inv": "press", "wave": "press",
            "gap": "none", "vgroove": "print", "slat": "print",
            "trough": "print", "square": "print", "triangle": "print",
            "mixed": "print", "reentrant": "print", "nested": "print"}
@@ -1721,7 +1733,9 @@ def _render_family(spec):
             # needs the same renderer family. Without this line it fell
             # through to "cell" and CellParams rejected the `kind` argument.
             "none": "floor",
-            "pyramid": "floor"}.get(spec["top"], "cell")
+            "pyramid": "floor",
+            # same builder as `pyramid`, so the same renderer family
+            "pyramid_inv": "floor"}.get(spec["top"], "cell")
 
 
 def _render_params(spec):
