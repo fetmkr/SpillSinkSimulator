@@ -9,7 +9,7 @@ full 3D geometry.
 ## 2026-08-25 — 관 안쪽은 안 칠해도 된다, 그리고 사각 격자
 
 전체 기록: `results/FINDINGS_coating_depth_2026_08_25.md`
-보고서: `report/coating/paint_depth_2026-08-24.html`
+보고서: `report/comb/paint_depth_2026-08-24.html`
 
 계기는 중국 업체가 셀 9.53 / 깊이 40 벌집에 "안쪽까지 못 칠한다, 아노다이징도
 안 된다" 고 답한 것. 칠하는 방법을 찾기 전에 **얼마나 깊이 칠해야 하는지**를

@@ -1,0 +1,282 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How far down does the black have to go</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.fig{background:#f4f1eb;border:1px solid var(--line);border-radius:3px;padding:10px;overflow-x:auto}
+.big{font-size:30px;font-weight:800;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:64ch}
+li{margin:4px 0}
+a{color:var(--cy)}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">2026-08-24 &middot; coating depth</div>
+<h1>How far down does the black have to go</h1>
+<p class="sub">9.53 mm cell &middot; 40 mm deep &middot; 0.08 mm foil. The honeycomb a supplier said could not be painted black on the inside, and could not be anodised either. Both are true of their line. Neither turns out to matter much.</p>
+<p class="tag">Korean edition: <code>paint_depth_2026-08-24.html</code> &mdash; same data, same numbers.</p></header>
+<section><div class="card verdict ok">
+<h2 style="margin:0">Verdict</h2>
+<p class="lead"><b>The deep wall never needed painting.</b> For light arriving head-on, the <b>foil rim</b> and the <b>backing plate</b> decide almost all of it, and both are flat exposed faces. Only oblique light uses the wall, and it stops mattering 15 mm down.</p>
+<div class="grid3">
+<div><div class="tag">foil rim</div><div class="big">51.4 %</div><div style="font-size:13px;color:var(--muted)">the panel's own front face; spray reaches it</div></div>
+<div><div class="tag">cell wall, 1-20 mm</div><div class="big">0.4 %</div><div style="font-size:13px;color:var(--muted)">painting it changes nothing head-on</div></div>
+<div><div class="tag">backing plate</div><div class="big">48.3 %</div><div style="font-size:13px;color:var(--muted)">a flat plate; paint it before bonding</div></div>
+</div>
+<p style="font-size:14px;color:var(--muted)">The three shares of the drop from 0.207 % to 0.039 % head-on.</p>
+</div></section>
+<section><h2>A honeycomb cell is a trap that opens one way</h2>
+<p>The strangest number in the table is that <b>head-on is five times darker than oblique</b>. The reason is on the way out, not the way in.</p>
+<figure><div class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:1080px;height:auto" viewBox="0 0 1080 640" font-family="Helvetica,Arial,sans-serif">
+<rect width="1080" height="640" fill="#f4f1eb"/>
+<defs><marker id="mr" markerWidth="10" markerHeight="10" refX="8" refY="3.2" orient="auto"><path d="M0,0 L8,3.2 L0,6.4 z" fill="#c8401c"/></marker><marker id="mb" markerWidth="10" markerHeight="10" refX="8" refY="3.2" orient="auto"><path d="M0,0 L8,3.2 L0,6.4 z" fill="#1e5fa8"/></marker></defs>
+<rect x="207.9" y="470.0" width="84.2" height="14" fill="#333"/>
+<rect x="209.9" y="150.0" width="4" height="320.0" fill="#333"/>
+<rect x="286.1" y="150.0" width="4" height="320.0" fill="#333"/>
+<text x="250.0" y="84.0" font-size="16" font-weight="bold" fill="#c8401c" text-anchor="middle">Light arriving head-on</text>
+<text x="250.0" y="104.0" font-size="13" fill="#555" text-anchor="middle">never touches a wall, reaches the floor</text>
+<line x1="250.0" y1="118.0" x2="250.0" y2="462.0" stroke="#c8401c" stroke-width="2.5" marker-end="url(#mr)"/>
+<path d="M 250.0 470.0 L 211.9 150.0 L 288.1 150.0 Z" fill="#c8401c" fill-opacity="0.22"/>
+<text x="250.0" y="518.0" font-size="13" fill="#c8401c" text-anchor="middle">exit seen from the floor: 6.8 deg half-angle</text>
+<text x="250.0" y="548.0" font-size="21" font-weight="bold" fill="#c8401c" text-anchor="middle">only 1.4 % leaves directly</text>
+<text x="250.0" y="570.0" font-size="13" fill="#666" text-anchor="middle">the other 98.6 % hits a wall</text>
+<rect x="577.9" y="470.0" width="84.2" height="14" fill="#333"/>
+<rect x="579.9" y="150.0" width="4" height="320.0" fill="#333"/>
+<rect x="656.1" y="150.0" width="4" height="320.0" fill="#333"/>
+<text x="620.0" y="84.0" font-size="16" font-weight="bold" fill="#1e5fa8" text-anchor="middle">Light arriving at 40 degrees</text>
+<text x="620.0" y="104.0" font-size="13" fill="#555" text-anchor="middle">meets a wall 5.7 mm down. Never reaches the floor</text>
+<line x1="620.8" y1="151.0" x2="653.1" y2="191.4" stroke="#1e5fa8" stroke-width="2.5" marker-end="url(#mb)"/>
+<path d="M 658.1 195.4 L 581.9 150.0 L 658.1 150.0 Z" fill="#1e5fa8" fill-opacity="0.22"/>
+<circle cx="658.1" cy="195.4" r="4.5" fill="#1e5fa8"/>
+<line x1="551.9" y1="195.4" x2="658.1" y2="195.4" stroke="#1e5fa8" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="547.9" y="199.4" font-size="12" fill="#1e5fa8" text-anchor="end">5.7 mm</text>
+<text x="620.0" y="518.0" font-size="13" fill="#1e5fa8" text-anchor="middle">exit seen from there: 40 deg half-angle</text>
+<text x="620.0" y="548.0" font-size="21" font-weight="bold" fill="#1e5fa8" text-anchor="middle">41 % leaves directly</text>
+<text x="620.0" y="570.0" font-size="13" fill="#666" text-anchor="middle">30 times the head-on share</text>
+<line x1="151.9" y1="150.0" x2="151.9" y2="470.0" stroke="#aaa"/>
+<text x="137.9" y="310.0" font-size="13" fill="#666" text-anchor="middle" transform="rotate(-90 137.9 310.0)">40 mm deep</text>
+<text x="40" y="42" font-size="20" font-weight="bold" fill="#222">A honeycomb cell is a trap that opens one way</text>
+<text x="40" y="66" font-size="14" fill="#555">9.53 mm cell · 40 mm deep · one cross-section. Angles are drawn true. The foil is 0.08 mm; drawn thick to be visible.</text>
+<rect x="796" y="116" width="248" height="272" rx="6" fill="#e9e5dc" stroke="#d3cdc1"/>
+<text x="814" y="148" font-size="15" fill="#222" font-weight="bold">Getting in is easy head-on.</text>
+<text x="814" y="170" font-size="13" fill="#666">Nothing is in the way.</text>
+<text x="814" y="201" font-size="15" fill="#222" font-weight="bold">Getting out is hard head-on.</text>
+<text x="814" y="223" font-size="13" fill="#666">From the floor the exit is</text>
+<text x="814" y="245" font-size="13" fill="#666">only 6.8 degrees wide.</text>
+<text x="814" y="276" font-size="15" fill="#222" font-weight="bold">Oblique light meets a wall</text>
+<text x="814" y="298" font-size="13" fill="#666">near the top, where the exit</text>
+<text x="814" y="320" font-size="13" fill="#666">is wide open at 40 degrees.</text>
+<text x="814" y="351" font-size="15" fill="#c8401c" font-weight="bold">Hence 5x darker head-on.</text>
+</svg>
+</div>
+<figcaption class="tag">Angles are drawn true. The foil is 0.08 mm; it is drawn thick to be visible. Built by <code>scripts/build_ray_figure.py</code>, which emits both languages.</figcaption></figure>
+<p>Light arriving straight down never touches a wall and reaches the floor. Getting out is the problem. From the bottom of a 40 mm well the exit subtends a half-angle of only 6.8 degrees, and of the light scattered there just <b>1.4 %</b> leaves in one go. The rest hits a wall, and loses most of itself each time.</p>
+<p>Oblique light at 40 degrees meets a wall <b>5.7 mm</b> down. It never reaches the floor. From that shallow point the exit is open to 40 degrees and <b>41 %</b> simply leaves &mdash; 30 times the head-on share.</p>
+</section>
+<section><h3>Worked on paper as well, with no renderer in it</h3>
+<p>Head-on return = foil rim (2.52 % of the area) + what escapes from the floor.</p>
+<div class="scroll"><table><thead><tr><th>coating inside the cell</th><th>rim</th><th>floor escape</th><th>closed form</th><th>render</th><th>difference</th></tr></thead><tbody>
+<tr><td>matte black, 5 %</td><td class="n">0.12592 %</td><td class="n">0.06820 %</td><td class="n"><b>0.19412 %</b></td><td class="n">0.20672 %</td><td class="n">6.1 %</td></tr>
+<tr><td>Musou, 1 %</td><td class="n">0.02513 %</td><td class="n">0.01361 %</td><td class="n"><b>0.03875 %</b></td><td class="n">0.03949 %</td><td class="n">1.9 %</td></tr>
+</tbody></table></div>
+<p>Within 2 % and 6 %. That is the render checking out, and it is also what turns the paragraph above from a story into a calculation.</p></section>
+<section><h2>Good black, N mm down from the tip</h2>
+<p>The base is 5 % matte black throughout. Musou (1 %) is laid over it from the tip down to N mm. All three axes are given &mdash; reporting one hides what the other two are doing.</p>
+<div class="scroll"><table><thead><tr><th>N mm</th><th>total, head-on</th><th>total, 20&deg;</th><th>total, 40&deg;</th><th>smear</th><th>head-on flash</th></tr></thead><tbody>
+<tr><td>0</td><td class="n">0.20672 %</td><td class="n">0.58303 %</td><td class="n">1.02114 %</td><td class="n">0.9651</td><td class="n">2.6349</td></tr>
+<tr><td>1</td><td class="n">0.12078 %</td><td class="n">0.41920 %</td><td class="n">0.75972 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>2</td><td class="n">0.12071 %</td><td class="n">0.35850 %</td><td class="n">0.62130 %</td><td class="n">0.9840</td><td class="n">2.5988</td></tr>
+<tr><td>3</td><td class="n">0.12065 %</td><td class="n">0.30978 %</td><td class="n">0.51348 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>4</td><td class="n">0.12060 %</td><td class="n">0.27061 %</td><td class="n">0.43020 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>5</td><td class="n">0.12055 %</td><td class="n">0.23988 %</td><td class="n">0.36650 %</td><td class="n">0.9780</td><td class="n">2.5988</td></tr>
+<tr><td>6</td><td class="n">0.12052 %</td><td class="n">0.21559 %</td><td class="n">0.31935 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>8</td><td class="n">0.12044 %</td><td class="n">0.18090 %</td><td class="n">0.25492 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>10</td><td class="n">0.12038 %</td><td class="n">0.15904 %</td><td class="n">0.21566 %</td><td class="n">0.9690</td><td class="n">2.5988</td></tr>
+<tr class="pick"><td>15</td><td class="n">0.12028 %</td><td class="n">0.13126 %</td><td class="n">0.20076 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>20</td><td class="n">0.12019 %</td><td class="n">0.12009 %</td><td class="n">0.20074 %</td><td class="n">&middot;</td><td class="n">&middot;</td></tr>
+<tr><td>40</td><td class="n">0.03949 %</td><td class="n">0.11454 %</td><td class="n">0.20072 %</td><td class="n">0.9594</td><td class="n">0.4280</td></tr>
+</tbody></table></div>
+<p class="tag">The green row is where the 40&deg; total stops moving. N = 40 is the whole panel in Musou, backing plate included.</p>
+<ul>
+<li><b>Head-on total</b> falls to 0.12078 % at 1 mm and is still 0.12019 % at 20 mm. It does not move.</li>
+<li><b>The 40&deg; total</b> reads 0.20076 % at 15 mm, 0.20074 % at 20 mm, 0.20072 % at 40 mm. <b>It is finished at 15 mm</b>, which is where pitch/tan(40&deg;) = 11.4 mm says it should be.</li>
+<li><b>Smear</b> stays between 0.9594 and 0.9840. Paint depth does not touch it; smear is set by shape.</li>
+<li><b>Head-on flash</b> drops to 2.5988 by 2 mm, holds there through 10 mm, and then falls to <b>0.4280</b> once the backing plate is Musou too &mdash; a factor of 6.1.</li>
+</ul>
+<p>That last drop is not gloss. The two coatings have the same diffuse fraction (0.993 against 0.99) and the same roughness. It is Musou being five times darker, showing through.</p>
+</section>
+<section><h2>So what depth</h2>
+<p>Cell 9.53 mm, depth varied. <b>A</b> is a backing plate we could not paint (Musou only 15 mm from the tip); <b>B</b> is a backing plate we could.</p>
+<div class="scroll"><table><thead><tr><th>depth</th><th>head-on A</th><th>head-on B</th><th>20&deg; B</th><th>40&deg; B</th><th>smear B</th><th>flash B</th></tr></thead><tbody>
+<tr><td>20 mm</td><td class="n">0.32507 %</td><td class="n"><b>0.08011 %</b></td><td class="n">0.12522 %</td><td class="n">0.20752 %</td><td class="n">0.9954</td><td class="n">0.4281</td></tr>
+<tr><td>30 mm</td><td class="n">0.17840 %</td><td class="n"><b>0.05066 %</b></td><td class="n">0.11650 %</td><td class="n">0.20439 %</td><td class="n">0.9720</td><td class="n">0.4280</td></tr>
+<tr class="pick"><td>40 mm</td><td class="n">0.12027 %</td><td class="n"><b>0.03949 %</b></td><td class="n">0.11454 %</td><td class="n">0.20073 %</td><td class="n">0.9594</td><td class="n">0.4280</td></tr>
+<tr><td>50 mm</td><td class="n">0.09082 %</td><td class="n"><b>0.03404 %</b></td><td class="n">0.11703 %</td><td class="n">0.20432 %</td><td class="n">0.9870</td><td class="n">0.4279</td></tr>
+<tr><td>60 mm</td><td class="n">0.07407 %</td><td class="n"><b>0.03100 %</b></td><td class="n">0.11897 %</td><td class="n">0.20862 %</td><td class="n">0.9556</td><td class="n">0.4297</td></tr>
+</tbody></table></div>
+<ul>
+<li><b>The 40&deg; total does not care about depth</b>: 0.20752 % at 20 mm, 0.20862 % at 60 mm. And it is five times the head-on number, so depth is not what makes the panel dark.</li>
+<li><b>Only head-on buys anything from depth</b>, and <b>83 % of what 60 mm gives is already there at 40 mm.</b> Past that the panel only gets thicker.</li>
+<li><b>Flash is untouched</b> &mdash; 0.4280 at every depth.</li>
+<li><b>Smear is untouched too</b>, 0.9556 to 0.9954 with no ordering. That is measurement scatter, not a trend.</li>
+</ul>
+<h3>Cell size &mdash; the ranking inverts</h3>
+<p>Once the backing is painted, what is left is mostly the foil rim, and the rim area is <span style="font-family:var(--mono)">3 &times; foil &divide; pitch</span> &mdash; smaller for a larger cell. So the answer before and after painting the backing is not the same.</p>
+<div class="scroll"><table><thead><tr><th>at 40 mm deep</th><th>6.35 mm cell</th><th>9.53 mm cell</th><th>winner</th></tr></thead><tbody>
+<tr><td>backing unpainted &mdash; head-on</td><td class="n">0.08359 %</td><td class="n">0.12027 %</td><td><b>6.35</b></td></tr>
+<tr><td>backing painted &mdash; head-on</td><td class="n">0.04141 %</td><td class="n">0.03949 %</td><td><b>9.53</b></td></tr>
+<tr><td>backing painted &mdash; 40&deg;</td><td class="n">0.21868 %</td><td class="n">0.20073 %</td><td><b>9.53</b></td></tr>
+<tr><td>backing painted &mdash; 20&deg;</td><td class="n">0.13013 %</td><td class="n">0.11454 %</td><td><b>9.53</b></td></tr>
+</tbody></table></div>
+<p>With the backing painted, <b>9.53 wins at all three angles.</b> 6.35 led in the 32-case study because the base there was 5 % paint.</p>
+<h3>Foil gauge is a bigger lever than depth</h3>
+<p>The rim is what is left, so thinning the foil beats deepening the panel. Cell 9.53, depth 40, backing painted.</p>
+<div class="scroll"><table><thead><tr><th>foil</th><th>rim area</th><th>head-on</th><th>20&deg;</th><th>40&deg;</th><th>flash</th></tr></thead><tbody>
+<tr><td>0.03 mm</td><td class="n">0.94 %</td><td class="n"><b>0.02664 %</b></td><td class="n">0.10246 %</td><td class="n">0.18996 %</td><td class="n">0.4280</td></tr>
+<tr class="pick"><td>0.04 mm</td><td class="n">1.26 %</td><td class="n"><b>0.02918 %</b></td><td class="n">0.10490 %</td><td class="n">0.19217 %</td><td class="n">0.4280</td></tr>
+<tr><td>0.05 mm</td><td class="n">1.57 %</td><td class="n"><b>0.03177 %</b></td><td class="n">0.10729 %</td><td class="n">0.19426 %</td><td class="n">0.4280</td></tr>
+<tr><td>0.06 mm</td><td class="n">1.89 %</td><td class="n"><b>0.03438 %</b></td><td class="n">0.10969 %</td><td class="n">0.19631 %</td><td class="n">0.4280</td></tr>
+<tr><td>0.08 mm</td><td class="n">2.52 %</td><td class="n"><b>0.03949 %</b></td><td class="n">0.11453 %</td><td class="n">0.20073 %</td><td class="n">0.4280</td></tr>
+<tr><td>0.10 mm</td><td class="n">3.15 %</td><td class="n"><b>0.04457 %</b></td><td class="n">0.11930 %</td><td class="n">0.20507 %</td><td class="n">0.4280</td></tr>
+</tbody></table></div>
+<div class="scroll"><table><thead><tr><th>on the same panel</th><th>head-on</th><th>20&deg;</th><th>40&deg;</th><th>thickness</th></tr></thead><tbody>
+<tr><td>depth 40 &rarr; 60 (foil 0.08)</td><td class="n">1.27&times;</td><td class="n bad">0.96&times; (worse)</td><td class="n bad">0.96&times; (worse)</td><td class="n bad">1.5&times; thicker</td></tr>
+<tr class="pick"><td>foil 0.08 &rarr; 0.04 (depth 40)</td><td class="n">1.35&times;</td><td class="n">1.09&times;</td><td class="n">1.04&times;</td><td class="n">unchanged</td></tr>
+</tbody></table></div>
+<p>Going 1.5 times deeper makes 40&deg; slightly worse. Halving the foil improves all three angles and leaves the panel the same thickness.</p>
+<p>Thin foil is not a special order. Hexcel grades its core as "cell size &ndash; alloy &ndash; foil gauge", and <b>3/8-5052-.001</b> is a catalogue part: 3/8 inch (9.53 mm) cell, 0.001 inch (0.0254 mm) foil. The 0.08 mm we had been assuming is on the heavy side for this cell.</p>
+<p class="tag">[verified] <a href="https://www.hexcel.com/wp-content/uploads/2025/12/HexWeb_CRIII_DataSheet.pdf">HexWeb CR III datasheet</a>, read directly &middot; local copy in <code>reference/datasheets/</code></p>
+<div class="card verdict ok"><h3 style="margin:0">Recommendation</h3>
+<p class="lead"><b>9.53 mm</b> cell &middot; <b>40 mm</b> deep &middot; <b>0.03&ndash;0.04 mm</b> foil &middot; <b>paint the backing plate separately and bond the core onto it</b></p>
+<div class="scroll"><table><thead><tr><th>three axes</th><th>as quoted (foil 0.08)</th><th>recommended (foil 0.04)</th></tr></thead><tbody>
+<tr><td>total reflectance, head-on</td><td class="n">0.03949 %</td><td class="n"><b>0.02918 %</b></td></tr>
+<tr><td>total reflectance, 20&deg;</td><td class="n">0.11453 %</td><td class="n"><b>0.10490 %</b></td></tr>
+<tr><td>total reflectance, 40&deg;</td><td class="n">0.20073 %</td><td class="n"><b>0.19217 %</b></td></tr>
+<tr><td>smear</td><td class="n">0.9594</td><td class="n"><b>0.9606</b></td></tr>
+<tr><td>head-on flash</td><td class="n">0.4280</td><td class="n"><b>0.4280</b></td></tr>
+</tbody></table></div>
+<p><b>There is one axis a tube cannot buy.</b> The smear target is 1.42 and a honeycomb sits near 0.96 at every depth, cell size and foil gauge. A flat plate is 1.0 by definition, so <b>the honeycomb does not blur the shape at all.</b> If that axis matters, a tube is not the answer.</p>
+</div></section>
+<section><h2>How it can be made</h2>
+<div class="card"><h3 style="margin:0">1. Paint the backing plate separately and bond afterwards</h3>
+<p>Half the head-on return and a factor of six on flash live on that plate, and it is flat. Paint it before the core goes on and the depth problem never arises.</p>
+</div>
+<div class="card"><h3 style="margin:0">2. Spray only 15 mm from the top</h3>
+<p>40 mm does not have to be coated. The aspect ratio to reach is 1.6 to 1, not 4.2 to 1. That sprays.</p>
+</div>
+<div class="card"><h3 style="margin:0">3. Dip it</h3>
+<p>An automotive catalyst substrate is a 1 mm channel 100 mm long &mdash; 100 to 1 &mdash; and it is dip-coated to a uniform 30 &micro;m with no cracking at the corners. Ours is 4.2 to 1, twenty-four times easier. If pooling is the worry, dip-spin throws the excess off centrifugally.</p>
+<p class="tag">[verified] <a href="https://www.sciencedirect.com/science/article/abs/pii/S0272884216308343">cordierite honeycomb dip coating</a> &middot; <a href="https://www.chemplateindustries.com/dip-spin">Chem-Plate dip-spin</a></p>
+</div>
+<div class="card"><h3 style="margin:0">4. Electrocoat (ED, e-coat)</h3>
+<p>Dipping with a field behind it. As the outside coats it insulates, and the current moves to whatever is still bare, so blind holes and internal cavities come out even. The Faraday cage that stops powder coating does not apply. 25&ndash;50 &micro;m. <b>But the finish comes out smooth</b>, and smooth means gloss, and gloss raises the flash. Any face that shows has to be finished matte separately.</p>
+<p class="tag">[verified] <a href="https://www.valencesurfacetech.com/the-news/e-coat-vs-powder-coat/">Valence: e-coat vs powder coat</a></p>
+</div>
+<div class="card"><h3 style="margin:0">5. Coat the foil before expanding it</h3>
+<p>Honeycomb is made by printing adhesive lines on flat foil, stacking and pressing it into a block, slicing, and expanding. Treating the surface before the block is standard. Done this way there is no depth at all.</p>
+<p class="tag">[verified] <a href="https://corex-honeycomb.com/products-and-services/aluminium-honeycomb-manufacturing/">Corex honeycomb manufacturing</a></p>
+</div>
+<div class="card"><h3 style="margin:0">6. A slotted grid instead of a honeycomb</h3>
+<p>Notched strips pushed together. Every blade is flat before assembly, so paint it flat and then build. Depth is just blade height. The cells come out square, so our measurements would have to be repeated.</p>
+<p class="tag">[verified] <a href="https://www.edee.com/fbseries.htm">Edee eggcrate louvers</a></p>
+</div>
+</section>
+<section><h2>Losing anodising costs nothing</h2>
+<div class="scroll"><table><thead><tr><th>material</th><th>reflectance</th><th>diffuse fraction</th></tr></thead><tbody>
+<tr><td><span style="display:inline-block;width:10px;height:10px;background:#12151a;border:1px solid var(--line);margin-right:6px"></span>Musou Black — as fitted here</td><td class="n">0.998 %</td><td class="n">0.9930</td></tr>
+<tr><td><span style="display:inline-block;width:10px;height:10px;background:#333b48;border:1px solid var(--line);margin-right:6px"></span>black anodised Al — raw</td><td class="n">4.500 %</td><td class="n">0.9943</td></tr>
+<tr><td><span style="display:inline-block;width:10px;height:10px;background:#45484f;border:1px solid var(--line);margin-right:6px"></span>matte black wall — 5% (control)</td><td class="n">5.000 %</td><td class="n">0.9900</td></tr>
+</tbody></table></div>
+<p><b>Black anodised aluminium and ordinary matte black paint are the same to within half a percentage point.</b> Anodising was never the good answer.</p>
+<p>And the supplier is right on the physics. Black anodising runs 10&ndash;25 &micro;m and about half of it grows inward, eating the metal. On 80 &micro;m foil, 25 &micro;m a side leaves 55 &micro;m of metal and the rest is brittle oxide. The fold lines would not survive expansion.</p>
+<p class="tag">[verified] <a href="https://www.xometry.com/resources/machining/black-anodizing/">Xometry, black anodising thickness</a></p>
+</section>
+<section><h2>Questions for the supplier</h2><div class="card"><ul>
+<li>Can you supply the backing plate separately? We will paint it and bond the core on afterwards.</li>
+<li>We need black only 15 mm down from the top, not through the full 40 mm.</li>
+<li>Do you have a partner who dips or electrocoats?</li>
+<li>Can the foil be coated black before it is expanded?</li>
+<li>Does 0.04 mm foil stand up at 40 mm depth? Hexcel lists 3/8-5052-.001 at 0.0254 mm as a catalogue part, but we have not confirmed it at this depth.</li>
+<li>Anodising is not needed. Matte black paint is equivalent, provided the gloss is low.</li>
+</ul></div></section>
+<section><h2>Not measured</h2><ul>
+<li>The case where <b>nothing</b> reaches the inside. Bare aluminium is not in our material table, and we do not publish numbers for materials we have not sourced a value for.</li>
+<li>The three axes for a square grid. Our measurements are hexagonal.</li>
+<li>The actual roughness of an electrocoated surface. "Smooth" is the supplier's word, not our measurement.</li>
+<li>Smear and flash were run at 6 phases rather than 16, so they are estimates of the published statistic rather than the statistic. Flash was measured by the same method as the 32-case study (ten-cell patch, head-on, 7.5 mm beam) and returned the same values, 2.635 and 2.599.</li>
+</ul></section>
+<section><p class="tag">measured: paint_depth_9p53_40.json &middot; 12 points &middot; 512 samples &middot; roughness slider 0.1975 (alpha 0.039) &middot; brightest of the 0/45/90&deg; planes. Built by <code>scripts/sweep_paint_depth.py</code>, <code>scripts/sweep_paint_depth_flash.py</code>. This document: <code>scripts/build_paint_depth_report_en.py</code>, paired with <code>build_paint_depth_report.py</code>.</p></section>
+</div></body></html>

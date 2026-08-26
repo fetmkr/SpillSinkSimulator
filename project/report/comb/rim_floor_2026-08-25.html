@@ -1,0 +1,207 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>벌집의 어디를 고칠 것인가</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.fig{background:#f4f1eb;border:1px solid var(--line);border-radius:3px;padding:12px;overflow-x:auto}
+.big{font-size:28px;font-weight:800;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:64ch}
+li{margin:5px 0}
+a{color:var(--cy)}
+tr.no td{color:var(--bad)}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">2026-08-25 · 모양</div>
+<h1>벌집의 어디를 고칠 것인가</h1>
+<p class="sub">칠로는 더 못 간다. 정면 반사의 51 % 를 포일 테두리가, 48 % 를 바닥판이 맡고, 둘 다 정면을 향한 평평한 면이라 깊이로는 안 없어진다. 그 두 면의 <b>모양</b>을 바꾸면 어떻게 되는지 잰 것이다.</p></header>
+<section><div class="card verdict ok"><h2 style="margin:0">결론</h2>
+<p class="lead">테두리를 <b>0.08 에서 0.03 mm 로 깎고</b>, 평평한 바닥판을 <b>눌러 찍은 피라미드 판으로</b> 바꾼다.</p>
+<div class="scroll"><table><thead><tr><th>세 축</th><th>지금</th><th>고친 것</th><th>몇 배</th></tr></thead><tbody>
+<tr><td>반사 총량 정면</td><td class="n">0.03949 %</td><td class="n"><b>0.02017 %</b></td><td class="n">1.96 배 어두움</td></tr>
+<tr><td>반사 총량 20도</td><td class="n">0.11454 %</td><td class="n"><b>0.10457 %</b></td><td class="n">1.10 배 어두움</td></tr>
+<tr><td>반사 총량 40도</td><td class="n">0.20073 %</td><td class="n"><b>0.19366 %</b></td><td class="n">1.04 배 어두움</td></tr>
+<tr><td>정면 반짝임</td><td class="n">0.4280</td><td class="n"><b>0.0639</b></td><td class="n">6.70 배 어두움</td></tr>
+<tr><td>모양 뭉개기 <span class="tag">클수록 좋다 · 목표 1.42</span></td><td class="n">0.9594</td><td class="n"><b>1.0363</b></td><td class="n">처음 움직였다</td></tr>
+</tbody></table></div>
+<p class="tag">뭉개기는 테두리 0.05 + 피라미드 10 에서 잰 값이다 (한 점에 5 분이라 두 점만 쟀다). 나머지는 테두리 0.03 + 피라미드 15.</p>
+</div></section>
+<section><h2>어디를 고치나</h2>
+<figure><div class="fig"><svg viewBox="0 0 900 470" width="100%" style="height:auto" font-family="var(--kr)">
+<rect width="900" height="470" fill="#f4f1eb"/>
+<defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#333"/></marker></defs>
+<text x="283" y="40" font-size="15" font-weight="700" text-anchor="middle" fill="#222">지금</text>
+<rect x="246.0" y="70.0" width="8.0" height="280.0" fill="#c8401c"/>
+<rect x="312.7" y="70.0" width="8.0" height="280.0" fill="#c8401c"/>
+<rect x="246.0" y="350.0" width="74.7" height="12" fill="#1e5fa8"/>
+<line x1="283.4" y1="52.0" x2="283.4" y2="340.0" stroke="#333" stroke-width="2" marker-end="url(#ar)"/>
+<text x="283" y="390" font-size="12" fill="#555" text-anchor="middle">테두리 0.08 mm · 평평한 바닥판</text>
+<text x="500" y="40" font-size="15" font-weight="700" text-anchor="middle" fill="#222">고친 것</text>
+<rect x="465.2" y="70.0" width="3.0" height="280.0" fill="#c8401c"/>
+<rect x="531.9" y="70.0" width="3.0" height="280.0" fill="#c8401c"/>
+<rect x="462.7" y="350.0" width="74.7" height="9" fill="#1e5fa8"/>
+<path d="M 466.7 350.0 L 477.8 245.0 L 488.9 350.0 Z" fill="#1e5fa8"/>
+<path d="M 488.9 350.0 L 500.1 245.0 L 511.2 350.0 Z" fill="#1e5fa8"/>
+<path d="M 511.2 350.0 L 522.3 245.0 L 533.4 350.0 Z" fill="#1e5fa8"/>
+<line x1="500.1" y1="52.0" x2="500.1" y2="340.0" stroke="#333" stroke-width="2" marker-end="url(#ar)"/>
+<text x="500" y="390" font-size="12" fill="#555" text-anchor="middle">테두리 0.03 mm · 눌러 찍은 피라미드</text>
+<text x="40" y="76" font-size="14" font-weight="700" fill="#222">정면 반사를 누가 맡나</text>
+<rect x="40" y="100" width="12" height="12" fill="#c8401c"/>
+<text x="60" y="110" font-size="13" fill="#222">포일 테두리</text>
+<text x="60" y="132" font-size="19" font-weight="800" fill="#c8401c" font-family="var(--mono)">51.4 %</text>
+<text x="60" y="147" font-size="11" fill="#666">겉면이다</text>
+<rect x="40" y="162" width="12" height="12" fill="#888"/>
+<text x="60" y="172" font-size="13" fill="#222">셀 벽</text>
+<text x="60" y="194" font-size="19" font-weight="800" fill="#888" font-family="var(--mono)">0.4 %</text>
+<text x="60" y="209" font-size="11" fill="#666">손댈 게 없다</text>
+<rect x="40" y="224" width="12" height="12" fill="#1e5fa8"/>
+<text x="60" y="234" font-size="13" fill="#222">바닥판</text>
+<text x="60" y="256" font-size="19" font-weight="800" fill="#1e5fa8" font-family="var(--mono)">48.3 %</text>
+<text x="60" y="271" font-size="11" fill="#666">평평한 판이다</text>
+<text x="40" y="296" font-size="11" fill="#666">깊이는 이 둘을 못 없앤다</text>
+</svg></div>
+<figcaption class="tag">셀 하나를 자른 것. 벽 두께는 보이라고 굵게 그렸다 (실제 0.08 과 0.03 mm). 몫은 <code>results/paint_depth/paint_depth_9p53_40.json</code> 에서 다시 계산했다.</figcaption></figure>
+<p>셀 벽은 0.4 % 밖에 안 맡는다. 그래서 <b>관 안쪽은 손댈 것이 없다.</b> 고칠 수 있는 두 면은 둘 다 겉으로 드러나 있다 — 테두리는 판의 앞면이고, 바닥판은 벌집을 붙이기 전의 평평한 판이다.</p>
+</section>
+<section><h2>무엇으로 바꿀지는 전파 쪽에서 찾았다</h2>
+<p>무반향실은 원래 피라미드를 쓴다. 설계 규칙이 파장으로 딱 정해져 있고 — 높이는 가장 낮은 주파수의 파장 이상, 밑변은 그 절반 이상, 끝 폭은 가장 높은 주파수 파장의 절반 미만 — 1.5~9 GHz 에서 평균 -40 dB 이 나온다. 작동 원리도 우리와 같다. 여러 번 튕기고 튕길 때마다 먹힌다.</p>
+<p><b>그런데 요즘 수법 대부분은 우리에게 안 넘어온다.</b> 파장과 구조의 크기 관계가 다르기 때문이다.</p>
+<div class="scroll"><table><thead><tr><th></th><th>파장</th><th>구조</th><th>비</th></tr></thead><tbody>
+<tr><td>전파 10 GHz</td><td class="n">30 mm</td><td class="n">mm~cm</td><td class="n">비슷함</td></tr>
+<tr><td>우리 빛 445 nm</td><td class="n">0.000445 mm</td><td class="n">9.53 mm</td><td class="n"><b>21,415 배</b></td></tr>
+</tbody></table></div>
+<p>전파는 파동 문제라 임피던스 정합도 위상 간섭도 메타표면 코딩도 성립한다. 우리는 순수 광선 문제다. 그 수법들은 전부 <b>파장 규모의 구조</b>를 요구하므로 쓸 수 없다.</p>
+<p>넘어오는 것은 원리 하나다. <b>갑자기 바꾸지 말고 서서히 바꾼다.</b> 전파는 그걸 임피던스로 하고(377 옴에서 0 옴까지), 우리는 <b>살 두께</b>로 한다.</p>
+<p class="tag">논문은 <code>reference/papers_rf/</code>, 목록은 <code>reference/INDEX.md</code></p></section>
+<section><h2>A. 테두리만 깎는다</h2>
+<p>벌집의 <b>강도는 아래벽이 정하고 정면 반사는 위벽이 정한다.</b> 노출 넓이 계산이 <code>wall_top</code> 만 쓴다 (<code>geom_topo.py:248</code>). 그러니 위만 얇게 하면 강도를 안 잃고 반사만 준다.</p>
+<div class="scroll"><table><thead><tr><th>위벽</th><th>테두리 넓이</th><th>정면</th><th>20도</th><th>40도</th><th>반짝임</th></tr></thead><tbody>
+<tr><td>0.08 mm</td><td class="n">2.52 %</td><td class="n"><b>0.03949 %</b></td><td class="n">0.11454 %</td><td class="n">0.20073 %</td><td class="n">0.4280</td></tr>
+<tr><td>0.05 mm</td><td class="n">1.57 %</td><td class="n"><b>0.03212 %</b></td><td class="n">0.10743 %</td><td class="n">0.19431 %</td><td class="n">0.4256</td></tr>
+<tr class="pick"><td>0.03 mm</td><td class="n">0.94 %</td><td class="n"><b>0.02722 %</b></td><td class="n">0.10255 %</td><td class="n">0.18990 %</td><td class="n">0.4239</td></tr>
+<tr><td>0.02 mm</td><td class="n">0.63 %</td><td class="n"><b>0.02469 %</b></td><td class="n">0.10012 %</td><td class="n">0.18756 %</td><td class="n">0.4231</td></tr>
+</tbody></table></div>
+<p>0.08 에서 0.03 으로 깎으면 정면이 31 % 줄고 40 도도 5 % 좋아진다. 아래벽은 0.08 그대로다.</p>
+<p class="tag">0.05 는 사용자가 정한 취급 한계다("너무 얇으면 손으로 쉽게 찌그러진다"). 0.03 과 0.02 는 그 아래이고, 만들 수 있는지는 업체에 물어야 한다.</p></section>
+<section><h2>B. 바닥판을 피라미드로</h2>
+<p>정면으로 관을 들여다보면 평평한 판이 보인다. 그 판을 기울어진 면으로 바꾸면 <b>반짝임이 무너진다.</b></p>
+<div class="scroll"><table><thead><tr><th>바닥</th><th>정면</th><th>20도</th><th>40도</th><th>반짝임</th></tr></thead><tbody>
+<tr><td>평판</td><td class="n">0.03949 %</td><td class="n">0.11454 %</td><td class="n">0.20073 %</td><td class="n"><b>0.4280</b></td></tr>
+<tr><td>피라미드 깊이 10</td><td class="n">0.03186 %</td><td class="n">0.11649 %</td><td class="n">0.20439 %</td><td class="n"><b>0.0971</b></td></tr>
+<tr class="pick"><td>피라미드 깊이 15</td><td class="n">0.03217 %</td><td class="n">0.11606 %</td><td class="n">0.20445 %</td><td class="n"><b>0.0727</b></td></tr>
+</tbody></table></div>
+<p class="lead">반짝임 0.4280 → <b>0.0727</b>, 5.9 배.</p>
+<p>만들기도 어렵지 않다. 평판 대신 <b>눌러 찍은 피라미드 판</b>을 깔고 그 위에 벌집을 붙이는 것뿐이고, 둘 다 이 연구가 이미 쓰는 공정이다.</p>
+<p>비스듬한 각도는 조금 나빠진다 (20도 1.3 %, 40도 1.9 %). 정면과 반짝임에서 얻는 것이 훨씬 크다.</p></section>
+<section><h2>둘을 합치면</h2>
+<div class="scroll"><table><thead><tr><th>경우</th><th>정면</th><th>20도</th><th>40도</th><th>반짝임</th><th>뭉개기</th></tr></thead><tbody>
+<tr><td>기준</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">0.9594</td></tr>
+<tr><td>A 테두리 0.03</td><td class="n">0.689</td><td class="n">0.895</td><td class="n">0.946</td><td class="n">0.990</td><td class="n">&middot;</td></tr>
+<tr><td>B 피라미드 바닥 15</td><td class="n">0.815</td><td class="n">1.013</td><td class="n">1.019</td><td class="n">0.170</td><td class="n">&middot;</td></tr>
+<tr><td>AB 0.05 + 피라미드 10</td><td class="n">0.624</td><td class="n">0.955</td><td class="n">0.986</td><td class="n">0.215</td><td class="n">1.0363</td></tr>
+<tr class="pick"><td>AB 0.03 + 피라미드 15</td><td class="n">0.511</td><td class="n">0.913</td><td class="n">0.965</td><td class="n">0.149</td><td class="n">&middot;</td></tr>
+</tbody></table></div>
+<p class="tag">기준을 1 로 놓은 값. 작을수록 어둡다. 뭉개기만 클수록 좋다.</p>
+<div class="card"><h3 style="margin:0">모양 뭉개기가 처음으로 움직였다</h3>
+<p><b>0.9594 → 1.0363.</b> 깊이도 셀 크기도 포일 두께도 셀 모양도 이 축을 못 움직였다. 목표 1.42 에는 아직 못 미치지만 처음으로 방향이 보인다.</p></div></section>
+<section><h2>뒤집힌 피라미드는 우리에게 안 좋다</h2>
+<p>시트를 눌러 피라미드를 만들면 반대면이 그대로 뒤집힌 피라미드다. <b>같은 부품을 뒤집어 다는 것</b>이라 공정이 안 는다. 태양전지 쪽이 둘을 비교해 놨고 이유도 우리 계산과 같아 보였다 — 파인 홈에서 빛이 한두 번 더 튕긴다. 그래서 나을 것이라고 <b>말했다가 재보고 취소했다.</b></p>
+<div class="scroll"><table><thead><tr><th>간격 4 / 깊이 22</th><th>정면</th><th>20도</th><th>40도</th><th>반짝임</th><th>모양 뭉개기</th></tr></thead><tbody>
+<tr><td>선 피라미드 끝0.1</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n"><b>1.4589</b></td></tr>
+<tr class="no"><td>뒤집힌 피라미드 끝0.1</td><td class="n">1.015</td><td class="n">0.997</td><td class="n">1.070</td><td class="n">1.006</td><td class="n"><b>1.0676</b></td></tr>
+<tr><td>선 피라미드 끝0.4</td><td class="n">1.022</td><td class="n">1.029</td><td class="n">1.021</td><td class="n">2.584</td><td class="n"><b>&middot;</b></td></tr>
+<tr class="no"><td>뒤집힌 피라미드 끝0.4</td><td class="n">0.939</td><td class="n">0.974</td><td class="n">1.055</td><td class="n">2.593</td><td class="n"><b>&middot;</b></td></tr>
+</tbody></table></div>
+<p class="tag">선 피라미드 끝0.1 을 1 로 놓은 값. 뭉개기만 실제 값.</p>
+<p>총량과 반짝임은 사실상 같고 <b>뭉개기가 1.4589 에서 1.0676 로 무너진다.</b> 목표가 1.42 이니 선 피라미드는 넘고 뒤집힌 것은 못 넘는다.</p>
+<p>이유는 로그에 그대로 있다. 40 도에서 되돌아온 봉우리가 선 피라미드 0.037, 뒤집힌 것 0.163 — <b>4.4 배</b>다. <b>파인 홈은 직각으로 만난 두 면이 코너 리플렉터가 되어 빛을 온 쪽으로 되돌려 보낸다.</b> 솟은 봉우리는 반대로 밖으로 흩는다.</p>
+<p><b>태양전지에서 뒤집힌 쪽이 좋은 이유가 정확히 그것이다</b> — 되돌아온 빛이 실리콘 안으로 다시 들어가 흡수된다. 같은 성질이 저쪽에선 이득이고 우리한테는 없애야 할 것이다.</p>
+<p>벌집 바닥으로 써도 선 피라미드와 차이가 없다 (정면 0.995 · 40도 1.000 · 반짝임 0.999). 관 깊은 곳이라 곧게 온 빛만 닿아서다.</p>
+</section>
+<section><h2>업체에 물어볼 것</h2><div class="card"><ul>
+<li>위벽만 0.03 mm 로 얇게 하고 아래벽은 0.08 로 둘 수 있습니까? 강도는 아래벽이 정하고 정면 반사는 위벽이 정합니다.</li>
+<li>바닥판을 평판 대신 눌러 찍은 피라미드 판(간격 9.53, 깊이 15)으로 주실 수 있습니까? 그 위에 벌집을 붙이면 됩니다.</li>
+<li>그 두 장을 따로 주시면 우리가 칠해서 조립하겠습니다.</li>
+</ul></div></section>
+<section><h2>안 잰 것</h2><ul>
+<li>테두리 0.03 mm 를 실제로 만들 수 있는지. 취급 한계 0.05 아래다.</li>
+<li>바닥 피라미드의 간격과 깊이를 훑지 않았다. 9.53 / 10 과 15 만 봤다. 뭉개기는 기울어진 면이 만드는 것이니 더 가파르면 더 갈 수 있다.</li>
+<li>바닥 피라미드에 <code>apex_jitter</code> 를 주면 셀마다 꼭짓점이 다른 각도를 가진다. 되돌아오는 방향이 흩어질 것이다 [추측].</li>
+<li>뒤집힌 피라미드의 끝 0.4 에서 뭉개기를 안 쟀다. 끝을 키우면 코너가 무뎌질 텐데 (끝 0.4 가 끝 0.1 보다 정면에서 8 % 나았다) 확인 못 했다.</li>
+<li>뭉개기와 반짝임은 위상 6 으로 줄여 잰 추정값이다.</li>
+</ul></section>
+<section><p class="tag">잰 것: <code>results/comb_depth/rim_and_floor.json</code> · <code>results/comb_depth/pyramid_inverted.json</code> · 전부 무소(0.998 %, 확산 0.993) · 거칠기 α 0.039 · 표본 512 · 면 0/45/90도 중 가장 밝은 값. 만든 것: <code>scripts/sweep_rim_and_floor.py</code>, <code>scripts/sweep_pyramid_inverted.py</code>. 이 문서: <code>scripts/build_shape_report.py</code>. 앞선 보고서: <code>report/comb/paint_depth_2026-08-24.html</code></p></section>
+</div></body></html>

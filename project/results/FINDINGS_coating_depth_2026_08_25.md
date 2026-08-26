@@ -6,7 +6,7 @@
 
 자료: `results/paint_depth/paint_depth_9p53_40.json`,
 `results/comb_depth/{comb_depth_pick,comb_foil,square_vs_comb,square_why}.json`
-보고서: `report/coating/paint_depth_2026-08-24.html`
+보고서: `report/comb/paint_depth_2026-08-24.html`
 그림: `figures/comb_headon_vs_oblique.svg`
 만든 것: `scripts/sweep_paint_depth*.py`, `scripts/sweep_comb_*.py`,
 `scripts/sweep_square_*.py`, `scripts/build_paint_depth_report.py`

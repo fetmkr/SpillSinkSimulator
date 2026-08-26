@@ -8,7 +8,7 @@
     material/*.json                                재료 값과 색
     report/comb/comb_musou_2026-08-22.html         디자인. 이미 있는 체계를 쓴다.
 쓰는 것
-    report/coating/paint_depth_2026-08-24.html
+    report/comb/paint_depth_2026-08-24.html
 
 손으로 안 짓는다. 재료 값이 또 정정되면 이 스크립트를 다시 돌리면 된다.
 """
@@ -27,7 +27,7 @@ FOILF = os.path.join(ROOT, "results/comb_depth/comb_foil.json")
 V2 = os.path.join(ROOT, "results/comb_musou/comb_musou_v2.json")
 FIG = os.path.join(ROOT, "figures/comb_headon_vs_oblique.svg")
 STYLE_FROM = os.path.join(ROOT, "report/comb/comb_musou_2026-08-22.html")
-OUT = os.path.join(ROOT, "report/coating/paint_depth_2026-08-24.html")
+OUT = os.path.join(ROOT, "report/comb/paint_depth_2026-08-24.html")
 
 rows = json.load(open(SRC))
 by_d = {r["paint_depth"]: r for r in rows}
