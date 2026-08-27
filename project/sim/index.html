@@ -442,6 +442,14 @@ details.why p{margin:.4em 0 0}
     <option value="both">Both &mdash; cross-check, all three axes</option>
   </select></div>
   <p class="note" id="rendnote"></p>
+  <!-- WHERE THE OBSERVER STANDS, not where the light comes from. Two different
+       angles, and the panel answers differently to each: a honeycomb sends its
+       return down its own axis, so moving the reader off the normal changed
+       the peak by 74x in the 40-degree case. 0 is the panel normal, which is
+       what every published figure was measured at. -->
+  <div class="row"><label for="obs">관찰자 각도 (판 법선에서, 도)</label>
+   <input type="number" id="obs" value="0" min="0" max="80" step="5"
+    style="width:5.5em"></div>
   <div class="row"><label for="beamw">beam width at wall, mm</label>
    <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
     style="width:5.5em"></div>
@@ -610,7 +618,12 @@ window.addEventListener('load', () => {
   }
 });
 document.addEventListener('input', e => {
-  if(e.target && e.target.id === 'beamw') axRefresh(); });
+  if(!e.target) return;
+  if(e.target.id === 'beamw') axRefresh();
+  // the camera is drawn into the line buffer, so moving it means rebuilding
+  // the overlay, not just redrawing the frame
+  if(e.target.id === 'obs') refresh();
+});
 setTimeout(axRefresh, 500);
 let FAM = null, MESH = null, LAST = null, busy = 0;
 
@@ -1949,6 +1962,32 @@ function buildOverlay(thetas){
   // the panel normal, for orientation
   push([cx,0,cz],[cx, R*0.45, cz],[0.85,0.66,0.28]);
 
+  // WHERE THE OBSERVER STANDS (2026-08-27). Until today the camera sat on the
+  // panel normal and nothing said so on screen, so "peak" read as a property
+  // of the panel when it is a property of a viewing direction. The coloured
+  // arrows are the angles light ARRIVES at; this white box is the one angle it
+  // is READ from, and the two are independent. A honeycomb collimates along
+  // its own axis rather than back at the source, so which one you draw changes
+  // the answer by a factor of 74 -- measured, not argued.
+  {
+    const oe = ((+($('#obs')||{value:0}).value) || 0) * Math.PI / 180;
+    const WHITE = [0.93, 0.93, 0.90];
+    // elevation is measured FROM the normal, in the YZ plane, same sign
+    // convention as theta -- see setup_camera's docstring.
+    const dy = Math.cos(oe), dz = Math.sin(oe);
+    const L = R * 0.62, e = R * 0.05;
+    const c0 = [cx, dy * L, cz + dz * L];
+    push([cx, 0, cz], c0, WHITE, 1.2);                 // stalk down to the panel
+    const vy = [0, -dz, dy];                           // across, within the YZ plane
+    const cor = (a, b) => [c0[0] + a * e,
+                           c0[1] + vy[1] * b * e,
+                           c0[2] + vy[2] * b * e];
+    const P = [cor(-1,-1), cor(1,-1), cor(1,1), cor(-1,1)];
+    for(let i = 0; i < 4; i++) push(P[i], P[(i+1)%4], WHITE, 1.6);
+    const lens = [cx, dy * (L - e*1.8), cz + dz * (L - e*1.8)];
+    for(const q of P) push(q, lens, WHITE, 1.2);
+  }
+
   // TRACED RAY PATHS, appended to the same line buffer. Each path is a
   // polyline in the mesh's own millimetre coordinates, so no transform is
   // needed. Green means the ray got back out, red means it was absorbed; the
@@ -2412,6 +2451,10 @@ addEventListener('resize', () => draw());
         // smear + head-on numbers were always the fitted Musou.
         body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
                               beam_w: BW, mm_per_px: MMPX, renderer: R,
+                              // WHERE IT IS READ FROM. 0 is the panel normal,
+                              // which is what every published figure used, so
+                              // an untouched control changes nothing.
+                              obs_elev: parseFloat($('#obs').value) || 0,
                               diffuse_frac: null, roughness: null,
                               coating: (NOTOP() || NOPAINT()
                                         || +$('#pcov').value <= 0)
@@ -2908,7 +2951,9 @@ addEventListener('resize', () => draw());
         : `top ${pc} % — ${mm.toFixed(2)} mm of ${LAST.depth} mm, from the tips`]);
     }
     rows.push(['model', `diffuse ${$('#df').value} · roughness ${$('#rg').value} (assumed)`]);
-    rows.push(['probe', `beam ${$('#beamw').value} mm at wall · renderer ${$('#renderer').value}`]);
+    rows.push(['probe', `beam ${$('#beamw').value} mm at wall · `
+      + `read from ${$('#obs').value}\u00b0 off normal · `
+      + `renderer ${$('#renderer').value}`]);
     for(const dv of $('#derived').querySelectorAll('div')){
       const k = ((dv.querySelector('dt') || {}).textContent || '').trim();
       const v = ((dv.querySelector('dd') || {}).textContent || '').trim();

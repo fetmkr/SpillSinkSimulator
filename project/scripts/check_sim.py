@@ -391,7 +391,35 @@ def H():
     check("H", "H4 hidden 이 진짜로 숨긴다", h4)
 
 
-GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H}
+def I():
+    """요청에서 재료 값을 빼먹으면 재료 값이 쓰이나.
+
+    2026-08-27 에 `/api/measure` 가 확산을 안 받으면 **버린 가정값 0.76** 을,
+    거칠기를 안 받으면 **버린 0.30** 을 썼다. 25 % 틀린 숫자가 조용히 나왔다.
+    `/api/rays` 도 같았다. 화면은 셋 다 명시해서 보내므로 무사했고, 물리는
+    것은 키를 빼고 부르는 쪽이다.
+
+    정본은 `scripts/gate_api_defaults.py` 다. 여기서는 그것을 부른다 --
+    같은 규칙을 두 군데 적으면 한 군데만 고치게 된다.
+    """
+    print("\n I. 재료 값을 안 보내면 재료 값이 쓰이나", flush=True)
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    r = subprocess.run([sys.executable,
+                        os.path.join(here, "gate_api_defaults.py")],
+                       capture_output=True, text=True, timeout=1200,
+                       env=dict(os.environ, SIM=BASE))
+    out = r.stdout
+    for line in out.splitlines():
+        if line.strip().startswith("[") and ("PASS" in line or "FAIL" in line):
+            name = line.split("]", 1)[1].strip()
+            RESULTS.append(("I", name[:60], "PASS" in line, "", 0.0))
+            print("  " + line.strip(), flush=True)
+    if not any(g == "I" for g, *_ in RESULTS):
+        check("I", "I0 관문이 돌지 않았다", lambda: (False, out[-160:]))
+
+
+GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H, "I": I}
 
 
 if __name__ == "__main__":

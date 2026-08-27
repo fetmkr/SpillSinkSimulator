@@ -1,0 +1,250 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>방이 정해지니 답이 바뀌었다</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.fig{background:#f4f1eb;border:1px solid var(--line);border-radius:3px;padding:12px;overflow-x:auto}
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:66ch}
+li{margin:5px 0}
+a{color:var(--cy)}
+td.hot{color:var(--bad);font-weight:700}
+td.dim{color:var(--muted)}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">2026-08-27 · 방과 관찰자</div>
+<h1>방이 정해지니 답이 바뀌었다</h1>
+<p class="sub">패널이 정면으로 맞을 일이 없다. 그리고 오늘까지 이 프로젝트는 <b>관객이 어디 서 있는지</b>를 한 번도 안 쟀다. 카메라가 판 법선에 붙박이였다.</p></header>
+<section><div class="card verdict ok"><h2 style="margin:0">결론</h2>
+<ul>
+<li><b>패널이 받는 각도는 30~45도다.</b> 정면은 이 방에서 안 일어난다. 지금까지 봐 온 정면 값은 여기서 안 쓰는 값이다.</li>
+<li><b>벌집은 빛이 온 쪽에서 보면 밝다.</b> 좁은 봉우리가 아니다. 관찰자 20도에서 60도까지 0.135 근처로 평평하게 밝다. 관객 상당수가 그 쪽 바닥에 서 있다.</li>
+<li><b>피라미드는 40도에서 되쏜다.</b> 같은 자리에서 0.4675 로, 벌집의 <b>3.4 배</b>다. 하필 이 방이 쓰는 각도다. 대신 60도로 벗어나면 벌집의 절반이다.</li>
+<li><b>둘 다 목표를 못 넘었다.</b> 목표가 0.040 인데 프로젝터 쪽 바닥에서는 벌집이 3.4 배, 피라미드가 11.7 배 밝다.</li>
+<li><b>셀은 작을수록 좋다.</b> 깊이 40에서 셀 9.53 이 15 와 20 을 모든 각도에서 이긴다.</li>
+</ul></div></section>
+<section><h2>방</h2>
+<figure><div class="fig"><svg viewBox="0 0 920 470" width="100%" style="height:auto" font-family="var(--kr)">
+<rect width="920" height="470" fill="#f4f1eb"/>
+<rect x="60" y="42" width="800" height="10" fill="#2b2b2b"/>
+<text x="60" y="34" font-size="13" font-weight="700" fill="#c8401c">천장 = 패널</text>
+<text x="860" y="34" font-size="11" fill="#8a8378" text-anchor="end">천장 높이 6 m · 방 10 x 10 m</text>
+<line x1="60" y1="392" x2="860" y2="392" stroke="#b9b2a6" stroke-width="2"/>
+<rect x="131" y="273" width="18" height="11" fill="#1e5fa8" rx="2"/>
+<line x1="140" y1="284" x2="140" y2="392" stroke="#1e5fa8" stroke-width="2"/>
+<text x="140" y="409" font-size="12" fill="#1e5fa8" font-weight="700" text-anchor="middle">프로젝터</text>
+<text x="140" y="423" font-size="11" fill="#1e5fa8" text-anchor="middle">높이 2 m</text>
+<line x1="140.0" y1="278.7" x2="324.8" y2="52.0" stroke="#e0a44e" stroke-width="2.5"/>
+<line x1="324.8" y1="52.0" x2="324.8" y2="82.0" stroke="#e0a44e" stroke-width="1" stroke-dasharray="3 3" opacity="0.85"/>
+<path d="M 324.8 82.0 L 324.8 88.0 L 524.0 88.0" fill="none" stroke="#e0a44e" stroke-width="1" opacity="0.55"/>
+<text x="532.0" y="92.0" font-size="12" fill="#e0a44e" font-weight="700">60도로 쏘면 패널은 30도로 맞는다</text>
+<text x="532.0" y="107.0" font-size="11" fill="#8a8378">프로젝터에서 2.3 m 앞. 점선이 판 법선.</text>
+<line x1="140.0" y1="278.7" x2="460.0" y2="52.0" stroke="#c8401c" stroke-width="2.5"/>
+<line x1="460.0" y1="52.0" x2="460.0" y2="82.0" stroke="#c8401c" stroke-width="1" stroke-dasharray="3 3" opacity="0.85"/>
+<path d="M 460.0 82.0 L 460.0 144.0 L 524.0 144.0" fill="none" stroke="#c8401c" stroke-width="1" opacity="0.55"/>
+<text x="532.0" y="148.0" font-size="12" fill="#c8401c" font-weight="700">45도로 쏘면 패널은 45도로 맞는다</text>
+<text x="532.0" y="163.0" font-size="11" fill="#8a8378">프로젝터에서 4.0 m 앞. 점선이 판 법선.</text>
+<line x1="460.0" y1="55.0" x2="154.0" y2="273.7" stroke="#5f7a2c" stroke-width="2" stroke-dasharray="7 4" transform="translate(9,7)"/>
+<text x="168.0" y="320.0" font-size="12" fill="#5f7a2c" font-weight="700">밝게 보이는 쪽은 빛이 온 쪽이다</text>
+<text x="168.0" y="335.0" font-size="11" fill="#7a8a5a">프로젝터가 서 있는 바닥이 그 쪽이다</text>
+<circle cx="332.0" cy="295.3" r="6" fill="#c8401c"/>
+<line x1="332.0" y1="301.3" x2="332.0" y2="392.0" stroke="#c8401c" stroke-width="3"/>
+<line x1="332.0" y1="291.3" x2="460.0" y2="55.0" stroke="#c8401c" stroke-width="1.3" stroke-dasharray="2 4" opacity="0.75"/>
+<text x="332.0" y="409.0" font-size="12" fill="#c8401c" font-weight="700" text-anchor="middle">관객</text>
+<text x="332.0" y="423.0" font-size="11" fill="#c8401c" text-anchor="middle">프로젝터와 같은 쪽</text>
+<circle cx="780.0" cy="295.3" r="6" fill="#6b6b6b"/>
+<line x1="780.0" y1="301.3" x2="780.0" y2="392.0" stroke="#6b6b6b" stroke-width="3"/>
+<line x1="780.0" y1="291.3" x2="460.0" y2="55.0" stroke="#6b6b6b" stroke-width="1.3" stroke-dasharray="2 4" opacity="0.75"/>
+<text x="780.0" y="409.0" font-size="12" fill="#6b6b6b" font-weight="700" text-anchor="middle">관객</text>
+<text x="780.0" y="423.0" font-size="11" fill="#6b6b6b" text-anchor="middle">패널을 지나친 쪽</text>
+<text x="60" y="444" font-size="13" font-weight="700" fill="#c8401c">패널이 받는 각도는 30~45도. 정면은 이 방에 없다.</text>
+<text x="60" y="460" font-size="11" fill="#8a8378">정면이 되려면 프로젝터가 천장 바로 밑에 있어야 하는데, 그러면 빔이 위로 안 가고 공중 이미지가 안 생긴다.</text>
+</svg></div>
+<figcaption class="tag">단면 하나. 각도와 거리는 다 계산해서 그렸다.</figcaption></figure>
+<div class="scroll"><table><thead><tr><th>쏘는 각</th><th>천장까지 수평 거리</th><th>패널이 받는 각</th></tr></thead><tbody>
+<tr><td>45&deg;</td><td class="n">4.00 m</td><td class="n"><b>45&deg;</b></td></tr>
+<tr><td>50&deg;</td><td class="n">3.36 m</td><td class="n"><b>40&deg;</b></td></tr>
+<tr><td>55&deg;</td><td class="n">2.80 m</td><td class="n"><b>35&deg;</b></td></tr>
+<tr><td>60&deg;</td><td class="n">2.31 m</td><td class="n"><b>30&deg;</b></td></tr>
+</tbody></table></div></section>
+<section><h2>왜 한쪽만 밝은가</h2>
+<p>빔이 40도로 들어오면 셀 한쪽 벽이 팁에서 <b>11.4 mm</b> 깊이까지 밝아진다. 그 벽의 법선은 관 축과 직각이다. 그래서 보는 자리에 따라 이렇게 갈린다.</p>
+<figure><div class="fig"><svg viewBox="0 0 740 790" width="100%" style="height:auto" font-family="var(--kr)">
+<rect width="740" height="790" fill="#f4f1eb"/>
+<rect x="270.0" y="630.0" width="210.2" height="14.0" fill="#3b3a36"/>
+<text x="270.0" y="660.0" font-size="11" fill="#8a8378">바닥판 · 5 % 페인트</text>
+<rect x="270.0" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="370.1" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="470.1" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="380.1" y="210.0" width="5.0" height="119.3" fill="#e8c15a"/>
+<line x1="236.0" y1="420.0" x2="510.2" y2="420.0" stroke="#4a7fb5" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="230.0" y="424.0" font-size="11" fill="#4a7fb5" text-anchor="end">무소 20 mm</text>
+<line x1="236.0" y1="329.3" x2="264.0" y2="329.3" stroke="#c8901c" stroke-width="1.2"/>
+<text x="230.0" y="333.3" font-size="11" fill="#a8760c" text-anchor="end">빛이 닿는 끝 11.4 mm</text>
+<line x1="570.8" y1="90.0" x2="380.1" y2="329.3" stroke="#c8401c" stroke-width="2.5"/>
+<path d="M 475.5 209.6 l 7.0 -3.0 l -1.0 9.0 z" fill="#c8401c"/>
+<text x="503.6" y="165.8" font-size="12" fill="#c8401c" font-weight="700" text-anchor="end">빔 40도</text>
+<circle cx="570.8" cy="90.0" r="9" fill="#f4f1eb" stroke="#c8401c" stroke-width="2"/>
+<circle cx="570.8" cy="90.0" r="3.4" fill="#c8401c"/>
+<text x="570.8" y="70.0" font-size="12" fill="#c8401c" font-weight="700" text-anchor="middle">같은 쪽</text>
+<text x="570.8" y="52.0" font-size="17" fill="#c8401c" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.1367</text>
+<line x1="430.2" y1="630.0" x2="430.2" y2="90.0" stroke="#4a7fb5" stroke-width="1.8" stroke-dasharray="6 4"/>
+<circle cx="430.2" cy="90.0" r="9" fill="#f4f1eb" stroke="#4a7fb5" stroke-width="2"/>
+<circle cx="430.2" cy="90.0" r="3.4" fill="#4a7fb5"/>
+<text x="430.2" y="70.0" font-size="12" fill="#4a7fb5" font-weight="700" text-anchor="middle">정면</text>
+<text x="430.2" y="52.0" font-size="17" fill="#4a7fb5" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.0070</text>
+<line x1="470.1" y1="329.3" x2="269.4" y2="90.0" stroke="#6b6b6b" stroke-width="1.8" stroke-dasharray="6 4"/>
+<circle cx="269.4" cy="90.0" r="9" fill="#f4f1eb" stroke="#6b6b6b" stroke-width="2"/>
+<circle cx="269.4" cy="90.0" r="3.4" fill="#6b6b6b"/>
+<text x="269.4" y="70.0" font-size="12" fill="#6b6b6b" font-weight="700" text-anchor="middle">반대쪽</text>
+<text x="269.4" y="52.0" font-size="17" fill="#6b6b6b" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.0223</text>
+<rect x="60" y="707" width="11" height="11" fill="#c8401c"/>
+<text x="78" y="716" font-size="12" fill="#3b3a36">빛이 온 쪽에서 보면 밝아진 벽이 그대로 보인다</text>
+<rect x="60" y="726" width="11" height="11" fill="#4a7fb5"/>
+<text x="78" y="735" font-size="12" fill="#3b3a36">관 축을 똑바로 내려다보면 벽이 옆으로 서서 안 보인다</text>
+<rect x="60" y="745" width="11" height="11" fill="#6b6b6b"/>
+<text x="78" y="754" font-size="12" fill="#3b3a36">반대쪽에서 보면 밝아진 벽의 뒷면이라 안 보인다</text>
+</svg></div>
+<figcaption class="tag">셀 하나를 옆에서 자른 그림. 각도는 실제 각도다. 포일은 실제 0.08 mm 인데 보이라고 굵게 그렸다.</figcaption></figure>
+<p>이 셈이 딱 맞아떨어진다. 깊이 11.4 mm 인 밝은 벽 끝에서 40도로 올려다보면 가로로 9.53 mm 를 가는데, 그것이 셀 너비와 같다. 그러니 <b>밝은 띠 전체가 그 방향에서 정확히 다 보인다.</b></p></section>
+<section><h2>관객이 어디 서 있는지가 답을 바꾼다</h2>
+<p>측정 장비의 카메라가 판 법선에 붙박이였다. <code>setup_camera</code> 는 처음부터 각도를 받았는데 <code>run_case</code> 가 0 을 글자 그대로 넘겼다. 그래서 이 프로젝트가 발표한 모든 봉우리는 <b>판에서 똑바로 나오는 밝기</b>다. 빔이 몇 도로 들어왔든 상관없이 그렇다.</p>
+<p>오늘 관찰자 각도를 손잡이로 만들고, 같은 판을 여러 자리에서 봤다. 부호가 중요하다. 램프와 카메라를 놓는 식이 글자 그대로 같아서, <b>빔 +40 에 관찰자 +40</b> 은 빛이 온 쪽에서 되보는 것이고 <b>빔 -40 에 관찰자 +40</b> 은 거울 방향이다.</p>
+<p class="tag">벌집 셀 9.53 · 깊이 40 · 포일 0.08 · 무소 팁 20 mm · 바닥판 5 % 페인트 · 표본 256 · 위상 6. 값은 봉우리이고 민판 무광 검정이 1.0 이다.</p>
+<div class="scroll"><table><thead><tr><th>관찰자 각도</th><th>빔이 같은 쪽에서</th><th>빔이 정면에서</th><th>빔이 반대쪽에서</th><th>같은 쪽 &divide; 반대쪽</th></tr></thead><tbody>
+<tr><td>0&deg;</td><td class="n">0.0070</td><td class="n">2.5985</td><td class="n">0.0070</td><td class="n">1&times;</td></tr>
+<tr><td>20&deg;</td><td class="hot">0.1329</td><td class="n">0.0074</td><td class="n">0.0071</td><td class="n">19&times;</td></tr>
+<tr><td>30&deg;</td><td class="hot">0.1347</td><td class="n">0.0068</td><td class="n">0.0073</td><td class="n">19&times;</td></tr>
+<tr><td>40&deg;</td><td class="hot">0.1367</td><td class="n">0.0068</td><td class="n">0.0223</td><td class="n">6&times;</td></tr>
+<tr><td>50&deg;</td><td class="hot">0.1365</td><td class="n">0.0067</td><td class="n">0.0076</td><td class="n">18&times;</td></tr>
+<tr><td>60&deg;</td><td class="hot">0.1344</td><td class="n">0.0068</td><td class="n">0.0071</td><td class="n">19&times;</td></tr>
+</tbody></table></div>
+<p><b>가운데 칸이 통째로 밝다.</b> 한 자리만 밝은 것이 아니라 20도에서 60도까지 넓게 밝다. 거울 방향(오른쪽 칸)은 오히려 어둡다. 벌집은 거울이 아니다.</p></section>
+<section><h2>그래서 관객은 얼마나 밝게 보나</h2>
+<p>천장 패널 한 점을 정한다. 프로젝터가 그 점을 40도로 비춘다. 키 1.6 m 인 사람이 그 점에서 바닥으로 얼마나 떨어져 서면 어느 각도로 보게 되는지 셈한다.</p>
+<p class="tag">벌집 셀 9.53 · 깊이 40 · 포일 0.08 · 무소 팁 20 mm · 바닥판 5 % 페인트 · 표본 256 · 위상 6. 값은 봉우리이고 민판 무광 검정이 1.0 이다.</p>
+<div class="scroll"><table><thead><tr><th>패널 아래에서 떨어진 거리</th><th>보는 각도</th><th>그 자리에서 본 밝기</th></tr></thead><tbody>
+<tr><td class="n">0.00 m</td><td class="n">0&deg;</td><td class="n">0.0070</td></tr>
+<tr><td class="n">1.60 m</td><td class="n">20&deg;</td><td class="hot">0.1329</td></tr>
+<tr><td class="n">2.54 m</td><td class="n">30&deg;</td><td class="hot">0.1347</td></tr>
+<tr><td class="n">3.69 m</td><td class="n">40&deg;</td><td class="hot">0.1367</td></tr>
+<tr><td class="n">5.24 m</td><td class="n">50&deg;</td><td class="hot">0.1365</td></tr>
+<tr><td class="n">7.62 m</td><td class="n">60&deg;</td><td class="hot">0.1344</td></tr>
+</tbody></table></div>
+<p><b>프로젝터와 같은 쪽 바닥 대부분이 밝은 쪽이다.</b> 민판 무광 검정을 1.0 으로 놓은 값이니 0.137 은 민판의 7 분의 1 을 보는 것이다. 목표는 0.040 이었으니 <b>3.4 배</b> 밝다.</p>
+<p class="tag">한 단면만 쟀다. 관객은 좌우로도 흩어져 있는데 이 훑기는 위아래로만 움직였다. 옆으로 벗어나면 얼마나 어두워지는지 <b>안 쟀다.</b></p></section>
+<section><h2>피라미드와 나란히 놓으면</h2>
+<p>둘 다 같은 조건에서 같은 방식으로 쟀다. 빔은 40도로 같은 쪽에서 들어오고, 관객만 자리를 옮긴다.</p>
+<p class="tag">벌집 셀 9.53 · 깊이 40 · 포일 0.08 · 판 95.3 mm &nbsp;/&nbsp; 피라미드 밑변 50 · 높이 250 · 끝 평평 1.0 · 판 200 mm. 둘 다 무소 팁 20 mm · 나머지 5 % 페인트 · 빔 40도 · 표본 256 · 위상 6. 값은 봉우리이고 민판 무광 검정이 1.0 이다.</p>
+<div class="scroll"><table><thead><tr><th>관찰자 각도</th><th>벌집 9.53 / 깊이 40</th><th>피라미드 밑변 50 / 높이 250</th><th>어느 쪽이 어두운가</th></tr></thead><tbody>
+<tr><td>0&deg;</td><td class="n">0.0070</td><td class="hot">0.0773</td><td class="n">벌집 (11.1&times;)</td></tr>
+<tr><td>20&deg;</td><td class="hot">0.1329</td><td class="n">0.1001</td><td class="n">피라미드 (1.3&times;)</td></tr>
+<tr><td>30&deg;</td><td class="n">0.1347</td><td class="hot">0.1585</td><td class="n">벌집 (1.2&times;)</td></tr>
+<tr><td>40&deg;</td><td class="n">0.1367</td><td class="hot">0.4675</td><td class="n">벌집 (3.4&times;)</td></tr>
+<tr><td>50&deg;</td><td class="hot">0.1365</td><td class="n">0.1124</td><td class="n">피라미드 (1.2&times;)</td></tr>
+<tr><td>60&deg;</td><td class="hot">0.1344</td><td class="n">0.0670</td><td class="n">피라미드 (2.0&times;)</td></tr>
+</tbody></table></div>
+<p><b>벌집은 평평하고 피라미드는 뾰족하다.</b> 피라미드는 40도에서 되쏘고, 그 자리를 벗어나면 급히 어두워진다. 밑변 50 에 높이 250 이면 옆면이 바닥에서 84도로 거의 서 있다. 마주 보는 두 면이 좁은 골을 이루니, 두 번 튕긴 빛이 온 길로 되돌아 나간다.</p>
+<p>고를 때 이렇게 갈린다. 관객이 프로젝터 가까이 서면 벌집이 낫고, 멀리 떨어져 60도로 올려다보면 피라미드가 낫다. <b>관객이 어디 서는지를 정해야 모양이 정해진다.</b></p></section>
+<section><h2>셀 크기 -- 작을수록 좋다</h2>
+<p class="tag">벌집 · 깊이 40 · 포일 0.08 · 무소 팁 20 mm · 바닥판 5 % 페인트. 값은 반사 총량이고 면 0/45/90도 중 가장 밝은 값.</p>
+<div class="scroll"><table><thead><tr><th>셀</th><th>0&deg;</th><th>20&deg;</th><th>30&deg;</th><th>40&deg;</th><th>45&deg;</th><th>테두리 넓이</th><th>40도 빛이 벽에 닿는 깊이</th></tr></thead><tbody>
+<tr class="pick"><td>9.53 mm</td><td class="n">0.1202 %</td><td class="n">0.1201 %</td><td class="n">0.1570 %</td><td class="n">0.2007 %</td><td class="n">0.2225 %</td><td class="n">2.52 %</td><td class="n">11.4 mm</td></tr>
+<tr><td>15.00 mm</td><td class="n">0.2240 %</td><td class="n">0.1502 %</td><td class="n">0.1848 %</td><td class="n">0.2139 %</td><td class="n">0.2371 %</td><td class="n">1.60 %</td><td class="n">17.9 mm</td></tr>
+<tr><td>20.00 mm</td><td class="n">0.3485 %</td><td class="n">0.2200 %</td><td class="n">0.2160 %</td><td class="n">0.2346 %</td><td class="n">0.2371 %</td><td class="n">1.20 %</td><td class="n">23.8 mm</td></tr>
+</tbody></table></div>
+<p>셀이 크면 테두리는 준다. 그런데도 진다. 깊이 40 에서 바닥 출구가 넓어져 <b>바닥판이 더 많이 보이기</b> 때문이다.</p>
+<div class="scroll"><table><thead><tr><th>셀</th><th>바닥 출구 반각</th><th>바닥에서 곧장 새는 몫</th></tr></thead><tbody>
+<tr><td>9.53 mm</td><td class="n">6.8&deg;</td><td class="n">1.40 %</td></tr>
+<tr><td>15.00 mm</td><td class="n">10.6&deg;</td><td class="n">3.40 %</td></tr>
+<tr><td>20.00 mm</td><td class="n">14.0&deg;</td><td class="n">5.88 %</td></tr>
+</tbody></table></div>
+<p>그리고 무소가 닿는 깊이가 문제가 된다. 40도 빛이 셀 9.53 에서는 11.4 mm 에서 벽에 닿으니 팁에서 20 mm 만 뿌려도 다 덮인다. 셀 20 은 23.8 mm 라 <b>못 덮는다.</b></p></section>
+<section><h2>오늘 고친 장비</h2><ul>
+<li><b>관찰자 각도를 손잡이로 만들었다.</b> <code>form_buildable.OBS_ELEV</code>, <code>/api/form</code> 의 <code>obs_elev</code>, 화면의 칸, 그리고 3D 에 카메라를 그린다. 안 보내면 판 법선이라 발표된 값은 안 움직인다 (<code>gate_observer_angle.py</code> 4항목).</li>
+<li>기울여 보면 세로가 <code>cos</code> 만큼 눌린다. 그 축의 mm 환산을 <code>1/cos</code> 로 고쳤다. 안 고쳤으면 비스듬히 본 뭉개기가 전부 좁게 읽혔을 것이다.</li>
+<li><b><code>form</code> 이 돌려주던 봉우리는 항상 0도 값이었다.</b> 40도 빔의 봉우리를 물을 방법이 없었다. <code>peak_by_theta</code> 를 더했다.</li>
+<li><b><code>/api/measure</code> 가 확산을 안 받으면 버린 값 0.76 을, 거칠기는 버린 0.30 을 썼다.</b> 25 % 틀린 숫자가 조용히 나왔다. <code>/api/rays</code> 도 같았다. 네 칸 다 고치고 <code>gate_api_defaults.py</code> 로 막았다. 화면과 배치 스크립트는 값을 명시해 보내므로 무사했다.</li>
+<li>보고서를 짓는 스크립트가 서식이 안 풀린 채로 나가면 <b>발행을 멈춘다.</b> 퍼센트가 두 번 찍히거나 문단이 통째로 빠지는 일이 세 번 있었는데, 숫자 검사도 태그 검사도 그걸 못 잡았다.</li>
+</ul></section>
+<section><h2>안 잰 것</h2><ul>
+<li><b>좌우로 벗어난 자리를 안 쟀다.</b> 관찰자 훑기가 한 단면 안에서만 움직였다. 방은 2차원이다.</li>
+<li>30도와 45도로 들어오는 빔의 관찰자 훑기를 안 했다. 40도만 했다.</li>
+<li>셀 6.35 를 30~45도에서 안 쟀다. 셀이 작을수록 좋았으니 더 좋을 수 있다.</li>
+<li>피라미드 뭉개기를 이 판(200 mm)으로는 못 믿는다. 되돌아온 빛이 창을 넘친다. 표에 안 실었다.</li>
+<li>사람 눈에 얼마나 보이는지는 아직 안 쟀다. 여기 숫자는 다 밝기의 비다.</li>
+</ul></section>
+<section><p class="tag">잰 것: <code>results/comb20/observer_scan_both.json</code> · <code>cell_15_20_depth40.json</code> · <code>results/pyramid_height/height_totals.json</code>. 이 문서를 짓는 스크립트: <code>scripts/build_room_report.py</code>. 같은 날 다른 보고서: <code>report/comb/pyramid_height_2026-08-27.html</code></p></section>
+</div></body></html>

@@ -1,0 +1,146 @@
+[
+ {
+  "obs_elev": 0.0,
+  "peak_by_theta": {
+   "-40": 0.0067898051891413435,
+   "+40": 0.006793647633432397,
+   "+0": 2.5982932553545197
+  },
+  "smear": 1.0152405254690366,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ },
+ {
+  "obs_elev": 20.0,
+  "peak_by_theta": {
+   "-40": 0.006949964576042096,
+   "+40": 0.30685408683377374,
+   "+0": 0.007371204287829163
+  },
+  "smear": 1.1582185018244027,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ },
+ {
+  "obs_elev": 30.0,
+  "peak_by_theta": {
+   "-40": 0.007721519612779062,
+   "+40": 0.284784810230064,
+   "+0": 0.006850050557669687
+  },
+  "smear": 1.1149106409305036,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ },
+ {
+  "obs_elev": 40.0,
+  "peak_by_theta": {
+   "-40": 0.02256808816483728,
+   "+40": 0.36210385180062327,
+   "+0": 0.006859351283326186
+  },
+  "smear": 1.0233630552510737,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ },
+ {
+  "obs_elev": 50.0,
+  "peak_by_theta": {
+   "-40": 0.00762860400679181,
+   "+40": 0.13650440074895132,
+   "+0": 0.006774156519106559
+  },
+  "smear": 1.0383206044880569,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ },
+ {
+  "obs_elev": 60.0,
+  "peak_by_theta": {
+   "-40": 0.007015191766524865,
+   "+40": 0.1344080307094755,
+   "+0": 0.006709553596393831
+  },
+  "smear": 1.055918472600566,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "paint_depth": 10.0
+ }
+]

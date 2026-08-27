@@ -1,0 +1,83 @@
+[
+ {
+  "depth": 100.0,
+  "pitch": 50.0,
+  "tip_flat": 1.0,
+  "panel": 500.0,
+  "aspect": 2.0,
+  "spray_mm": 20.0,
+  "n_phase": 8,
+  "beam_w": 7.5,
+  "alpha": 0.039,
+  "slider": 0.19748417658131498,
+  "samples": 512,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "head_on": 0.23465846324784329,
+  "head_on_sec": 519.5,
+  "smear": 7.038859904736887,
+  "smear_converged": true,
+  "window_mm": 500.0,
+  "window_needed_mm": 179.35125649015242,
+  "mm_per_px": 0.215,
+  "draft_density": false,
+  "smear_sec": 765.3
+ },
+ {
+  "depth": 175.0,
+  "pitch": 50.0,
+  "tip_flat": 1.0,
+  "panel": 500.0,
+  "aspect": 3.5,
+  "spray_mm": 20.0,
+  "n_phase": 8,
+  "beam_w": 7.5,
+  "alpha": 0.039,
+  "slider": 0.19748417658131498,
+  "samples": 512,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "head_on": 0.13863110750585014,
+  "head_on_sec": 448.4,
+  "smear": 13.331411955605912,
+  "smear_converged": true,
+  "window_mm": 500.0,
+  "window_needed_mm": 343.59221360176804,
+  "mm_per_px": 0.215,
+  "draft_density": false,
+  "smear_sec": 780.1
+ },
+ {
+  "depth": 250.0,
+  "pitch": 50.0,
+  "tip_flat": 1.0,
+  "panel": 500.0,
+  "aspect": 5.0,
+  "spray_mm": 20.0,
+  "n_phase": 8,
+  "beam_w": 7.5,
+  "alpha": 0.039,
+  "slider": 0.19748417658131498,
+  "samples": 512,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "head_on": 0.0984916920484622,
+  "head_on_sec": 436.3,
+  "smear": 19.650876785433088,
+  "smear_converged": false,
+  "window_mm": 500.0,
+  "window_needed_mm": 508.5746896478097,
+  "mm_per_px": 0.215,
+  "draft_density": false,
+  "smear_sec": 850.9
+ }
+]

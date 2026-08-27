@@ -54,6 +54,7 @@ import json
 import time
 
 import bpy
+import math
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -73,6 +74,24 @@ RES_X, RES_Y = 1400, 620
 # pre-2026-08-20 behaviour of a constant pixel count, which is what every
 # published number was measured with.
 MM_PER_PX = 0.215
+
+# WHERE THE OBSERVER STANDS (2026-08-27). Until now the camera sat on the panel
+# normal and nothing could move it: `setup_camera` has taken `elev_deg` from the
+# start, and `run_case` passed 0.0 as a literal. So every "peak" this project
+# has ever published is **brightness straight out of the panel**, whatever
+# angle the beam arrived at.
+#
+# That is the wrong question for the room this is being built for. The panels
+# go on a 6 m ceiling, a projector 2 m up fires 45-60 deg above horizontal, so
+# the panels are lit at 30-45 deg from their normal -- and the audience is
+# spread across a 10 x 10 m floor, seeing each panel from many angles at once.
+# A honeycomb is not a corner-cube: it collimates along its own axis rather
+# than back at the source, so "how bright toward the source" and "how bright
+# toward a person on the floor" are different numbers and we only ever had one.
+#
+# 0.0 keeps every published figure bit-identical; `gate_observer_angle.py`
+# is what holds that.
+OBS_ELEV = 0.0
 # NOT A QUALITY KNOB. The rig renders at whatever the protocol density asks
 # for; this only stops a request that would not fit in memory. 6000 was my own
 # render-time budget and it silently coarsened the sampling on any panel over
@@ -228,6 +247,15 @@ def run_case(entry):
                   "quotable from this run"
                   % (want, MM_PER_PX, res_x, ortho / res_x), flush=True)
     mm_per_px = ortho / res_x
+    # A TILTED CAMERA FORESHORTENS THE AXIS THE PROFILE IS READ ALONG.
+    # `z_profile` reads down the panel's z axis, and an orthographic camera at
+    # elevation e squashes that axis by cos(e). The pixel-to-mm scale for a
+    # WIDTH therefore grows by 1/cos(e); the peak RATIO is untouched, because
+    # panel and control patch are squashed by the same factor.
+    # Leaving this out would have made every off-normal smear read too narrow,
+    # which is the same failure mode as the clipped window in the note below:
+    # a design that does smear reading as one that does not.
+    mm_per_px_z = mm_per_px / max(math.cos(math.radians(float(OBS_ELEV))), 1e-6)
     # profile array long enough to hold the whole measured window (see NWIN)
     nwin = max(NWIN, int(round(p.face_h / mm_per_px)) | 1)
     nwin = min(nwin, 60001)
@@ -256,7 +284,8 @@ def run_case(entry):
 
     out = {"tag": tag, "topology": entry["topology"],
            "process": entry["process"], "pitch": pitch,
-           "mm_per_px": mm_per_px, "n_phase": N_PHASE,
+           "mm_per_px": mm_per_px, "mm_per_px_z": mm_per_px_z,
+           "obs_elev_deg": float(OBS_ELEV), "n_phase": N_PHASE,
            # NEVER omit these again: 15 result files carry a beam
            # width recoverable only by inverting the control rms.
            "beam_w_mm": STRIPE_W, "spread_deg": SPREAD_DEG,
@@ -308,7 +337,8 @@ def run_case(entry):
             for o in list(bpy.data.objects):
                 if o.type in ("LIGHT", "CAMERA"):
                     bpy.data.objects.remove(o, do_unlink=True)
-            BR.setup_camera(cx, cz, ortho, res_x, res_y, elev_deg=0.0)
+            BR.setup_camera(cx, cz, ortho, res_x, res_y,
+                            elev_deg=float(OBS_ELEV))
             px_panel = BR.to_pixel_window(w_panel)
             px_ctrl = BR.to_pixel_window(w_ctrl)
             BR.set_world(0.0)
@@ -324,7 +354,7 @@ def run_case(entry):
             acc_c += pc
             pk = float(pp.max()) / float(pc.max()) if pc.max() > 0 else float("nan")
             rec["peak_ratio"].append(pk)
-            rec["rms_mm"].append(rms_width(pp, mm_per_px))
+            rec["rms_mm"].append(rms_width(pp, mm_per_px_z))
             for h in LADDER:                      # same frame, wider readings
                 lad_p[h] += recentre(
                     z_profile(arr, BR.to_pixel_window(
@@ -343,8 +373,8 @@ def run_case(entry):
         # walk the ladder outward and stop where two successive windows agree
         curve = []
         for h in LADDER:
-            rp = rms_width(lad_p[h], mm_per_px)
-            rc = rms_width(lad_c[h], mm_per_px)
+            rp = rms_width(lad_p[h], mm_per_px_z)
+            rc = rms_width(lad_c[h], mm_per_px_z)
             curve.append({"window_mm": h, "rms_mm": rp, "rms_control_mm": rc,
                           "smear": (rp / rc) if rc and rc == rc else None})
         conv_i, converged = len(curve) - 1, False
@@ -382,15 +412,15 @@ def run_case(entry):
              "z90_mm": z90,
              "window_needed_mm": (6.0 * z90) if z90 == z90 else None,
              "window_curve": curve,
-             "rms_mm_legacy": rms_width(acc_p, mm_per_px),
-             "rms_control_legacy_mm": rms_width(acc_c, mm_per_px),
+             "rms_mm_legacy": rms_width(acc_p, mm_per_px_z),
+             "rms_control_legacy_mm": rms_width(acc_c, mm_per_px_z),
              "peak_ratio_mean": float(np.mean(rec["peak_ratio"])),
              "peak_ratio_sd": float(np.std(rec["peak_ratio"])),
              "peak_ratio_max": float(np.max(rec["peak_ratio"])),
              "peak_ratio_span": (float(np.max(rec["peak_ratio"]))
                                  / max(float(np.min(rec["peak_ratio"])), 1e-12)),
              "rms_sd_mm": float(np.std(rec["rms_mm"]))}
-        d.update(mtf_at(acc_p, mm_per_px, PERIODS_MM))
+        d.update(mtf_at(acc_p, mm_per_px_z, PERIODS_MM))
         out["thetas"]["%+.0f" % theta] = d
         print("   th%+5.0f  rms %6.2f mm (ctrl %5.2f)  peak %.5f +/-%.5f  "
               "span %5.1fx  mtf20 %.3f"

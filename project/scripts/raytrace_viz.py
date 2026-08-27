@@ -141,7 +141,10 @@ def _lcg(seed):
 
 def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
           n_rays=120, max_bounces=12, rho=0.5, seed=23, mode="diffuse",
-          diffuse_frac=None, roughness=0.30):
+          # 0.30 은 2026-08-22 에 버린 거칠기 슬라이더 값이다 (알파 0.09).
+          # 재료가 쓰는 값은 0.1975 (알파 0.039). `None` 은 확산 비율과
+          # 같은 뜻으로 쓴다 -- 부르는 쪽이 재료 값을 넣어 준다.
+          diffuse_frac=None, roughness=None):
     """Cast `n_rays` at incidence theta and walk each until it leaves or dies.
 
     2026-08-17 upgrade toward optical-tool behaviour:
@@ -239,7 +242,7 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
                 dd = d[0] * n[0] + d[1] * n[1] + d[2] * n[2]
                 d = [d[0] - 2 * dd * n[0], d[1] - 2 * dd * n[1],
                      d[2] - 2 * dd * n[2]]
-                if mode == "fitted" and roughness > 0.0:
+                if mode == "fitted" and roughness and roughness > 0.0:
                     # blur the mirror leg. Not GGX -- a spherical jitter of
                     # the reflected direction, kept in the upper hemisphere.
                     for _ in range(8):

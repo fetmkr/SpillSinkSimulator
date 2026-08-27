@@ -150,7 +150,8 @@ def in_blender(op, **req):
                                    req.get("paint_depth"),
                                    req.get("roughness"),
                                    slot_df=req.get("slot_df"),
-                                   slot_rough=req.get("slot_rough")),
+                                   slot_rough=req.get("slot_rough"),
+                                   obs_elev=req.get("obs_elev")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
                   req.get("n_phase", 6), req.get("samples", 256),
@@ -1630,9 +1631,17 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
            "family": _render_family(m),
            "out_dir": "/tmp/simsrv", "results_dir": "/tmp/simsrv",
            "samples": int(samples), "res_x": 480, "res_y": 220, "gpu": True,
-           "spec_roughness": float(roughness),
+           # `cc["roughness"]` IS THE RESOLVED VALUE, not the request. When
+           # the caller sends nothing, `_coat` has already filled in the
+           # material's own roughness -- and `float(roughness)` on that None
+           # is what made /api/measure return 500 the moment the stale 0.30
+           # default was removed (2026-08-27). The panel-wide roughness and
+           # the shader's roughness were being read from two different
+           # places, which is the same defect as the diffuse fraction one
+           # line above it. One source now.
+           "spec_roughness": float(cc["roughness"]),
            "coating": {"body": body, "spec_scale": sspec,
-                       "roughness": float(roughness)},
+                       "roughness": float(cc["roughness"])},
            "params": prm,
            "renders": [{"mode": "hemi_view", "theta": float(t)}
                        for t in thetas]}
@@ -1768,7 +1777,7 @@ def _render_params(spec):
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
          phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
          coating="musou_fit", deep_coating=None, paint_depth=None,
-         roughness=None, slot_df=None, slot_rough=None):
+         roughness=None, slot_df=None, slot_rough=None, obs_elev=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1857,7 +1866,15 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # The protocol value is FB.MM_PER_PX; anything coarser is a draft and
     # the response says so, because a PEAK statistic dilutes with pixel
     # size even where an area average does not.
-    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX)
+    # WHERE THE OBSERVER STANDS. `None` keeps the panel normal, which is what
+    # every published figure was measured at. It joins the tuple the `finally`
+    # already restores -- a second save/restore path is a second thing to
+    # forget, and a module constant left changed follows the next caller into
+    # a different answer.
+    old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX,
+           FB.OBS_ELEV)
+    if obs_elev is not None:
+        FB.OBS_ELEV = float(obs_elev)
     PROTOCOL_MMPX = FB.MM_PER_PX
     if mm_per_px:
         FB.MM_PER_PX = float(mm_per_px)
@@ -1902,7 +1919,22 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
                 "smear": (0.5 * (a["rms_mm"] / a["rms_control_mm"]
                                  + b["rms_mm"] / b["rms_control_mm"])
                           if a and b else None),
+                # `peak` STAYS THE THETA-0 ENTRY, because 66,426 published
+                # rows mean exactly that by "head-on flash" and renaming it
+                # would silently change what they refer to.
+                #
+                # But it is the ONLY peak the summary ever carried, so asking
+                # "how bright is a 40-degree beam's return" was impossible
+                # through this API -- a caller who passed thetas=[-40] still
+                # got the theta-0 number, or None, with nothing saying which.
+                # Found 2026-08-27 while measuring exactly that. `peak_by_theta`
+                # carries every angle actually rendered, keyed the way
+                # `rec["thetas"]` keys them.
                 "peak": (t.get("+0") or {}).get("peak_ratio_mean"),
+                "peak_by_theta": {k: (v or {}).get("peak_ratio_mean")
+                                  for k, v in t.items()},
+                "rms_by_theta": {k: (v or {}).get("rms_mm")
+                                 for k, v in t.items()},
                 "converged": (all(conv) if conv else None),
                 "window_mm": (max(wins) if wins else None),
                 "window_needed_mm": (max(need) if need else None),
@@ -1914,7 +1946,7 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
                                  if a and b and a.get("rms_mm_legacy") else None)}
     finally:
         (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W,
-         FB.MM_PER_PX) = old
+         FB.MM_PER_PX, FB.OBS_ELEV) = old
         _prog(len(phis) * n_frames, len(phis) * n_frames)
     # the dashboard reports the WORST plane: smear-up is good so worst is the
     # lowest; head-on-down is good so worst is the highest
@@ -1928,8 +1960,16 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     fc = [p["face_mm"] for p in planes.values() if p.get("face_mm")]
     sl = [p["smear_legacy"] for p in planes.values()
           if p.get("smear_legacy") is not None]
+    # 각도별 봉우리: 면 0/45/90 중 가장 밝은 면. 표에 쓰는 규칙과 같다.
+    pbt = {}
+    for p_ in planes.values():
+        for k, v in (p_.get("peak_by_theta") or {}).items():
+            if v is None:
+                continue
+            pbt[k] = v if k not in pbt else max(pbt[k], v)
     return {"smear": min(sm) if sm else None,
             "peak": max(pk) if pk else None,
+            "peak_by_theta": pbt or None,
             "planes": planes,
             # a smear the panel was too small to contain is a LOWER BOUND
             "converged": (all(cv) if cv else None),
@@ -1941,6 +1981,12 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
             "samples": int(samples or 256),
             "beam_w": float(beam_w or BEAM_DEFAULT_MM), "reduced": True,
             "mm_per_px": float(mm_per_px or PROTOCOL_MMPX),
+            # 어느 각도에서 본 값인지, 그리고 기울인 만큼 늘어난 세로 환산.
+            # 결과가 스스로 조건을 말해야 나중에 가릴 수 있다.
+            "obs_elev_deg": float(obs_elev or 0.0),
+            "mm_per_px_z": (float(mm_per_px or PROTOCOL_MMPX)
+                            / max(math.cos(math.radians(float(obs_elev or 0.0))),
+                                  1e-6)),
             "protocol_mm_per_px": PROTOCOL_MMPX,
             "draft_density": bool(mm_per_px
                                   and float(mm_per_px) > PROTOCOL_MMPX * 1.01)}
@@ -2575,8 +2621,32 @@ class H(BaseHTTPRequestHandler):
                     return self._send(200, json.dumps(out))
                 r = in_blender("measure", spec=req["spec"],
                                thetas=req.get("thetas", [0.0]),
-                               diffuse_frac=req.get("diffuse_frac", 0.76),
-                               roughness=req.get("roughness", 0.30),
+                               # NOT 0.76 AND NOT 0.30. Those were the values
+                               # this study ran on before 2026-08-22, and both
+                               # were withdrawn: the diffuse fraction was an
+                               # assumption (measured 0.99 for black paint,
+                               # 0.993 for Musou) and 0.30 was a roughness
+                               # slider with no source, replaced by 0.1975
+                               # (alpha 0.039, MERL paint-black).
+                               #
+                               # `None` is what the rest of the code means by
+                               # "use the material's own value" -- `_coat` is
+                               # built on it, and /api/form and the mitsuba
+                               # path already passed it. This one handler kept
+                               # the old constants, so a caller that simply
+                               # omitted the key silently measured a material
+                               # nobody uses any more. Found 2026-08-27 by
+                               # probing the API directly: omitting the key
+                               # gave 0.07863 % where the material's own value
+                               # gives 0.09807 %, a 25 % error, and sending
+                               # 0.76 by hand reproduced the omitted case
+                               # exactly.
+                               #
+                               # The browser was never affected -- it sends
+                               # `diffuse_frac: null` explicitly, and a present
+                               # key beats a .get default.
+                               diffuse_frac=req.get("diffuse_frac"),
+                               roughness=req.get("roughness"),
                                samples=req.get("samples", 64),
                                coating=req.get("coating", "musou_fit"),
                                deep_coating=req.get("deep_coating"),
@@ -2666,7 +2736,9 @@ class H(BaseHTTPRequestHandler):
                                      coating=req.get("coating") or "musou_fit",
                                      deep_coating=req.get("deep_coating"),
                                      paint_depth=req.get("paint_depth"),
-                                     roughness=req.get("roughness"))
+                                     roughness=req.get("roughness"),
+                                     # 관찰자가 어디서 보나. 안 보내면 판 법선.
+                                     obs_elev=req.get("obs_elev"))
                     if "error" in out:
                         return self._send(200, json.dumps(out))
                     tries.append({"face_mm": out.get("face_mm"),
@@ -2781,16 +2853,29 @@ class H(BaseHTTPRequestHandler):
                 fw = float(req.get("spec", {}).get(
                     "panel", req.get("spec", {}).get("face", 100.0)))
                 v, f = clip_to_panel(v, f, fw, fw)
+                # ONE RULE FOR EVERY ENDPOINT: a material value that the
+                # request leaves out comes from the MATERIAL, never from a
+                # constant. `_coat` is where that rule lives, so this path
+                # goes through it too instead of keeping its own numbers.
+                # Until 2026-08-27 this handler defaulted rho to 0.5 and
+                # roughness to 0.30 -- a half-white panel and a roughness
+                # withdrawn five days earlier. The browser always sent all
+                # three, so it never showed; `gate_api_defaults.py` is what
+                # made it visible.
+                _rv = _coat(str(req.get("coating", "musou_fit")),
+                            req.get("diffuse_frac"),
+                            roughness=req.get("roughness"))
+                if req.get("rho") is not None:
+                    _rv = dict(_rv, rho0=float(req["rho"]))
                 out = RV.trace(v, f, fw, fw,
                                theta_deg=float(req.get("theta", 0.0)),
                                phi_deg=float(req.get("phi", 0.0)),
                                n_rays=int(req.get("n_rays", 120)),
                                max_bounces=int(req.get("max_bounces", 12)),
-                               rho=float(req.get("rho", 0.5)),
-                               mode=str(req.get("mode", "fitted")),
-                               diffuse_frac=(None if req.get("diffuse_frac") is None
-                                             else float(req["diffuse_frac"])),
-                               roughness=float(req.get("roughness", 0.30)),
+                               rho=_rv["rho0"], mode=str(req.get("mode",
+                                                                  "fitted")),
+                               diffuse_frac=_rv["df"],
+                               roughness=_rv["roughness"],
                                seed=int(req.get("seed", 23)))
                 out["seconds"] = round(time.perf_counter() - t0, 2)
                 return self._send(200, json.dumps(out))

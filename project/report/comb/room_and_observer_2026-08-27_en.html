@@ -1,0 +1,250 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The room changed the answer</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.fig{background:#f4f1eb;border:1px solid var(--line);border-radius:3px;padding:12px;overflow-x:auto}
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:66ch}
+li{margin:5px 0}
+a{color:var(--cy)}
+td.hot{color:var(--bad);font-weight:700}
+td.dim{color:var(--muted)}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">2026-08-27 · Room and observer</div>
+<h1>The room changed the answer</h1>
+<p class="sub">Nothing in this room ever hits the panel head-on. And until today this project never measured <b>where the audience is standing</b>. The camera was welded to the panel normal.</p></header>
+<section><div class="card verdict ok"><h2 style="margin:0">Verdict</h2>
+<ul>
+<li><b>The panel is struck at 30 to 45 degrees.</b> Head-on never happens here. Every head-on figure published so far is a number this room does not use.</li>
+<li><b>The honeycomb is bright when you look from the side the light came from.</b> Not a narrow spike: it sits flat near 0.135 from 20 degrees to 60, and much of the audience stands on that side of the floor.</li>
+<li><b>The pyramid throws it straight back at 40 degrees.</b> 0.4675 there, <b>3.4 times</b> the honeycomb, at the very angle this room uses. Move out to 60 degrees and it drops to half the honeycomb.</li>
+<li><b>Neither one clears the target.</b> Against a target of 0.040, on the projector's side of the floor the honeycomb is 3.4 times brighter and the pyramid 11.7 times.</li>
+<li><b>Smaller cells win.</b> At depth 40 the 9.53 cell beats 15 and 20 at every angle.</li>
+</ul></div></section>
+<section><h2>The room</h2>
+<figure><div class="fig"><svg viewBox="0 0 920 470" width="100%" style="height:auto" font-family="var(--kr)">
+<rect width="920" height="470" fill="#f4f1eb"/>
+<rect x="60" y="42" width="800" height="10" fill="#2b2b2b"/>
+<text x="60" y="34" font-size="13" font-weight="700" fill="#c8401c">Ceiling = panel</text>
+<text x="860" y="34" font-size="11" fill="#8a8378" text-anchor="end">ceiling 6 m · room 10 x 10 m</text>
+<line x1="60" y1="392" x2="860" y2="392" stroke="#b9b2a6" stroke-width="2"/>
+<rect x="131" y="273" width="18" height="11" fill="#1e5fa8" rx="2"/>
+<line x1="140" y1="284" x2="140" y2="392" stroke="#1e5fa8" stroke-width="2"/>
+<text x="140" y="409" font-size="12" fill="#1e5fa8" font-weight="700" text-anchor="middle">Projector</text>
+<text x="140" y="423" font-size="11" fill="#1e5fa8" text-anchor="middle">2 m up</text>
+<line x1="140.0" y1="278.7" x2="324.8" y2="52.0" stroke="#e0a44e" stroke-width="2.5"/>
+<line x1="324.8" y1="52.0" x2="324.8" y2="82.0" stroke="#e0a44e" stroke-width="1" stroke-dasharray="3 3" opacity="0.85"/>
+<path d="M 324.8 82.0 L 324.8 88.0 L 524.0 88.0" fill="none" stroke="#e0a44e" stroke-width="1" opacity="0.55"/>
+<text x="532.0" y="92.0" font-size="12" fill="#e0a44e" font-weight="700">fire at 60&deg;, the panel takes 30&deg;</text>
+<text x="532.0" y="107.0" font-size="11" fill="#8a8378">2.3 m out from the projector. Dashes are the panel normal.</text>
+<line x1="140.0" y1="278.7" x2="460.0" y2="52.0" stroke="#c8401c" stroke-width="2.5"/>
+<line x1="460.0" y1="52.0" x2="460.0" y2="82.0" stroke="#c8401c" stroke-width="1" stroke-dasharray="3 3" opacity="0.85"/>
+<path d="M 460.0 82.0 L 460.0 144.0 L 524.0 144.0" fill="none" stroke="#c8401c" stroke-width="1" opacity="0.55"/>
+<text x="532.0" y="148.0" font-size="12" fill="#c8401c" font-weight="700">fire at 45&deg;, the panel takes 45&deg;</text>
+<text x="532.0" y="163.0" font-size="11" fill="#8a8378">4.0 m out from the projector. Dashes are the panel normal.</text>
+<line x1="460.0" y1="55.0" x2="154.0" y2="273.7" stroke="#5f7a2c" stroke-width="2" stroke-dasharray="7 4" transform="translate(9,7)"/>
+<text x="168.0" y="320.0" font-size="12" fill="#5f7a2c" font-weight="700">the bright side is the side the light came from</text>
+<text x="168.0" y="335.0" font-size="11" fill="#7a8a5a">that is the floor the projector stands on</text>
+<circle cx="332.0" cy="295.3" r="6" fill="#c8401c"/>
+<line x1="332.0" y1="301.3" x2="332.0" y2="392.0" stroke="#c8401c" stroke-width="3"/>
+<line x1="332.0" y1="291.3" x2="460.0" y2="55.0" stroke="#c8401c" stroke-width="1.3" stroke-dasharray="2 4" opacity="0.75"/>
+<text x="332.0" y="409.0" font-size="12" fill="#c8401c" font-weight="700" text-anchor="middle">audience</text>
+<text x="332.0" y="423.0" font-size="11" fill="#c8401c" text-anchor="middle">same side as the projector</text>
+<circle cx="780.0" cy="295.3" r="6" fill="#6b6b6b"/>
+<line x1="780.0" y1="301.3" x2="780.0" y2="392.0" stroke="#6b6b6b" stroke-width="3"/>
+<line x1="780.0" y1="291.3" x2="460.0" y2="55.0" stroke="#6b6b6b" stroke-width="1.3" stroke-dasharray="2 4" opacity="0.75"/>
+<text x="780.0" y="409.0" font-size="12" fill="#6b6b6b" font-weight="700" text-anchor="middle">audience</text>
+<text x="780.0" y="423.0" font-size="11" fill="#6b6b6b" text-anchor="middle">past the panel</text>
+<text x="60" y="444" font-size="13" font-weight="700" fill="#c8401c">The panel takes 30 to 45 degrees. Head-on is not in this room.</text>
+<text x="60" y="460" font-size="11" fill="#8a8378">Head-on would need the projector directly under the ceiling, and then the beam never goes up and there is no mid-air image.</text>
+</svg></div>
+<figcaption class="tag">One cross-section. Every angle and distance is computed.</figcaption></figure>
+<div class="scroll"><table><thead><tr><th>Firing angle</th><th>Horizontal run to the ceiling</th><th>Angle the panel receives</th></tr></thead><tbody>
+<tr><td>45&deg;</td><td class="n">4.00 m</td><td class="n"><b>45&deg;</b></td></tr>
+<tr><td>50&deg;</td><td class="n">3.36 m</td><td class="n"><b>40&deg;</b></td></tr>
+<tr><td>55&deg;</td><td class="n">2.80 m</td><td class="n"><b>35&deg;</b></td></tr>
+<tr><td>60&deg;</td><td class="n">2.31 m</td><td class="n"><b>30&deg;</b></td></tr>
+</tbody></table></div></section>
+<section><h2>Why only one side is bright</h2>
+<p>A beam arriving at 40 degrees lights one wall of the cell down to <b>11.4 mm</b> from the mouth. That wall's normal is perpendicular to the tube axis, so what you see depends on where you stand.</p>
+<figure><div class="fig"><svg viewBox="0 0 740 790" width="100%" style="height:auto" font-family="var(--kr)">
+<rect width="740" height="790" fill="#f4f1eb"/>
+<rect x="270.0" y="630.0" width="210.2" height="14.0" fill="#3b3a36"/>
+<text x="270.0" y="660.0" font-size="11" fill="#8a8378">backing plate · 5 % paint</text>
+<rect x="270.0" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="370.1" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="470.1" y="210.0" width="10.1" height="420.0" fill="#6e6a60"/>
+<rect x="380.1" y="210.0" width="5.0" height="119.3" fill="#e8c15a"/>
+<line x1="236.0" y1="420.0" x2="510.2" y2="420.0" stroke="#4a7fb5" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="230.0" y="424.0" font-size="11" fill="#4a7fb5" text-anchor="end">Musou 20 mm</text>
+<line x1="236.0" y1="329.3" x2="264.0" y2="329.3" stroke="#c8901c" stroke-width="1.2"/>
+<text x="230.0" y="333.3" font-size="11" fill="#a8760c" text-anchor="end">light stops at 11.4 mm</text>
+<line x1="570.8" y1="90.0" x2="380.1" y2="329.3" stroke="#c8401c" stroke-width="2.5"/>
+<path d="M 475.5 209.6 l 7.0 -3.0 l -1.0 9.0 z" fill="#c8401c"/>
+<text x="503.6" y="165.8" font-size="12" fill="#c8401c" font-weight="700" text-anchor="end">beam 40&deg;</text>
+<circle cx="570.8" cy="90.0" r="9" fill="#f4f1eb" stroke="#c8401c" stroke-width="2"/>
+<circle cx="570.8" cy="90.0" r="3.4" fill="#c8401c"/>
+<text x="570.8" y="70.0" font-size="12" fill="#c8401c" font-weight="700" text-anchor="middle">same side</text>
+<text x="570.8" y="52.0" font-size="17" fill="#c8401c" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.1367</text>
+<line x1="430.2" y1="630.0" x2="430.2" y2="90.0" stroke="#4a7fb5" stroke-width="1.8" stroke-dasharray="6 4"/>
+<circle cx="430.2" cy="90.0" r="9" fill="#f4f1eb" stroke="#4a7fb5" stroke-width="2"/>
+<circle cx="430.2" cy="90.0" r="3.4" fill="#4a7fb5"/>
+<text x="430.2" y="70.0" font-size="12" fill="#4a7fb5" font-weight="700" text-anchor="middle">head-on</text>
+<text x="430.2" y="52.0" font-size="17" fill="#4a7fb5" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.0070</text>
+<line x1="470.1" y1="329.3" x2="269.4" y2="90.0" stroke="#6b6b6b" stroke-width="1.8" stroke-dasharray="6 4"/>
+<circle cx="269.4" cy="90.0" r="9" fill="#f4f1eb" stroke="#6b6b6b" stroke-width="2"/>
+<circle cx="269.4" cy="90.0" r="3.4" fill="#6b6b6b"/>
+<text x="269.4" y="70.0" font-size="12" fill="#6b6b6b" font-weight="700" text-anchor="middle">far side</text>
+<text x="269.4" y="52.0" font-size="17" fill="#6b6b6b" font-weight="800" text-anchor="middle" font-family="var(--mono)">0.0223</text>
+<rect x="60" y="707" width="11" height="11" fill="#c8401c"/>
+<text x="78" y="716" font-size="12" fill="#3b3a36">From the side the light came from, the lit wall is in full view</text>
+<rect x="60" y="726" width="11" height="11" fill="#4a7fb5"/>
+<text x="78" y="735" font-size="12" fill="#3b3a36">Straight down the tube the walls are edge-on and invisible</text>
+<rect x="60" y="745" width="11" height="11" fill="#6b6b6b"/>
+<text x="78" y="754" font-size="12" fill="#3b3a36">From the far side you face the back of the lit wall</text>
+</svg></div>
+<figcaption class="tag">One cell cut from the side. Angles are true. The foil is 0.08 mm and is drawn thick so it can be seen.</figcaption></figure>
+<p>The arithmetic closes exactly. Looking up at 40 degrees from the bottom of the lit strip at 11.4 mm travels 9.53 mm sideways, which is the cell width. So <b>the whole lit strip is visible from that direction and no other.</b></p></section>
+<section><h2>Where the audience stands changes the answer</h2>
+<p>The rig's camera was welded to the panel normal. <code>setup_camera</code> took an elevation from the start, but <code>run_case</code> passed a literal zero. So every peak this project has published is <b>brightness straight out of the panel</b>, whatever angle the beam arrived at.</p>
+<p>Today the observer angle became a control and the same panel was viewed from several places. The sign matters. The lamp and the camera are placed by literally the same expression, so <b>beam +40 with observer +40</b> looks back along the incoming light, and <b>beam -40 with observer +40</b> is the mirror direction.</p>
+<p class="tag">Honeycomb cell 9.53 · depth 40 · foil 0.08 · Musou 20 mm from the tip · 5 % paint on the backing plate · 256 samples · 6 phases. Values are peaks with a flat matte black patch at 1.0.</p>
+<div class="scroll"><table><thead><tr><th>Observer angle</th><th>Beam from the same side</th><th>Beam head-on</th><th>Beam from the far side</th><th>Same side &divide; far side</th></tr></thead><tbody>
+<tr><td>0&deg;</td><td class="n">0.0070</td><td class="n">2.5985</td><td class="n">0.0070</td><td class="n">1&times;</td></tr>
+<tr><td>20&deg;</td><td class="hot">0.1329</td><td class="n">0.0074</td><td class="n">0.0071</td><td class="n">19&times;</td></tr>
+<tr><td>30&deg;</td><td class="hot">0.1347</td><td class="n">0.0068</td><td class="n">0.0073</td><td class="n">19&times;</td></tr>
+<tr><td>40&deg;</td><td class="hot">0.1367</td><td class="n">0.0068</td><td class="n">0.0223</td><td class="n">6&times;</td></tr>
+<tr><td>50&deg;</td><td class="hot">0.1365</td><td class="n">0.0067</td><td class="n">0.0076</td><td class="n">18&times;</td></tr>
+<tr><td>60&deg;</td><td class="hot">0.1344</td><td class="n">0.0068</td><td class="n">0.0071</td><td class="n">19&times;</td></tr>
+</tbody></table></div>
+<p><b>The middle column is bright all the way down.</b> Not one position but everything from 20 to 60 degrees. The mirror direction on the right is dark instead. A honeycomb is not a mirror.</p></section>
+<section><h2>So how bright does the audience see it</h2>
+<p>Fix one point on the ceiling panel. The projector lights it at 40 degrees. For a viewer with eyes at 1.6 m, this is how far along the floor they stand and what angle they see.</p>
+<p class="tag">Honeycomb cell 9.53 · depth 40 · foil 0.08 · Musou 20 mm from the tip · 5 % paint on the backing plate · 256 samples · 6 phases. Values are peaks with a flat matte black patch at 1.0.</p>
+<div class="scroll"><table><thead><tr><th>Distance out from below the panel</th><th>Viewing angle</th><th>Brightness seen there</th></tr></thead><tbody>
+<tr><td class="n">0.00 m</td><td class="n">0&deg;</td><td class="n">0.0070</td></tr>
+<tr><td class="n">1.60 m</td><td class="n">20&deg;</td><td class="hot">0.1329</td></tr>
+<tr><td class="n">2.54 m</td><td class="n">30&deg;</td><td class="hot">0.1347</td></tr>
+<tr><td class="n">3.69 m</td><td class="n">40&deg;</td><td class="hot">0.1367</td></tr>
+<tr><td class="n">5.24 m</td><td class="n">50&deg;</td><td class="hot">0.1365</td></tr>
+<tr><td class="n">7.62 m</td><td class="n">60&deg;</td><td class="hot">0.1344</td></tr>
+</tbody></table></div>
+<p><b>Most of the floor on the projector's side is the bright side.</b> With a flat matte black patch at 1.0, 0.137 means seeing one 7 th of a bare painted board. The target was 0.040, so this is <b>3.4 times</b> brighter.</p>
+<p class="tag">Only one cross-section was measured. The audience also spreads left and right, and this scan only moved up and down. How much darker it gets off to the side was <b>not measured.</b></p></section>
+<section><h2>Side by side with the pyramid</h2>
+<p>Both measured the same way under the same conditions. The beam arrives at 40 degrees from the same side; only the viewer moves.</p>
+<p class="tag">Honeycomb cell 9.53 · depth 40 · foil 0.08 · panel 95.3 mm &nbsp;/&nbsp; pyramid base 50 · height 250 · tip flat 1.0 · panel 200 mm. Both with Musou 20 mm from the tip · 5 % paint elsewhere · beam at 40 degrees · 256 samples · 6 phases. Values are peaks with a flat matte black patch at 1.0.</p>
+<div class="scroll"><table><thead><tr><th>Observer angle</th><th>Honeycomb 9.53 / depth 40</th><th>Pyramid base 50 / height 250</th><th>Which is darker</th></tr></thead><tbody>
+<tr><td>0&deg;</td><td class="n">0.0070</td><td class="hot">0.0773</td><td class="n">Honeycomb (11.1&times;)</td></tr>
+<tr><td>20&deg;</td><td class="hot">0.1329</td><td class="n">0.1001</td><td class="n">Pyramid (1.3&times;)</td></tr>
+<tr><td>30&deg;</td><td class="n">0.1347</td><td class="hot">0.1585</td><td class="n">Honeycomb (1.2&times;)</td></tr>
+<tr><td>40&deg;</td><td class="n">0.1367</td><td class="hot">0.4675</td><td class="n">Honeycomb (3.4&times;)</td></tr>
+<tr><td>50&deg;</td><td class="hot">0.1365</td><td class="n">0.1124</td><td class="n">Pyramid (1.2&times;)</td></tr>
+<tr><td>60&deg;</td><td class="hot">0.1344</td><td class="n">0.0670</td><td class="n">Pyramid (2.0&times;)</td></tr>
+</tbody></table></div>
+<p><b>The honeycomb is flat and the pyramid is peaked.</b> The pyramid throws light back at 40 degrees and falls away fast on either side. With base 50 and height 250 the faces stand at 84 degrees from the base, so two opposing faces form a narrow groove and a double bounce sends light back the way it came.</p>
+<p>That is the choice. If the audience stands near the projector the honeycomb is better; if they stand far off and look up at 60 degrees the pyramid is better. <b>Where the audience stands decides the shape.</b></p></section>
+<section><h2>Cell size -- smaller is better</h2>
+<p class="tag">Honeycomb · depth 40 · foil 0.08 · Musou 20 mm from the tip · 5 % paint on the backing plate. Values are total reflectance, the brightest of the 0/45/90 degree planes.</p>
+<div class="scroll"><table><thead><tr><th>Cell</th><th>0&deg;</th><th>20&deg;</th><th>30&deg;</th><th>40&deg;</th><th>45&deg;</th><th>Rim area</th><th>Depth a 40 degree beam reaches the wall</th></tr></thead><tbody>
+<tr class="pick"><td>9.53 mm</td><td class="n">0.1202 %</td><td class="n">0.1201 %</td><td class="n">0.1570 %</td><td class="n">0.2007 %</td><td class="n">0.2225 %</td><td class="n">2.52 %</td><td class="n">11.4 mm</td></tr>
+<tr><td>15.00 mm</td><td class="n">0.2240 %</td><td class="n">0.1502 %</td><td class="n">0.1848 %</td><td class="n">0.2139 %</td><td class="n">0.2371 %</td><td class="n">1.60 %</td><td class="n">17.9 mm</td></tr>
+<tr><td>20.00 mm</td><td class="n">0.3485 %</td><td class="n">0.2200 %</td><td class="n">0.2160 %</td><td class="n">0.2346 %</td><td class="n">0.2371 %</td><td class="n">1.20 %</td><td class="n">23.8 mm</td></tr>
+</tbody></table></div>
+<p>A bigger cell has less rim, and still loses. At depth 40 the exit at the bottom widens, so <b>more of the backing plate is in view.</b></p>
+<div class="scroll"><table><thead><tr><th>Cell</th><th>Half-angle of the exit</th><th>Share escaping straight off the floor</th></tr></thead><tbody>
+<tr><td>9.53 mm</td><td class="n">6.8&deg;</td><td class="n">1.40 %</td></tr>
+<tr><td>15.00 mm</td><td class="n">10.6&deg;</td><td class="n">3.40 %</td></tr>
+<tr><td>20.00 mm</td><td class="n">14.0&deg;</td><td class="n">5.88 %</td></tr>
+</tbody></table></div>
+<p>And the spray stops reaching. At cell 9.53 a 40 degree beam meets the wall at 11.4 mm, so 20 mm from the tip covers it. At cell 20 it is 23.8 mm and <b>the spray does not reach.</b></p></section>
+<section><h2>What was fixed in the rig today</h2><ul>
+<li><b>The observer angle became a control.</b> <code>form_buildable.OBS_ELEV</code>, <code>obs_elev</code> on <code>/api/form</code>, a field in the UI, and the camera drawn into the 3D view. Omit it and the camera sits on the panel normal, so published figures do not move (<code>gate_observer_angle.py</code>, 4 items).</li>
+<li>Viewed at a tilt the vertical axis compresses by <code>cos</code>. The mm-per-pixel on that axis is now divided by <code>cos</code>. Without it every oblique smear would have read too narrow.</li>
+<li><b>The peak <code>form</code> returned was always the zero degree entry.</b> There was no way to ask for the peak of a 40 degree beam. <code>peak_by_theta</code> was added.</li>
+<li><b><code>/api/measure</code> fell back to the withdrawn diffuse fraction 0.76 and the withdrawn roughness 0.30.</b> Numbers 25 % wrong came out quietly. <code>/api/rays</code> did the same. All four slots are fixed and <code>gate_api_defaults.py</code> holds them. The UI and the batch scripts always sent explicit values, so they were safe.</li>
+<li>A report builder now <b>refuses to publish</b> when a format marker is left unresolved. A doubled percent sign or a vanished paragraph slipped through three times, and neither the number checks nor the tag checks could see them.</li>
+</ul></section>
+<section><h2>Not measured</h2><ul>
+<li><b>Nothing off to the side.</b> The observer scan moved within one cross-section. The room is two-dimensional.</li>
+<li>No observer scan for beams arriving at 30 or 45 degrees. Only 40.</li>
+<li>Cell 6.35 at 30 to 45 degrees. Smaller cells won, so it may do better still.</li>
+<li>Pyramid smear cannot be trusted on this 200 mm panel. The return overflows the window. It is left out of the table.</li>
+<li>How visible any of this is to a human eye. These are all ratios.</li>
+</ul></section>
+<section><p class="tag">Measured in: <code>results/comb20/observer_scan_both.json</code> · <code>cell_15_20_depth40.json</code> · <code>results/pyramid_height/height_totals.json</code>. Script that builds this document: <code>scripts/build_room_report.py</code>. Other report from the same day: <code>report/comb/pyramid_height_2026-08-27.html</code></p></section>
+</div></body></html>

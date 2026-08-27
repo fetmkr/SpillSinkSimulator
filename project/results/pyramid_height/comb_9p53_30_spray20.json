@@ -1,0 +1,28 @@
+{
+ "spec": {
+  "top": "comb",
+  "top_params": {
+   "pitch": 9.53,
+   "wall_top": 0.08,
+   "wall_bot": 0.08,
+   "comb_expand": 1.0,
+   "jitter": 0.0
+  },
+  "depth": 30.0,
+  "panel": 200.0,
+  "floor": "none",
+  "margin_depths": 0.2
+ },
+ "coating": {
+  "coating": "musou_fit",
+  "deep_coating": "wall_5pct",
+  "paint_depth": 20.0
+ },
+ "total": {
+  "0": 0.0017811760772019625,
+  "-20": 0.0012038694694638252,
+  "20": 0.0012205844977870584,
+  "-40": 0.002016357146203518,
+  "40": 0.0020439934451133013
+ }
+}
