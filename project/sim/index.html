@@ -418,7 +418,7 @@ details.why p{margin:.4em 0 0}
   <div class="ln"><i style="background:#49c2ca"></i>colored arrows = directions being read; each &theta; keeps its color above</div>
   <div class="ln"><i style="background:#d9a847"></i>amber = panel normal</div>
   <div class="ln"><i style="background:#dc59b8"></i>자홍 상자 = <b>되풀이되는 한 칸</b> (간격 x 간격 x 깊이). 재는 자리가 아니다</div>
-  <div class="ln"><i style="background:#6bb873"></i>초록 테두리 = <b>재는 자리.</b> 판 전체다</div>
+  <div class="ln"><i style="background:#6bb873"></i>초록 상자 = <b>재는 자리.</b> 판 전체다. 자홍 상자와 견줘 보라</div>
   <div class="ln"><i style="background:#f28c40"></i>주황 두 줄 = 빔 폭. 이 폭이 한 칸 안에 들어가는지 보라</div>
   </div>
   <div id="busy">RENDERING</div>
@@ -2079,12 +2079,23 @@ function buildOverlay(thetas){
       // profile in a window that opens until the return fits, up to the face
       // (sim_server: "window_max_mm": face). Either way it is the panel, not
       // the little box.
+      // The panel is a SOLID, so draw it as one. A flat outline on the top
+      // face could not be compared with the cell box beside it; two boxes of
+      // the same kind can. Its extent is read from the mesh's own bounding
+      // box, so it hugs what is on screen including the backing slab.
       const MEAS = [0.42, 0.72, 0.45];
-      const fz0 = cz - W / 2, fz1 = cz + W / 2;
+      if(BBLO && BBHI){
+        const Xs = [BBLO[0], BBHI[0]], Ys = [BBLO[1], BBHI[1]],
+              Zs = [BBLO[2], BBHI[2]];
+        const Q = [];
+        for(const yy of Ys) for(const zz of Zs) for(const xx of Xs) Q.push([xx, yy, zz]);
+        const EB = [[0,1],[2,3],[0,2],[1,3],
+                    [4,5],[6,7],[4,6],[5,7],
+                    [0,4],[1,5],[2,6],[3,7]];
+        for(const [i,j] of EB) push(Q[i], Q[j], MEAS, 2.2);
+      }
       const fx0 = cx - W / 2, fx1 = cx + W / 2;
       const yf = R * 0.012;
-      const C = [[fx0,yf,fz0],[fx1,yf,fz0],[fx1,yf,fz1],[fx0,yf,fz1]];
-      for(let i = 0; i < 4; i++) push(C[i], C[(i+1)%4], MEAS, 2.2);
 
       // THE BEAM, at its real width. It is a stripe that walks one pitch; the
       // point of drawing it is that at pitch 50 a 7.5 mm beam sits INSIDE one
@@ -2235,6 +2246,7 @@ gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
 gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
 gl.enable(gl.DEPTH_TEST); gl.clearColor(.039,.051,.059,1);
 let NTRI = 0, CEN=[30,-25,0], RAD=60;
+let BBLO=null, BBHI=null;   // 메시 경계 상자. 판 전체를 그리는 데 쓴다.
 function upload(a){
   gl.bindBuffer(gl.ARRAY_BUFFER, VBO); gl.bufferData(gl.ARRAY_BUFFER, a, gl.STATIC_DRAW);
   NTRI = a.length/18;
@@ -2242,6 +2254,11 @@ function upload(a){
   for(let i=0;i<a.length;i+=6) for(let k=0;k<3;k++){ lo[k]=Math.min(lo[k],a[i+k]); hi[k]=Math.max(hi[k],a[i+k]); }
   CEN = lo.map((v,k)=>(v+hi[k])/2);
   RAD = Math.max(...lo.map((v,k)=>hi[k]-v))*0.62 || 60;
+  // Keep the box itself, not just its centre. The overlay draws the whole
+  // panel as a solid box and must hug what is actually on screen -- deriving
+  // the depth from `LAST.depth` would miss the backing slab, and the backing
+  // is part of the panel being measured.
+  BBLO = lo; BBHI = hi;
 }
 let yaw=-0.72, pitch=0.46, dist=2.4, drag=null;
 const cv = $('#gl');
