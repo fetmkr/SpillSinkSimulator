@@ -179,6 +179,23 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
   color:var(--ink3);pointer-events:none}
 #illum b{color:var(--ink);font:600 9.5px/1.8 ui-monospace,Menlo,monospace;
   letter-spacing:.11em;text-transform:uppercase;display:block;margin-bottom:4px}
+#keybox{border:1px solid var(--line);border-radius:3px;margin-bottom:14px}
+#keytog{cursor:pointer;user-select:none;padding:7px 10px;
+  font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3);display:flex;
+  justify-content:space-between;align-items:center}
+#keybox .keyb{padding:2px 10px 9px}
+#keybox .kln{display:grid;grid-template-columns:14px 9px 1fr;gap:7px;
+  align-items:baseline;padding:4px 0;cursor:pointer;
+  font:400 11px/1.5 ui-monospace,Menlo,monospace;color:var(--ink2)}
+#keybox .kln input{margin:0;accent-color:var(--a);width:12px;height:12px;
+  transform:translateY(1px)}
+#keybox .kln i{width:9px;height:9px;border-radius:2px;flex:none;
+  transform:translateY(1px)}
+#keybox .kln .kt{grid-column:3}
+#keybox .kln b{color:var(--ink);font-weight:700}
+#keybox .kln .kn{grid-column:3;color:var(--ink3);font-size:10px;
+  display:block;margin-top:2px}
 #illum .ln{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 /* `#illum b` is the panel HEADING style -- block, uppercase, dark, wide
    letter-spacing. Inside a legend line that made the emphasised words a
@@ -417,15 +434,37 @@ details.why p{margin:.4em 0 0}
   <div class="ln" style="margin-top:5px"><i style="background:#555f66"></i>grey dome = incoming, all directions at once</div>
   <div class="ln"><i style="background:#49c2ca"></i>colored arrows = directions being read; each &theta; keeps its color above</div>
   <div class="ln"><i style="background:#d9a847"></i>amber = panel normal</div>
-  <div class="ln"><i style="background:#dc59b8"></i>자홍 = 칸 하나 <b>unit cell</b> (간격 x 간격 x 깊이)</div>
-  <div class="ln"><i style="background:#737f94"></i>회색 = 실제로 짓는 <b>계산 영역 simulation domain</b>. 판 + 사방 여백(깊이 2배)</div>
-  <div class="ln"><i style="background:#6bb873"></i>초록 = <b>읽는 창 sampling area</b>. 가로 60 %, 세로 40 %. 여기 값만 쓴다</div>
-  <div class="ln"><i style="background:#f28c40"></i>주황 = 빔 띠. 세로는 빔 폭, 가로는 전체</div>
   </div>
   <div id="busy">RENDERING</div>
 </div>
 
 <div class="col right">
+  <!-- 색 이름표. 3D 에 겹쳐 있던 범례는 그림을 가리고 글자도 잘렸다.
+       여기로 옮기고, 줄마다 그 표시를 끄고 켤 수 있게 했다. 켜고 끈 상태는
+       localStorage 에 남는다 -- 껐는데 새로고침하면 다시 켜지면 끈 뜻이 없다. -->
+  <div id="keybox">
+    <div class="righ" id="keytog">show <span class="caret">&#9662;</span></div>
+    <div class="keyb">
+      <label class="kln"><input type="checkbox" id="k_dom" checked>
+        <i style="background:#737f94"></i><span class="kt"><b>simulation domain</b></span>
+        <span class="kn">what is actually built: panel + margin on all sides</span></label>
+      <label class="kln"><input type="checkbox" id="k_win" checked>
+        <i style="background:#6bb873"></i><span class="kt"><b>sampling area</b></span>
+        <span class="kn">only values in here are used. smear and peak share it</span></label>
+      <label class="kln"><input type="checkbox" id="k_beam" checked>
+        <i style="background:#f28c40"></i><span class="kt"><b>beam stripe</b></span>
+        <span class="kn">beam width across Z, full scene width across X</span></label>
+      <label class="kln"><input type="checkbox" id="k_cam" checked>
+        <i style="background:#eeece4"></i><span class="kt"><b>observer</b></span>
+        <span class="kn">the direction the value is read from</span></label>
+      <label class="kln"><input type="checkbox" id="k_th" checked>
+        <i style="background:#49c2ca"></i><span class="kt"><b>incidence</b></span>
+        <span class="kn">where light arrives from. one colour per angle</span></label>
+      <label class="kln"><input type="checkbox" id="k_nrm" checked>
+        <i style="background:#d9a847"></i><span class="kt"><b>panel normal</b></span>
+        <span class="kn">the reference every angle is measured from</span></label>
+    </div>
+  </div>
   <h2>세 축 한눈에 <span style="color:var(--ink3)">study targets in gray</span></h2>
   <div id="axes">
     <div class="ax" id="ax_total"><span class="nm">반사 총량 total reflectance &darr;</span>
@@ -628,6 +667,35 @@ window.addEventListener('load', () => {
       {subtree:true, childList:true, characterData:true});
   }
 });
+// 색 이름표: 접기 단추와 각 체크박스. 상태를 localStorage 에 남긴다.
+{
+  const KEYOPEN = 'keyOpen', KEYSET = 'keyShown';
+  const box = $('#keybox'), tog = $('#keytog');
+  if(box && tog){
+    const body = box.querySelector('.keyb');
+    let open = localStorage.getItem(KEYOPEN) !== '0';
+    const paint = () => {
+      body.style.display = open ? 'block' : 'none';
+      tog.querySelector('.caret').innerHTML = open ? '&#9662;' : '&#9656;';
+    };
+    paint();
+    tog.onclick = () => { open = !open;
+      localStorage.setItem(KEYOPEN, open ? '1' : '0'); paint(); };
+    const saved = JSON.parse(localStorage.getItem(KEYSET) || '{}');
+    box.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      if(cb.id in saved) cb.checked = !!saved[cb.id];
+      cb.addEventListener('change', () => {
+        const s = {};
+        box.querySelectorAll('input[type=checkbox]').forEach(c => s[c.id] = c.checked);
+        localStorage.setItem(KEYSET, JSON.stringify(s));
+        // 선 버퍼를 다시 짓는다. 렌더는 다시 안 한다.
+        if(typeof LAST !== 'undefined' && LAST) buildOverlay(SHOW_THETAS || []);
+        draw();
+      });
+    });
+  }
+}
+
 document.addEventListener('input', e => {
   if(!e.target) return;
   if(e.target.id === 'beamw') axRefresh();
@@ -1960,6 +2028,9 @@ let NLINE = 0, LINEW = 2.5;
 // 검사를 끄고 그린다 -- 칸 상자는 재료 속에 있어서 켜 두면 윗머리만 보이고,
 // 깊이 22 mm 짜리가 2 mm 처럼 보인다.
 let REF0 = 0, REF1 = 0;
+// 색 이름표의 켜기/끄기. 상자가 아직 없으면 켜진 것으로 본다 -- 화면이
+// 다 그려지기 전에 buildOverlay 가 먼저 도는 경우가 있다.
+const shown = id => { const e = $('#' + id); return e ? e.checked : true; };
 function buildOverlay(thetas){
   if(!LAST) return;
   const R = RAD*1.15, cx = CEN[0], cz = CEN[2], v = [];
@@ -2001,7 +2072,7 @@ function buildOverlay(thetas){
   // illumination card, so five arrows are five identifiable measurements
   // rather than an anonymous fan.
   const ths = (thetas&&thetas.length?thetas:[0]);
-  for(const th of ths){
+  for(const th of (shown('k_th') ? ths : [])){
     const t = th*Math.PI/180, COL = thc(th)[1];
     const d = [0, Math.cos(t), Math.sin(t)];
     const tip=[cx, 0, cz], base=[cx+d[0]*R, d[1]*R, cz+d[2]*R];
@@ -2015,7 +2086,7 @@ function buildOverlay(thetas){
   if(il) il.innerHTML = ths.slice().sort((a,b)=>a-b)
     .map(t=>`<span style="color:${thc(t)[0]}">${t}&deg;</span>`).join(', ');
   // the panel normal, for orientation
-  push([cx,0,cz],[cx, R*0.45, cz],[0.85,0.66,0.28]);
+  if(shown('k_nrm')) push([cx,0,cz],[cx, R*0.45, cz],[0.85,0.66,0.28]);
 
   // WHERE THE OBSERVER STANDS (2026-08-27). Until today the camera sat on the
   // panel normal and nothing said so on screen, so "peak" read as a property
@@ -2024,7 +2095,7 @@ function buildOverlay(thetas){
   // is READ from, and the two are independent. A honeycomb collimates along
   // its own axis rather than back at the source, so which one you draw changes
   // the answer by a factor of 74 -- measured, not argued.
-  {
+  if(shown('k_cam')) {
     const oe = ((+($('#obs')||{value:0}).value) || 0) * Math.PI / 180;
     const WHITE = [0.93, 0.93, 0.90];
     // elevation is measured FROM the normal, in the YZ plane, same sign
@@ -2064,33 +2135,9 @@ function buildOverlay(thetas){
     const pitch = +(tp.pitch || tp.pitch_mean || 0);
     const W = +LAST.panel || 0, D = +LAST.depth || 0;
     if(pitch > 0 && W > 0){
-      // NOT amber -- that is already the panel normal, and a second amber
-      // thing on the same picture reads as one more stray line. Magenta is
-      // unused elsewhere in this view.
-      const CELL = [0.86, 0.35, 0.72];
-      // Snap to a real lattice cell so the box sits ON a cell, not across two.
-      //
-      // Snap against the PANEL's own extent, not against the margin the rig
-      // reports. The preview mesh is the panel alone -- measured, CEN came back
-      // [58, -12, 58] for a 116 mm panel, so x and z both run 0..116 with no
-      // margin field, while the Python lattice starts at -margin. Snapping to
-      // the Python convention put the box half a pitch out in z, straddling
-      // four cells, which is exactly what the box exists to rule out.
-      const snap = (c, lo) => lo + (Math.round((c - lo) / pitch - 0.5) + 0.5) * pitch;
-      const bx = snap(cx, cx - W / 2);
-      const bz = snap(cz, cz - W / 2);
-      const a = pitch / 2;
-      // The structure runs from y = -depth (base) to y = 0 (entrance plane);
-      // see geom_floor._build_pyramid, apex at y = 0.
-      const X = [bx - a, bx + a], Z = [bz - a, bz + a], Y = [-D, 0];
-      const P = [];
-      for(const yy of Y) for(const zz of Z) for(const xx of X) P.push([xx, yy, zz]);
-      // index = y*4 + z*2 + x
-      const E = [[0,1],[2,3],[0,2],[1,3],      // base square
-                 [4,5],[6,7],[4,6],[5,7],      // mouth square
-                 [0,4],[1,5],[2,6],[3,7]];     // the four uprights
-      for(const [i,j] of E) push(P[i], P[j], CELL, 2.0);
-
+      // 칸 하나를 자홍 상자로 그렸다가 뺐다 (2026-08-27). 피라미드가 이미
+      // 눈에 보이는데 그 둘레에 상자를 하나 더 그린 것이라, 없어도 되는
+      // 것을 있어야 하는 것처럼 보이게 했다. 칸 수는 옆 표에 숫자로 있다.
       // WHAT IS ACTUALLY MEASURED (2026-08-27). The cell box alone read as
       // "this is the patch it measures", which is wrong and was asked out
       // loud. The cell is the unit being COUNTED; the reading is taken over
@@ -2130,14 +2177,14 @@ function buildOverlay(thetas){
       const yf = R * 0.012;
 
       // 계산 영역. 여백은 geom_floor.margin(): max(2.0*깊이, 간격).
-      if(BBLO && BBHI){
+      if(BBLO && BBHI && shown('k_dom')){
         const mg = Math.max(2.0 * D, pitch);
         box([fx0 - mg, fx1 + mg], [BBLO[1], BBHI[1]], [fz0 - mg, fz1 + mg],
             DOMAIN, 1.4);
       }
 
       // 읽는 창. 세로는 띠가 한 간격을 걸을 만큼 못 되면 넓어진다.
-      {
+      if(shown('k_win')) {
         const dx = W * 0.20;
         let dz = W * 0.30;
         const bwv = ($('#beamw') ? (+$('#beamw').value || 0) : 0);
@@ -2153,7 +2200,7 @@ function buildOverlay(thetas){
       // changes what the phase average means and it is invisible otherwise.
       const bwEl = $('#beamw');
       const bw = bwEl ? (+bwEl.value || 0) : 0;
-      if(bw > 0){
+      if(bw > 0 && shown('k_beam')){
         const BEAM = [0.95, 0.55, 0.25];
         for(const s of [-1, 1]){
           const z = cz + s * bw / 2;
