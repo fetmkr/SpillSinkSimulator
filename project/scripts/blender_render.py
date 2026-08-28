@@ -105,8 +105,9 @@ def describe(p):
 
 SEED = 0            # Cycles sampling seed; set per-run to measure the spread
 GAP = 100.0          # X gap between panel and flat control
-MEAS_INSET_X = 0.20  # fraction of width trimmed off each side of a window
-MEAS_INSET_Z = 0.30  # trimmed harder in Z: fins run past the panel there
+# 재는 창의 크기. 숫자는 `form_metrics` 에 한 번만 적혀 있다 -- Mitsuba 쪽
+# 코드가 같은 넓이를 재야 두 렌더러의 차이를 빛 계산의 차이로 읽을 수 있다.
+from form_metrics import MEAS_INSET_X, MEAS_INSET_Z                # noqa: E402
 
 
 def clear_scene():

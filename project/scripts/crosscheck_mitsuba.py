@@ -44,9 +44,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.environ.get("MTS_OUT", "/tmp/mts")
 
-# Read from the Cycles harness rather than copied, so they cannot drift.
-MEAS_INSET_X = 0.20
-MEAS_INSET_Z = 0.30
+# 2026-08-28: 바로 위 줄에 "복사하지 않고 읽어 온다" 고 적어 놓고 실제로는
+# 숫자를 복사해 두었다. 이제 정말로 읽어 온다.
+from form_metrics import MEAS_INSET_X, MEAS_INSET_Z             # noqa: E402
 
 
 def write_ply(path, verts, faces):

@@ -106,11 +106,10 @@ OBS_ELEV = 0.0
 RES_CAP = 20000
 ALLOW_COARSE = False
 GAP_EST = 100.0
-# Default probe = the DEPLOYMENT beam (user 2026-08-16: "빔 2mm 쓰지마.
-# 기본을 5-10mm"). 7.5 mm is the midpoint of the expected 5-10 mm at the
-# wall (LaserCube Ultra MK2, 3-6 m throw). Historical numbers were taken
-# at 2.0; any comparison against them must set STRIPE_W explicitly.
-STRIPE_W = 7.5
+# Default probe = the DEPLOYMENT beam. 숫자와 그 근거는 `form_metrics` 에
+# 한 번만 적혀 있다. 여기서 다시 적으면 Mitsuba 쪽과 갈라진다 -- 실제로
+# 2026-08-20 에 갈라져 있었다.
+from form_metrics import STRIPE_W                                  # noqa: E402
 SPREAD_DEG = 0.05
 THETAS = (-40.0, 0.0, 40.0)
 N_PHASE = 16                     # stripe positions across one pitch

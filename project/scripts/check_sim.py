@@ -450,8 +450,38 @@ def J():
         check("J", "J0 관문이 돌지 않았다", lambda: (False, out[-160:]))
 
 
+def K():
+    """설정 기본값이 두 군데 적혀 있나. 그리고 서버가 파일과 같은 값인가.
+
+    같은 결함이 세 번 났다. 확산값 0.76, 거칠기 0.30, 그리고 2026-08-28 에
+    빛줄기 수 -- 파일에 16 이라 적고도 화면은 256 으로 돌았다. 셋 다 상수를
+    두 군데 적어 놓고 한 군데만 고친 것이다.
+
+    C 항목이 특히 중요하다. 서버는 계속 떠 있는 프로세스라 **파일을 고쳐도
+    안 바뀐다.** 파일만 읽는 검사는 그걸 못 잡는다. 실제로 옛 코드를 검사해
+    놓고 통과라고 보고한 적이 있다.
+
+    정본은 `scripts/gate_no_shadow_defaults.py` 다.
+    """
+    print("\n K. 설정이 한 곳에서만 정해지나", flush=True)
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    r = subprocess.run([sys.executable,
+                        os.path.join(here, "gate_no_shadow_defaults.py")],
+                       capture_output=True, text=True, timeout=600,
+                       env=dict(os.environ, SIM=BASE))
+    out = r.stdout
+    for line in out.splitlines():
+        if line.strip().startswith("[") and ("PASS" in line or "FAIL" in line):
+            name = line.split("]", 1)[1].strip()
+            RESULTS.append(("K", name[:60], "PASS" in line, "", 0.0))
+            print("  " + line.strip(), flush=True)
+    if not any(g == "K" for g, *_ in RESULTS):
+        check("K", "K0 관문이 돌지 않았다", lambda: (False, out[-160:]))
+
+
 GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H, "I": I,
-          "J": J}
+          "J": J, "K": K}
 
 
 if __name__ == "__main__":

@@ -196,6 +196,17 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 #keybox .kln b{color:var(--ink);font-weight:700}
 #keybox .kln .kn{grid-column:3;color:var(--ink3);font-size:10px;
   display:block;margin-top:2px}
+/* 지금 쓰는 설정. 색 이름표와 같은 상자에 두되 줄 사이에 선을 하나 그어
+   "이건 켜고 끄는 게 아니다" 를 보이게 한다. */
+#keybox .kmeth{margin-top:8px;padding-top:8px;
+  border-top:1px solid var(--ln);
+  font:400 10px/1.6 ui-monospace,Menlo,monospace;color:var(--ink3)}
+#keybox .kmeth b{color:var(--ink2);font-weight:700}
+#keybox .kmeth .mrow{display:flex;justify-content:space-between;gap:8px}
+#keybox .kmeth .mhd{text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink3);margin-bottom:4px}
+#keybox .kmeth a{color:var(--a);text-decoration:none}
+#keybox .kmeth a:hover{text-decoration:underline}
 #illum .ln{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 /* `#illum b` is the panel HEADING style -- block, uppercase, dark, wide
    letter-spacing. Inside a legend line that made the emphasised words a
@@ -463,6 +474,10 @@ details.why p{margin:.4em 0 0}
       <label class="kln"><input type="checkbox" id="k_nrm" checked>
         <i style="background:#d9a847"></i><span class="kt"><b>panel normal</b></span>
         <span class="kn">the reference every angle is measured from</span></label>
+      <!-- 이 줄들은 끄고 켜는 것이 아니라 지금 쓰는 설정을 보이는 자리다.
+           서버가 소스에서 읽어 보내 준다. 여기 숫자를 적으면 상수가 두 군데
+           살게 되고, 2026-08-28 에 그것 때문에 파일은 16, 화면은 256 이었다. -->
+      <div class="kmeth" id="kmeth"></div>
     </div>
   </div>
   <h2>세 축 한눈에 <span style="color:var(--ink3)">study targets in gray</span></h2>
@@ -939,6 +954,32 @@ function showRig(r, err){
     host.querySelector('.rigb').style.display = RIG_OPEN ? 'block' : 'none';
     host.querySelector('.caret').textContent = RIG_OPEN ? '▾' : '▸';
   };
+  showMethod(r.method);
+}
+
+// WHAT THIS SIMULATOR IS SET TO. Not a control -- a readout. The server reads
+// each value out of the source it lives in, so nothing here can drift from
+// what a measurement actually runs. On 2026-08-28 the sample count was
+// lowered to 16 in the file and the screen kept running 256, because the
+// number had a second home in the request body; this panel is how that shows.
+// `report/METHOD.html` carries the formulas, the reasoning and the papers.
+function showMethod(m){
+  const el = $('#kmeth'); if(!el) return;
+  if(!m){ el.innerHTML = ''; return; }
+  const n = x => x==null ? '—' : x;
+  const rows = [
+    ['peak read as', n(m.peak_stat)],
+    ['beam positions', `${n(m.n_phase)} · ${n(m.beam_pos)}`],
+    ['samples / frame', n(m.samples)],
+    ['pixel', `${n(m.mm_per_px)} mm`],
+    ['beam width', `${n(m.stripe_w)} mm · ${n(m.spread_deg)}°`],
+    ['sampling area', `${Math.round((1-2*m.inset_x)*100)} % × `
+       + `${Math.round((1-2*m.inset_z)*100)} % of the face`],
+  ];
+  el.innerHTML = '<div class="mhd">method &mdash; how this is measured</div>'
+    + rows.map(([k,v])=>`<div class="mrow"><span>${k}</span><b>${v}</b></div>`).join('')
+    + `<div class="mrow" style="margin-top:5px"><span>formulas, why, papers</span>`
+    + `<a href="/report/METHOD.html" target="_blank">METHOD.html &rarr;</a></div>`;
 }
 
 // what the chosen density costs, live, so speed is a decision and not a surprise
@@ -1055,7 +1096,10 @@ async function measure(thetas){
       // fraction and one roughness onto all three slots. `slotOverrides()`
       // above carries whatever the user changed, per slot; null lets each
       // material use its own numbers.
-      diffuse_frac: null, roughness: null, samples: 64,
+      // samples is deliberately NOT sent. It used to say 64 right here, which
+      // gave the constant a second home in the browser; the server reads it
+      // from `form_metrics.RHO_SAMPLES` instead.
+      diffuse_frac: null, roughness: null,
       // 0 % painted means the panel IS the base material, so that is what the
       // server is told to coat with; 100 % means there is nothing below.
       // ALWAYS SENT (2026-08-23). `floor: none` does not mean there is
@@ -2688,12 +2732,20 @@ addEventListener('resize', () => draw());
     $('#formout').innerHTML = '<div><dt>rendering&hellip;</dt><dd>~60 s</dd></div>';
     try{
       const R = $('#renderer').value;
-      const BW = parseFloat($('#beamw').value) || 7.5;
-      const MMPX = parseFloat($('#mmpx').value) || 0.215;
+      // An empty box means "use the protocol value", so send null and let
+      // the server read it from `form_buildable`. A number written here as
+      // well would be a second home for the same constant, and on
+      // 2026-08-28 that is exactly what made the screen keep running at
+      // 256 samples after the file had been lowered to 16.
+      const BW = parseFloat($('#beamw').value) || null;
+      const MMPX = parseFloat($('#mmpx').value) || null;
       const r = await fetch('/api/form', {method:'POST',
         // the SAME finish the totals button sends. Without these the
         // smear + head-on numbers were always the fitted Musou.
-        body: JSON.stringify({spec: LAST, n_phase: 6, samples: 256,
+        // n_phase / samples are deliberately NOT sent: the protocol values
+        // live in `form_buildable` and the colour key at the top of this
+        // column shows what the server actually used.
+        body: JSON.stringify({spec: LAST,
                               beam_w: BW, mm_per_px: MMPX, renderer: R,
                               // WHERE IT IS READ FROM. 0 is the panel normal,
                               // which is what every published figure used, so
@@ -2773,8 +2825,11 @@ addEventListener('resize', () => draw());
            <div><dt>head-on brightness${P?' (가장 밝은 평면)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
           + densRow + convRow + planeRows +
           `<div><dt>renderer</dt><dd>${who}</dd></div>
-           <div><dt>beam</dt><dd>${(j.beam_w||BW).toFixed(1)} mm</dd></div>
-           <div><dt>took</dt><dd>${j.seconds} s &middot; ${j.n_phase||6} phases${P?' \u00d7 '+Object.keys(P).length+' planes':''}</dd></div>`;
+           <div><dt>beam</dt><dd>${j.beam_w!=null?j.beam_w.toFixed(1)+' mm':'&mdash;'}</dd></div>
+           <div><dt>peak read as</dt><dd>${j.peak_stat||'&mdash;'}</dd></div>
+           <div><dt>beam positions</dt><dd>${j.n_phase!=null?j.n_phase:'?'} &middot; ${j.beam_pos||'?'}</dd></div>
+           <div><dt>samples / frame</dt><dd>${j.samples!=null?j.samples:'&mdash;'}</dd></div>
+           <div><dt>took</dt><dd>${j.seconds} s${P?' \u00d7 '+Object.keys(P).length+' planes':''}</dd></div>`;
       }
       b.classList.add('done');
     }catch(e){ $('#err').textContent = String(e).slice(0,600);

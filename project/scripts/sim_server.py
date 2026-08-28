@@ -154,7 +154,8 @@ def in_blender(op, **req):
                                    obs_elev=req.get("obs_elev")),
               "form_lambert": lambda: form_lambert(
                   req["spec"], req.get("rho", 0.01),
-                  req.get("n_phase", 6), req.get("samples", 256),
+                  int(req.get("n_phase") or FB_DEF("N_PHASE")),
+                  int(req.get("samples") or FB_DEF("SAMPLES")),
                   beam_w=req.get("beam_w"))}[op]
         val = on_main(fn)
         return {"rho": val} if op in ("measure", "lambert") else val
@@ -456,7 +457,11 @@ def _fit(mod, cname, kw):
 # return is beam/sqrt(12), so smear divides by a denominator 3.75x apart and
 # head-on scales with the deposited line power. Any "renderer disagreement" on
 # the two form axes was that, not transport.
-BEAM_DEFAULT_MM = 7.5
+#
+# 2026-08-28: 여기 있던 `BEAM_DEFAULT_MM = 7.5` 를 뺐다. 같은 숫자가
+# `form_buildable.STRIPE_W` 에도 있어서 상수가 두 군데 살았다. 이제 `FB_BEAM()`
+# 이 그 한 곳에서 읽는다. 같은 이유로 `samples`/`n_phase` 의 숫자 기본값도
+# 뺐다 -- 그것들 때문에 SAMPLES 를 16 으로 내려도 화면은 256 으로 돌았다.
 
 NEEDS_MARGIN = "margin_depths"
 
@@ -1265,7 +1270,11 @@ def derived(p, verts, spec):
             # 방법과 그 설정을 화면에도 보인다. report/METHOD.html 이 왜
             # 이렇게 정했는지와 참고 문헌을 담고, 여기는 지금 쓰는 값이다.
             # 코드에서 읽는다 -- 손으로 적으면 조용히 어긋난다.
-            "method": {
+            #
+            # 서버가 뜰 때 베껴 둔 값을 쓴다. 모듈 변수를 그때그때 읽으면
+            # **다른 창이 지금 재고 있는 값**이 보인다 (`_snap_method_defaults`
+            # 의 설명을 볼 것).
+            "method": METHOD_DEFAULTS or {
                 "mm_per_px": _FB.MM_PER_PX,
                 "samples": _FB.SAMPLES,
                 "n_phase": _FB.N_PHASE,
@@ -1274,6 +1283,7 @@ def derived(p, verts, spec):
                 "inset_x": _BR.MEAS_INSET_X,
                 "inset_z": _BR.MEAS_INSET_Z,
                 "peak_stat": getattr(_FB, "PEAK_STAT", "max"),
+                "beam_pos": getattr(_FB, "BEAM_POS", "uniform"),
                 "doc": "report/METHOD.html",
             },
         }
@@ -1892,10 +1902,19 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     PROTOCOL_MMPX = FB.MM_PER_PX
     if mm_per_px:
         FB.MM_PER_PX = float(mm_per_px)
-    FB.N_PHASE = int(n_phase or 6)
-    FB.THETAS = tuple(thetas or (-40.0, 40.0, 0.0))
-    FB.SAMPLES = int(samples or 256)
-    FB.STRIPE_W = float(beam_w or BEAM_DEFAULT_MM)
+    # 안 받은 값은 `form_buildable` 에 적힌 값을 쓴다. 여기에 숫자를 따로
+    # 적으면 상수가 두 군데 살게 되고, 한 군데만 고치면 조용히 어긋난다.
+    # 2026-08-28 에 그게 났다 -- SAMPLES 를 16 으로 내렸는데 화면은 여기
+    # 적힌 256 으로 돌았다. `gate_no_shadow_defaults.py` 가 이 자리를 지킨다.
+    FB.N_PHASE = int(n_phase or FB.N_PHASE)
+    FB.THETAS = tuple(thetas or FB.THETAS)
+    FB.SAMPLES = int(samples or FB.SAMPLES)
+    FB.STRIPE_W = float(beam_w or FB.STRIPE_W)
+    # 실제로 쓴 값. 아래 보고 칸은 `finally` 뒤라 FB 가 되돌려진 다음이다.
+    # 되돌려진 값을 읽으면 이번에 무엇으로 쟀는지가 아니라 파일에 적힌
+    # 값이 나온다. 그래서 여기서 붙잡아 둔다.
+    used = {"n_phase": FB.N_PHASE, "samples": FB.SAMPLES,
+            "beam_w": FB.STRIPE_W, "thetas": list(FB.THETAS)}
     n_frames = FB.N_PHASE * len(FB.THETAS)
     planes = {}
     try:
@@ -1991,9 +2010,11 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
             "window_needed_mm": (max(nd) if nd else None),
             "face_mm": (max(fc) if fc else None),
             "smear_legacy": (min(sl) if sl else None),
-            "n_phase": int(n_phase or 6),
-            "samples": int(samples or 256),
-            "beam_w": float(beam_w or BEAM_DEFAULT_MM), "reduced": True,
+            "n_phase": used["n_phase"],
+            "samples": used["samples"],
+            "beam_w": used["beam_w"], "reduced": True,
+            "peak_stat": getattr(FB, "PEAK_STAT", "max"),
+            "beam_pos": getattr(FB, "BEAM_POS", "uniform"),
             "mm_per_px": float(mm_per_px or PROTOCOL_MMPX),
             # 어느 각도에서 본 값인지, 그리고 기울인 만큼 늘어난 세로 환산.
             # 결과가 스스로 조건을 말해야 나중에 가릴 수 있다.
@@ -2035,7 +2056,7 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
     FB.N_PHASE = int(n_phase)
     FB.THETAS = tuple(thetas)
     FB.SAMPLES = int(samples)
-    FB.STRIPE_W = float(beam_w or BEAM_DEFAULT_MM)
+    FB.STRIPE_W = float(beam_w or FB.STRIPE_W)
     FB.PROGRESS_CB = _prog
     _prog(0, FB.N_PHASE * len(FB.THETAS))
     try:
@@ -2057,6 +2078,28 @@ def FB_MMPX():
     return _FB.MM_PER_PX or 0.215
 
 
+def FB_BEAM():
+    """빔 너비의 정본은 `form_buildable.STRIPE_W` 다. 여기에 숫자를 안 적는다."""
+    import form_buildable as _FB
+    return float(_FB.STRIPE_W)
+
+
+def FB_DEF(name):
+    """설정 하나의 정본 값. 요청이 안 채운 자리를 이걸로 채운다.
+
+    숫자를 여기 적지 않는 것이 요점이다. 상수가 두 군데 살면 한 군데만
+    고치게 되고, 그러면 화면과 파일이 조용히 갈라진다.
+
+    `form_metrics` 를 먼저 본다. 거기 있는 값은 bpy 없이도 열리므로 Mitsuba
+    쪽 코드도 같은 값을 읽을 수 있다. 없으면 `form_buildable` 을 본다.
+    """
+    import form_metrics as _FM
+    if hasattr(_FM, name):
+        return getattr(_FM, name)
+    import form_buildable as _FB
+    return getattr(_FB, name)
+
+
 def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None,
                  mm_per_px=None):
     """The same, in Mitsuba, as a subprocess."""
@@ -2065,7 +2108,7 @@ def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None,
                      or (spec.get("top_params") or {}).get("pitch_mean")
                      or 6.5,
                      n_phase=int(n_phase), spp=int(spp),
-                     beam_w=float(beam_w or BEAM_DEFAULT_MM),
+                     beam_w=float(beam_w or FB_BEAM()),
                      mm_per_px=float(mm_per_px or FB_MMPX()),
                      full_face_window=True))
 
@@ -2413,6 +2456,16 @@ class H(BaseHTTPRequestHandler):
             # cached copy means the user presses buttons wired to old code
             return self._send(200, open(f, "rb").read(), "text/html",
                               {"Cache-Control": "no-store"})
+        # 방법 문서. 화면의 설정 칸에서 여기로 넘어간다. 일반 파일 서버를
+        # 만들지 않는다 -- 이 한 파일만 이름으로 연다.
+        if p == "/report/METHOD.html":
+            f = os.path.join(ROOT, "report", "METHOD.html")
+            if not os.path.exists(f):
+                return self._send(
+                    404, "scripts/build_method_report.py 를 먼저 돌려라",
+                    "text/plain; charset=utf-8")
+            return self._send(200, open(f, "rb").read(), "text/html",
+                              {"Cache-Control": "no-store"})
         if p == "/api/families":
             return self._send(200, json.dumps(families_json()))
         if p == "/api/processes":
@@ -2608,8 +2661,10 @@ class H(BaseHTTPRequestHandler):
                     mts = {}
                     for i, th in enumerate(ths):
                         _prog(i, n_steps)
-                        one = measure_mitsuba(req["spec"], float(th), rho0,
-                                              int(req.get("samples", 256)))
+                        one = measure_mitsuba(
+                            req["spec"], float(th), rho0,
+                            int(req.get("samples")
+                                or FB_DEF("RHO_XCHECK_SAMPLES")))
                         if "error" in one:
                             return self._send(200, json.dumps(one))
                         mts["%g" % float(th)] = one["rho_dh"]
@@ -2622,8 +2677,10 @@ class H(BaseHTTPRequestHandler):
                             _prog(len(ths) + i, n_steps)
                             r2 = in_blender("lambert", spec=req["spec"],
                                             theta=float(th), rho=rho0,
-                                            samples=int(req.get("samples",
-                                                                512)))
+                                            samples=int(
+                                                req.get("samples")
+                                                or FB_DEF(
+                                                    "RHO_XCHECK_SAMPLES")))
                             if "error" in r2:
                                 return self._send(200, json.dumps(r2))
                             cyc["%g" % float(th)] = r2["rho"]
@@ -2661,7 +2718,8 @@ class H(BaseHTTPRequestHandler):
                                # key beats a .get default.
                                diffuse_frac=req.get("diffuse_frac"),
                                roughness=req.get("roughness"),
-                               samples=req.get("samples", 64),
+                               samples=int(req.get("samples")
+                                           or FB_DEF("RHO_SAMPLES")),
                                coating=req.get("coating", "musou_fit"),
                                deep_coating=req.get("deep_coating"),
                                paint_depth=req.get("paint_depth"),
@@ -2691,8 +2749,8 @@ class H(BaseHTTPRequestHandler):
                 if rend in ("mitsuba", "both"):
                     rho0 = float(req.get("lambert_rho", 0.01))
                     m = form_mitsuba(req["spec"], rho0,
-                                     int(req.get("n_phase") or 6),
-                                     int(req.get("samples") or 256),
+                                     int(req.get("n_phase") or FB_DEF("N_PHASE")),
+                                     int(req.get("samples") or FB_DEF("SAMPLES")),
                                      beam_w=req.get("beam_w"))
                     if "error" in m:
                         return self._send(200, json.dumps(m))
@@ -2703,8 +2761,10 @@ class H(BaseHTTPRequestHandler):
                     if rend == "both":
                         c = in_blender("form_lambert", spec=req["spec"],
                                        rho=rho0,
-                                       n_phase=int(req.get("n_phase") or 6),
-                                       samples=int(req.get("samples") or 256),
+                                       n_phase=int(req.get("n_phase")
+                                                   or FB_DEF("N_PHASE")),
+                                       samples=int(req.get("samples")
+                                                   or FB_DEF("SAMPLES")),
                                        beam_w=req.get("beam_w"))
                         if "error" in c:
                             return self._send(200, json.dumps(c))
@@ -2921,8 +2981,40 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, json.dumps({"error": "no such path"}))
 
 
+def _snap_method_defaults():
+    """설정의 기본값을 서버가 뜰 때 한 번 베껴 둔다.
+
+    `form()` 은 부탁받은 값을 `form_buildable` 의 모듈 변수에 얹었다가
+    끝나면 되돌린다. 그 사이에 다른 창이 설정을 물어보면 **지금 도는 측정의
+    값**이 보인다. 2026-08-28 에 실제로 봤다 -- 파일에는 빛줄기 16 인데
+    화면 표에 128 이 떴다. 관문 하나가 128 로 재던 중이었다.
+
+    화면 표는 "이 시뮬레이터의 설정" 을 보이는 자리다. 남이 지금 무엇으로
+    재고 있는지가 아니다. 그래서 아무것도 안 돌 때의 값을 여기 붙잡아 둔다.
+    """
+    global METHOD_DEFAULTS
+    try:
+        import form_buildable as _FB
+        import form_metrics as _FM
+    except Exception:
+        return
+    METHOD_DEFAULTS = {
+        "mm_per_px": _FB.MM_PER_PX, "samples": _FB.SAMPLES,
+        "n_phase": _FB.N_PHASE, "stripe_w": _FM.STRIPE_W,
+        "spread_deg": _FB.SPREAD_DEG,
+        "inset_x": _FM.MEAS_INSET_X, "inset_z": _FM.MEAS_INSET_Z,
+        "peak_stat": getattr(_FB, "PEAK_STAT", "max"),
+        "beam_pos": getattr(_FB, "BEAM_POS", "uniform"),
+        "doc": "report/METHOD.html",
+    }
+
+
+METHOD_DEFAULTS = None
+
+
 def main():
     os.makedirs("/tmp/simsrv", exist_ok=True)
+    _snap_method_defaults()
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), H)
     srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()

@@ -57,12 +57,13 @@ from form_metrics import z_profile, recentre, rms_width, mtf_at
 # apart. mts_worker now overwrites every one of these from the request; the
 # values below are only what a bare `python mts_form.py` would use.
 GAP = 100.0                  # x gap between panel and flat control
-STRIPE_W = 7.5               # mm -- the deployment beam, as form_buildable
 MM_PER_PX = 0.0              # 0 = legacy fixed pixel count; set from request
 RES_X, RES_Y = 1400, 620
 NWIN = 361
-MEAS_INSET_X = 0.20
-MEAS_INSET_Z = 0.30
+# 빔 너비와 창 크기는 `form_metrics` 에서 읽는다. 여기 숫자를 다시 적으면
+# Cycles 와 서로 다른 실험을 하게 된다 -- 2026-08-20 에 빔이 7.5 대 2.0 으로
+# 갈라져 있었고, 그 차이를 "렌더러가 다르다" 로 읽고 있었다.
+from form_metrics import STRIPE_W, MEAS_INSET_X, MEAS_INSET_Z   # noqa: E402
 RHO_CONTROL = 0.05           # the matte black wall the ratio is against
 SLIT_Y = 10.0                # height of the slit above the face plane, mm
 EYE_Y = 500.0                # orthographic eye height; near_clip hides the slit
