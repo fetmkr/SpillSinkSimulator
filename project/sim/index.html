@@ -877,7 +877,32 @@ function showCost(r){
 }
 
 function showDerived(d){
+  // HOW MANY CELLS ARE IN THE MEASURED WINDOW. The pitch is fixed and the
+  // count follows the panel (geom_*: n_x = int((face_w + 2m)/pitch) + 2), so
+  // this line is where you check that widening the panel added cells instead
+  // of stretching them. It is also the number that decides whether a peak has
+  // settled: pyramid pitch 50 read 0.46746 / 0.53523 / 0.50772 at 4 / 6 / 10
+  // cells, same mm-per-pixel throughout. Too few periods, not too few pixels.
+  //
+  // The rig block already reports `cells_across` from the SERVER, but it sits
+  // in a section that is collapsed by default, so the number nobody could see
+  // is the number that decides whether a peak has settled. It is repeated
+  // here, beside the model, and the two are compared: if the browser's
+  // panel/pitch and the server's count disagree, that is a real defect (the
+  // panel was snapped, or the pitch means something else) and it says so
+  // rather than quietly showing one of them.
+  const _tp = (LAST && LAST.top_params) || {};
+  const _pitch = +(_tp.pitch || _tp.pitch_mean || 0);
+  const _mine = (_pitch > 0 && LAST) ? (+LAST.panel / _pitch) : 0;
+  const _rig = (d.rig && d.rig.cells_across != null) ? +d.rig.cells_across : null;
+  const _cells = _rig != null ? _rig : _mine;
+  const _clash = (_rig != null && _mine > 0 && Math.abs(_rig - _mine) > 0.05);
   const rows = [
+    ['cells across', _cells
+        ? `${_cells.toFixed(1)} @ pitch ${_pitch} mm`
+          + (_clash ? ` <b style="color:var(--a)">— 화면은 ${_mine.toFixed(1)},`
+                      + ` 리그는 ${_rig.toFixed(1)}</b>` : '')
+        : '—'],
     ['aspect ratio', d.aspect ? d.aspect.toFixed(2) : '—'],
     ['exposed area', d.exposed_fraction_est != null ? (100*d.exposed_fraction_est).toFixed(2)+' %' : '—'],
     ['min feature', d.min_feature_mm != null ? d.min_feature_mm.toFixed(3)+' mm' : '—'],
@@ -1986,6 +2011,42 @@ function buildOverlay(thetas){
     for(let i = 0; i < 4; i++) push(P[i], P[(i+1)%4], WHITE, 1.6);
     const lens = [cx, dy * (L - e*1.8), cz + dz * (L - e*1.8)];
     for(const q of P) push(q, lens, WHITE, 1.2);
+  }
+
+  // HOW MANY CELLS THE PANEL HOLDS (2026-08-27). The panel is a window on a
+  // field tiled at a FIXED pitch -- geom_floor/geom_topo do
+  // `n_x = int((face_w + 2m) / pitch) + 2`, so widening the panel adds cells
+  // and never stretches them. Nothing on screen said so, and the question
+  // "does the cell grow with the panel?" had no answer you could look at.
+  //
+  // It matters because a measured peak DOES move with the cell count until
+  // there are enough of them: pyramid pitch 50 at panel 200/300/500 reads
+  // 0.46746 / 0.53523 / 0.50772 -- 4, 6 and 10 cells. Same mm-per-pixel in all
+  // three, so that is not resolution, it is too few periods. This ruler is
+  // where you see how many you are averaging over.
+  {
+    const tp = (LAST.top_params) || {};
+    const pitch = +(tp.pitch || tp.pitch_mean || 0);
+    const W = +LAST.panel || 0;
+    if(pitch > 0 && W > 0){
+      const AMBER = [0.85, 0.66, 0.28];
+      const y = R * 0.035;                       // float it clear of the face
+      const zt = cz + W / 2;                     // top edge of the panel
+      const x0 = cx - W / 2, x1 = cx + W / 2;
+      push([x0, y, zt], [x1, y, zt], AMBER, 1.0);
+      const tick = W * 0.022;
+      // one mark per pitch, walking out from the centre so the marks stay put
+      // when the panel is resized -- marks that slide would look like the
+      // cells themselves were moving.
+      for(let k = -Math.ceil(W / (2 * pitch)); k <= Math.ceil(W / (2 * pitch)); k++){
+        const x = cx + k * pitch;
+        if(x < x0 - 1e-6 || x > x1 + 1e-6) continue;
+        push([x, y, zt], [x, y, zt - tick], AMBER, 1.0);
+      }
+      // end stops, taller, so the panel edge is not mistaken for a cell edge
+      for(const x of [x0, x1])
+        push([x, y, zt + tick * 0.5], [x, y, zt - tick * 1.4], AMBER, 1.6);
+    }
   }
 
   // TRACED RAY PATHS, appended to the same line buffer. Each path is a

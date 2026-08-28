@@ -1,0 +1,1160 @@
+[
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 0.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.006952284721979289,
+   "-30": 0.006945777631899475,
+   "+40": 0.006970913321095969,
+   "-40": 0.006960737050040176,
+   "+45": 0.006725786859830873,
+   "-45": 0.00664084111773353
+  },
+  "rms_by_theta": null,
+  "smear": 1.0114383634786124,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 48.4
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 20.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.09317411346158484,
+   "-30": 0.007301261590175189,
+   "+40": 0.1329355872867088,
+   "-40": 0.007078903670783122,
+   "+45": 0.15722846001232366,
+   "-45": 0.006759560473409139
+  },
+  "rms_by_theta": null,
+  "smear": 1.0872688312451875,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 20.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2287982210823211,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 48.7
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 30.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.09636807995639439,
+   "-30": 0.017831245931084927,
+   "+40": 0.13472332332866355,
+   "-40": 0.0072666389711727375,
+   "+45": 0.15926191081680516,
+   "-45": 0.006751459227462397
+  },
+  "rms_by_theta": null,
+  "smear": 1.0449966023112527,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 30.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.24826061575153907,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 57.7
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 40.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.0953056929684515,
+   "-30": 0.007262350796274377,
+   "+40": 0.1367348698940388,
+   "-40": 0.022324670196188338,
+   "+45": 0.15810802921304976,
+   "-45": 0.009862754298292106
+  },
+  "rms_by_theta": null,
+  "smear": 1.0114036985804842,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 40.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 72.7
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 50.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.09257570109095377,
+   "-30": 0.0069063876293925545,
+   "+40": 0.13645768752632317,
+   "-40": 0.007580476033204313,
+   "+45": 0.16361979118095485,
+   "-45": 0.011390486253338166
+  },
+  "rms_by_theta": null,
+  "smear": 1.0322005772041494,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 50.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.33448062277498863,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 69.6
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40",
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 60.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.0926749891293333,
+   "-30": 0.0069652136529169085,
+   "+40": 0.13439461559230037,
+   "-40": 0.007106682614819899,
+   "+45": 0.16035388928078081,
+   "-45": 0.007101392770994125
+  },
+  "rms_by_theta": null,
+  "smear": 1.050163447244874,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 60.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.4299999999999999,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 44.9
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 0.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.1823361505761749,
+   "-30": 0.2507335214626818,
+   "+40": 0.163186219983024,
+   "-40": 0.22976868075234502,
+   "+45": 0.16572477600961621,
+   "-45": 0.23190866664548945
+  },
+  "rms_by_theta": null,
+  "smear": 6.740606983526558,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 169.3
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 20.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.3766917054838938,
+   "-30": 0.019712049204278433,
+   "+40": 0.28055215285221863,
+   "-40": 0.013899816301228702,
+   "+45": 0.22012607801634454,
+   "-45": 0.012515511190362573
+  },
+  "rms_by_theta": null,
+  "smear": 6.3222155536970135,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 20.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2287982210823211,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 200.2
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 30.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.488480175557407,
+   "-30": 0.010762311144755945,
+   "+40": 0.39822177676109516,
+   "-40": 0.010503657330991671,
+   "+45": 0.36936070008285204,
+   "-45": 0.010535013953522403
+  },
+  "rms_by_theta": null,
+  "smear": 5.218196976532693,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 30.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.24826061575153907,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 191.1
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 40.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.2959425591307892,
+   "-30": 0.0036910185057332473,
+   "+40": 0.5847933078781419,
+   "-40": 0.005137053650785439,
+   "+45": 0.5575179831183911,
+   "-45": 0.004289258363199582
+  },
+  "rms_by_theta": null,
+  "smear": 4.73294336029531,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 40.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 155.6
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 50.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.17689615511555104,
+   "-30": 0.0015695783872603632,
+   "+40": 0.28732879809707346,
+   "-40": 0.0016534386902032324,
+   "+45": 0.5312534874535019,
+   "-45": 0.0019938546061813423
+  },
+  "rms_by_theta": null,
+  "smear": 5.786937621566361,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 50.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.33448062277498863,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 184.9
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 100",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 100.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 60.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.07702358171549616,
+   "-30": 0.0010744203311532066,
+   "+40": 0.1472479203071589,
+   "-40": 0.0011411822204918703,
+   "+45": 0.2228284510932822,
+   "-45": 0.0011915502597540058
+  },
+  "rms_by_theta": null,
+  "smear": 8.344302832489452,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 60.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.4299999999999999,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 169.9
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 0.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.10708637143320426,
+   "-30": 0.14556575034489008,
+   "+40": 0.10731530292031871,
+   "-40": 0.1457875225429262,
+   "+45": 0.09847368973378527,
+   "-45": 0.13730566726988666
+  },
+  "rms_by_theta": null,
+  "smear": 8.467131937703318,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 187.0
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 20.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.21438878220161195,
+   "-30": 0.005196700057084191,
+   "+40": 0.13710794131334528,
+   "-40": 0.004508077173720302,
+   "+45": 0.10735457480312205,
+   "-45": 0.004048419136548788
+  },
+  "rms_by_theta": null,
+  "smear": 8.756427430989135,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 20.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2287982210823211,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 214.3
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 30.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.3953418351713002,
+   "-30": 0.0034796784999772505,
+   "+40": 0.22328540728709576,
+   "-40": 0.002781420528862606,
+   "+45": 0.204001983489752,
+   "-45": 0.002933007864574066
+  },
+  "rms_by_theta": null,
+  "smear": 6.805314738998597,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 30.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.24826061575153907,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 205.5
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 40.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.15519293249464497,
+   "-30": 0.0012625893709901684,
+   "+40": 0.5049470442925909,
+   "-40": 0.002544778671444267,
+   "+45": 0.35971656190689955,
+   "-45": 0.0014991436699641756
+  },
+  "rms_by_theta": null,
+  "smear": 6.12177194683263,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 40.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 188.2
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 50.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.09170582927965164,
+   "-30": 0.0009104525998696811,
+   "+40": 0.15830144155912074,
+   "-40": 0.0009490051207096832,
+   "+45": 0.3193380793618394,
+   "-45": 0.0013073501467064218
+  },
+  "rms_by_theta": null,
+  "smear": 8.746505522466222,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 50.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.33448062277498863,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 212.0
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 175",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 175.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 60.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.033935581491772095,
+   "-30": 0.0007499903000069094,
+   "+40": 0.09328456558514625,
+   "-40": 0.0007804582525377545,
+   "+45": 0.1331239026385166,
+   "-45": 0.0007865583025658305
+  },
+  "rms_by_theta": null,
+  "smear": 10.975579312823704,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 60.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.4299999999999999,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 223.5
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 0.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.0763411411204371,
+   "-30": 0.10357401288003965,
+   "+40": 0.07730246834074109,
+   "-40": 0.10454586890210914,
+   "+45": 0.07074348723378475,
+   "-45": 0.09801010899407382
+  },
+  "rms_by_theta": null,
+  "smear": 8.02081843284442,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 171.1
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 20.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.15017968789240385,
+   "-30": 0.0024341184274021634,
+   "+40": 0.1001229674658805,
+   "-40": 0.0023538140432545706,
+   "+45": 0.07466353653147334,
+   "-45": 0.0021448239061801428
+  },
+  "rms_by_theta": null,
+  "smear": 10.212743397948213,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 20.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2287982210823211,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 201.4
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 30.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.35078604781628914,
+   "-30": 0.002291063679513283,
+   "+40": 0.15851963910029968,
+   "-40": 0.0015011124768238154,
+   "+45": 0.13010369583465567,
+   "-45": 0.0015190154513885646
+  },
+  "rms_by_theta": null,
+  "smear": 8.765194344500573,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 30.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.24826061575153907,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 202.2
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 40.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.1084268559619533,
+   "-30": 0.0008756679124555087,
+   "+40": 0.46745597471511185,
+   "-40": 0.002098958186578086,
+   "+45": 0.2656578354131989,
+   "-45": 0.0011028405316875014
+  },
+  "rms_by_theta": null,
+  "smear": 7.361647461382268,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 40.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 191.1
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 50.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.06523201474988688,
+   "-30": 0.0007419503183589849,
+   "+40": 0.11241822716147724,
+   "-40": 0.0007903194235054866,
+   "+45": 0.23680585108164762,
+   "-45": 0.0011418920419385132
+  },
+  "rms_by_theta": null,
+  "smear": 11.157611881701623,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 50.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.33448062277498863,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 208.6
+ },
+ {
+  "case": "피라미드 밑변 50 / 높이 250",
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "obs_elev": 60.0,
+  "thetas": [
+   30.0,
+   -30.0,
+   40.0,
+   -40.0,
+   45.0,
+   -45.0
+  ],
+  "peak_by_theta": {
+   "+30": 0.02359714837097665,
+   "-30": 0.0006620481878855557,
+   "+40": 0.06696141122959291,
+   "-40": 0.0006805828624646563,
+   "+45": 0.09592844856147274,
+   "-45": 0.0006951619404796248
+  },
+  "rms_by_theta": null,
+  "smear": 12.042742956042606,
+  "smear_trustworthy": false,
+  "obs_elev_deg": 60.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.4299999999999999,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "sec": 224.0
+ }
+]

@@ -1,0 +1,107 @@
+[
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 200.0,
+  "pitch": 50.0,
+  "cells_across": 4.0,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "peak": 0.46745595681487434,
+  "rel_vs_smallest": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 34.3
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 300.0,
+  "pitch": 50.0,
+  "cells_across": 6.0,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "peak": 0.5352338744310443,
+  "rel_vs_smallest": 0.14499316273129015,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 79.6
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 500.0,
+  "pitch": 50.0,
+  "cells_across": 10.0,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "peak": 0.5077183676078453,
+  "rel_vs_smallest": 0.08613091823090402,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 300.9
+ },
+ {
+  "family": "벌집 셀 9.53 / 깊이 40",
+  "panel": 95.3,
+  "pitch": 9.53,
+  "cells_across": 10.0,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "peak": 0.13673486469293628,
+  "rel_vs_smallest": 0.0,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 10.0
+ },
+ {
+  "family": "벌집 셀 9.53 / 깊이 40",
+  "panel": 190.6,
+  "pitch": 9.53,
+  "cells_across": 20.0,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "peak": 0.1322167576216501,
+  "rel_vs_smallest": -0.03304283133224595,
+  "mm_per_px": 0.215,
+  "mm_per_px_z": 0.2806625672064399,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 28.4
+ }
+]

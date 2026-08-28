@@ -1,0 +1,162 @@
+[
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 200.0,
+  "pitch": 50.0,
+  "cells_across": 4.0,
+  "peak": 0.4674559752158203,
+  "step_vs_prev": null,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 37.5
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 300.0,
+  "pitch": 50.0,
+  "cells_across": 6.0,
+  "peak": 0.5352338733130272,
+  "step_vs_prev": 0.1449931152680517,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 69.8
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 500.0,
+  "pitch": 50.0,
+  "cells_across": 10.0,
+  "peak": 0.5077185152942957,
+  "step_vs_prev": -0.05140810286990072,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 243.0
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 700.0,
+  "pitch": 50.0,
+  "cells_across": 14.0,
+  "peak": 0.4959474730634037,
+  "step_vs_prev": -0.02318418942052758,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 327.2
+ },
+ {
+  "family": "피라미드 밑변 50 / 높이 250",
+  "panel": 900.0,
+  "pitch": 50.0,
+  "cells_across": 18.0,
+  "peak": 0.5015730200292577,
+  "step_vs_prev": 0.011343029799316673,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 419.0
+ },
+ {
+  "family": "벌집 셀 9.53 / 깊이 40",
+  "panel": 95.3,
+  "pitch": 9.53,
+  "cells_across": 10.0,
+  "peak": 0.1367348632688842,
+  "step_vs_prev": null,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 7.6
+ },
+ {
+  "family": "벌집 셀 9.53 / 깊이 40",
+  "panel": 190.6,
+  "pitch": 9.53,
+  "cells_across": 20.0,
+  "peak": 0.13221675557858772,
+  "step_vs_prev": -0.03304283620346171,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 19.9
+ },
+ {
+  "family": "벌집 셀 9.53 / 깊이 40",
+  "panel": 381.2,
+  "pitch": 9.53,
+  "cells_across": 40.0,
+  "peak": 0.13267837712481587,
+  "step_vs_prev": 0.0034913997413419384,
+  "theta": 40.0,
+  "obs_elev": 40.0,
+  "mm_per_px": 0.215,
+  "n_phase": 6,
+  "samples": 256,
+  "spray_mm": 20.0,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 76.4
+ }
+]

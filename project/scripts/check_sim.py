@@ -419,7 +419,39 @@ def I():
         check("I", "I0 관문이 돌지 않았다", lambda: (False, out[-160:]))
 
 
-GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H, "I": I}
+def J():
+    """관찰자 각도를 넣었는데 옛 숫자가 안 움직였나.
+
+    2026-08-27 에 카메라를 판 법선에서 떼어냈다. 그전까지 발표된 모든 봉우리는
+    "판에서 똑바로 나오는 밝기" 였다. 새 손잡이를 달면서 **옛 답을 건드리지
+    않았나**를 지킨다. 66,426 행이 그 값들을 가리킨다.
+
+    그리고 **아무것도 안 하는 손잡이**도 불합격이다. 각도를 보냈는데 값이
+    안 움직이면 어딘가에서 인자가 떨어진 것이고, 이 프로젝트는 실제로 그
+    결함을 세 번 냈다 (디스패치 람다에서 `obs_elev` 가 빠져 있었다).
+
+    정본은 `scripts/gate_observer_angle.py` 다. 여기서는 그것을 부른다 --
+    같은 규칙을 두 군데 적으면 한 군데만 고치게 된다.
+    """
+    print("\n J. 관찰자 각도가 옛 값을 안 건드리나", flush=True)
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    r = subprocess.run([sys.executable,
+                        os.path.join(here, "gate_observer_angle.py")],
+                       capture_output=True, text=True, timeout=2400,
+                       env=dict(os.environ, SIM=BASE))
+    out = r.stdout
+    for line in out.splitlines():
+        if line.strip().startswith("[") and ("PASS" in line or "FAIL" in line):
+            name = line.split("]", 1)[1].strip()
+            RESULTS.append(("J", name[:60], "PASS" in line, "", 0.0))
+            print("  " + line.strip(), flush=True)
+    if not any(g == "J" for g, *_ in RESULTS):
+        check("J", "J0 관문이 돌지 않았다", lambda: (False, out[-160:]))
+
+
+GROUPS = {"A": A, "B": B, "C": C, "D": D, "E": E, "G": G, "H": H, "I": I,
+          "J": J}
 
 
 if __name__ == "__main__":

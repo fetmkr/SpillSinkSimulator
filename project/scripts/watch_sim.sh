@@ -61,7 +61,7 @@ while [[ ! -f $STOP ]]; do
     else say "RESTART FAILED -- see $DIR/server.log"; fi
   fi
   if up; then
-    if out=$(python3 scripts/check_sim.py A C E H I 2>&1); then
+    if out=$(python3 scripts/check_sim.py A C E H I J 2>&1); then
       n=$(print -r -- "$out" | grep -c "\[PASS\]")
       say "checklist ok ($n items)"
     else

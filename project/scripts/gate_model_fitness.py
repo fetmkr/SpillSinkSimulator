@@ -224,6 +224,18 @@ DESIGNS = [
                                      depth=22.0, tip_flat=0.1), 100.0),
     ("뒤집힌 피라미드 간격4 깊이22", dict(kind="pyramid_inv", pitch=4.0,
                                     depth=22.0, tip_flat=0.1), 100.0),
+    # 2026-08-27 에 숫자를 낸 **실제 그 모양들**. 여기에 없으면 검사한 적이
+    # 없는 것이다. 밑변 50 짜리는 간격이 열두 배라 셀 수가 확 줄고, 끝 평평이
+    # 1.0 mm 라 옛 0.1~0.4 보다 열 배 크다. 같은 코드라도 같은 답이 나온다는
+    # 보장이 없으므로 따로 본다.
+    ("피라미드 밑변50 높이100 끝1.0", dict(kind="pyramid", pitch=50.0,
+                                       depth=100.0, tip_flat=1.0), 200.0),
+    ("피라미드 밑변50 높이250 끝1.0", dict(kind="pyramid", pitch=50.0,
+                                       depth=250.0, tip_flat=1.0), 200.0),
+    ("피라미드 밑변50 높이250 끝2.0", dict(kind="pyramid", pitch=50.0,
+                                       depth=250.0, tip_flat=2.0), 200.0),
+    ("벌집 간격9.53 깊이40", dict(topology="honeycomb", pitch=9.53, depth=40.0,
+                               wall_top=0.08, wall_bot=0.08, jitter=0.0), 95.3),
 ]
 
 HDR = ("%-34s %7s %8s %7s %8s %9s %9s"

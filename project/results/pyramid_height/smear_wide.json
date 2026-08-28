@@ -1,0 +1,48 @@
+[
+ {
+  "panel": 500.0,
+  "depth": 250.0,
+  "pitch": 50.0,
+  "tip_flat": 1.0,
+  "spray_mm": 20.0,
+  "n_phase": 8,
+  "beam_w": 7.5,
+  "samples": 512,
+  "slider": 0.19748417658131498,
+  "smear": 19.650876795477053,
+  "smear_converged": false,
+  "window_mm": 500.0,
+  "window_needed_mm": 508.5746890540324,
+  "mm_per_px": 0.215,
+  "rms_by_theta": null,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 786.6
+ },
+ {
+  "panel": 600.0,
+  "depth": 250.0,
+  "pitch": 50.0,
+  "tip_flat": 1.0,
+  "spray_mm": 20.0,
+  "n_phase": 8,
+  "beam_w": 7.5,
+  "samples": 512,
+  "slider": 0.19748417658131498,
+  "smear": 19.92360026034322,
+  "smear_converged": true,
+  "window_mm": 600.0,
+  "window_needed_mm": 513.804602223088,
+  "mm_per_px": 0.215,
+  "rms_by_theta": null,
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "sec": 1064.9
+ }
+]
