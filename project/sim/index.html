@@ -1940,6 +1940,10 @@ gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,40,12);
 gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2,1,gl.FLOAT,false,40,24);
 gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3,3,gl.FLOAT,false,40,28);
 let NLINE = 0, LINEW = 2.5;
+// 기준 상자 둘(칸, 판)이 선 버퍼의 어디부터 어디까지인지. 이 구간만 깊이
+// 검사를 끄고 그린다 -- 칸 상자는 재료 속에 있어서 켜 두면 윗머리만 보이고,
+// 깊이 22 mm 짜리가 2 mm 처럼 보인다.
+let REF0 = 0, REF1 = 0;
 function buildOverlay(thetas){
   if(!LAST) return;
   const R = RAD*1.15, cx = CEN[0], cz = CEN[2], v = [];
@@ -2038,6 +2042,7 @@ function buildOverlay(thetas){
   // cells. Pyramid pitch 50 read 0.46746 / 0.53523 / 0.50772 / 0.49595 /
   // 0.50157 at 4 / 6 / 10 / 14 / 18 cells, at the same 0.215 mm/px throughout.
   // Too few periods, not too few pixels. This box is the unit being counted.
+  REF0 = v.length / 10;
   {
     const tp = (LAST.top_params) || {};
     const pitch = +(tp.pitch || tp.pitch_mean || 0);
@@ -2116,6 +2121,7 @@ function buildOverlay(thetas){
       // line lying across the middle of the panel, so it is not drawn.
     }
   }
+  REF1 = v.length / 10;
 
   // TRACED RAY PATHS, appended to the same line buffer. Each path is a
   // polyline in the mesh's own millimetre coordinates, so no transform is
@@ -2380,7 +2386,18 @@ function draw(fw, fh){
     gl.uniformMatrix4fv(gl.getUniformLocation(LP,'mvp'), false, MVP);
     gl.uniform2f(gl.getUniformLocation(LP,'vp'), cv.width, cv.height);
     gl.uniform1f(gl.getUniformLocation(LP,'hw'), LINEW*(devicePixelRatio||1)/2);
-    gl.drawArrays(gl.TRIANGLES, 0, NLINE);
+    // 기준 상자 둘만 깊이 검사를 끄고 그린다. 나머지(빛 화살, 카메라,
+    // 광선 경로)는 가려지는 것이 맞다 -- 재료 안에서 죽은 광선이 겉으로
+    // 비쳐 보이면 안 된다.
+    if(REF1 > REF0){
+      if(REF0) gl.drawArrays(gl.TRIANGLES, 0, REF0);
+      gl.disable(gl.DEPTH_TEST);
+      gl.drawArrays(gl.TRIANGLES, REF0, REF1 - REF0);
+      gl.enable(gl.DEPTH_TEST);
+      if(NLINE > REF1) gl.drawArrays(gl.TRIANGLES, REF1, NLINE - REF1);
+    } else {
+      gl.drawArrays(gl.TRIANGLES, 0, NLINE);
+    }
     gl.useProgram(P); gl.bindVertexArray(VAO);
   }
 }
