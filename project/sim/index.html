@@ -179,7 +179,14 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
   color:var(--ink3);pointer-events:none}
 #illum b{color:var(--ink);font:600 9.5px/1.8 ui-monospace,Menlo,monospace;
   letter-spacing:.11em;text-transform:uppercase;display:block;margin-bottom:4px}
-#illum .ln{display:flex;gap:6px;align-items:baseline}
+#illum .ln{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+/* `#illum b` is the panel HEADING style -- block, uppercase, dark, wide
+   letter-spacing. Inside a legend line that made the emphasised words a
+   separate flex item in a colour that vanished against the dark box, and
+   pushed the rest of the sentence onto its own row. Bold inside a line is
+   just bold. */
+#illum .ln b{display:inline;text-transform:none;letter-spacing:0;margin:0;
+  font:700 10.5px/1.6 ui-monospace,Menlo,monospace;color:#e9e3d7}
 #illum .ln i{width:5px;height:5px;border-radius:50%;background:var(--a);
   flex:none;transform:translateY(-1px)}
 #illum em{color:var(--no);font-style:normal}
@@ -410,6 +417,9 @@ details.why p{margin:.4em 0 0}
   <div class="ln" style="margin-top:5px"><i style="background:#555f66"></i>grey dome = incoming, all directions at once</div>
   <div class="ln"><i style="background:#49c2ca"></i>colored arrows = directions being read; each &theta; keeps its color above</div>
   <div class="ln"><i style="background:#d9a847"></i>amber = panel normal</div>
+  <div class="ln"><i style="background:#dc59b8"></i>자홍 상자 = <b>되풀이되는 한 칸</b> (간격 x 간격 x 깊이). 재는 자리가 아니다</div>
+  <div class="ln"><i style="background:#6bb873"></i>초록 테두리 = <b>재는 자리.</b> 판 전체다</div>
+  <div class="ln"><i style="background:#f28c40"></i>주황 두 줄 = 빔 폭. 이 폭이 한 칸 안에 들어가는지 보라</div>
   </div>
   <div id="busy">RENDERING</div>
 </div>
@@ -2059,6 +2069,36 @@ function buildOverlay(thetas){
                  [4,5],[6,7],[4,6],[5,7],      // mouth square
                  [0,4],[1,5],[2,6],[3,7]];     // the four uprights
       for(const [i,j] of E) push(P[i], P[j], CELL, 2.0);
+
+      // WHAT IS ACTUALLY MEASURED (2026-08-27). The cell box alone read as
+      // "this is the patch it measures", which is wrong and was asked out
+      // loud. The cell is the unit being COUNTED; the reading is taken over
+      // the whole panel face. Draw the face so the two cannot be confused.
+      //
+      // Total reflectance averages over the face. Peak and smear read a
+      // profile in a window that opens until the return fits, up to the face
+      // (sim_server: "window_max_mm": face). Either way it is the panel, not
+      // the little box.
+      const MEAS = [0.42, 0.72, 0.45];
+      const fz0 = cz - W / 2, fz1 = cz + W / 2;
+      const fx0 = cx - W / 2, fx1 = cx + W / 2;
+      const yf = R * 0.012;
+      const C = [[fx0,yf,fz0],[fx1,yf,fz0],[fx1,yf,fz1],[fx0,yf,fz1]];
+      for(let i = 0; i < 4; i++) push(C[i], C[(i+1)%4], MEAS, 2.2);
+
+      // THE BEAM, at its real width. It is a stripe that walks one pitch; the
+      // point of drawing it is that at pitch 50 a 7.5 mm beam sits INSIDE one
+      // face, while at pitch 4 the same beam covers two whole cells. That
+      // changes what the phase average means and it is invisible otherwise.
+      const bwEl = $('#beamw');
+      const bw = bwEl ? (+bwEl.value || 0) : 0;
+      if(bw > 0){
+        const BEAM = [0.95, 0.55, 0.25];
+        for(const s of [-1, 1]){
+          const z = cz + s * bw / 2;
+          push([fx0, yf, z], [fx1, yf, z], BEAM, 1.6);
+        }
+      }
 
       // The COUNT lives in the table beside the view ('cells across'). A
       // ruler drawn along the panel edge looked, in an oblique view, like a
