@@ -1,0 +1,571 @@
+Designation: E 430 – 97
+
+Standard Test Methods for
+
+Measurement of Gloss of High-Gloss Surfaces by
+Goniophotometry1
+This standard is issued under the fixed designation E 430; the number immediately following the designation indicates the year of
+original adoption or, in the case of revision, the year of last revision. A number in parentheses indicates the year of last reapproval. A
+superscript epsilon (e) indicates an editorial change since the last revision or reapproval.
+
+(1) Discussion—The term reflectance is often used in a
+general sense or as an abbreviation for reflectance factor. Such
+usage is not assumed in this method. The definition may
+require that the term be modified by adjectives denoting the
+spectral and geometric conditions of measurement.
+3.1.1.2 reflectance factor, R, n—ratio of the flux reflected
+from the specimen to the flux reflected from the perfect
+reflecting diffuser under the same spectral and geometric
+conditions of measurement. (E 284)
+3.1.1.3 gloss reflectance factor, Rs, n—ratio of the specularly reflected part of the (whole) flux reflected from the
+specimen to the flux reflected from a specified gloss standard
+under the same geometric and spectral conditions of measurement.
+(1) Discussion—The gloss standard may be a black glass or
+a mirror, and may be assigned one of a variety of scale values
+Gs as specified. (E 284)
+3.1.2 Gloss and Types of Gloss:
+3.1.2.1 gloss, n—angular selectivity of reflected light, responsible for the degree to which reflected highlights or images
+of objects may be seen as superimposed on a surface. (E 284)
+(1) Discussion—Gloss is responsible for the object’s glossy
+appearance, not for an observer’s perception of the appearance.
+At least six types or characteristics of gloss may be observed
+depending upon the character of the surface and the spatial
+distribution of the reflected light (3).
+3.1.2.2 specular gloss, n—ratio of flux reflected in specular
+direction to incident flux for a specified angle of incidence and
+source and receptor angular apertures. (E 284)
+3.1.2.3 distinctness-of-image gloss, n—aspect of gloss characterized by the sharpness of images of objects produced by
+reflection at a surface. (E 284)
+3.1.2.4 sheen, n—the specular gloss at a large angle of
+incidence for an otherwise matte specimen. (The usual angle
+for measurement is 85°.) (E 284)
+3.1.3 Terms Relating to Surface Characteristics:
+3.1.3.1 directionality, n—perceived, the degree to which the
+appearance of a surface changes as the surface is rotated in its
+own plane, under fixed conditions of illumination and viewing.
+(E 284)
+3.1.3.2 texture, n—the visible surface structure depending
+on the size and organization of small constituent parts of a
+material; typically, the surface structure of a woven fabric.
+(E 284)
+
+1. Scope
+1.1 These test methods cover the measurement of the
+reflection characteristics responsible for the glossy appearance
+of high-gloss surfaces. Two test methods, A and B, are
+provided for evaluating such surface characteristics at specular
+angles of 30° and 20°, respectively. These test methods are not
+suitable for diffuse finish surfaces nor do they measure color,
+another appearance attribute.
+1.2 As originally developed by Tingle and others (see Refs
+1 and 2),2 the test methods were applied only to bright metals.
+Recently they have been applied to high-gloss automotive
+finishes and other nonmetallic surfaces.
+2. Referenced Documents
+2.1 ASTM Standards:
+D 523 Test Method for Specular Gloss3
+D 2457 Test Method for Specular Gloss of Plastic Films and
+Solid Plastics4
+E 171 Specification for Standard Atmospheres for Conditioning and Testing Flexible Barrier Materials5
+E 179 Guide for Selection of Geometric Conditions for
+Measurement of Reflectance and Transmission Properties
+of Materials3
+E 284 Terminology of Appearance3
+E 308 Practice for Computing the Colors of Objects by
+Using the CIE System3
+E 1347 Test Method for Color and Color-Difference Measurement of Object-Color Specimens by Tristimulus
+(Filler) Colormetry3
+3. Terminology
+3.1 Definitions:
+3.1.1 Reflectance and Related Terms:
+3.1.1.1 reflectance, r, n—ratio of the reflected radiant or
+luminous flux to the incident flux in the given conditions.
+(E 284)
+1
+These test methods are under the jurisdiction of ASTM Committee E-12 on
+Appearance and are the direct responsibility of Subcommittee E 12.03 on Geometry.
+Current edition approved July 10, 1997. Published September 1997. Originally
+published as E 430 – 71. Last previous edition E 430 – 91.
+2
+The boldface numbers in parentheses refer to the list of references at the end of
+this method.
+3
+Annual Book of ASTM Standards, Vol 06.01.
+4
+Annual Book of ASTM Standards, Vol 08.02.
+5
+Annual Book of ASTM Standards, Vol 15.09.
+
+Copyright © ASTM, 100 Barr Harbor Drive, West Conshohocken, PA 19428-2959, United States.
+
+1
+
+E 430
+appearance. The present method identifies by measurements
+important aspects of finishes. Those having identical sets of
+numbers normally have the same gloss characteristics. It
+usually requires more than one measurement to identify
+properly the glossy appearance of any finish (see Refs 3 and 4).
+
+3.1.4 Other Terms:
+3.1.4.1 aperture angle, 2k, n—angle subtended at a point on
+a specimen by the maximum dimension of the illuminator or
+receiver, within which the flux in a directional beam is
+contained.
+(1) Discussion—In optics, the symbol k is used for the half
+angle; hence the recommended symbol here is 2k. (E 284)
+3.1.4.2 goniophotometer, n—instrument that measures flux
+as a function of angles of illumination or observation. (E 284)
+3.2 Terms Specific to This Test Method:
+3.2.1 Terms Relating to Reflection Haze:
+3.2.1.1 reflection haze, H, n—for a specified specular angle,
+ratio of flux reflected at a specified angle (or angles) from the
+specular direction to the flux similarly reflected at the specular
+angle by a specified gloss standard.
+(1) Discussion—Modifiers may be used to specify the angles
+at which the haze is measured (for example, 2° or 5°); whether
+H or a logarithmic form is to be stated; or whether H is to be
+compensated for the luminance of the specimen by multiplication by Y specimen/Yn, where n denotes the reference white; or
+any combination of these.
+3.2.2 Terms Relating to Metallic Reflection:
+3.2.2.1 metallic brightness, n—freedom of a metal surface
+from diffuse haze or texture.
+3.2.3 Terms Relating to Specimen Directionality:
+3.2.3.1 8with-machine’ direction, n—the axis of a specimen
+that is parallel to the direction of mill rolling or extrusion, or
+other surface-finish texture.
+3.2.3.2 8across-machine’ direction, n—the perpendicular to
+8with-machine’ direction.
+3.3 Other appearance terms and definitions in Terminology
+E 284 are applicable to this test method.
+
+6. Apparatus
+6.1 The apparatus shall be either an abridged goniophotometer (see Fig. 1 and Fig. 2) or a full goniophotometer (see Fig.
+3) that can be set to the specified specular, off-specular, and
+aperture angles given in Table 1 and Table 2. The abridged
+goniophotometer may have a fixed angle of incidence (for Test
+Method A, 30°; for Test Method B, 20°) and specific fixed
+directions of view at which the flux from the specimen is
+measured (see Table 1 and Table 2).6
+6.1.1 Geometric Conditions for Test Method A—The direction of incidence shall be 30°. The directions of view shall be
+opposite the direction of incidence at 30° for specular reflectance, 29.7 or 30.3° for distinctness of image comparisons, 28
+or 32° for narrow-angle haze comparisons, and 25 or 35° for
+wide-angle haze comparisons. The angular dimensions of the
+mirror reflected image of the source slit in the plane of
+measurement and the angular dimensions of the receiver
+windows in this plane of measurement shall be as shown in
+Table 1.
+6.1.2 Geometric Conditions for Test Method B—The direction of incidence shall be 20 6 0.1°. The directions of view
+shall be opposite the direction of incidence, at 20° for specular
+gloss measurement and at 18.1 and 21.9° for narrow-angle
+reflection haze measurement. The angular dimensions of the
+specularly reflected image of the source slit in the plane of
+measurement and the angular dimensions of the receiver
+windows in this plane of measurement shall be as shown in
+Table 2.
+6.1.3 Spectral Conditions—The measurement shall be made
+with visible light to give results in accordance with the CIE
+spectral luminous efficiency function V (l identical with ȳ) in
+the CIE 1931 standard observer and CIE standard illuminant C
+(see Practice E 308 and Test Method E 1347). If another
+illuminant A, is used, this shall be specified in the report.
+6.1.4 Polarization—The incident flux shall be unpolarized
+and the receiver shall be insensitive to the state of polarization
+of the reflected luminous flux.
+6.1.5 Clamp—For Test Method A, a rotatable clamp of the
+type shown in Fig. 4 may be used for flattening and positioning
+the specimen during measurement.
+
+4. Summary of Test Method
+4.1 Several geometrically different measures of light reflected by a surface are proposed for use in describing its gloss
+appearance. In Test Method A, gloss reflectance factor is
+measured at 30° to the specimen normal using narrow illuminator and receiver aperture angles (0.5° wide maximum).
+Distinctness-of-image gloss is measured at 29.7 or 30.3° or
+both. Narrow-angle (2°) reflection haze is measured at 28 or
+32° or both, and wide-angle (5°) reflection haze at 25 or 35° or
+both. The ratio of reflectance factors for 28 or 32° or both,
+perpendicular and parallel to the machine direction of the
+specimen, is computed as a measure of directionality. In
+Method B, specular gloss is measured at 20° according to Test
+Method D 523, and narrow-angle reflection haze is measured at
+18.1 and 21.9°. For additional information on the selection of
+geometric conditions, see Guide E 179.
+
+7. Standards
+7.1 Three calibrated standards of good planarity shall be
+available in either a set of metals or a set of nonmetals,
+depending upon which type of surface is measured.
+7.2 High-Gloss Standards:
+
+5. Significance and Use
+5.1 The gloss of metallic finishes is important commercially
+on metals for automotive, architectural, and other uses where
+these metals undergo special finishing processes to produce the
+appearances desired. It is important for the end-products which
+use such finished metals that parts placed together have the
+same glossy appearance.
+5.2 It is also important that automotive finishes and other
+high-gloss nonmetallic surfaces possess the desired finished
+
+6
+The sole source of supply of the apparatus known to the committee at this time
+for Method A is Hunter Associates Laboratory, Reston, VA, and for Method B is
+BVK-Gardner USA, Columbia, MD. If you are aware of alternative suppliers,
+please provide this information to ASTM Headquarters. Your comments will receive
+careful consideration at a meeting of the responsible technical committee,1 which
+you may attend.
+
+2
+
+E 430
+
+FIG. 1 Optical Diagram of the Abridged Goniophotometer
+
+protective coating and calibrated for specular gloss and
+distinctness-of-image gloss.
+7.3.2 Intermediate Standard for Nonmetals shall be of a
+ceramic material, such as porcelain enamel on steel, and
+calibrated for specular gloss and distinctness-of-image gloss.
+7.4 Diffuse Standards shall have a reflectance factor substantially constant over the angular range of the instrument.
+7.5 Care of Standards—It is essential that the standards be
+kept clean and free of scratches as well as from contact with
+contaminating materials. The cleaning method specified by the
+instrument manufacturer shall be followed and the standards
+should be checked at regular intervals against reference standards held in reserve.
+
+7.2.1 High-Gloss Standard for Metals shall be of aluminum, evaporated onto glass and covered with a protective
+coating of silicon monoxide, and calibrated for specular gloss
+and distinctness-of-image gloss.
+7.2.2 High-Gloss Standard for Nonmetals shall be of highly
+polished black glass with a refractive index of approximately
+nD 5 1.527, calibrated for specular gloss and reflection haze,
+and assigned a scale value of Gs 5 89.4 for a specular angle of
+30° (Test Method A) or Gs 5 89.2 for a specular angle of 20°
+(Test Method B).
+NOTE 1—To determine the scale value, calculate the first-surface
+(Fresnel) reflectance (Test Method D 2457, Section 5.1) for nD 5 1.567
+and the specular angle of interest; for 30° it is 5.0436 % and for 20° it is
+4.9078 %. Assign this a scale value of 100 (Test Method D 523, Section
+7.1). Repeat the calculation for np 5 1.527 and the same specular angle;
+the result for 30° is 4.5069 % and for 20°, 4.3769 %. The new scale value
+for 30° is 100 3 (4.5069/5.0436) 5 89.4, and for 20°, 100 3 (4.3769/
+4.9078) 5 89.2. (The latter value is also given in Test Method D 523.)
+
+8. Specimens
+8.1 Specimens shall be obtained from test samples by
+selecting areas that are plane and representative of each sample
+being tested. Every specimen must be at least 23⁄4 in. (70 mm)
+in the smallest dimension. Specimens may be larger so long as
+it is possible to insert them and flatten them properly for
+measurement.
+
+7.3 Intermediate Standards:
+7.3.1 Intermediate Standard for Metals shall be of either
+chromium evaporated onto glass and covered with a protective
+coating of silicon monoxide, or of bright sheet aluminum with
+3
+
+E 430
+full goniophotometer, shown in Fig. 3, identifies the specular
+direction by the peak of the goniophotometric curve.
+10.3 Rotate the specimen in its own plane to find the
+orientation, giving the maximum specular signal. This specimen orientation is called the “machine direction” because it
+generally coincides with the direction of travel of a sheet or
+film material through a processing machine.
+10.4 Record the following quantities:
+10.4.1 For Test Method A, readings of (a) gloss reflectance
+factor (specular gloss), R s,30 at 30°; (b) distinctness-of-image
+gloss; (c) 2° reflection haze; H2; and (d) 5° reflection haze, H5.
+The quantities in (b), (c), and (d) may be either gloss
+reflectance factors or values of H, which are their ratios to the
+specular gloss reflectance factor recorded in (a).
+10.4.2 For Test Method B, readings of (a) the 20° specular
+gloss, Rs ,20; (b) the reflection haze, H; and (c) the luminous
+reflectance, Y.
+10.5 Measure at least three areas of each specimen.
+10.6 From these same areas, read 2° haze for the“ acrossmachine direction,” being careful to flatten the test surface and
+orient the specular beam in each case.
+10.7 Take readings on the standards at the end of the series
+of observations to ensure that the instrument has remained in
+calibration throughout the operation.
+11. Calculation
+11.1 For Test Method A, calculate the mean of three
+readings for each specimen for:
+11.1.1 Specular gloss, Rs,30, at 30°.
+11.1.2 Distinctness-of-image gloss, 100 3 (1 − H0.3), evaluated at 0.3° on either or both sides of the specular angle.
+11.1.3 2° Reflection haze, 100 H2, evaluated at 2° on either
+or both sides of the specular angle.
+11.1.4 5° Reflection haze, 100 H5, evaluated at 5° on either
+or both sides of the specular angle.
+11.1.5 Directionality, 100 3 (H2, across-machine/ H2, withmachine), evaluated at 2° on either or both sides of the specular
+angle.
+11.2 For Test Method B, calculate the mean of three
+readings of each specimen for:
+11.2.1 Specular gloss, Rs,20 at 20°.
+11.2.2 One or more of the following, as required:
+11.2.2.1 Reflection haze, H 20.
+11.2.2.2 Logarithmic reflection haze, H20,log 5 1285 log[(H
+20/20) + 1].
+11.2.2.3 Compensated reflection haze, H 20,comp 5 H
+20, specimen − (H 20,n 3 Yspecimen/Yn).
+
+FIG. 2 Optical Diagram of the Apparatus for Method B
+
+9. Preparation and Standardization of Apparatus
+9.1 The instrument must be used in a clean dry area free of
+drafts. Standard laboratory conditions are recommended (see
+Section 2 of Specification E 171). Voltage regulation to
+60.01 % must be incorporated in the instrument, or supplied
+separately. Follow manufacturer’s recommendations for instrument warmup.
+9.2 Standardization—Adjust the instrument to read the
+same gloss reflectance factor for the intensity of light reflected
+from the diffuse standard through the specular, distinctness-ofimage, and haze apertures. Adjust the instrument to read values
+of specular gloss and distinctness-of-image gloss assigned the
+aluminum mirror if metal surfaces are being measured; or the
+black gloss standard if nonmetal surfaces are being measured.
+If the instrument does not then read the appropriate intermediate standard within the limits set by the instrument manufacturer, refocus or restandardize following the manufacturer’s
+instructions.
+
+NOTE 2—H20,log may also be calculated as a compensated quantity by
+using H20, comp in place of H20 in 11.2.2.2. Compensated quantities shall
+be used when comparing specimens with different values of Y.
+
+12. Report
+12.1 The report for Test Method A shall contain the following:
+12.1.1 The specular gloss Rs,30,
+12.1.2 The distinctness-of-image gloss,
+12.1.3 The 2° haze, H 2,
+12.1.4 The 5° reflection haze, H5,
+12.1.5 The directionality.
+
+10. Procedure
+10.1 Bring the specimen to the instrument for measurement.
+Be sure the specimen is flat.
+10.2 For Test Method A, be certain that the specular sensor
+is centered on the specimen-reflected specular light beam. The
+4
+
+E 430
+
+FIG. 3 Recording Goniophotometer Showing Viewing Angle, v, Incidence Angle, i, and Their Respective Field Angles, 2Kv and 2Ki
+TABLE 1 Dimensions of the Mirror Image of the Source-Slit, and of the Receptor Windows Measured in the Plane of the Receiving
+Windows (see Fig. 1)
+Source-Slit Mirror
+Image, °
+
+Specular Receiver
+Window, °
+
+Distinctness-of-Image (60.29)
+Receiver Window, °
+
+Haze Receiver
+Windows,°
+28 and 32 or
+25 and 35
+0.4 6 0.1 or
+0.5 6 0.1
+3.0 6 1
+
+Angle of center of window (measured from
+perpendicular to specimen surface)
+Width (in the plane of the angle of reflection)
+
+30
+
+30
+
+30.3 and 29.7
+
+0.44 6 0.01
+
+0.4 6 0.01
+
+0.14 6 0.01
+
+Length (across the plane of the angle of reflection)
+
+5.0 6 1
+
+3.0 6 1
+
+3.0 6 1
+
+scale differ by more than 3.0 in individual readings from the
+averages reported.
+
+12.2 The report for Test Method B shall contain the following:
+12.2.1 The specular gloss Rs,20,
+12.2.2 Either the logarithmic reflection haze or the compensated logarithmic reflection haze.
+12.3 The report for both methods shall contain the following:
+12.3.1 Identification of instrument used by model and serial
+number,
+12.3.2 Identification of gloss standards by number and scale
+value assigned, and
+12.3.3 Identification of any specimens whose values on any
+
+13. Precision and Bias
+13.1 Test Method A:
+13.1.1 An indication of the sensitivity of this test method is
+shown in Table 3 by the values of Spearman rank correlation
+coefficients. The data were obtained with a set of 20 aluminum
+and stainless steel specimens selected for a wide range of
+reflectance characteristics. Visual evaluations were compared
+with measurements using ( 1) the abridged goniophotometer,
+(2) a full goniophotometer, and (3) other instruments. A more
+5
+
+E 430
+TABLE 2 Dimensions of the Specular Image of the Source-Slit
+and of the Receptor Windows Measured in the Plane of the
+Receiving Windows (see Fig. 2)
+
+Angle of center of window
+(measured from
+perpendicular to specimen
+surface)
+Width (in the plane of the
+angle of reflection)
+Length (across the plane of
+the angle of reflection)
+
+Source-Slit
+Specular
+Image, °
+
+Specular
+Gloss
+Receiver
+Window, °
+
+20.0 6 0.1
+
+20.0 6 0.1
+
+18.1 6 0.1
+and
+21.9 6 0.1
+
+0.75 6 0.1
+
+1.8 6 0.05
+
+1.8 6 0.1
+
+2.5 6 0.25
+
+3.6 6 0.1
+
+5.5 6 0.25
+
+complete report of these findings appears in Ref (5).
+13.1.2 Instrument Reproducibility—Five panels of anodized
+
+Haze
+Receiver
+Window, °
+
+TABLE 4 Instrument Reproducibility Data
+
+One instrument with receptor windows
+filled with optical fibers
+Average, two instruments with segmented silicon photocell light receivers
+
+Root-Mean-Square Differences
+from Goniophotometer
+Assigned Values
+Distinctness30° Specular
+of-Reflected
+Reflectance
+Image
+1.4
+1.5
+2.2
+
+1.1
+
+FIG. 4 A Rotatable Clamp Suggested for Flattening the Specimen and Positioning It During Measurement
+TABLE 3 Rank Correlation Coefficients of Distinctness-of-Image
+and Haze Between the Dorigon Abridged Goniophotometer and
+Other Instruments, and with Visual Judgments
+Dori-Gon Versus
+Visual
+D10-5 Gonio
+Alcoa DORI
+Alcoa Abridged Gonio
+D36B Distinctness-ofImage Glossmeter
+
+Distinctnessof-ImageA
+0.91
+0.93
+0.87
+...
+0.94
+
+aluminum sheet, ranging from 12 to 77 in specular reflectance
+and from 24 to 97 in distinctness-of-image gloss, were calibrated with the full goniophotometer, then measured with three
+abridged goniophotometers. One of the abridged goniophotometers had optical fibers filling the receptor windows and two
+instruments had receptor windows of segmented silicon photocells. The results of the full goniophotometer calibration are
+given in Table 4.
+13.2 Test Method B:
+13.2.1 Precision and Bias will be determined.
+
+HazeB
+2°
+
+5°
+
+0.82
+...
+...
+...
+...
+
+0.96
+0.96
+...
+0.98
+...
+
+A
+Visual judgments of rank were made by sighting in the “with” machine direction
+only, whereas instrumental “with” and “across” directions were averaged.
+B
+Visual judgments of haze were made by ranking the specimens according to
+the amount of near specular reflectance (milkiness) adjacent to the image of a
+concentrated light source. Correlation between the Dorigon and the D10-5 Gonio
+and between the Dorigon and the Alcoa Abridged Gonio at 2° were equivalent to
+those at 5°.
+
+6
+
+E 430
+REFERENCES
+(1) Tingle, W. H., and Potter, F. R.,“ New Instrument Grades for Polished
+Metal Surfaces,” Product Engineering, Vol 27, March 1961.
+(2) Tingle, W. H., and George, D. J., “Measuring Appearance Characteristics of Anodized Aluminum Automotive Trim,” Report No. 650513,
+Society of Automotive Engineers, May 1965.
+(3) Hunter, R. S., “Gloss Evaluation of Materials,” ASTM Bulletin 186,
+ASTBA, December 1952.
+
+(4) Christie, J. S., “Instruments for Metallic Appearance,” Appearance of
+Metallic Materials, ASTM STP 478, Am. Soc. Testing Mats., ASTTA,
+1971.
+(5) Christie, J. S., “An Instrument for the Geometric Attributes of
+Metallic Appearance,” Applied Optics, Vol. 8, No. 9, September 1969.
+
+The American Society for Testing and Materials takes no position respecting the validity of any patent rights asserted in connection
+with any item mentioned in this standard. Users of this standard are expressly advised that determination of the validity of any such
+patent rights, and the risk of infringement of such rights, are entirely their own responsibility.
+This standard is subject to revision at any time by the responsible technical committee and must be reviewed every five years and
+if not revised, either reapproved or withdrawn. Your comments are invited either for revision of this standard or for additional standards
+and should be addressed to ASTM Headquarters. Your comments will receive careful consideration at a meeting of the responsible
+technical committee, which you may attend. If you feel that your comments have not received a fair hearing you should make your
+views known to the ASTM Committee on Standards, 100 Barr Harbor Drive, West Conshohocken, PA 19428.
+This standard is copyrighted by ASTM, 100 Barr Harbor Drive, West Conshohocken, PA 19428-2959, United States. Individual
+reprints (single or multiple copies) of this standard may be obtained by contacting ASTM at the above address or at 610-832-9585
+(phone), 610-832-9555 (fax), or service@astm.org (e-mail); or through the ASTM website (http://www.astm.org).
+
+7
+
+

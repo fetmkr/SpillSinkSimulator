@@ -1262,6 +1262,20 @@ def derived(p, verts, spec):
             "control_clear": (face + margin) < ctrl_x0,
             "window_max_mm": face,          # the ladder can open to the face
             "window_legacy_mm": face * (1.0 - 2.0 * _BR.MEAS_INSET_Z),
+            # 방법과 그 설정을 화면에도 보인다. report/METHOD.html 이 왜
+            # 이렇게 정했는지와 참고 문헌을 담고, 여기는 지금 쓰는 값이다.
+            # 코드에서 읽는다 -- 손으로 적으면 조용히 어긋난다.
+            "method": {
+                "mm_per_px": _FB.MM_PER_PX,
+                "samples": _FB.SAMPLES,
+                "n_phase": _FB.N_PHASE,
+                "stripe_w": _FB.STRIPE_W,
+                "spread_deg": _FB.SPREAD_DEG,
+                "inset_x": _BR.MEAS_INSET_X,
+                "inset_z": _BR.MEAS_INSET_Z,
+                "peak_stat": getattr(_FB, "PEAK_STAT", "max"),
+                "doc": "report/METHOD.html",
+            },
         }
         # verdicts, each traceable to a measurement made today
         w = []

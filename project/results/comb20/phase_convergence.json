@@ -1,0 +1,257 @@
+[
+ {
+  "case": "벌집 9.53 / 깊이 40 · 관찰자 40",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 6,
+  "peak": 0.13673486469294116,
+  "step_vs_prev": null,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 8.0
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40 · 관찰자 40",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 12,
+  "peak": 0.13686726905148786,
+  "step_vs_prev": 0.0009683291737190292,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 15.7
+ },
+ {
+  "case": "벌집 9.53 / 깊이 40 · 관찰자 40",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 24,
+  "peak": 0.1369098017500905,
+  "step_vs_prev": 0.00031075872922281533,
+  "spec": {
+   "top": "comb",
+   "top_params": {
+    "pitch": 9.53,
+    "wall_top": 0.08,
+    "wall_bot": 0.08,
+    "comb_expand": 1.0,
+    "jitter": 0.0
+   },
+   "depth": 40.0,
+   "panel": 95.3,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 36.1
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 40 (흔들림 1 %)",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 6,
+  "peak": 0.46745596681214296,
+  "step_vs_prev": null,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 36.1
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 40 (흔들림 1 %)",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 12,
+  "peak": 0.4658203662433175,
+  "step_vs_prev": -0.003498940402835271,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 76.5
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 40 (흔들림 1 %)",
+  "obs_elev": 40.0,
+  "theta": 40.0,
+  "n_phase": 24,
+  "peak": 0.4652184313720433,
+  "step_vs_prev": -0.0012922038513013545,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 152.8
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 60 (흔들림 46 %)",
+  "obs_elev": 60.0,
+  "theta": 40.0,
+  "n_phase": 6,
+  "peak": 0.06696141346728336,
+  "step_vs_prev": null,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 60.6
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 60 (흔들림 46 %)",
+  "obs_elev": 60.0,
+  "theta": 40.0,
+  "n_phase": 12,
+  "peak": 0.06787339120398805,
+  "step_vs_prev": 0.013619451703334784,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 104.2
+ },
+ {
+  "case": "피라미드 50/250 · 관찰자 60 (흔들림 46 %)",
+  "obs_elev": 60.0,
+  "theta": 40.0,
+  "n_phase": 24,
+  "peak": 0.06333532303347969,
+  "step_vs_prev": -0.06686078432223264,
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 50.0,
+    "tip_flat": 1.0,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 250.0,
+   "panel": 200.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "coating": {
+   "coating": "musou_fit",
+   "deep_coating": "wall_5pct",
+   "paint_depth": 20.0
+  },
+  "samples": 256,
+  "sec": 140.8
+ }
+]

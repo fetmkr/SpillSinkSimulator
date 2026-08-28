@@ -1,0 +1,188 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>공식과 구현</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:70ch}
+li{margin:6px 0}
+a{color:var(--cy)}
+.ax{border-left:3px solid var(--a);padding-left:14px;margin:22px 0}
+.g-jaem{color:#6bb873;font-weight:700}
+.g-none{color:var(--bad);font-weight:700}
+.g-half{color:#e0a44e;font-weight:700}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">Spill Sink Simulator · 방법</div>
+<h1>공식과 구현</h1>
+<p class="sub">이 시뮬레이터가 무엇을 어떻게 재는지, 설정값이 어디서 왔는지, 무엇이 아직 근거가 없는지. <b>숫자는 코드에서 직접 읽는다</b> -- 손으로 옮겨 적으면 코드를 고쳤을 때 이 문서가 조용히 거짓말을 한다.</p></header>
+<section><h2>재는 값 셋</h2>
+<div class="ax"><h3 style="margin:0 0 4px">반사 총량 <span class="tag">total reflectance · 낮을수록 좋다</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">무엇을 재나</td><td>되돌아온 빛의 <b>양</b></td></tr>
+<tr><td style="width:9em;color:var(--muted)">조명</td><td>하늘처럼 사방에서 (uniform hemisphere, radiance 1). 램프가 아니다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">공식</td><td>판 창 화소의 <b>평균</b> &divide; 대조판 창 화소의 <b>평균</b></td></tr>
+<tr><td style="width:9em;color:var(--muted)">코드</td><td>blender_render.run() -- <code>ratio = s_panel['mean'] / s_ctrl['mean']</code></td></tr>
+<tr><td style="width:9em;color:var(--muted)">읽는 창</td><td>없다. 면 전체를 넓이로 평균한다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">왜 이렇게</td><td>헬름홀츠 상반성(Helmholtz reciprocity)으로 &rho;<sub>dh</sub>(&theta;) 를 읽는다. 하늘 조명 한 번으로 그 각도 빔의 되돌림 비율이 나온다. 빔을 옮겨가며 잴 필요가 없다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">걸리는 시간</td><td>각도 하나에 0.74 초</td></tr>
+<tr><td style="width:9em;color:var(--muted)">아는 결함</td><td>없음. 빔 자리도 창도 안 쓰므로 이 문서의 다른 결함이 안 걸린다.</td></tr>
+</tbody></table></div></div>
+<div class="ax"><h3 style="margin:0 0 4px">모양 뭉개기 <span class="tag">smear · 높을수록 좋다</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">무엇을 재나</td><td>되돌아온 빛의 <b>폭</b></td></tr>
+<tr><td style="width:9em;color:var(--muted)">조명</td><td>빔 띠 하나 (stripe). 세로는 빔 폭, 가로는 장면 전체.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">공식</td><td>판 곡선의 <b>rms 폭</b> &divide; 대조판 곡선의 rms 폭</td></tr>
+<tr><td style="width:9em;color:var(--muted)">코드</td><td>form_mtf.rms_width() -- 곡선을 확률로 보고 표준편차를 낸다. <code>sqrt(&Sigma;(z-c)&sup2;w)</code>, w = 곡선 &divide; 합</td></tr>
+<tr><td style="width:9em;color:var(--muted)">읽는 창</td><td><b>값이 멎을 때까지 넓힌다.</b> 두 칸이 2 % 안에서 같으면 멈춘다. 실측으로 되돌아온 빛 90 % 반폭의 6 배 근처에서 멎었다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">왜 이렇게</td><td>민판이 1.0 이 되도록 대조판으로 나눈다. 판 크기와 무관한 값이 되고, 되돌아온 빛이 창을 넘치면 <code>converged False</code> 로 알린다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">걸리는 시간</td><td>각도 하나에 6~7 분 (판 500, 자리 8, 빛줄기 512)</td></tr>
+<tr><td style="width:9em;color:var(--muted)">아는 결함</td><td>가로 창이 판의 60 % 로 고정이라 근거가 없다. 세로는 물리 규칙이 붙어 있다.</td></tr>
+</tbody></table></div></div>
+<div class="ax"><h3 style="margin:0 0 4px">정면 반짝임 <span class="tag">head-on peak · 낮을수록 좋다</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">무엇을 재나</td><td>되돌아온 빛의 <b>가장 밝은 곳</b></td></tr>
+<tr><td style="width:9em;color:var(--muted)">조명</td><td>뭉개기와 <b>같은 사진</b>을 쓴다. 렌더는 한 번이고 읽기만 두 번이다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">공식</td><td>판 곡선의 <b>99 번째 백분위수</b> &divide; 대조판 곡선의 같은 값, 빔 자리마다 내고 <b>평균</b></td></tr>
+<tr><td style="width:9em;color:var(--muted)">코드</td><td><code>percentile(pp,99) / percentile(pc,99)</code>. <code>PEAK_STAT="max"</code> 로 옛 최대값 방식으로 되돌린다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">읽는 창</td><td>뭉개기와 같은 창을 쓴다. <b>이게 남은 결함이다</b> -- 창이 넓어지면 뽑을 점이 많아지고 값이 커진다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">왜 이렇게</td><td>민판 무광 검정을 1.0 으로 놓는다. 목표 0.040 은 그 잣대에서 나온 값이다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">걸리는 시간</td><td>뭉개기와 같은 사진. 따로 안 든다.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">아는 결함</td><td>옛 최대값 방식은 위로 치우쳤다. 여러 개 중 가장 큰 것을 고르면 잡음이 도운 것을 고르게 된다 -- 승자의 저주(winner's curse). 실측으로 정면에서 편향 없는 값보다 <b>9 배</b> 높았다. p99 는 그 값과 1 % 안에서 같다. <b>목표 0.040 은 최대값 기준이라 다시 봐야 한다.</b></td></tr>
+</tbody></table></div></div>
+</section>
+<section><h2>어느 축이 어느 설정을 쓰나</h2>
+<p>셋이 설정을 다 쓰는 게 아니다. 반사 총량은 하늘 조명이라 빔도 창도 안 쓴다. 그래서 이 문서의 결함이 총량에는 안 걸린다.</p>
+<div class="scroll"><table><thead><tr><th>설정</th><th>반사 총량<br><span class="tag">total</span></th><th>모양 뭉개기<br><span class="tag">smear</span></th><th>정면 반짝임<br><span class="tag">head-on peak</span></th></tr></thead><tbody>
+<tr><td>화소 밀도 mm/px</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>빔 폭</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>빔 자리 수</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>빔 자리 뽑는 법 (소볼)</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>빛줄기 수</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>읽는 창</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:#6bb873">쓴다</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+<tr><td>봉우리 재는 법 (p99)</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:var(--muted)">안 씀</td><td class="n" style="color:#6bb873">쓴다</td></tr>
+</tbody></table></div>
+<p class="tag">지금 값: 봉우리 <b>"p99"</b> · 빔 자리 <b>"sobol"</b> · 빛줄기 <b>16</b> · 자리 수 <b>16</b></p></section>
+<section><h2>설정값과 그 근거</h2>
+<p>값은 소스에서 읽는다. 근거 등급을 같이 적는다 -- <span class="g-jaem">잼</span>은 재거나 문헌에서 온 것, <span class="g-half">반쯤</span>은 일부만, <span class="g-none">없음</span>은 그냥 정한 것이다.</p>
+<div class="scroll"><table><thead><tr><th>설정</th><th>값</th><th>어디</th><th>근거</th><th>설명</th></tr></thead><tbody>
+<tr><td>화소 밀도 mm/px</td><td class="n"><b>0.215</b></td><td class="tag">form_buildable.py</td><td class="g-jaem">잼</td><td>최소 피처를 4 화소로 해상하는 밀도. 판 크기가 바뀌어도 고정이라 같은 장비가 같은 잣대로 잰다. 못 지키면 성기게 가는 대신 거절한다.</td></tr>
+<tr><td>화소 상한 RES_CAP</td><td class="n"><b>20000</b></td><td class="tag">form_buildable.py</td><td class="g-half">정함</td><td>메모리 한계다. 물리가 아니다. 넘으면 거절하고 왜 넘었는지 말한다.</td></tr>
+<tr><td>빔 폭 mm</td><td class="n"><b>7.5</b></td><td class="tag">form_buildable.py</td><td class="g-jaem">잼</td><td>LaserCube Ultra MK2 를 벽에서 재면 7~14 mm. 그 아래쪽 값.</td></tr>
+<tr><td>빔 퍼짐 도</td><td class="n"><b>0.05</b></td><td class="tag">form_buildable.py</td><td class="g-half">정함</td><td>거의 평행한 빔을 흉내내는 값.</td></tr>
+<tr><td>빔 자리 수</td><td class="n"><b>16</b></td><td class="tag">form_buildable.py</td><td class="g-half">반쯤</td><td>6/12/24 사다리에서 한 자리가 24 에서도 6.7 % 움직였다. 소볼로 바꾼 뒤 다시 안 쟀다.</td></tr>
+<tr><td>빛줄기 수 (표본)</td><td class="n"><b>16</b></td><td class="tag">form_buildable.py</td><td class="g-jaem">잼</td><td>모양 셋 x 각도 넷, 열두 경우 사다리. p99 로 재면 16 부터 512 와 1 % 안에서 같다. 뭉개기는 4 에서도 1 % 안. 최대값을 쓰던 시절엔 어두운 자리에서 512 로도 안 멎었다.</td></tr>
+<tr><td>봉우리 재는 법</td><td class="n"><b>"p99"</b></td><td class="tag">form_buildable.py</td><td class="g-jaem">잼</td><td>최대값은 위로 치우친다 (승자의 저주). 사진 두 장으로 고르는 자리와 읽는 값을 나눠 재니 최대값이 2.6 % 높았고, 정면에서는 9 배까지 높았다. p99 는 그 값과 1 % 안에서 같았다. 목표 0.040 은 최대값 기준이라 다시 봐야 한다.</td></tr>
+<tr><td>빔 자리 뽑는 법</td><td class="n"><b>"sobol"</b></td><td class="tag">form_buildable.py</td><td class="g-jaem">잼</td><td>한 주기를 균등하게 나누면 자리가 늘 골·꼭짓점에 박힌다. 실제 레이저는 그 격자에 안 맞춰 떨어진다. 자리마다 값이 23 배 갈리므로 골고루 흩어야 한다. 되풀이가 정확한 판에서 발표 값을 재현할 때만 uniform.</td></tr>
+<tr><td>읽는 창 가로 잘라내기</td><td class="n"><b>0.20</b></td><td class="tag">blender_render.py</td><td class="g-none">없음</td><td>**근거 없음.** 판의 20 % 를 양쪽에서 잘라낸다. 왜 20 % 인지 코드에 아무 말이 없다. 그리고 이 상수가 네 파일에 따로 적혀 있다.</td></tr>
+<tr><td>읽는 창 세로 잘라내기</td><td class="n"><b>0.30</b></td><td class="tag">blender_render.py</td><td class="g-half">반쯤</td><td>30 % 자체는 근거가 없다. 다만 '간격 + 빔 x 2' 가 안 들어가면 넓히는 규칙이 붙어 있고 그건 물리적 근거가 있다.</td></tr>
+</tbody></table></div>
+<p class="tag">설정이 아홉 군데에 흩어져 있다. 한곳에 모으는 것이 남은 일이다.</p></section>
+<section><h2>왜 이렇게 만들었나 -- 재서 알아낸 것</h2>
+<div class="scroll"><table><thead><tr><th>알아낸 것</th><th>무슨 일인가</th><th>우리가 잰 것</th><th>근거</th></tr></thead><tbody>
+<tr><td><b>최대값은 위로 치우친다</b></td><td>픽셀 하나하나는 편향이 없는데, 그 중 가장 큰 것을 고르는 순간 치우친다. 고르는 행위가 편향을 만든다. 빛줄기를 늘리면 줄어든다.</td><td>벌집 정면에서 빛줄기 64&rarr;2048 로 값이 8 % 내려왔고 아직 안 멎었다. 사진 두 장으로 고르는 자리와 읽는 값을 나눠 재니, 최대값이 편향 없는 값보다 2.6 % 높았다. 정면 자리에서는 9 배까지 높았다.</td><td class="tag">Efron 2011 · Forde 2023 · Kriegeskorte 2009</td></tr>
+<tr><td><b>백분위수가 대안이고 근거가 있다</b></td><td>거칠기 표준 쪽에서 같은 문제를 겪고 같은 답을 냈다. 최대값 대신 위쪽 백분위수를 쓰거나, 여러 창의 최대값을 평균한다. 둘이 같은 값이다.</td><td>우리 실측에서 p99 는 편향 없는 값과 <b>1 % 안</b>에서 같았고, 빛줄기 4 개에서도 그랬다. 순위는 여섯 각도 전부 안 바뀐다.</td><td class="tag">Pawlus 2023 · evalglare 매뉴얼</td></tr>
+<tr><td><b>읽는 창이 판 크기를 따라간다</b></td><td>창을 판의 60 % 로 잡으니 판을 키우면 창도 커진다. 최대값은 창 안의 점이 많아질수록 커진다. 그래서 판 크기가 값을 움직인다.</td><td>피라미드 봉우리가 칸 4/6/10/14/18 개에서 0.467 / 0.535 / 0.508 / 0.496 / 0.502 로 움직였다. 화소 밀도는 전부 같았다.</td><td class="tag">Pawlus 2023 (면 측정이 선 측정보다 최대값이 큰 이유가 점 수) · Hartigan 2013</td></tr>
+<tr><td><b>빔 자리를 한 주기 균등 분할했다 (지금은 소볼)</b></td><td>걸음이 구조 주기와 항상 맞아떨어진다. 늘 같은 자리를 밟는다. 되풀이 안 되는 모양(STEP, 꼭짓점 흔든 것)에는 애초에 못 쓴다.</td><td>매끄러운 주기 함수에는 균등이 최적이다 (사다리꼴 적분, 지수 수렴). 그런데 실제 레이저는 그 격자에 안 맞춰 떨어진다. 한 칸 안에서 자리를 옮기며 재니 정면에서 <b>23 배</b> 갈렸다 (골 0.00116, 꼭짓점 너머 0.02658). 그래서 소볼로 바꿨다.</td><td class="tag">Cook 1986 · Owen 2023</td></tr>
+<tr><td><b>빔 자리마다 사진을 한 장씩 찍는다</b></td><td>자리 수에 시간이 정비례한다. 남들은 광선마다 다른 출발점을 줘서 한 번에 넣는다.</td><td>띠 조명을 자리마다 놓고 한 번에 렌더해 봤더니 <b>다른 물건</b>이 된다 (뭉개기 &minus;65 %, 봉우리 +196 %). Cycles 로는 광선 생성에 손을 못 댄다.</td><td class="tag">genBSDF.pl · RayFlare 소스</td></tr>
+</tbody></table></div></section>
+<section><div class="card verdict"><h2 style="margin:0">아직 근거가 없는 것</h2>
+<ul>
+<li><b>읽는 창 가로 60 % 에 근거가 없다.</b> 그리고 그 상수가 네 파일에 따로 적혀 있어서 (<code>blender_render</code>, <code>crosscheck_mitsuba</code>, <code>mts_form</code>, <code>mts_worker</code> 는 0.0) 고치면 어긋난다.</li>
+<li><b>빔 자리가 주기를 전제한다.</b> <code>apex_jitter</code> 나 <code>row_offset</code> 을 켜면 주기가 깨지는데 코드가 확인 없이 주기대로 걷는다. STEP 파일은 넣을 값이 없다.</li>
+<li><b>벌집이 왜 판 381 mm 를 필요로 했는지 모른다.</b> 되돌아온 빛이 3 mm 인데 문헌의 두 규칙이 각각 38 배, 4 배 빗나간다.</li>
+<li><b>실물 측정이 0 회다.</b> CIE 171:2006 은 기준 자료의 절반을 실험에서 가져오라고 한다. 시뮬레이터를 시뮬레이터로만 검사했다.</li>
+<li><b>도료의 거칠기와 확산이 우리 값이 아니다.</b> MERL 의 검정 페인트에서 빌렸다. 거칠기가 반짝임을 1160 배 움직인다.</li>
+</ul></div></section>
+<section><h2>참고 문헌</h2>
+<p class="tag">원문을 열어 확인한 것만 싣는다. 유료라 못 읽은 것은 싣지 않았다. 받아 둔 원문은 <code>project/reference/papers_method/</code> 에 있다 -- 링크가 죽어도 읽을 수 있게.</p>
+<div class="scroll"><table><thead><tr><th>저자</th><th>제목</th><th>어디</th><th>무엇을 말하나</th></tr></thead><tbody>
+<tr><td>Efron, B. (2011)</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3325056/">Tweedie's Formula and Selection Bias</a></td><td class="tag">JASA 106(496)</td><td>가장 큰 몇 개는 참값을 상당히 과대추정한다. 선택 편향, 평균 회귀.</td></tr>
+<tr><td>Forde, Hemani, Ferguson (2023)</td><td><a href="https://doi.org/10.1371/journal.pgen.1010546">Review of Battling the Winner's Curse</a></td><td class="tag">PLoS Genetics 19(9):e1010546</td><td>순위 편향. 표본을 늘리면 편향이 상당히 준다.</td></tr>
+<tr><td>Kriegeskorte 외 (2009)</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2841687/">Circular analysis in systems neuroscience</a></td><td class="tag">Nature Neuroscience 12</td><td>고르는 자료와 재는 자료를 나누면 편향이 사라진다. 표본 분할.</td></tr>
+<tr><td>Pawlus, Reizer, &#379;elasko (2023)</td><td><a href="https://doi.org/10.3390/ma16227109">Characterization of the Maximum Height of a Surface Texture</a></td><td class="tag">Materials 16(22):7109</td><td>최대 높이는 안정된 값이 아니다. 백분위수와 '여러 최대값의 평균' 이 같은 값이고 더 안정적이다. 면 측정이 선 측정보다 큰 이유는 점 수.</td></tr>
+<tr><td>Wienold, J.</td><td><a href="https://www.radiance-online.org/learning/documentation/manual-pages/pdfs/evalglare.pdf">evalglare v2.10 매뉴얼</a></td><td class="tag">Radiance</td><td>눈부심원을 문턱값으로 고르고 묶어서 <b>평균</b>을 낸다. 중앙값과 75 / 95 백분위수를 같이 낸다. 점 최대값을 안 쓴다.</td></tr>
+<tr><td>Nicodemus 외 (1977)</td><td><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nbsmonograph160.pdf">Geometrical Considerations and Nomenclature for Reflectance</a></td><td class="tag">NBS Monograph 160</td><td>유한한 판은 옆으로 빛을 흘리기만 한다. 무한한 판이면 옆에서 되돌아 들어오는 몫이 그걸 메운다. 그 차이를 edge losses 라 부른다. 빛이 옆으로 걷는 거리 r<sub>m</sub> 을 재는 절차가 우리 수렴 시험과 같다.</td></tr>
+<tr><td>IEA SHC Task 61 (2021)</td><td><a href="https://www.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task61--Technical-Report-C2.1-Whitepaper-BSDF.pdf">BSDF generation procedures for daylighting systems</a></td><td class="tag">T61.C.2.1</td><td>빛 비추는 자리가 되풀이 주기보다 최소 5 배, 되도록 10 배 커야 한다. <b>우리는 0.15 배다.</b> 그래서 BSDF 로 형상을 대체할 수 없다.</td></tr>
+<tr><td>McNeil, A. (2015)</td><td><a href="https://www.radiance-online.org/learning/tutorials/Tutorial-genBSDF_v1.0.1.pdf">genBSDF Tutorial v1.0.1</a></td><td class="tag">LBNL</td><td>가장자리에서 출발한 광선은 원래 만났을 형상을 안 만나고 빠져나간다. 해법은 크게 짓고 가운데만 쏘는 것. 원뿔 예제는 21 주기를 깔고 가운데 1 주기만 쏜다.</td></tr>
+<tr><td>Cook, R. (1986)</td><td><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15869-f11/www/readings/cook86_sampling.pdf">Stochastic Sampling in Computer Graphics</a></td><td class="tag">ACM TOG 5(1)</td><td>규칙적인 표본 격자가 규칙적인 구조와 맞부딪히면 무늬가 생긴다. 적분 변수를 차원을 더 늘린 것으로 보고 그 축에 표본을 흩뿌린다.</td></tr>
+<tr><td>Owen, A. (2023)</td><td><a href="https://artowen.su.domains/mc/practicalqmc.pdf">Practical quasi-Monte Carlo integration</a></td><td class="tag">Stanford</td><td>스크램블 소볼은 매끄러운 경우 오차가 n<sup>&minus;1.5</sup> 로 준다. 주기성도 매끄러움도 요구하지 않고, 최악에도 몬테카를로의 2.72 배를 안 넘는다.</td></tr>
+<tr><td>Veach, E. (1997)</td><td><a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf">Robust Monte Carlo Methods for Light Transport Simulation</a></td><td class="tag">Stanford</td><td>효율은 분산과 시간의 곱의 역수다. 헬름홀츠 상반성 원문은 거울 반사에만 해당한다 -- 실제 근거는 굴절률로 나눈 BSDF 의 대칭이다.</td></tr>
+<tr><td>Zirr, Hanika, Dachsbacher (2018)</td><td><a href="https://jo.dreggn.org/home/2018_fireflies.pdf">Reweighting Firefly Samples</a></td><td class="tag">Computer Graphics Forum</td><td>튀는 표본(반딧불)이 들어 있으면 유한 표본 추정이 참값보다 크다. 그런데 그냥 지우면 아래로 치우친다.</td></tr>
+<tr><td>Kanit 외 (2003)</td><td><a href="https://matperso.minesparis.psl.eu/Donnees/data04/464-kanit03.pdf">Determination of the size of the representative volume element</a></td><td class="tag">Int. J. Solids and Structures 40</td><td>단 하나의 최소 크기라는 발상을 버려야 한다. 무엇을 재느냐, 어느 정확도를 원하느냐, 몇 번 반복하느냐에 따라 달라진다. 답은 경계 조건 종류에 무관해야 한다.</td></tr>
+<tr><td>Kulesza 외 (2022)</td><td><a href="https://mcnp.lanl.gov/pdf_files/TechReport_2022_LANL_LA-UR-22-30006Rev.1_KuleszaAdamsEtAl.pdf">MCNP 6.3.0 매뉴얼</a></td><td class="tag">LANL LA-UR-22-30006</td><td>거울 경계를 쓰면 면 전체 평균은 정확히 두 배가 되는데 한 점 값은 1.67 배로 <b>항상 틀리고 항상 낮게</b> 나온다. 주기 경계도 같다.</td></tr>
+</tbody></table></div></section>
+<section><p class="tag">이 문서를 짓는 스크립트: <code>scripts/build_method_report.py</code>. 설정값은 <code>scripts/form_buildable.py</code> 와 <code>scripts/blender_render.py</code> 에서 읽는다.</p></section>
+</div></body></html>

@@ -1,0 +1,619 @@
+Designation: D 523 – 89 (Reapproved 1999)
+
+Standard Test Method for
+
+Specular Gloss1
+
+This standard is issued under the fixed designation D 523; the number immediately following the designation indicates the year of
+original adoption or, in the case of revision, the year of last revision. A number in parentheses indicates the year of last reapproval. A
+superscript epsilon (e) indicates an editorial change since the last revision or reapproval.
+This standard has been approved for use by agencies of the Department of Defense.
+
+conditions. For the purpose of measuring specular gloss, the
+standard surface is polished glass.
+3.1.2 specular gloss—the relative luminous reflectance factor of a specimen in the mirror direction.
+
+1. Scope
+1.1 This test method covers the measurement of the specular
+gloss of nonmetallic specimens for glossmeter geometries of
+60, 20, and 85° (1-7).2
+1.2 The values stated in inch-pound units are to be regarded
+as the standard. The values given in parentheses are for
+information only.
+1.3 This standard does not purport to address all of the
+safety concerns, if any, associated with its use. It is the
+responsibility of the user of this standard to establish appropriate safety and health practices and determine the applicability of regulatory limitations prior to use.
+
+4. Summary of Test Method
+4.1 Measurements are made with 60, 20, or 85° geometry
+(8, 9). The geometry of angles and apertures is chosen so that
+these procedures may be used as follows:
+4.1.1 The 60° geometry is used for intercomparing most
+specimens and for determining when the 20° geometry may be
+more applicable.
+4.1.2 The 20° geometry is advantageous for comparing
+specimens having 60° gloss values higher than 70.
+4.1.3 The 85° geometry is used for comparing specimens
+for sheen or near-grazing shininess. It is most frequently
+applied when specimens have 60° gloss values lower than 10.
+
+2. Referenced Documents
+2.1 ASTM Standards:
+D 823 Practices for Producing Films of Uniform Thickness
+of Paint, Varnish, and Related Products on Test Panels3
+D 3964 Practice for Selection of Coating Specimens for
+Appearance Measurements3
+D 3980 Practice for Interlaboratory Testing of Paint and
+Related Materials4
+D 4039 Test Method for Reflection Haze of High-Gloss
+Surfaces3
+E 97 Test Method for Directional Reflectance Factor, 45deg 0-deg, of Opaque Specimens by Broad-Band Filter
+Reflectometry5
+E 430 Test Method for Measurement of Gloss of HighGloss Surfaces by Goniophotometry3
+
+5. Significance and Use
+5.1 Gloss is associated with the capacity of a surface to
+reflect more light in some directions than in others. The
+directions associated with mirror (or specular) reflection normally have the highest reflectances. Measurements by this test
+method correlate with visual observations of surface shininess
+made at roughly the corresponding angles.
+5.1.1 Measured gloss ratings by this test method are obtained by comparing the specular reflectance from the specimen to that from a black glass standard. Since specular
+reflectance depends also on the surface refractive index of the
+specimen, the measured gloss ratings change as the surface
+refractive index changes. In obtaining the visual gloss ratings,
+however, it is customary to compare the specular reflectances
+of two specimens having similar surface refractive indices.
+Since the instrumental ratings are affected more than the visual
+ratings by changes in surface refractive index, non-agreement
+between visual and instrumental gloss ratings can occur when
+high gloss specimen surfaces differing in refractive index are
+compared.
+5.2 Other visual aspects of surface appearance, such as
+distinctness of reflected images, reflection haze, and texture,
+are frequently involved in the assessment of gloss (1), (6), (7).
+Test Method E 430 includes techniques for the measurement of
+both distinctness-of-image gloss and reflection haze. Test
+
+3. Terminology
+3.1 Definitions:
+3.1.1 relative luminous reflectance factor—the ratio of the
+luminous flux reflected from a specimen to the luminous flux
+reflected from a standard surface under the same geometric
+1
+This test method is under the jurisdiction of ASTM Committee E12 on Color
+and Appearance and is the direct responsibility of Subcommittee E12.03 on
+Geometry.
+Current edition approved March 31, 1989. Published May 1989. Originally
+published as D 523 – 39 T. Last previous edition D 523 – 85e1.
+2
+The boldface numbers in parentheses refer to the list of references at the end of
+this test method.
+3
+Annual Book of ASTM Standards, Vol 06.01.
+4
+Discontinued; see 1997 Annual Book of ASTM Standards, Vol 06.01.
+5
+Discontinued; see 1992 Annual Book of ASTM Standards, Vol 14.02.
+
+Copyright © ASTM International, 100 Barr Harbor Drive, PO Box C700, West Conshohocken, PA 19428-2959, United States.
+
+1
+
+D 523
+0.1° of the nominal value indicated by the geometry. With a flat
+piece of polished black glass or other front-surface mirror in
+the specimen position, an image of the source shall be formed
+at the center of the receptor field stop (receptor window). The
+length of the illuminated area of the specimen shall be not more
+than one third of the distance from the center of this area to the
+receptor field stop. The dimensions and tolerance of the source
+and receptor shall be as indicated in Table 1. The angular
+dimensions of the receptor field stop are measured from the
+receptor lens in a collimated-beam-type instrument, as illustrated in Fig. 1, and from the test surface in a convergingbeam-type instrument, as illustrated in Fig. 2. See Fig. 1 and
+Fig. 2 for a generalized illustration of the dimensions. The
+tolerances are chosen so that errors in the source and receptor
+apertures do not produce an error of more than one gloss unit
+at any point on the scale (5).
+6.2.1 The important geometric dimensions of any speculargloss measurement are:
+6.2.1.1 Beam axis angle(s), usually 60, 20, or 85°.
+6.2.1.2 Accepted angular divergences from principal rays
+(degree of spreading or diffusion of the reflected beam).
+
+Method D 4039 provides an alternative procedure for measuring reflection haze.
+5.3 Little information about the relation of numerical-toperceptual intervals of specular gloss has been published.
+However, in many applications the gloss scales of this test
+method have provided discriminations between coated specimens that have agreed well with visual discriminations of gloss
+(10).
+5.4 When specimens differing widely in perceived gloss or
+color, or both, are compared, nonlinearity may be encountered
+in the relationship between visual gloss difference ratings and
+instrumental gloss reading differences.
+6. Apparatus
+6.1 Instrumental Components—The apparatus shall consist
+of an incandescent light source furnishing an incident beam,
+means for locating the surface of the specimen, and a receptor
+located to receive the required pyramid of rays reflected by the
+specimen. The receptor shall be a photosensitive device responding to visible radiation.
+TABLE 1 Angles and Relative Dimensions of Source Image and
+Receptors
+In Plane of
+Measurement
+
+NOTE 1—The parallel-beam glossmeters possess the better uniformity
+of principle-ray angle of reflection, but the converging-beam glossmeters
+possess the better uniformity in extent of angular divergence accepted for
+measurement.
+NOTE 2—Polarization—An evaluation of the impact of polarization on
+gloss measurement has been reported (11). The magnitude of the polarization error depends on the difference between the refractive indices of
+specimen and standard, the angle of incidence, and the degree of
+polarization. Because the specimen and standard are generally quite
+similar optically, measured gloss values are little affected by polarization.
+
+Perpendicular to
+Plane of Measurement
+
+u,°
+
+2 tan u/2
+
+Relative
+Dimension
+
+u, °
+
+2 tan u/2
+
+Relative
+Dimension
+
+Source image
+Tolerance 6
+
+0.75
+0.25
+
+0.0131
+0.0044
+
+0.171
+0.057
+
+2.5
+0.5
+
+0.0436
+0.0087
+
+0.568
+0.114
+
+60° receptor
+Tolerance6
+
+4.4
+0.1
+
+0.0768
+0.0018
+
+1.000
+0.023
+
+11.7
+0.2
+
+0.2049
+0.0035
+
+2.668
+0.046
+
+20° receptor
+Tolerance 6
+
+1.8
+0.05
+
+0.0314
+0.0009
+
+0.409
+0.012
+
+3.6
+0.1
+
+0.0629
+0.0018
+
+0.819
+0.023
+
+85° receptor
+Tolerance6
+
+4.0
+0.3
+
+0.0698
+0.0052
+
+0.909
+0.068
+
+6.0
+0.3
+
+0.1048
+0.0052
+
+1.365
+0.068
+
+6.3 Vignetting—There shall be no vignetting of rays that lie
+within the field angles specified in Table 1.
+6.4 Spectral Conditions—Results should not differ significantly from those obtained with a source-filter photocell
+combination that is spectrally corrected to yield CIE luminous
+efficiency with CIE source C. Since specular reflection is, in
+general, spectrally nonselective, spectral corrections need to be
+applied only to highly chromatic, low-gloss specimens upon
+agreement of users of this test method.
+6.5 Measurement Mechanism—The receptor-measurement
+mechanism shall give a numerical indication that is proportional to the light flux passing the receptor field stop with
+
+6.2 Geometric Conditions—The axis of the incident beam
+shall be at one of the specified angles from the perpendicular to
+the specimen surface. The axis of the receptor shall be at the
+mirror reflection of the axis of the incident beam. The axis of
+the incident beam and the axis of the receptor shall be within
+
+FIG. 1 Diagram of Parallel-Beam Glossmeter Showing Apertures and Source Mirror-Image Position
+
+2
+
+D 523
+
+FIG. 2 Diagram of Converging-Beam Glossmeter Showing Apertures and Source Mirror-Image Position
+
+61 % of full-scale reading.
+
+Whenever a test for gloss requires the preparation of test
+specimens, use the procedures given in Practice D 823.
+
+7. Reference Standards
+7.1 Primary Standards—Highly polished, plane, black glass
+with a refractive index of 1.567 for the sodium D line shall be
+assigned a specular gloss value of 100 for each geometry. The
+gloss value for glass of any other refractive index can be
+computed from the Fresnel equation (5). For small differences
+in refractive index, however, the gloss value is a linear function
+of index, but the rate of change of gloss with index is different
+for each geometry. Each 0.001 increment in refractive index
+produces a change of 0.27, 0.16, and 0.016 in the gloss value
+assigned to a polished standard for the 20, 60, and 85°
+geometries, respectively. For example, glass of index 1.527
+would be assigned values of 89.2, 93.6, and 99.4, in order of
+increasing geometry.
+
+NOTE 4—To determine the maximum gloss obtainable from a test
+material, such as a paint or varnish, use Methods B or C of Practice D 823.
+
+8.2 Select specimens in accordance with Practice D 3964.
+9. Instrument Calibration
+9.1 Operate the glossmeter in accordance with the manufacturer’s instructions.
+9.2 Verify the instrument zero by placing a black cavity in
+the specified position. If the reading is not within 60.1 of zero,
+subtract it algebraically from subsequent readings or adjust the
+instrument to read zero.
+9.3 Calibrate the instrument at the start and completion of
+every period of glossmeter operation, and during the operation
+at sufficiently frequent intervals to assure that the instrument
+response is practically constant. To calibrate, adjust the instrument to read correctly the gloss of a highly polished standard,
+properly positioned and oriented, and then read the gloss of a
+working standard in the mid-gloss range. If the instrument
+reading for the second standard does not agree within one unit
+of its assigned values, check cleanliness and repeat. If the
+instrument reading for the second standard still does not agree
+within one unit of its assigned value, repeat with another
+mid-range standard. If the disparity is still more than one unit,
+do not use the instrument without readjustment, preferably by
+the manufacturer.
+
+NOTE 3—Polished black glass has been reported to change in refractive
+index with time largely due to chemical contamination (10). The original
+values can be restored by optical polishing with cerium oxide. A wedge of
+high-purity quartz provides a more stable reference standard than glass.
+
+7.2 Working Standards—Ceramic tile, depolished ground
+opaque glass, emery paper, and other semigloss materials
+having hard and uniform surfaces are suitable when calibrated
+against a primary standard on a glossmeter known to meet the
+requirements of this test method. Such standards should be
+checked periodically for constancy by comparing with primary
+standards.
+7.3 Store standards in a closed container when not in use.
+Keep them clean and away from any dirt that might scratch or
+mar their surfaces. Never place standards face down on a
+surface that may be dirty or abrasive. Always hold standards at
+the side edges to avoid getting oil from the skin on the standard
+surface. Clean the standards in warm water and a mild
+detergent solution brushing gently with a soft nylon brush. (Do
+not use soap solutions to clean standards, because they can
+leave a film.) Rinse standards in hot running water (temperature near 150°F (65°C)) to remove detergent solution, followed
+by a final rinse in distilled water. Do not wipe standards. The
+polished black glass high-gloss standard may be dabbed gently
+with a lint-free paper towel or other lint-free absorbent
+material. Place the rinsed standards in a warm oven to dry.
+
+10. Procedure
+10.1 Position each specimen in turn beneath (or on) the
+glossmeter. For specimens with brush marks or similar texture
+effects, place them in such a way that the directions of the
+marks are parallel to the plane of the axes of the incident and
+reflected beams.
+10.2 Take at least three readings on a 3 by 6-in. (75 by
+150-mm) area of the test specimen. If the range is greater than
+two gloss units, take additional readings and calculate the mean
+after discarding divergent results as in the section on Test for
+Outliers of Practice D 3980. For larger specimens, take a
+proportionately greater number of readings.
+11. Diffuse Correction
+11.1 Apply diffuse corrections only upon agreement between the producer and the user. To apply the correction,
+
+8. Preparation and Selection of Test Specimens
+8.1 This test method does not cover preparation techniques.
+3
+
+D 523
+TABLE 2 Standard Deviation of Gloss Determinations
+
+subtract it from the glossmeter reading. To measure the
+correction, illuminate the specimen perpendicularly and view
+at the incident angle with the receiver aperture specified in 6.2
+for the corresponding geometry. To compute the correction,
+multiply the 45°, 0° directional reflectance of the specimen,
+determined in accordance with Test Method E 97, by the
+effective fraction of the luminous flux reflected by the perfect
+diffuse reflector and accepted by the receiver aperture. The
+luminous flux entering the receiver aperture from the perfect
+white diffusor would give the following gloss indications for
+each of the geometries:
+Geometry, °
+60
+20
+85
+
+Gloss of Perfect White Diffuser
+2.5
+1.2
+0.03
+
+A
+B
+
+Type of
+Gloss,°
+
+No. of
+Ceramic
+Tiles
+
+20
+60
+85
+
+4
+4
+2
+
+Type of
+Gloss,°
+
+No. of
+Painted
+Panels
+
+20
+60
+85
+
+8
+22
+6
+
+Degrees of Freedom
+WithinBetweenLaboraLaboratory
+tories
+40
+34
+40
+34
+16
+6
+Degrees of Freedom
+WithinBetweenLaboraLaboratory
+tories
+80
+72
+220
+136
+48
+18
+
+Standard Deviations
+BetweenWithinLaboraLaboratoriesB
+toryA
+0.4
+1.2
+0.3
+1.2
+0.2
+0.6
+Standard Deviations
+WithinBetweenLaboraLaboratoryA
+toriesB
+0.6
+2.2
+0.3
+1.2
+0.3
+2.4
+
+Single determinations.
+For means of three determinations.
+
+than the maximum acceptable differences given in Table 3.
+
+12. Report
+12.1 Report the information following:
+12.1.1 Mean specular gloss readings and the geometry used.
+12.1.2 If uniformity of surface is of interest, the presence of
+any specimen that exhibits gloss readings varying by more than
+5 % from their mean.
+12.1.3 Where preparation of the test specimen has been
+necessary, a description or identification of the method of
+preparation.
+12.1.4 Manufacturer’s name and model designation of the
+glossmeter.
+12.1.5 Working standard or standards of gloss used.
+
+TABLE 3 Maximum Acceptable Differences for Two Results
+Type of
+Gloss,°
+20
+60
+85
+A
+B
+
+Repeatability
+(Within Laboratories)A
+Ceramic
+Painted
+Tiles
+Panels
+1.1
+1.7
+0.9
+0.9
+0.6
+0.8
+
+Reproducibility
+(Between Laboratories)B
+Ceramic
+Painted
+Tiles
+Panels
+3.5
+6.4
+3.4
+3.5
+2.0
+7.2
+
+Single determinations.
+For means of three determinations.
+
+13.1.2 Reproducibility—Two results, each the mean of three
+determinations, obtained on the same specimen by different
+laboratories should be considered suspect if they differ by more
+than the maximum acceptable differences given in Table 3.
+This does not include variability due to preparation of panels in
+different laboratories.
+
+13. Precision
+13.1 On the basis of studies of this test method by several
+laboratories in which single determinations were made on
+different days on several ceramic tiles and painted panels
+differing in visually perceived gloss, the pooled withinlaboratory and between-laboratories standard deviations were
+found to be those shown in Table 2. Based on these standard
+deviations, the following criteria should be used for judging the
+acceptability of results at the 95 % confidence level:
+13.1.1 Repeatability—Two results, each of which are single
+determinations obtained on the same specimen by the same
+operator, should be considered suspect if they differ by more
+
+NOTE 5—For some types of paint, particularly semi-gloss, the measured
+gloss is affected by method of film preparation and drying conditions so
+that the reproducibility of results from such materials may be poorer than
+the values given in Table 3.
+
+14. Keywords
+14.1 appearance; directional reflectance factor; gloss; goniophotometry; high gloss; relative luminous reflectance factor; specular gloss
+
+REFERENCES
+(1) Hunter, R. S., “Methods of Determining Gloss,” Proceedings, ASTM,
+Vol 36, 1936, Part II, p. 783. Also, Journal of Research, Nat. Bureau
+Standards, Vol 18, No. 1, January 1937, p. 19 ( Research Paper
+RP958). Six somewhat different appearance attributes are shown to be
+variously associated with gloss. Therefore, as many as six different
+photometric scales may be required to handle all gloss measurement
+problems. (This paper is out of print).
+(2) Hunter, R. S., and Judd, D. B., “Development of a Method of
+Classifying Paint According to Gloss,” ASTM Bulletin, No. 97, March
+1939, p. 11. A comparison is made of several geometrically different
+photometric scales for separating paint finishes for gloss. The geometric conditions of test later incorporated in Test Method D 523 are
+recommended.
+(3) Wetlaufer, L. A., and Scott, W. E., “The Measurement of Gloss,”
+Industrial and Engineering Chemistry, Analytical Edition, Vol 12,
+November 1940, p. 647. A goniophotometric study of a number of
+
+paint finishes illuminated at 45°; a study of gloss readings affected by
+variation of aperture for 45 and 60° incidence.
+(4) Hunter, R. S.,“ The Gloss Measurement of Paint Finishes,” ASTM
+Bulletin, No. 150, January 1948, p. 72. History of Test Method D 523.
+(5) Hammond, H. K., III, and Nimerroff, I., “Measurement of SixtyDegree Specular Gloss,” Journal of Research, Nat. Bureau Standards.
+A study of the effect of aperture variation on glossmeter readings,
+including definitions of terms used in connection with specular gloss
+measurement, the Fresnel equation in a form readily usable for
+computation, and the deviation of diffuse correction formulas.
+(6) Hunter, R. S., “Gloss Evaluation of Materials,” ASTM Bulletin, No.
+186, December 1952, p. 48. A study of the history of gloss methods in
+ASTM and other societies, describing the background in the choice of
+geometry of these methods. Contains photographs depicting gloss
+characteristics of a variety of methods.
+(7) Hunter, R. S., The Measurement of Appearance, Wiley-Interscience,
+
+4
+
+D 523
+New York, 1975, Chapter 6, “Scales for Gloss and Other Geometric
+Attributes,” and Chapter 13,“ Instruments for the Geometric Attributes
+of Object Appearance.”
+(8) Horning, S. C., and Morse, M. P., “Measurement of the Gloss of Paint
+Panels,” Offıcial Digest, Federation of Paint and Varnish Production
+Clubs, March 1947, p. 153. A study of the effect of geometric
+conditions on results of gloss tests with special attention to high-gloss
+panels.
+(9) Huey, S., Hunter, R. S., Schreckendgust, J. G., and Hammond, H. K.,
+III, “Symposium on Gloss Measurement,” Offıcial Digest, Vol 36, No.
+471, April 1964, p. 343. Contains discussion of industrial experience in
+measurement of 60° specular gloss (Huey), high-gloss measurement
+
+(Hunter), evaluation of low-gloss finishes with 85° sheen measurements (Schreckendgust), and gloss standards and glossmeter standardization (Hammond).
+(10) Billmeyer, F. W., Jr., O’Donnell, F. X. D., “Visual Gloss Scaling and
+Multidimensional Scaling Analysis of Painted Specimens,” Color
+Research and Application, Vol 12, 1987, pp 315–326. Compares
+visual difference ratings with instrumental measurements of specular
+gloss, distinctness of image gloss, and haze for series of black, gray,
+and white painted specimens. The data are analyzed by multidimensional scaling.
+(11) Budde, W., “Stability Problems in Gloss Measurements,” Journal of
+Coatings Technology, Vol 52, June 1980, pp. 44–48.
+
+ASTM International takes no position respecting the validity of any patent rights asserted in connection with any item mentioned
+in this standard. Users of this standard are expressly advised that determination of the validity of any such patent rights, and the risk
+of infringement of such rights, are entirely their own responsibility.
+This standard is subject to revision at any time by the responsible technical committee and must be reviewed every five years and
+if not revised, either reapproved or withdrawn. Your comments are invited either for revision of this standard or for additional standards
+and should be addressed to ASTM International Headquarters. Your comments will receive careful consideration at a meeting of the
+responsible technical committee, which you may attend. If you feel that your comments have not received a fair hearing you should
+make your views known to the ASTM Committee on Standards, at the address shown below.
+This standard is copyrighted by ASTM International, 100 Barr Harbor Drive, PO Box C700, West Conshohocken, PA 19428-2959,
+United States. Individual reprints (single or multiple copies) of this standard may be obtained by contacting ASTM at the above
+address or at 610-832-9585 (phone), 610-832-9555 (fax), or service@astm.org (e-mail); or through the ASTM website
+(www.astm.org).
+
+5
+
+

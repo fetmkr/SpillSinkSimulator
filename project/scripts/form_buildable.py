@@ -67,7 +67,12 @@ OUT = os.path.join(ROOT, "renders", "form_b")
 OUTJSON = os.path.join(RESULTS, "form_buildable.json")
 CAND = os.path.join(RESULTS, "form_candidates.json")
 
-SAMPLES = 512
+# 빛줄기(표본) 수. 512 는 최대값을 쓰던 시절의 값이다 -- 최대값이 잡음을
+# 신호로 읽으니 잡음을 없애야 했다. p99 로 바꾸면 그 이유가 사라진다.
+# 실측: 모양 셋 x 각도 넷, 열두 경우에서 p99 가 4~16 개부터 512 개 값과
+# 1 % 안에서 같았다 (`gate_sample_budget.py`). 뭉개기는 4 개에서도 1 % 안.
+# 16 으로 둔다. 그보다 낮추면 어두운 자리에서 p99 도 흔들리기 시작한다.
+SAMPLES = 16
 RES_X, RES_Y = 1400, 620
 # Sampling density in mm per pixel, held FIXED so the instrument does not
 # change with the sample (see the note in run_case). Set to 0 to restore the
@@ -109,6 +114,61 @@ STRIPE_W = 7.5
 SPREAD_DEG = 0.05
 THETAS = (-40.0, 0.0, 40.0)
 N_PHASE = 16                     # stripe positions across one pitch
+
+# HOW THE PEAK IS READ (2026-08-28). It used to be the MAXIMUM of the profile.
+# A maximum picked out of a noisy estimate is biased HIGH -- picking the largest
+# of many noisy values picks the ones the noise helped, and the bias only goes
+# away as the noise does. Statistics calls this the winner's curse (Efron 2011,
+# "the largest few of the z_i's are likely to substantially overestimate their
+# corresponding mu_i's"; Forde 2023 for the ranking-bias form).
+#
+# We measured it. Splitting the render in two -- find the position in image A,
+# read the value at that position in image B, which decouples selection from
+# estimation (Kriegeskorte 2009) -- the maximum read 2.6 % high on the darkest
+# case and up to 9x high looking head-on at a deep pyramid, where the profile
+# is nearly all noise. The 99th percentile matched the split-sample value to
+# within 1 % everywhere, and did so from 4 samples per pixel upward.
+#
+# Surface metrology reached the same answer for the same reason: Pawlus 2023
+# calls maximum height "not a stable parameter" and shows a top percentile
+# (S+-3sigma) equals the average of many per-window maxima and is steadier.
+# Radiance's evalglare never takes a point maximum either -- it thresholds,
+# groups, and AVERAGES over each glare source, and reports median/75/95
+# percentiles beside it.
+#
+# Set to "max" to reproduce a published figure. The two are NOT the same
+# quantity: the head-on target of 0.040 was set on the maximum.
+PEAK_STAT = "p99"                # "p99" or "max"
+PEAK_PCT = 99.0
+
+# BEAM POSITIONS (2026-08-28). `uniform` walks one pitch in equal steps.
+# That is the trapezoid rule on a periodic function, and mathematically it is
+# the best way to average one -- the endpoint terms cancel and the error falls
+# exponentially. Measured, it beat a golden-ratio sequence at every count.
+#
+# **It is still the wrong thing to do here, and the reason is physical, not
+# numerical.** Equal steps across one pitch land on the same features every
+# time: -25 is a valley, 0 is an apex, the rest are quarter points. A real
+# laser does not respect our grid. It falls wherever it falls.
+#
+# And it matters, because the value depends enormously on where it falls.
+# Measured on the base-50 pyramid at 512 spp, beam at 40 deg, read head-on,
+# stepping one pitch: 0.00116 in the valley rising to 0.02645 near the apex,
+# a spread of 22.7x. (Off-normal it is only 1.1x -- the sensitivity is
+# specific to looking down the axis.) Averaging six grid-locked samples of a
+# quantity that swings 23x is not an average over where the beam might land.
+#
+# `sobol` is the default for that reason. A low-discrepancy sequence fills the
+# gaps rather than repeating a lattice, needs neither periodicity nor
+# smoothness, converges like n^-1.5 on smooth parts, and is bounded at 2.72x
+# plain Monte Carlo in the worst case (Owen 2023). It is also the only option
+# that stays meaningful once `apex_jitter`, `row_offset` or an imported STEP
+# surface removes the period that `uniform` assumes exists.
+#
+# Keep `uniform` for reproducing a published figure, and for the one case it is
+# genuinely better: a smooth periodic response where you want the mean over the
+# period and nothing else.
+BEAM_POS = "sobol"               # "sobol" or "uniform"
 # Optional per-frame progress hook, same contract as blender_render.PROGRESS_CB:
 # sim_server points it at its counter; batch sweeps leave it None.
 PROGRESS_CB = None
@@ -123,6 +183,36 @@ PERIODS_MM = (10.0, 20.0, 40.0)
 # It is now derived per run from the measurement window, so it always holds
 # whatever the window holds. NWIN stays as the floor and the legacy value.
 NWIN = 361                       # floor only; run_case derives the real one
+
+
+def beam_positions(pitch, n, mode=None):
+    """빔을 놓을 자리 n 개. 한 칸(pitch) 안에서.
+
+    `uniform` 은 한 주기를 똑같은 간격으로 걷는다. 되풀이가 정확할 때 이게
+    최적이다 -- 주기 함수의 사다리꼴 적분이라 양 끝 항이 지워지고 오차가
+    지수적으로 준다. 그리고 꼭짓점을 반드시 밟으므로 진짜 최대값을 안 놓친다.
+
+    `sobol` 은 되풀이가 깨졌을 때 쓴다. van der Corput (밑 2) 수열을 한 칸에
+    펼친 것이다. 간격이 일정하지 않아 구조 격자에 안 물리고, 주기도 매끄러움도
+    요구하지 않는다. **되풀이되는 판에 이걸 쓰면 손해다** -- 실측으로 낮은
+    개수에서 균등보다 나빴다.
+
+    씨앗을 안 쓴다. 같은 설정에 같은 자리가 나와야 결과를 다시 지을 수 있다.
+    """
+    mode = (mode or BEAM_POS).lower()
+    if mode == "sobol":
+        out = []
+        for i in range(n):
+            # van der Corput: i 의 이진수를 뒤집어 소수로 읽는다
+            x, f, k = 0.0, 0.5, i + 1
+            while k:
+                if k & 1:
+                    x += f
+                f *= 0.5
+                k >>= 1
+            out.append(-pitch / 2.0 + pitch * x)
+        return out
+    return [(-pitch / 2.0) + pitch * i / n for i in range(n)]
 
 
 # The four statistics live in `form_metrics` so the Mitsuba cross-check scores
@@ -295,7 +385,7 @@ def run_case(entry):
 
     # phases walk exactly one pitch, so the mean is over the full period rather
     # than over three arbitrary draws
-    phases = [(-pitch / 2.0) + pitch * i / N_PHASE for i in range(N_PHASE)]
+    phases = beam_positions(pitch, N_PHASE)
 
     # WINDOW LADDER (2026-08-20). The legacy window is 40 % of the face, so a
     # design whose return is wider than that is clipped -- and rms_width divides
@@ -322,7 +412,10 @@ def run_case(entry):
         return (x0, x1, -h / 2.0, h / 2.0)
 
     for ti, theta in enumerate(THETAS):
-        rec = {"per_phase": [], "peak_ratio": [], "rms_mm": []}
+        # `per_phase` 는 만들어만 놓고 아무것도 안 넣던 죽은 키였다.
+        # 자리마다의 값을 실제로 들고 다닌다 -- 계산해 놓고 버리면
+        # 나중에 "어느 자리가 문제였나" 를 물을 수가 없다.
+        rec = {"beam_pos_mm": list(phases), "peak_ratio": [], "rms_mm": []}
         acc_p = np.zeros(nwin)
         acc_c = np.zeros(nwin)
         lad_p = {h: np.zeros(nwin) for h in LADDER}
@@ -352,7 +445,13 @@ def run_case(entry):
             pc = recentre(z_profile(arr, px_ctrl), nwin)
             acc_p += pp
             acc_c += pc
-            pk = float(pp.max()) / float(pc.max()) if pc.max() > 0 else float("nan")
+            # 최대값은 위로 치우친다. 왜 그런지는 PEAK_STAT 옆 주석에.
+            if PEAK_STAT == "p99":
+                _a = float(np.percentile(pp, PEAK_PCT))
+                _b = float(np.percentile(pc, PEAK_PCT))
+            else:
+                _a, _b = float(pp.max()), float(pc.max())
+            pk = (_a / _b) if _b > 0 else float("nan")
             rec["peak_ratio"].append(pk)
             rec["rms_mm"].append(rms_width(pp, mm_per_px_z))
             for h in LADDER:                      # same frame, wider readings
@@ -419,7 +518,13 @@ def run_case(entry):
              "peak_ratio_max": float(np.max(rec["peak_ratio"])),
              "peak_ratio_span": (float(np.max(rec["peak_ratio"]))
                                  / max(float(np.min(rec["peak_ratio"])), 1e-12)),
-             "rms_sd_mm": float(np.std(rec["rms_mm"]))}
+             "rms_sd_mm": float(np.std(rec["rms_mm"])),
+             # 자리마다의 값. 평균만 남기면 "어느 자리에서 튀었나" 를
+             # 못 묻는다. 그리고 자리를 고르게 나누면 그 격자와 어긋난
+             # 자리는 영원히 안 본다 -- 그것도 이 목록이 있어야 보인다.
+             "beam_pos_mm": rec["beam_pos_mm"],
+             "peak_by_beam_pos": [float(x) for x in rec["peak_ratio"]],
+             "rms_by_beam_pos": [float(x) for x in rec["rms_mm"]]}
         d.update(mtf_at(acc_p, mm_per_px_z, PERIODS_MM))
         out["thetas"]["%+.0f" % theta] = d
         print("   th%+5.0f  rms %6.2f mm (ctrl %5.2f)  peak %.5f +/-%.5f  "
