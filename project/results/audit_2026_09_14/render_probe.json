@@ -1,0 +1,345 @@
+{
+  "blender": "5.1.2",
+  "records": [
+    {
+      "name": "current_musou_hemi",
+      "ti": null,
+      "to": 0,
+      "samples": 256,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.009979413822293282,
+      "control": 0.05000012367963791,
+      "ratio": 0.19958778274697161,
+      "brdf": null
+    },
+    {
+      "name": "current_musou_hemi",
+      "ti": null,
+      "to": 60,
+      "samples": 256,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.010064415633678436,
+      "control": 0.05000012367963791,
+      "ratio": 0.2012878147694878,
+      "brdf": null
+    },
+    {
+      "name": "current_musou_hemi",
+      "ti": null,
+      "to": 80,
+      "samples": 256,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.010580528527498245,
+      "control": 0.05000012367963791,
+      "ratio": 0.2116100471128848,
+      "brdf": null
+    },
+    {
+      "name": "current_musou",
+      "ti": 80,
+      "to": -65,
+      "samples": 128,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0007218570681288838,
+      "control": 0.0027636962477117777,
+      "ratio": 0.2611926215576515,
+      "brdf": 0.004157009682003099
+    },
+    {
+      "name": "current_musou",
+      "ti": -65,
+      "to": 80,
+      "samples": 128,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0027318005450069904,
+      "control": 0.006726189516484737,
+      "ratio": 0.40614385579113044,
+      "brdf": 0.0064639802255560316
+    },
+    {
+      "name": "current_musou",
+      "ti": 60,
+      "to": -40,
+      "samples": 128,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0015897497069090605,
+      "control": 0.007957753725349903,
+      "ratio": 0.19977367505667049,
+      "brdf": 0.0031794967884903186
+    },
+    {
+      "name": "current_musou",
+      "ti": -40,
+      "to": 60,
+      "samples": 128,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0024539234582334757,
+      "control": 0.012191981077194214,
+      "ratio": 0.20127356191715862,
+      "brdf": 0.0032033682292828456
+    },
+    {
+      "name": "historical_musou",
+      "ti": 80,
+      "to": -65,
+      "samples": 128,
+      "coating": {
+        "body": 0.00758,
+        "spec_scale": 0.0605,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.01760159432888031,
+      "control": 0.0027636962477117777,
+      "ratio": 6.368859943799423,
+      "brdf": 0.1013635541915649
+    },
+    {
+      "name": "historical_musou",
+      "ti": -65,
+      "to": 80,
+      "samples": 128,
+      "coating": {
+        "body": 0.00758,
+        "spec_scale": 0.0605,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.14489620923995972,
+      "control": 0.006726189516484737,
+      "ratio": 21.54209435890023,
+      "brdf": 0.3428530801771006
+    },
+    {
+      "name": "historical_musou",
+      "ti": 60,
+      "to": -40,
+      "samples": 128,
+      "coating": {
+        "body": 0.00758,
+        "spec_scale": 0.0605,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0028241868130862713,
+      "control": 0.007957753725349903,
+      "ratio": 0.35489748873349203,
+      "brdf": 0.00564836896228355
+    },
+    {
+      "name": "historical_musou",
+      "ti": -40,
+      "to": 60,
+      "samples": 128,
+      "coating": {
+        "body": 0.00758,
+        "spec_scale": 0.0605,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.006741507910192013,
+      "control": 0.012191981077194214,
+      "ratio": 0.5529460608171696,
+      "brdf": 0.008800409884224434
+    },
+    {
+      "name": "lambert_control",
+      "ti": 80,
+      "to": -65,
+      "samples": 128,
+      "coating": {
+        "body": 0.01,
+        "spec_scale": 0.0,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0005527394241653383,
+      "control": 0.0027636962477117777,
+      "ratio": 0.20000006318457858,
+      "brdf": 0.0031830998674517077
+    },
+    {
+      "name": "lambert_control",
+      "ti": -65,
+      "to": 80,
+      "samples": 128,
+      "coating": {
+        "body": 0.01,
+        "spec_scale": 0.0,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0013452336424961686,
+      "control": 0.006726189516484737,
+      "ratio": 0.19999936653572303,
+      "brdf": 0.0031830887799408117
+    },
+    {
+      "name": "lambert_control",
+      "ti": 60,
+      "to": -40,
+      "samples": 128,
+      "coating": {
+        "body": 0.01,
+        "spec_scale": 0.0,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0015915485564619303,
+      "control": 0.007957753725349903,
+      "ratio": 0.19999972497162818,
+      "brdf": 0.0031830944846254206
+    },
+    {
+      "name": "lambert_control",
+      "ti": -40,
+      "to": 60,
+      "samples": 128,
+      "coating": {
+        "body": 0.01,
+        "spec_scale": 0.0,
+        "roughness": 0.3
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.002438395982608199,
+      "control": 0.012191981077194214,
+      "ratio": 0.19999998090296875,
+      "brdf": 0.0031830985578992148
+    },
+    {
+      "name": "current_musou_high_spp",
+      "ti": 80,
+      "to": -65,
+      "samples": 1024,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0007218668470159173,
+      "control": 0.0027637279126793146,
+      "ratio": 0.2611931672811086,
+      "brdf": 0.004157018367461674
+    },
+    {
+      "name": "current_musou_high_spp",
+      "ti": -65,
+      "to": 80,
+      "samples": 1024,
+      "coating": {
+        "body": 0.00991014,
+        "spec_scale": 0.0017465000000000013,
+        "roughness": 0.1975
+      },
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sample": 0.0027318003121763468,
+      "control": 0.006726236082613468,
+      "ratio": 0.4061410094179909,
+      "brdf": 0.0064639349241205285
+    }
+  ]
+}

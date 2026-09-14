@@ -1,0 +1,114 @@
+[
+  {
+    "op": "form",
+    "request": {
+      "spec": {
+        "top": "comb",
+        "depth": 40,
+        "panel": 100,
+        "floor": "none"
+      },
+      "thetas": [
+        40
+      ],
+      "samples": 64,
+      "n_phase": 6,
+      "beam_w": 7.5,
+      "coating": "wall_5pct",
+      "deep_coating": "anodised",
+      "paint_depth": 15,
+      "floor_coating": "musou_air",
+      "obs_elev": 40,
+      "phis": [
+        45,
+        90
+      ],
+      "mm_per_px": 0.05,
+      "diffuse_frac": 0.91,
+      "roughness": 0.2,
+      "slot_df": {
+        "coating": 0.92
+      },
+      "slot_rough": {
+        "coating": 0.3
+      },
+      "op": "form"
+    },
+    "forwarded": {
+      "args": [
+        {
+          "top": "comb",
+          "depth": 40,
+          "panel": 100,
+          "floor": "none"
+        },
+        [
+          40
+        ],
+        6,
+        64
+      ],
+      "kwargs": {
+        "beam_w": 7.5
+      }
+    }
+  },
+  {
+    "op": "measure",
+    "request": {
+      "spec": {
+        "top": "comb",
+        "depth": 40,
+        "panel": 100,
+        "floor": "none"
+      },
+      "thetas": [
+        40
+      ],
+      "samples": 64,
+      "n_phase": 6,
+      "beam_w": 7.5,
+      "coating": "wall_5pct",
+      "deep_coating": "anodised",
+      "paint_depth": 15,
+      "floor_coating": "musou_air",
+      "obs_elev": 40,
+      "phis": [
+        45,
+        90
+      ],
+      "mm_per_px": 0.05,
+      "diffuse_frac": 0.91,
+      "roughness": 0.2,
+      "slot_df": {
+        "coating": 0.92
+      },
+      "slot_rough": {
+        "coating": 0.3
+      },
+      "op": "measure"
+    },
+    "forwarded": {
+      "args": [
+        {
+          "top": "comb",
+          "depth": 40,
+          "panel": 100,
+          "floor": "none"
+        },
+        [
+          40
+        ],
+        0.91,
+        0.2,
+        64,
+        "wall_5pct",
+        "anodised",
+        15,
+        null,
+        0.0
+      ],
+      "kwargs": {}
+    }
+  }
+]

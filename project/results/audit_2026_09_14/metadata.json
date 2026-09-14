@@ -1,0 +1,14 @@
+{
+  "commit": "d3dbe5b389ecb931c6f35b1c5acfc2d71c8ddc73",
+  "date": "2026-09-14",
+  "sha256": {
+    "project/scripts/blender_render.py": "7d5070abf051bc13f865103320179b3f2fa757c32b16c4082ad4c54f715b10ba",
+    "project/scripts/form_buildable.py": "d6160c51083f91e5ccac42aaa47d78a0f09e41d8ab483bf76b6c8ab5c01831b7",
+    "project/scripts/form_metrics.py": "68b31894891e57b384da0e4dfbc3489e593fcd141a2dd93d3591cb5e74c5d572",
+    "project/scripts/cyc_worker.py": "fd25720239debe2ff72e03890072a6d6b9f8ecc299f90e4ebec36df9b915395e",
+    "project/scripts/sim_server.py": "7117ab23104a2a7d4240f4a8b5345bc7031731032c22cf1ce92a9bd233239136",
+    "project/material/musou_fit.json": "455a0423d284fa8210fe592ccbc9a256b20ca08e89c20a3d0414038ccdcc5f65",
+    "project/reference/papers/HowDarkIsDark_2601.05094.pdf": "8830c79673631175687d0bb388d58f51fd0577d8913eed298cb9fb2e0f7e47fe",
+    "project/reference/papers/Kaster2025_anechoic_2507.05152.pdf": "ce20de25a4c6c44026bd6a814ee778038964c6197096e29e76815330e54d80dd"
+  }
+}

@@ -278,9 +278,63 @@ def coating_split(diffuse_frac, rho0=MUSOU_RHO0):
     return d * rho0, (1.0 - d) * rho0 / F0_IOR15
 
 
+# WHICH NODE TREE THE COATING IS BUILT FROM (2026-09-14).
+#
+#   "fresnel_mix"  the tree every number before 2026-09-14 was rendered with:
+#                  a Fresnel NODE drives the Diffuse/Glossy mix factor. That
+#                  node evaluates Fresnel against the macro normal and the
+#                  direction the path arrived FROM -- the viewer's side -- so
+#                  the weight is F(theta_o), not F(half vector). The BRDF is
+#                  not symmetric in (source, viewer): swapping them on a flat
+#                  plate changed the reading by 55 % at 1024 spp
+#                  (results/audit_2026_09_14/render_probe.json). `hemi_view`
+#                  reads the panel from one direction under a uniform sky and
+#                  calls that, by reciprocity, the reflectance for light
+#                  ARRIVING from that direction. Without reciprocity it is not.
+#                  Kept, byte-identical, so every published figure reproduces.
+#
+#   "reciprocal"   the mix factor is the CONSTANT spec_scale; the angular
+#                  dependence lives inside the lobe, where a microfacet BSDF
+#                  evaluates Fresnel on the half vector (Cycles' Principled
+#                  dielectric layer with a black base). Both legs are then
+#                  reciprocal and so is any constant mix of them.
+#                  rho_dh(theta) = body + spec_scale * E_lobe(theta), the same
+#                  closed form as before, so `coating_split` keeps its meaning.
+#                  `scripts/brdf_model.py` is the arithmetic reference and
+#                  `scripts/gate_coating_reciprocity.py` measures the tree
+#                  against it.
+#
+# Every result records which one it used (`run()` writes `coating_model`).
+# 2026-09-14: "reciprocal" is written but NOT yet measured by the gate, so the
+# default stays on the legacy tree until it is. Nothing renders differently.
+COATING_MODEL = "fresnel_mix"
+COATING_MODELS = ("reciprocal", "fresnel_mix")
+
+
+def _principled_lobe(nt, roughness, ior):
+    """One full dielectric microfacet lobe over a black base: Principled BSDF
+    with base colour 0, the lobe's Fresnel from `ior` (F0 = 0.04 at 1.5) on
+    the half vector, single-scatter GGX so it is the same distribution
+    `brdf_model` integrates. Every socket is set by name so a renamed socket
+    fails here, loudly, instead of rendering something else."""
+    p = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    p.distribution = "GGX"
+    fixed = (("Base Color", (0.0, 0.0, 0.0, 1.0)), ("Metallic", 0.0),
+             ("IOR", float(ior)), ("Alpha", 1.0),
+             ("Specular IOR Level", 0.5), ("Specular Tint", (1.0, 1.0, 1.0, 1.0)),
+             ("Subsurface Weight", 0.0), ("Transmission Weight", 0.0),
+             ("Coat Weight", 0.0), ("Sheen Weight", 0.0),
+             ("Emission Strength", 0.0), ("Anisotropic", 0.0))
+    for name, val in fixed:
+        p.inputs[name].default_value = val
+    if roughness is not None:
+        p.inputs["Roughness"].default_value = float(roughness)
+    return p
+
+
 def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
                      ior=MUSOU_IOR, deep_until=None, paint_fade=0.0,
-                     roughness_deep=None):
+                     roughness_deep=None, model=None):
     """`make_coating`, but its two constants switch at a depth plane.
 
     Musou Black and black anodising differ only in `body` and `spec_scale`, so
@@ -367,6 +421,43 @@ def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
     rough_out = (None if abs(rough_deep - float(roughness)) < 1e-9
                  else switch(float(roughness), rough_deep))
 
+    model = model or COATING_MODEL
+    if model not in COATING_MODELS:
+        raise ValueError("unknown coating model %r" % model)
+    if model == "reciprocal":
+        for side, (b, s) in (("shallow", shallow), ("deep", deep)):
+            if s > 1.0:
+                raise ValueError("%s spec_scale %.3f > 1: more than one full "
+                                 "dielectric lobe is not a passive surface"
+                                 % (side, s))
+        # diffuse colour = body / (1 - spec_scale), so the constant mix
+        # gives back exactly `body` on the diffuse leg
+        one_minus = nt.nodes.new("ShaderNodeMath")
+        one_minus.operation = "SUBTRACT"
+        one_minus.inputs[0].default_value = 1.0
+        nt.links.new(spec_out, one_minus.inputs[1])
+        cd = nt.nodes.new("ShaderNodeMath")
+        cd.operation = "DIVIDE"
+        nt.links.new(body_out, cd.inputs[0])
+        nt.links.new(one_minus.outputs["Value"], cd.inputs[1])
+        diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
+        diff.inputs["Roughness"].default_value = 0.0
+        rgb = nt.nodes.new("ShaderNodeCombineColor"
+                           if hasattr(bpy.types, "ShaderNodeCombineColor")
+                           else "ShaderNodeCombineRGB")
+        for i in range(3):
+            nt.links.new(cd.outputs["Value"], rgb.inputs[i])
+        nt.links.new(rgb.outputs[0], diff.inputs["Color"])
+        spec = _principled_lobe(nt, roughness, ior)
+        if rough_out is not None:
+            nt.links.new(rough_out, spec.inputs["Roughness"])
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        nt.links.new(spec_out, mix.inputs["Fac"])
+        nt.links.new(diff.outputs[0], mix.inputs[1])
+        nt.links.new(spec.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs["Surface"])
+        return m
+
     fres = nt.nodes.new("ShaderNodeFresnel")
     fres.inputs["IOR"].default_value = ior
     scale = nt.nodes.new("ShaderNodeMath")
@@ -405,18 +496,39 @@ def make_depth_split(name, paint_depth, shallow, deep, roughness=0.30,
 
 
 def make_coating(name, roughness=0.30, body=MUSOU_BODY,
-                 spec_scale=MUSOU_SPEC_SCALE, ior=MUSOU_IOR):
+                 spec_scale=MUSOU_SPEC_SCALE, ior=MUSOU_IOR, model=None):
     """A dark coating whose reflectance rises toward grazing, as real ones do.
 
     body        angle-independent part of rho_dh
     spec_scale  fraction of a full dielectric Fresnel lobe to keep
     ior         index used for the Fresnel curve shape
+    model       see COATING_MODEL; None takes the module default
     """
+    model = model or COATING_MODEL
+    if model not in COATING_MODELS:
+        raise ValueError("unknown coating model %r" % model)
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
     nt.nodes.clear()
     out = nt.nodes.new("ShaderNodeOutputMaterial")
+
+    if model == "reciprocal":
+        if spec_scale > 1.0:
+            raise ValueError("spec_scale %.3f > 1: more than one full "
+                             "dielectric lobe is not a passive surface"
+                             % spec_scale)
+        diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
+        cd = body / (1.0 - spec_scale) if spec_scale < 1.0 else 0.0
+        diff.inputs["Color"].default_value = (cd, cd, cd, 1.0)
+        diff.inputs["Roughness"].default_value = 0.0
+        spec = _principled_lobe(nt, roughness, ior)
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        mix.inputs["Fac"].default_value = float(spec_scale)
+        nt.links.new(diff.outputs[0], mix.inputs[1])
+        nt.links.new(spec.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs["Surface"])
+        return m
 
     fres = nt.nodes.new("ShaderNodeFresnel")
     fres.inputs["IOR"].default_value = ior
@@ -1231,6 +1343,7 @@ def run(cfg):
         "cycles_seed": cfg.get("cycles_seed", SEED),
         "phi_deg": cfg.get("phi_deg", 0.0),
         "coating": cfg.get("coating"),
+        "coating_model": COATING_MODEL,
         "ar": cfg.get("ar"),
         "paint_depth": cfg.get("paint_depth"),
         "n_slats": len(cs.stage1),
