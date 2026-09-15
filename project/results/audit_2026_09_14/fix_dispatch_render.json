@@ -1,0 +1,705 @@
+{
+ "request_measure": {
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 4.0,
+    "tip_flat": 0.1,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 22.0,
+   "panel": 40.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "thetas": [
+   40.0
+  ],
+  "samples": 16,
+  "phis": [
+   0.0,
+   45.0
+  ],
+  "coating": "wall_5pct",
+  "deep_coating": "anodised",
+  "paint_depth": 10.0,
+  "floor_coating": "musou_air"
+ },
+ "request_form": {
+  "spec": {
+   "top": "pyramid",
+   "top_params": {
+    "pitch": 4.0,
+    "tip_flat": 0.1,
+    "apex_jitter": 0.0,
+    "tip_drop": 0.0
+   },
+   "depth": 22.0,
+   "panel": 40.0,
+   "floor": "none",
+   "margin_depths": 0.2
+  },
+  "n_phase": 2,
+  "samples": 16,
+  "beam_w": 5.0,
+  "mm_per_px": 0.1,
+  "obs_elev": 30.0,
+  "renderer": "cycles",
+  "coating": "wall_5pct",
+  "deep_coating": "anodised",
+  "paint_depth": 10.0,
+  "floor_coating": "musou_air"
+ },
+ "runs": {
+  "plain": {
+   "measure": {
+    "rho": {
+     "40": 0.008449180983006954
+    },
+    "rho_planes": {
+     "0": {
+      "40": 0.008449180983006954
+     },
+     "45": {
+      "40": 0.012049044482409954
+     }
+    },
+    "conditions": {
+     "coating": {
+      "id": "wall_5pct",
+      "body": 0.0495,
+      "spec_scale": 0.012500000000000011,
+      "df": 0.99,
+      "roughness": 0.1975,
+      "rho0": 0.05
+     },
+     "deep_coating": {
+      "id": "anodised",
+      "body": 0.0447435,
+      "spec_scale": 0.006412500000000043,
+      "df": 0.9943,
+      "roughness": 0.4359,
+      "rho0": 0.045
+     },
+     "paint_depth": 10.0,
+     "deep_until": null,
+     "paint_fade": 0.0,
+     "floor_coating": {
+      "id": "musou_air",
+      "body": 0.005958,
+      "spec_scale": 0.001050000000000001,
+      "df": 0.993,
+      "roughness": 0.1975,
+      "rho0": 0.006
+     },
+     "floor_boundary_depth": 22.0,
+     "thetas": [
+      40.0
+     ],
+     "phis": [
+      0.0,
+      45.0
+     ],
+     "samples": 16,
+     "mode": "hemi_view",
+     "margin_depths": 2.0,
+     "coating_model": "reciprocal"
+    },
+    "ignored_keys": [],
+    "seconds": 1.44
+   },
+   "form": {
+    "smear": 3.1823741268109793,
+    "peak": 0.07314918713988218,
+    "peak_by_theta": {
+     "-40": 0.03284729922072441,
+     "+0": 0.07314918713988218,
+     "+40": 0.5467496728008835
+    },
+    "planes": {
+     "0": {
+      "smear": 3.1823741268109793,
+      "peak": 0.07314918713988218,
+      "peak_by_theta": {
+       "-40": 0.03284729922072441,
+       "+0": 0.07314918713988218,
+       "+40": 0.5467496728008835
+      },
+      "peak_by_stat": {
+       "box": 0.07314918713988218,
+       "p99": 0.03772182814219893,
+       "max": 0.041099480052621075
+      },
+      "smear_verdict": {
+       "-40": {
+        "converged": true,
+        "stable": true,
+        "control_stable": true,
+        "edge_ok": true,
+        "tol": 0.02,
+        "first_agreement": {
+         "window_mm": 160.0,
+         "rms_mm": 9.666026461933239,
+         "rms_control_mm": 1.8955474950794928,
+         "smear": 5.099332244127114
+        },
+        "first_agreement_reversed": false,
+        "band_energy": 0.0002491385995746648,
+        "band_moment": 0.014570236620413337,
+        "edge_energy": 0.00012427628049200746,
+        "edge_moment": 0.008402495008152926
+       },
+       "+40": {
+        "converged": true,
+        "stable": true,
+        "control_stable": true,
+        "edge_ok": true,
+        "tol": 0.02,
+        "first_agreement": {
+         "window_mm": 128.0,
+         "rms_mm": 2.397337104681459,
+         "rms_control_mm": 1.8955462956852003,
+         "smear": 1.2647209462192912
+        },
+        "first_agreement_reversed": false,
+        "band_energy": 1.069996136611165e-06,
+        "band_moment": 0.0009629513803631067,
+        "edge_energy": 3.1993712323889647e-07,
+        "edge_moment": 0.0003439208533442044
+       }
+      },
+      "smear_by_theta": {
+       "-40": 5.099332244127114,
+       "+0": 2.76673536000505,
+       "+40": 1.2654160094948448
+      },
+      "converged_by_theta": {
+       "-40": true,
+       "+0": true,
+       "+40": true
+      },
+      "peak_by_stat_by_theta": {
+       "-40": {
+        "box": 0.03284729922072441,
+        "p99": 0.015443610517422225,
+        "max": 0.01958441234238672
+       },
+       "+0": {
+        "box": 0.07314918713988218,
+        "p99": 0.03772182814219893,
+        "max": 0.041099480052621075
+       },
+       "+40": {
+        "box": 0.5467496728008835,
+        "p99": 0.33348530222427697,
+        "max": 0.3883950639838539
+       }
+      },
+      "rms_by_theta": {
+       "-40": 9.666026461933239,
+       "+0": 4.017817422974599,
+       "+40": 2.398654629298701
+      },
+      "converged": true,
+      "window_mm": 160.0,
+      "window_needed_mm": 85.06762034595104,
+      "face_mm": 160.0,
+      "smear_legacy": 3.1100112973041187
+     }
+    },
+    "converged": true,
+    "window_mm": 160.0,
+    "window_needed_mm": 85.06762034595104,
+    "face_mm": 160.0,
+    "smear_legacy": 3.1100112973041187,
+    "n_phase": 2,
+    "samples": 16,
+    "beam_w": 5.0,
+    "reduced": true,
+    "peak_stat": "box",
+    "beam_pos": "sobol",
+    "conditions": {
+     "n_phase": 2,
+     "samples": 16,
+     "beam_w": 5.0,
+     "thetas": [
+      -40.0,
+      0.0,
+      40.0
+     ],
+     "mm_per_px": 0.1,
+     "obs_elev_deg": 30.0,
+     "peak_stat": "box",
+     "peak_box_mm": 2.0,
+     "beam_pos": "sobol",
+     "smear_tol": 0.02,
+     "coating_model": "reciprocal",
+     "phis": [
+      0.0
+     ],
+     "coating": {
+      "id": "wall_5pct",
+      "body": 0.0495,
+      "spec_scale": 0.012500000000000011,
+      "df": 0.99,
+      "roughness": 0.1975,
+      "rho0": 0.05
+     },
+     "deep_coating": {
+      "id": "anodised",
+      "body": 0.0447435,
+      "spec_scale": 0.006412500000000043,
+      "df": 0.9943,
+      "roughness": 0.4359,
+      "rho0": 0.045
+     },
+     "paint_depth": 10.0,
+     "floor_coating": {
+      "id": "musou_air",
+      "body": 0.005958,
+      "spec_scale": 0.001050000000000001,
+      "df": 0.993,
+      "roughness": 0.1975,
+      "rho0": 0.006
+     },
+     "floor_boundary_depth": 22.0
+    },
+    "mm_per_px": 0.1,
+    "obs_elev_deg": 30.0,
+    "mm_per_px_z": 0.11547005383792515,
+    "protocol_mm_per_px": 0.215,
+    "draft_density": false,
+    "ignored_keys": [],
+    "seconds": 16.2,
+    "sample_face_mm": 160.0,
+    "requested_face_mm": 40.0,
+    "grow_attempts": [
+     {
+      "face_mm": 40.0,
+      "smear": 2.349413083334282,
+      "converged": false
+     },
+     {
+      "face_mm": 80.0,
+      "smear": 3.1343399148706106,
+      "converged": false
+     },
+     {
+      "face_mm": 160.0,
+      "smear": 3.1823741268109793,
+      "converged": true
+     }
+    ]
+   },
+   "seconds": 17.7
+  },
+  "blender": {
+   "measure": {
+    "rho": {
+     "40": 0.008449180983006954
+    },
+    "rho_planes": {
+     "0": {
+      "40": 0.008449180983006954
+     },
+     "45": {
+      "40": 0.012049044482409954
+     }
+    },
+    "conditions": {
+     "coating": {
+      "id": "wall_5pct",
+      "body": 0.0495,
+      "spec_scale": 0.012500000000000011,
+      "df": 0.99,
+      "roughness": 0.1975,
+      "rho0": 0.05
+     },
+     "deep_coating": {
+      "id": "anodised",
+      "body": 0.0447435,
+      "spec_scale": 0.006412500000000043,
+      "df": 0.9943,
+      "roughness": 0.4359,
+      "rho0": 0.045
+     },
+     "paint_depth": 10.0,
+     "deep_until": null,
+     "paint_fade": 0.0,
+     "floor_coating": {
+      "id": "musou_air",
+      "body": 0.005958,
+      "spec_scale": 0.001050000000000001,
+      "df": 0.993,
+      "roughness": 0.1975,
+      "rho0": 0.006
+     },
+     "floor_boundary_depth": 22.0,
+     "thetas": [
+      40.0
+     ],
+     "phis": [
+      0.0,
+      45.0
+     ],
+     "samples": 16,
+     "mode": "hemi_view",
+     "margin_depths": 2.0,
+     "coating_model": "reciprocal"
+    },
+    "ignored_keys": [],
+    "seconds": 0.81
+   },
+   "form": {
+    "smear": 3.182374132187134,
+    "peak": 0.07314918714699409,
+    "peak_by_theta": {
+     "-40": 0.03284729901825464,
+     "+0": 0.07314918714699409,
+     "+40": 0.5467496726682393
+    },
+    "planes": {
+     "0": {
+      "smear": 3.182374132187134,
+      "peak": 0.07314918714699409,
+      "peak_by_theta": {
+       "-40": 0.03284729901825464,
+       "+0": 0.07314918714699409,
+       "+40": 0.5467496726682393
+      },
+      "peak_by_stat": {
+       "box": 0.07314918714699409,
+       "p99": 0.037721827156455306,
+       "max": 0.041099477111959534
+      },
+      "smear_verdict": {
+       "-40": {
+        "converged": true,
+        "stable": true,
+        "control_stable": true,
+        "edge_ok": true,
+        "tol": 0.02,
+        "first_agreement": {
+         "window_mm": 160.0,
+         "rms_mm": 9.666026464276031,
+         "rms_control_mm": 1.895547491732613,
+         "smear": 5.099332254366712
+        },
+        "first_agreement_reversed": false,
+        "band_energy": 0.00024913859929240236,
+        "band_moment": 0.014570236603893994,
+        "edge_energy": 0.00012427628035120827,
+        "edge_moment": 0.008402494998350362
+       },
+       "+40": {
+        "converged": true,
+        "stable": true,
+        "control_stable": true,
+        "edge_ok": true,
+        "tol": 0.02,
+        "first_agreement": {
+         "window_mm": 128.0,
+         "rms_mm": 2.39733710515297,
+         "rms_control_mm": 1.8955462952903646,
+         "smear": 1.264720946731475
+        },
+        "first_agreement_reversed": false,
+        "band_energy": 1.0699961374013037e-06,
+        "band_moment": 0.0009629513806744792,
+        "edge_energy": 3.199371234751541e-07,
+        "edge_moment": 0.0003439208534221299
+       }
+      },
+      "smear_by_theta": {
+       "-40": 5.099332254366712,
+       "+0": 2.766735360396868,
+       "+40": 1.2654160100075555
+      },
+      "converged_by_theta": {
+       "-40": true,
+       "+0": true,
+       "+40": true
+      },
+      "peak_by_stat_by_theta": {
+       "-40": {
+        "box": 0.03284729901825464,
+        "p99": 0.015443610528944707,
+        "max": 0.019584412932113618
+       },
+       "+0": {
+        "box": 0.07314918714699409,
+        "p99": 0.037721827156455306,
+        "max": 0.041099477111959534
+       },
+       "+40": {
+        "box": 0.5467496726682393,
+        "p99": 0.33348530222427697,
+        "max": 0.3883950758719501
+       }
+      },
+      "rms_by_theta": {
+       "-40": 9.666026464276031,
+       "+0": 4.017817423041214,
+       "+40": 2.398654629770937
+      },
+      "converged": true,
+      "window_mm": 160.0,
+      "window_needed_mm": 85.06762045375167,
+      "face_mm": 160.0,
+      "smear_legacy": 3.110011303055759
+     }
+    },
+    "converged": true,
+    "window_mm": 160.0,
+    "window_needed_mm": 85.06762045375167,
+    "face_mm": 160.0,
+    "smear_legacy": 3.110011303055759,
+    "n_phase": 2,
+    "samples": 16,
+    "beam_w": 5.0,
+    "reduced": true,
+    "peak_stat": "box",
+    "beam_pos": "sobol",
+    "conditions": {
+     "n_phase": 2,
+     "samples": 16,
+     "beam_w": 5.0,
+     "thetas": [
+      -40.0,
+      0.0,
+      40.0
+     ],
+     "mm_per_px": 0.1,
+     "obs_elev_deg": 30.0,
+     "peak_stat": "box",
+     "peak_box_mm": 2.0,
+     "beam_pos": "sobol",
+     "smear_tol": 0.02,
+     "coating_model": "reciprocal",
+     "phis": [
+      0.0
+     ],
+     "coating": {
+      "id": "wall_5pct",
+      "body": 0.0495,
+      "spec_scale": 0.012500000000000011,
+      "df": 0.99,
+      "roughness": 0.1975,
+      "rho0": 0.05
+     },
+     "deep_coating": {
+      "id": "anodised",
+      "body": 0.0447435,
+      "spec_scale": 0.006412500000000043,
+      "df": 0.9943,
+      "roughness": 0.4359,
+      "rho0": 0.045
+     },
+     "paint_depth": 10.0,
+     "floor_coating": {
+      "id": "musou_air",
+      "body": 0.005958,
+      "spec_scale": 0.001050000000000001,
+      "df": 0.993,
+      "roughness": 0.1975,
+      "rho0": 0.006
+     },
+     "floor_boundary_depth": 22.0
+    },
+    "mm_per_px": 0.1,
+    "obs_elev_deg": 30.0,
+    "mm_per_px_z": 0.11547005383792515,
+    "protocol_mm_per_px": 0.215,
+    "draft_density": false,
+    "ignored_keys": [],
+    "seconds": 14.1,
+    "sample_face_mm": 160.0,
+    "requested_face_mm": 40.0,
+    "grow_attempts": [
+     {
+      "face_mm": 40.0,
+      "smear": 2.3494130804756685,
+      "converged": false
+     },
+     {
+      "face_mm": 80.0,
+      "smear": 3.134339915063994,
+      "converged": false
+     },
+     {
+      "face_mm": 160.0,
+      "smear": 3.182374132187134,
+      "converged": true
+     }
+    ]
+   },
+   "seconds": 14.9
+  }
+ },
+ "plain_form_defaults": {
+  "smear": 2.758260348145823,
+  "peak": 0.07708240727968502,
+  "peak_by_theta": {
+   "-40": 0.06249008873308643,
+   "+0": 0.07708240727968502,
+   "+40": 0.06163246632036583
+  },
+  "planes": {
+   "0": {
+    "smear": 2.758260348145823,
+    "peak": 0.07708240727968502,
+    "peak_by_theta": {
+     "-40": 0.06249008873308643,
+     "+0": 0.07708240727968502,
+     "+40": 0.06163246632036583
+    },
+    "peak_by_stat": {
+     "box": 0.07708240727968502,
+     "p99": 0.07732692344119187,
+     "max": 0.07741010813576432
+    },
+    "smear_verdict": {
+     "-40": {
+      "converged": true,
+      "stable": true,
+      "control_stable": true,
+      "edge_ok": true,
+      "tol": 0.02,
+      "first_agreement": {
+       "window_mm": 80.0,
+       "rms_mm": 5.2338610446657645,
+       "rms_control_mm": 1.8955858536845918,
+       "smear": 2.7610783412908035
+      },
+      "first_agreement_reversed": false,
+      "band_energy": 3.0762395312850076e-05,
+      "band_moment": 0.0014031200303085182,
+      "edge_energy": 1.248752593196567e-05,
+      "edge_moment": 0.00064082408035589
+     },
+     "+40": {
+      "converged": true,
+      "stable": true,
+      "control_stable": true,
+      "edge_ok": true,
+      "tol": 0.02,
+      "first_agreement": {
+       "window_mm": 80.0,
+       "rms_mm": 5.223183900992291,
+       "rms_control_mm": 1.8955881590165562,
+       "smear": 2.7554423550008424
+      },
+      "first_agreement_reversed": false,
+      "band_energy": 2.923579638573982e-05,
+      "band_moment": 0.0013401102319025562,
+      "edge_energy": 1.316329612708988e-05,
+      "edge_moment": 0.0006812694286072072
+     }
+    },
+    "smear_by_theta": {
+     "-40": 2.7610783412908035,
+     "+0": 1.0382847759989124,
+     "+40": 2.7554423550008424
+    },
+    "converged_by_theta": {
+     "-40": true,
+     "+0": true,
+     "+40": true
+    },
+    "peak_by_stat_by_theta": {
+     "-40": {
+      "box": 0.06249008873308643,
+      "p99": 0.04316030208727224,
+      "max": 0.059951657140998815
+     },
+     "+0": {
+      "box": 0.07708240727968502,
+      "p99": 0.07732692344119187,
+      "max": 0.07741010813576432
+     },
+     "+40": {
+      "box": 0.06163246632036583,
+      "p99": 0.043045857360146725,
+      "max": 0.05819320155301881
+     }
+    },
+    "rms_by_theta": {
+     "-40": 5.2338610446657645,
+     "+0": 1.5076614531193435,
+     "+40": 5.223183900992291
+    },
+    "converged": true,
+    "window_mm": 80.0,
+    "window_needed_mm": 52.349001077588554,
+    "face_mm": 80.0,
+    "smear_legacy": 2.2952387377614
+   }
+  },
+  "converged": true,
+  "window_mm": 80.0,
+  "window_needed_mm": 52.349001077588554,
+  "face_mm": 80.0,
+  "smear_legacy": 2.2952387377614,
+  "n_phase": 2,
+  "samples": 16,
+  "beam_w": 5.0,
+  "reduced": true,
+  "peak_stat": "box",
+  "beam_pos": "sobol",
+  "conditions": {
+   "n_phase": 2,
+   "samples": 16,
+   "beam_w": 5.0,
+   "thetas": [
+    -40.0,
+    0.0,
+    40.0
+   ],
+   "mm_per_px": 0.1,
+   "obs_elev_deg": 0.0,
+   "peak_stat": "box",
+   "peak_box_mm": 2.0,
+   "beam_pos": "sobol",
+   "smear_tol": 0.02,
+   "coating_model": "reciprocal",
+   "phis": [
+    0.0
+   ],
+   "coating": {
+    "id": "musou_fit2",
+    "body": 0.0,
+    "spec_scale": 0.5034,
+    "df": 0.0,
+    "roughness": 0.8646,
+    "rho0": 0.00967
+   },
+   "deep_coating": null,
+   "paint_depth": null,
+   "floor_coating": null,
+   "floor_boundary_depth": null
+  },
+  "mm_per_px": 0.1,
+  "obs_elev_deg": 0.0,
+  "mm_per_px_z": 0.1,
+  "protocol_mm_per_px": 0.215,
+  "draft_density": false,
+  "ignored_keys": [],
+  "seconds": 7.2,
+  "sample_face_mm": 80.0,
+  "requested_face_mm": 40.0,
+  "grow_attempts": [
+   {
+    "face_mm": 40.0,
+    "smear": 2.6831325770603165,
+    "converged": false
+   },
+   {
+    "face_mm": 80.0,
+    "smear": 2.758260348145823,
+    "converged": true
+   }
+  ]
+ },
+ "failed": []
+}

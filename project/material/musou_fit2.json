@@ -1,0 +1,67 @@
+{
+ "schema": "spillsink.material/2",
+ "id": "musou_fit2",
+ "label": "Musou Black — 논문 THR·TIS·덩어리 모양 맞춤 (2026-09-15)",
+ "label_en": "Musou Black — fit to THR, TIS and lobe shape",
+ "color": "#12151a",
+ "scattering": {
+  "band": "visible_rgb",
+  "band_note": "가시광 RGB 가중 (논문: 비편광 LED, RGB 카메라). 파장별 값이 아니다. 레이저 445/520/635 nm 각각의 값은 모른다.",
+  "reflectance": {
+   "model": "constant",
+   "value": 0.00967,
+   "_뜻": "이 재료로 민판을 정면에서 비췄을 때의 반구 반사율(THR). 모델에서 계산한 값이고, 논문 판독 0.0100 과 3 % 차이. body + spec_scale x F0 (0.0201) 과는 다르다 -- 덩어리가 넓어서 가림(masking)으로 절반이 사라진다.",
+   "angles_deg": [0, 15, 30, 45, 60, 75, 80],
+   "values": [0.00967, 0.00986, 0.01056, 0.01219, 0.01586, 0.02457, 0.02997]
+  },
+  "spectral": null,
+  "transmittance": 0.0,
+  "absorption": 0.99033,
+  "laser_lines_nm": [445, 520, 635]
+ },
+ "bsdf": {
+  "model": "lambert_plus_ggx_halfvector_fresnel",
+  "_모델": "f = body/pi + spec_scale x D G F(h.wi) / (4 cos_i cos_o). 단일 산란 GGX, 높이 상관 Smith, 정확한 유전체 프레넬 (굴절률 1.5) 을 반각 벡터에서. Cycles 에서는 blender_render.COATING_MODEL = 'reciprocal' 트리. scripts/brdf_model.py 가 산술 기준이고, gate_coating_reciprocity.py 가 둘이 0.08 % 안에서 같음을 쟀다.",
+  "body": 0.0,
+  "spec_scale": 0.5034,
+  "diffuse_fraction": 0.0,
+  "_diffuse_fraction_뜻": "body / (body + spec_scale x F0). 옛 재료들과 같은 정의라 적어 둔다. 0 이라는 것은 '확산이 없다' 가 아니라 '각도에 안 매인 몸통 성분이 필요 없었다' 는 뜻이다. 넓은 광택 덩어리가 확산처럼 퍼진다.",
+  "lobe": {
+   "type": "ggx",
+   "roughness": 0.8646,
+   "ior": 1.5,
+   "alpha_ggx": 0.7476,
+   "_단위": "roughness 는 Cycles 에 넘기는 값, alpha_ggx = roughness^2."
+  },
+  "table": null,
+  "anisotropic": false
+ },
+ "provenance": {
+  "reflectance": "fitted",
+  "diffuse_fraction": "fitted",
+  "roughness": "fitted",
+  "_등급": "measured 장비로 잰 값 / fitted 논문 판독값에 맞춘 값 / chart_read 도표에서 눈으로 읽은 값 / bounded 범위만 묶인 값 / analogue 비슷한 재료에서 빌림 / guessed 순서만 맞춘 값",
+  "_이_재료의_자료": "chart_read -> fitted. 원시 수치표가 논문에 없어서 도표를 읽었다. 판독값: material/_filip2026_fig6_read.json. 맞춤: scripts/fit_musou_fit2.py, 결과 results/fit_coating/musou_fit2_fit.json."
+ },
+ "fit": {
+  "data": "Filip & Vávra 2026 (arXiv 2601.05094 v1) 그림 6 THR 7 점 + TIS 7 점 (85 도는 축 밖이라 경계 조건만), 그림 5 의 60/60·75/75·85/85 단면 모양 25 점",
+  "chi2": 180.4,
+  "n_data": 39,
+  "residual_thr": {"0": -0.033, "15": -0.014, "30": 0.015, "45": 0.060, "60": 0.109, "75": 0.054, "80": -0.058},
+  "residual_tis": {"0": 0.033, "15": 0.003, "30": -0.001, "45": -0.002, "60": -0.001, "75": 0.020, "80": 0.116},
+  "range_chi2_plus_4": {"body": [0.0, 0.00013], "spec_scale": [0.489, 0.515], "alpha_ggx": [0.731, 0.764]}
+ },
+ "uncertainty": {
+  "_요약": "아래는 맞춤이 못 묶은 것이다. 이 재료의 숫자를 인용할 때 같이 적는다.",
+  "alpha_depends_on_fig5": "그림 5 덩어리 모양을 빼고 THR·TIS 만 맞추면 alpha 0.45 (0.42~0.47), spec_scale 0.33, body 0 이 나온다. 넣으면 0.75. 두 판의 판독이 서로 다른 덩어리 폭을 가리킨다. 0.45~0.75 를 열어 둔다.",
+  "thr_absolute_scale": "논문은 BRDF 를 상대 단위로 보고한다. THR 절대 눈금에 +-20 % 쯤 불확실성이 있다 (같은 논문 Vantablack 0.0023 대 규격 3.5e-4). 모든 각도에 같은 배율로 걸리므로 모양 맞춤은 못 잡는다.",
+  "tis_at_normal": "0 도 TIS 판독 0.96 은 광택 없는 Vantablack 도 0.948 이라 장비 효과가 섞였다고 봤다 [추측]. 오차를 0.03 으로 넓혀 맞췄다. 모델은 0.993.",
+  "grazing_narrow_peak": "85/85 단면의 좁은 봉우리(바탕의 20 배)는 한 덩어리 모델이 못 낸다 (모델 8 배). 80 도 TIS 도 판독 0.856 대 모델 0.972. 스치는 각에서 이 재료는 실제보다 덜 번쩍인다. 벌집 벽이 받는 각이 거기라 벽이 깊은 구조의 정면 반짝임은 낮게 나올 수 있다.",
+  "rs_panel_disagrees": "그림 6 의 Rs 판은 (1-TIS)xTHR 과 80 도에서 두 배 어긋난다. 어느 판이 맞는지 모른다. 맞춤에 안 넣었다.",
+  "application": "논문 시료는 붓칠(brush-on). 우리 도포법과 같은지 모른다. 제조사 총반사: 에어브러시 0.6 %, 붓칠 1.1 %.",
+  "wavelength": "레이저 세 선 각각의 값은 모른다.",
+  "energy_loss": "단일 산란 GGX 라 덩어리가 넓으면 여러 번 튕긴 빛을 버린다. 수동 재료로는 허용되는 쪽(흡수)이지만, 실제 도막이 그 빛을 흡수하는지는 모른다. 맞춤이 spec_scale 을 키워 THR 을 맞췄다."
+ },
+ "supersedes": "musou_fit",
+ "source": "Filip & Vávra 2026, JOSA A 43, 1037 / arXiv 2601.05094 v1, 그림 5·6. 2026-09-14 감사가 옛 musou_fit 의 정면 TIS 오독(0.985~0.995, 실제 0.96)과 '원뿔 안 1.5 % -> 광택 몫 0.74 % 이하' 추론의 숨은 가정을 잡았다. 논문이 그리는 무소는 램버시안 위의 좁은 광택이 아니라 거의 검정 바탕 위의 아주 넓은 유전체 덩어리다."
+}

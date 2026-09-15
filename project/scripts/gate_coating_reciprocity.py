@@ -57,10 +57,14 @@ def say(ok, name, note):
         FAILED.append(name)
 
 
-def plate(coat, model):
+def plate(coat, model, mat=None):
     BR.clear_scene()
     p = SimpleNamespace(face_w=100.0, face_h=300.0)
-    if coat is None:
+    # `mat` is a FACTORY, called after clear_scene: a material built before
+    # it is deleted with the scene (ReferenceError on the first run of D)
+    if mat is not None:
+        mat = mat()
+    elif coat is None:
         mat = BR.make_diffuse("lam", 0.01)
     else:
         mat = BR.make_coating("coat", roughness=coat["roughness"],
@@ -164,6 +168,24 @@ def main():
     say(worst[which] <= 0.03, "hemi_view == brdf_model (%s fresnel)" % which,
         "worst %.2f%% (tol 3%%); other fresnel %.2f%%"
         % (100 * worst[which], 100 * worst[min(worst, key=lambda k: k == which)]))
+
+    # --- D. the depth-split tree builds the same shader on its shallow side --
+    # `make_depth_split` is the tree every painted 3D panel uses. Its
+    # reciprocal branch is written separately from `make_coating`'s, so check
+    # they agree: a plate at y = 0 lies above a 10 mm paint line and must read
+    # exactly the shallow coating, whatever the deep one is.
+    plate(None, None, mat=lambda: BR.make_depth_split(
+        "split", 10.0, (NEW["body"], NEW["spec_scale"]), (0.05, 0.05),
+        roughness=NEW["roughness"], roughness_deep=0.3, model="reciprocal"))
+    split = {}
+    for t in (0, 60, 80):
+        s, c = read(None, t)
+        split[t] = s / c * 0.05
+    worst_split = max(abs(split[t] - hemi[t]["cycles"]) / hemi[t]["cycles"]
+                      for t in split)
+    res["depth_split"] = {str(t): v for t, v in split.items()}
+    say(worst_split <= 0.005, "depth split (shallow side) == make_coating",
+        "worst %.3f%% at 0/60/80 deg (tol 0.5%%)" % (100 * worst_split))
 
     # --- C. the 0.05 control ----------------------------------------------
     cbad = [c for c in res["control"] if abs(c - 0.05) > 5e-4]

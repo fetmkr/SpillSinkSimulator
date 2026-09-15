@@ -1,0 +1,136 @@
+{
+  "review_time_utc": "2026-09-14T12:35:51.688287+00:00",
+  "head": "f543c049a33e3700dc9d875316fc18476d3df356",
+  "sha256": {
+    "scripts/blender_render.py": "79f0fe0f7b5ee4581885ba27510f0691c11309bf1bbee60a712b82372187a5c9",
+    "scripts/brdf_model.py": "d87e3b6f84c3ec61a0ef1628e5c592f9c69fbc1fe0efdee71890859bc7fc61c3",
+    "scripts/fit_musou_fit2.py": "ec633019f3b02aaa1d731523a5f664c72148585d1b2696d46cf28e62d04ba4aa",
+    "scripts/gate_coating_reciprocity.py": "11a6c28b3037ac35db3c0f01cf8a74f5153ff249ec602515a1faae9984b321ef",
+    "scripts/cyc_worker.py": "fd25720239debe2ff72e03890072a6d6b9f8ecc299f90e4ebec36df9b915395e",
+    "scripts/form_buildable.py": "d6160c51083f91e5ccac42aaa47d78a0f09e41d8ab483bf76b6c8ab5c01831b7",
+    "scripts/form_metrics.py": "68b31894891e57b384da0e4dfbc3489e593fcd141a2dd93d3591cb5e74c5d572",
+    "scripts/sim_server.py": "7117ab23104a2a7d4240f4a8b5345bc7031731032c22cf1ce92a9bd233239136",
+    "material/musou_fit.json": "455a0423d284fa8210fe592ccbc9a256b20ca08e89c20a3d0414038ccdcc5f65",
+    "material/_filip2026_fig6_read.json": "cee949369a84b98682e1f1383ce87503a057b5a9e1bc27c7b72882dc7fa58e36",
+    "results/fit_coating/musou_fit2_fit.json": "d049970aa34927e26429d8c57d63ca788d80a51fcacaba8a7656e775e8979119"
+  },
+  "identity_probe": {
+    "description": "1% Lambertian, normal incidence, 5 degree specular cone",
+    "analytic_cone_reflectance": 7.59612349389597e-05,
+    "output": {
+      "thr": 0.010000031731051708,
+      "tis": 0.9924038765061041,
+      "rs": 0.009924070255079761,
+      "inside": 7.596147597194708e-05
+    },
+    "correct_rs_from_reported_tis": 7.596147597194671e-05,
+    "reported_rs_over_expected": 130.6465101976615
+  },
+  "fit_summary": {
+    "body": 0.0,
+    "spec_scale": 0.5034068455387914,
+    "alpha": 0.7476094983557415,
+    "roughness_cycles": 0.8646441455048092,
+    "rho0_nominal": 0.02013627382155166,
+    "diffuse_fraction_nominal": 0.0,
+    "thr0_model": 0.009670699027543809,
+    "chi2": 180.3855570331283,
+    "n_data": 39
+  },
+  "fit_angle_rows": [
+    {
+      "angle": 0.0,
+      "thr_model": 0.009670699027543809,
+      "thr_read": 0.01,
+      "thr_resid": -0.032930097245619135,
+      "tis_model": 0.9929262779755155,
+      "tis_read": 0.96,
+      "tis_resid": 0.032926277975515506,
+      "rs_model": 0.00960229119084051,
+      "rs_read": 0.0004
+    },
+    {
+      "angle": 15.0,
+      "thr_model": 0.009862858337830932,
+      "thr_read": 0.01,
+      "thr_resid": -0.013714166216906819,
+      "tis_model": 0.9929532585391336,
+      "tis_read": 0.99,
+      "tis_resid": 0.0029532585391336408,
+      "rs_model": 0.009793357325059086,
+      "rs_read": 0.0002
+    },
+    {
+      "angle": 30.0,
+      "thr_model": 0.010557712625657727,
+      "thr_read": 0.0104,
+      "thr_resid": 0.015164675544012293,
+      "tis_model": 0.992866028379111,
+      "tis_read": 0.994,
+      "tis_resid": -0.0011339716208890183,
+      "rs_model": 0.010482394203404783,
+      "rs_read": 0.0002
+    },
+    {
+      "angle": 45.0,
+      "thr_model": 0.012190264820141844,
+      "thr_read": 0.0115,
+      "thr_resid": 0.06002302783842126,
+      "tis_model": 0.9920225304110097,
+      "tis_read": 0.994,
+      "tis_resid": -0.001977469588990255,
+      "rs_model": 0.012093017353257426,
+      "rs_read": 0.0003
+    },
+    {
+      "angle": 60.0,
+      "thr_model": 0.015858166958363416,
+      "thr_read": 0.0143,
+      "thr_resid": 0.10896272436107805,
+      "tis_model": 0.9882848075134779,
+      "tis_read": 0.989,
+      "tis_resid": -0.000715192486522076,
+      "rs_model": 0.015672385479962785,
+      "rs_read": 0.0005
+    },
+    {
+      "angle": 75.0,
+      "thr_model": 0.024568459067825087,
+      "thr_read": 0.0233,
+      "thr_resid": 0.05444030334013242,
+      "tis_model": 0.9777154646274053,
+      "tis_read": 0.958,
+      "tis_resid": 0.019715464627405366,
+      "rs_model": 0.024020962372677993,
+      "rs_read": 0.003
+    },
+    {
+      "angle": 80.0,
+      "thr_model": 0.029970224531816896,
+      "thr_read": 0.0318,
+      "thr_resid": -0.05754010906236181,
+      "tis_model": 0.9722703431551434,
+      "tis_read": 0.856,
+      "tis_resid": 0.1162703431551434,
+      "rs_model": 0.02913916048998631,
+      "rs_read": 0.008
+    },
+    {
+      "angle": 85.0,
+      "thr_model": 0.038034114830968184,
+      "thr_read": null,
+      "thr_resid": null,
+      "tis_model": 0.969952709577966,
+      "tis_read": null,
+      "tis_resid": null,
+      "rs_model": 0.03689129273669709,
+      "rs_read": 0.041
+    }
+  ],
+  "gate_result_present": false,
+  "limits": [
+    "Arithmetic probe only; no new Blender render in this follow-up.",
+    "Graph-read targets are not new physical measurements.",
+    "Rs is displayed by fit_musou_fit2 but not used in its chi2 objective."
+  ]
+}

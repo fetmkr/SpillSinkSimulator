@@ -1,0 +1,627 @@
+{
+ "meta": {
+  "date": "2026-09-15",
+  "n_published_designs": 1643,
+  "coating": {
+   "id": "musou_fit2",
+   "body": 0.0,
+   "spec_scale": 0.5034,
+   "df": 0.0,
+   "roughness": 0.8646,
+   "rho0": 0.00967
+  },
+  "coating_model": "reciprocal",
+  "totals": {
+   "thetas": [
+    0.0,
+    -20.0,
+    -40.0,
+    20.0,
+    40.0
+   ],
+   "phi": 0.0,
+   "samples": 256,
+   "mode": "hemi_view"
+  },
+  "form": {
+   "samples": 256,
+   "n_phase": 16,
+   "beam_w": 7.5,
+   "mm_per_px": 0.215,
+   "peak_stat": "box",
+   "peak_box_mm": 2.0,
+   "beam_pos": "sobol",
+   "thetas": [
+    -40.0,
+    0.0,
+    40.0
+   ]
+  }
+ },
+ "rows": {
+  "sweep_anechoic.csv|AN_pyr_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_pyr_a283",
+   "old_worst_rho": 0.0025261165574193,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 17.6678445229682,
+    "tip_flat": 0.0
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0023388690315186977,
+    "-20": 0.0024420004338026047,
+    "-40": 0.0028830450028181076,
+    "+20": 0.0026160154957324266,
+    "+40": 0.0028712027706205845
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791
+   ],
+   "worst_rho": 0.0028830450028181076,
+   "total_sec": 2.1,
+   "smear": 2.7104948606467536,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07891056568803348,
+    "p99": 0.07779757534379744,
+    "max": 0.07796380343839723
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 242.68551635742188,
+   "form_sec": 41.1
+  },
+  "sweep_anechoic.csv|AN_trn_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_trn_a283",
+   "old_worst_rho": 0.0047100018709897995,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 17.6678445229682,
+    "tip_flat": 3.53356890459364
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0022946337703615427,
+    "-20": 0.002357845427468419,
+    "-40": 0.002812750870361924,
+    "+20": 0.002603790257126093,
+    "+40": 0.002928330097347498
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791
+   ],
+   "worst_rho": 0.002928330097347498,
+   "total_sec": 2.0,
+   "smear": 3.4643881081767183,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.1290813874835699,
+    "p99": 0.08732491008944981,
+    "max": 0.08920224332580684
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 242.68551635742188,
+   "form_sec": 42.2
+  },
+  "sweep_anechoic.csv|AN_wdg_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_wdg_a283",
+   "old_worst_rho": 0.0036722132936120033,
+   "old_n": 1,
+   "params": {
+    "arc_segments": 24,
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "margin_depths": 2.0,
+    "micro_depth": 0.0,
+    "micro_pitch": 0.0,
+    "pitch_jitter": 0.0,
+    "pitch_mean": 17.6678445229682,
+    "pitch_seed": 23,
+    "tip_width": 0.08,
+    "valley_round": 0.0
+   },
+   "family": "ridge",
+   "totals": {
+    "+0": 0.0030620587058365345,
+    "-20": 0.002519496949389577,
+    "-40": 0.003131341654807329,
+    "+20": 0.002442046068608761,
+    "+40": 0.0030620587058365345
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.003131341654807329,
+   "total_sec": 2.0,
+   "smear": 1.7791540366198302,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07838904041406926,
+    "p99": 0.07724570788773899,
+    "max": 0.0850414342415643
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 220.0,
+   "form_sec": 39.0
+  },
+  "sweep_anechoic.csv|AN_pyr_a400": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_pyr_a400",
+   "old_worst_rho": 0.0027401347178965807,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 12.5,
+    "tip_flat": 0.0
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0020309328101575375,
+    "-20": 0.0021200058981776237,
+    "-40": 0.0024193671997636557,
+    "+20": 0.0021293105091899633,
+    "+40": 0.0024117124266922474
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.0024193671997636557,
+   "total_sec": 2.3,
+   "smear": 2.7408647386082245,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07808110887615738,
+    "p99": 0.07736320733404253,
+    "max": 0.07755010548017299
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 235.0,
+   "form_sec": 45.8
+  },
+  "sweep_anechoic.csv|AN_trn_a400": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_trn_a400",
+   "old_worst_rho": 0.004972467664629221,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 12.5,
+    "tip_flat": 2.5
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0020980737172067165,
+    "-20": 0.0022157724015414715,
+    "-40": 0.002583589404821396,
+    "+20": 0.002296651713550091,
+    "+40": 0.0026131814811378717
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.0026131814811378717,
+   "total_sec": 2.2,
+   "smear": 3.5705681938231137,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.14151694285033786,
+    "p99": 0.0903563445418235,
+    "max": 0.09287203987263738
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 235.0,
+   "form_sec": 45.7
+  },
+  "sweep_anechoic.csv|AN_wdg_a400": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_wdg_a400",
+   "old_worst_rho": 0.0033553375396877527,
+   "old_n": 1,
+   "params": {
+    "arc_segments": 24,
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "margin_depths": 2.0,
+    "micro_depth": 0.0,
+    "micro_pitch": 0.0,
+    "pitch_jitter": 0.0,
+    "pitch_mean": 12.5,
+    "pitch_seed": 23,
+    "tip_width": 0.08,
+    "valley_round": 0.0
+   },
+   "family": "ridge",
+   "totals": {
+    "+0": 0.0021376681979745626,
+    "-20": 0.002217063447460532,
+    "-40": 0.002846848452463746,
+    "+20": 0.002208240330219269,
+    "+40": 0.00285167945548892
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.00285167945548892,
+   "total_sec": 2.0,
+   "smear": 1.5458077150506218,
+   "smear_converged": true,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07827214193017638,
+    "p99": 0.07713311415576503,
+    "max": 0.08579587726490803
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 220.0,
+   "form_sec": 38.3
+  },
+  "sweep_anechoic.csv|AN_pyr_a600": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_pyr_a600",
+   "old_worst_rho": 0.0022886444348841906,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 8.333333333333334,
+    "tip_flat": 0.0
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0016314821550622582,
+    "-20": 0.0017663516337051988,
+    "-40": 0.001980685396119952,
+    "+20": 0.001767549430951476,
+    "+40": 0.001976759871467948
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.001980685396119952,
+   "total_sec": 2.3,
+   "smear": 2.740396411722771,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07746579335578829,
+    "p99": 0.07712903070647309,
+    "max": 0.07739496893279854
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 235.0,
+   "form_sec": 45.4
+  },
+  "sweep_anechoic.csv|AN_trn_a600": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_trn_a600",
+   "old_worst_rho": 0.0047330171801149845,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 8.333333333333334,
+    "tip_flat": 1.666666666666667
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0017838082276284695,
+    "-20": 0.002023730194196105,
+    "-40": 0.0022826120257377625,
+    "+20": 0.0020326392259448767,
+    "+40": 0.002295043086633086
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.002295043086633086,
+   "total_sec": 2.2,
+   "smear": 3.581930912317576,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.1430589334704236,
+    "p99": 0.0955394823389393,
+    "max": 0.0988082201734834
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 235.0,
+   "form_sec": 48.5
+  },
+  "sweep_anechoic.csv|AN_wdg_a600": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_wdg_a600",
+   "old_worst_rho": 0.00317355222068727,
+   "old_n": 1,
+   "params": {
+    "arc_segments": 24,
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "margin_depths": 2.0,
+    "micro_depth": 0.0,
+    "micro_pitch": 0.0,
+    "pitch_jitter": 0.0,
+    "pitch_mean": 8.333333333333334,
+    "pitch_seed": 23,
+    "tip_width": 0.08,
+    "valley_round": 0.0
+   },
+   "family": "ridge",
+   "totals": {
+    "+0": 0.0015907699707895517,
+    "-20": 0.0019595881458371878,
+    "-40": 0.002637168625369668,
+    "+20": 0.002048408379778266,
+    "+40": 0.0027277343906462193
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.0027277343906462193,
+   "total_sec": 2.0,
+   "smear": 1.3108781163088308,
+   "smear_converged": true,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07813961421803725,
+    "p99": 0.0771532175007677,
+    "max": 0.09194607642601732
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 220.0,
+   "form_sec": 39.8
+  },
+  "sweep_anechoic.csv|AN_pyr_a909": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_pyr_a909",
+   "old_worst_rho": 0.0018151008989661932,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 5.5005500550055,
+    "tip_flat": 0.0
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0012551690451800823,
+    "-20": 0.0014280531322583556,
+    "-40": 0.0015643283259123564,
+    "+20": 0.001428604475222528,
+    "+40": 0.0015631387941539288
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.0015643283259123564,
+   "total_sec": 2.1,
+   "smear": 2.8035202687273735,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07691366445522767,
+    "p99": 0.07694845779615492,
+    "max": 0.07711190968398608
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 229.52694702148438,
+   "form_sec": 45.9
+  },
+  "sweep_anechoic.csv|AN_trn_a909": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_trn_a909",
+   "old_worst_rho": 0.004598754923790693,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 5.5005500550055,
+    "tip_flat": 1.1001100110011002
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.001481704879552126,
+    "-20": 0.0017273101257160306,
+    "-40": 0.001962958835065365,
+    "+20": 0.0017554645892232656,
+    "+40": 0.0019611017778515816
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.001962958835065365,
+   "total_sec": 2.1,
+   "smear": 3.7086009400692963,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.10957342985917383,
+    "p99": 0.09678531453003683,
+    "max": 0.09856805898363868
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 229.52694702148438,
+   "form_sec": 43.4
+  },
+  "sweep_anechoic.csv|AN_wdg_a909": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_wdg_a909",
+   "old_worst_rho": 0.003040623152628541,
+   "old_n": 1,
+   "params": {
+    "arc_segments": 24,
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "margin_depths": 2.0,
+    "micro_depth": 0.0,
+    "micro_pitch": 0.0,
+    "pitch_jitter": 0.0,
+    "pitch_mean": 5.5005500550055,
+    "pitch_seed": 23,
+    "tip_width": 0.08,
+    "valley_round": 0.0
+   },
+   "family": "ridge",
+   "totals": {
+    "+0": 0.0012801217380911112,
+    "-20": 0.0019534314051270485,
+    "-40": 0.0025940032210201025,
+    "+20": 0.001976270927116275,
+    "+40": 0.0026268456131219864
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.0026268456131219864,
+   "total_sec": 2.1,
+   "smear": 1.1644778561433422,
+   "smear_converged": true,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07853341222460494,
+    "p99": 0.0774989267058752,
+    "max": 0.08934501459750348
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 220.0,
+   "form_sec": 42.1
+  }
+ }
+}

@@ -24,9 +24,28 @@ NOTHING HERE FEEDS A MEASUREMENT. It is a display, and the numbers it reports
 (mean bounces, absorbed fraction) come from the same scattering rule the
 measurement assumes rather than from Cycles, so they are an illustration of the
 transport and not a second opinion about it.
+
+WHICH SCATTERING RULE (2026-09-15). The 2026-09-14 audit (section 8) found that
+`fitted` was not the render's material at all: a constant rho per bounce, a
+coin flip between diffuse and mirror by the diffuse fraction, the mirror blurred
+by a uniform jitter instead of GGX, no Fresnel, and one finish for every surface.
+Its escape fraction and `rho_est` therefore could not check a Cycles number.
+
+`fitted` with `layers` now samples the SAME BRDF the renderer's reciprocal tree
+evaluates (`brdf_model.sample_scalar`: Lambert body + GGX lobe with Fresnel on the
+half vector, single-scatter, height-correlated Smith), carries the throughput
+f cos / pdf instead of a constant rho, and picks the top / below-the-paint /
+floor finish by the depth of each hit, as `build_scene` does.
+`gate_rays_brdf.py` checks that a flat plate's `rho_est` equals
+`brdf_model.directional_albedo` at each angle. `diffuse`, `specular` and
+`fitted` without layers keep their old rule; `stats.model` says which ran.
+What is still not the render: no margin field beyond the clipped preview mesh,
+and the display counts a path cut at `max_bounces` as absorbed.
 """
 
 import math
+
+import brdf_model as BM
 
 
 def _tris(verts, faces):
@@ -144,7 +163,7 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
           # 0.30 은 2026-08-22 에 버린 거칠기 슬라이더 값이다 (알파 0.09).
           # 재료가 쓰는 값은 0.1975 (알파 0.039). `None` 은 확산 비율과
           # 같은 뜻으로 쓴다 -- 부르는 쪽이 재료 값을 넣어 준다.
-          diffuse_frac=None, roughness=None):
+          diffuse_frac=None, roughness=None, layers=None):
     """Cast `n_rays` at incidence theta and walk each until it leaves or dies.
 
     2026-08-17 upgrade toward optical-tool behaviour:
@@ -165,6 +184,19 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
     tris = _tris(verts, faces)
     grid = Grid(tris)
     rng = _lcg(seed)
+    # `layers` = {"top": {body, spec_scale, alpha}, "deep": {...} or None,
+    #             "paint_depth": mm or None, "floor": {...} or None,
+    #             "floor_depth": mm or None}
+    use_brdf = (mode == "fitted" and layers is not None)
+
+    def _finish(y):
+        if layers.get("floor") and layers.get("floor_depth") is not None \
+                and y < -abs(float(layers["floor_depth"])) + 1e-3:
+            return layers["floor"]
+        if layers.get("deep") and layers.get("paint_depth") is not None \
+                and y < -abs(float(layers["paint_depth"])):
+            return layers["deep"]
+        return layers["top"]
     th = math.radians(theta_deg)
     ph = math.radians(phi_deg)
     # travel direction of the incoming beam: down -y, tilted by theta in the
@@ -223,12 +255,45 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
             o = [o[0] + d[0] * best, o[1] + d[1] * best, o[2] + d[2] * best]
             pts.append(list(o))
             b += 1
-            w *= rho
             n = tris[bi][3]
             nl = math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2) or 1.0
             n = (n[0] / nl, n[1] / nl, n[2] / nl)
             if n[0] * d[0] + n[1] * d[1] + n[2] * d[2] > 0:
                 n = (-n[0], -n[1], -n[2])
+            if use_brdf:
+                # local frame about n; wi points back toward where it came from
+                tx, ty, tz = ((1.0, 0.0, 0.0) if abs(n[0]) < 0.9
+                              else (0.0, 1.0, 0.0))
+                bx = n[1] * tz - n[2] * ty
+                by = n[2] * tx - n[0] * tz
+                bz = n[0] * ty - n[1] * tx
+                bl = math.sqrt(bx * bx + by * by + bz * bz) or 1.0
+                bx, by, bz = bx / bl, by / bl, bz / bl
+                cx = n[1] * bz - n[2] * by
+                cy = n[2] * bx - n[0] * bz
+                cz = n[0] * by - n[1] * bx
+                wi = (-(d[0] * bx + d[1] * by + d[2] * bz),
+                      -(d[0] * cx + d[1] * cy + d[2] * cz),
+                      -(d[0] * n[0] + d[1] * n[1] + d[2] * n[2]))
+                mt = _finish(o[1])
+                wo, thr = BM.sample_scalar(wi, mt["body"], mt["spec_scale"],
+                                           mt["alpha"], next(rng), next(rng),
+                                           next(rng))
+                if wo is None:
+                    # the draw went below the surface: the model reflects
+                    # nothing there, so the path ends absorbed
+                    alive = False
+                    n_absorbed += 1
+                    w = 0.0
+                    break
+                w *= thr
+                d = [wo[0] * bx + wo[1] * cx + wo[2] * n[0],
+                     wo[0] * by + wo[1] * cy + wo[2] * n[1],
+                     wo[0] * bz + wo[1] * cz + wo[2] * n[2]]
+                o = [o[0] + n[0] * 1e-4, o[1] + n[1] * 1e-4,
+                     o[2] + n[2] * 1e-4]
+                continue
+            w *= rho
             # THE SAME MATERIAL THE RENDER USES, when the caller asks for it.
             # "diffuse" and "specular" are the two pure pictures; `fitted`
             # mixes them per bounce with the panel's own diffuse fraction and
@@ -282,6 +347,7 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
             # bounce budget exhausted while still inside: trapped
             alive = False
             n_absorbed += 1
+            w = 0.0 if use_brdf else w
         total_b += b
         paths.append([c for p in pts for c in p])
         depths.append(b)
@@ -309,6 +375,10 @@ def trace(verts, faces, face_w, face_h, theta_deg=0.0, phi_deg=0.0,
                       "max_bounces": max_bounces, "rho": rho,
                       "mode": mode, "diffuse_frac": diffuse_frac,
                       "roughness": roughness,
+                      "model": ("brdf_model lambert+ggx halfvector fresnel, "
+                                "per-depth finish" if use_brdf else
+                                "legacy: constant rho, %s" % mode),
+                      "layers": layers,
                       "hist": hist, "rho_est": rho_est,
                       "missed": n_missed,
                       "theta": theta_deg,

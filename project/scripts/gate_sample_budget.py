@@ -1,79 +1,52 @@
 # -*- coding: utf-8 -*-
-"""빛줄기를 몇 개 쏴야 하나. 지금 256 이 어디서 온 숫자인지 아무도 모른다.
-
-우리는 사진 한 장에 빛줄기(sample) 를 화소마다 256 개 쏜다. 그 사진에서
-뽑아내는 것은 점 229 개짜리 곡선 하나다. 점 하나에 빛줄기 24 만 개를 쓰는
-셈이다 (가로 945 열을 평균하고 열마다 256 개).
-
-남들이 쓰는 숫자는 이렇다.
-
-    Zemax 권장                점 하나당 1 만
-    Radiance rfluxmtx 기본값   점 하나당 1 만
-    genBSDF 기본값            점 하나당 2 천
-
-**24 배 많다.** 그리고 그 24 배가 필요한지 잰 적이 없다. 위상 수 검사도 있고
-해상도 검사도 있는데 빛줄기 수 검사만 없다.
-
-왜 많이 쓰게 됐는지는 짐작이 간다
---------------------------------
-정면 반짝임(head-on peak) 이 곡선의 **최대값**이다. 빛줄기가 적으면 그림이
-지글거리고, 지글거리는 곡선의 최대값은 **위로 치우친다.** 잡음 봉우리를
-신호로 읽기 때문이다. 그래서 잡음을 없애려고 빛줄기를 많이 쏘게 된다.
-
-뭉개기(smear) 는 곡선 전체의 폭이라 지글거림에 훨씬 덜 흔들린다.
-반사 총량(total reflectance) 은 이 길을 안 쓴다 (하늘 조명, 넓이 평균).
-
-**이게 맞다면 최대값을 잡음에 강한 값으로 바꾸는 것만으로 빛줄기를 크게
-줄일 수 있다.** 그래서 이 검사는 최대값과 함께 상위 1 % 지점(p99) 도 같이
-재서 어느 쪽이 덜 흔들리는지 보인다.
-
-무엇을 보나
-----------
-빛줄기를 16 / 32 / 64 / 128 / 256 / 512 로 올리며 세 값을 잰다.
-**512 를 참값으로 놓고** 각 값이 몇 % 어긋나는지 본다.
-
-    뭉개기 (smear)          곡선의 폭
-    반짝임 최대값 (peak)     곡선의 최대값. 지금 쓰는 값
-    반짝임 p99              위에서 1 % 지점. 잡음에 강한 대안
-
-같은 자리를 두 번씩 잰다. 렌더러 자체가 흔들리는 폭과, 빛줄기를 줄여서
-생기는 차이를 갈라 봐야 하기 때문이다.
+"""빛줄기를 몇 개 쏴야 하나. 실제 측정 경로로, 2026-09-15 판.
 
     zsh scripts/run_batch.sh scripts/gate_sample_budget.py samplegate
+
+옛 판이 틀렸던 것 (2026-09-14 감사 7 절, 코드로 확인)
+------------------------------------------------------
+  1  빛 퍼짐 SPREAD 1.0 도. 실제 측정은 form_metrics.SPREAD_DEG 0.05 도.
+  2  코팅 상수를 cfg 맨 위에 넣었는데 build_scene 은 cfg["coating"] 에서 읽는다.
+     그래서 옛 무소 상수(확산 0.76 시절)로 렌더했다.
+  3  두 번 잰다면서 씨앗이 같았다. "렌더러 흔들림" 칸이 구조상 0 이었다.
+  4  빔 자리 하나, 봉우리는 max / p99 뿐.
+그 결과(results/comb20/sample_budget.json)는 지우지 않고 둔다. 16 의 근거로는
+쓰지 않는다.
+
+이번 판
+------
+장면을 따로 짓지 않는다. `sim_server.form` 을 그대로 부른다 -- 화면과 배치가
+재는 바로 그 길이다. 바꾸는 것은 빛줄기 수와 씨앗뿐이다.
+
+    모양 셋 x (빔 각, 관찰자 각) 넷 = 열두 경우       (옛 판과 같은 경우)
+    빛줄기 4 / 8 / 16 / 32 / 64 / 256
+    씨앗 두 개 (1, 2): 같은 설정을 독립으로 두 번
+    위상 16, 빔 자리 sobol, 빔 7.5 mm, 0.215 mm/px    (규약값)
+    재료: 기본 무소(musou_fit2) 팁에서 20 mm, 그 아래 5 % 페인트
+    읽는 것: 뭉개기, 봉우리 box / p99 / max, 수렴 여부
+
+판정
+----
+빛줄기 256 의 두 씨앗 평균을 참값으로 둔다. 어떤 빛줄기 수가 **열두 경우 전부**
+에서 (a) 참값과 1 % 안, (b) 두 씨앗 차이가 1 % 안이면 그 수로 충분하다.
+뭉개기와 box 봉우리를 따로 판정한다. 1 % 는 옛 판과 같은 자다.
 """
 import os
 import sys
 import json
-import math
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
-import numpy as np              # noqa: E402
-import bpy                      # noqa: E402
-import blender_render as BR     # noqa: E402
-import sim_server as SS         # noqa: E402
-import form_buildable as FB     # noqa: E402
-from form_mtf import z_profile, recentre, rms_width   # noqa: E402
+import numpy as np                  # noqa: E402
+import sim_server as SS             # noqa: E402
+import form_buildable as FB         # noqa: E402
+import form_metrics as FM           # noqa: E402
 
 OUT = os.path.join(os.path.dirname(HERE), "results", "comb20")
-os.makedirs(OUT, exist_ok=True)
-PATH = os.path.join(OUT, "sample_budget.json")
-TMP = "/tmp/simsrv"
+PATH = os.path.join(OUT, "sample_budget_v2.json")
 
-# 한 경우만 보고 빛줄기 수를 정할 수 없다. 되돌아오는 모양이 셋 다 다르다.
-# 민판은 좁고 밝고, 벌집은 좁고 어둡고, 피라미드는 넓게 퍼진다. 잡음이
-# 어디에 얼마나 붙는지가 다르므로 셋을 다 본다.
-# 모양 셋에 각도 조합 넷. 한 경우만 보고 빛줄기 수를 정할 수 없다.
-#
-# 되돌아오는 모양이 셋 다 다르다. 민판은 좁고 밝고, 벌집은 좁고 어둡고,
-# 피라미드는 넓게 퍼진다. 잡음이 어디에 얼마나 붙는지가 다르다.
-#
-# 각도도 바꾼다. 관찰자 0 도(정면)는 어두운 바닥만 보이고, 40 도는 밝은
-# 벽이 보이고, 60 도는 자리마다 값이 2853 배 갈렸던 자리다. **어두울수록
-# 잡음이 크게 보인다** -- 신호가 작으니 잡음의 몫이 커진다. 그래서 가장
-# 어두운 조합이 빛줄기를 제일 많이 요구할 것으로 본다 [추측].
 SHAPES = [
     ("민판 (평판)",
      {"top": "none", "top_params": {}, "depth": 10.0, "panel": 200.0,
@@ -89,116 +62,104 @@ SHAPES = [
                      "tip_drop": 0.0},
       "depth": 250.0, "panel": 200.0, "floor": "none", "margin_depths": 0.2}),
 ]
-# (빔 각도, 관찰자 각도)
 ANGLES = [(40.0, 0.0), (40.0, 40.0), (40.0, 60.0), (30.0, 30.0)]
-CASES = [("%s · 빔%+.0f 관찰%.0f" % (nm, th, ob), sp, th, ob)
-         for nm, sp in SHAPES for th, ob in ANGLES]
-BEAM, SPREAD = 7.5, 1.0
-BEAM_POS = 0.0                  # 자리 하나만. 여기서 보는 것은 빛줄기 수다.
-# 앞선 한 경우에서 16 도 512 와 0.1 % 안에서 같았다. 아래쪽을
-# 더 보고 위는 참값 하나만 둔다. 경우가 12 개라 사다리를 줄인다.
 LADDER = [4, 8, 16, 32, 64, 256]
-REPEATS = 2                     # 렌더러 자체 흔들림을 갈라 보려고
-KW = dict(coating="musou_fit", deep_coating="wall_5pct", paint_depth=20.0)
+SEEDS = (1, 2)
+TOL = 0.01
+KW = dict(coating="musou_fit2", deep_coating="wall_5pct", paint_depth=20.0)
+STATS = ("smear", "box", "p99", "max")
 
 
-def p99(prof):
-    """위에서 1 % 지점. 최대값은 잡음 봉우리 하나에 끌려가는데 이건 안 그렇다."""
-    return float(np.percentile(prof, 99.0))
+def one(spec, theta, obs, spp, seed):
+    FB.CYCLES_SEED = seed
+    try:
+        f = SS.form(spec, thetas=[theta], samples=spp, phis=[0.0],
+                    obs_elev=obs, diffuse_frac=None, roughness=None, **KW)
+    finally:
+        FB.CYCLES_SEED = None
+    p = f["planes"]["0"]
+    k = "%+.0f" % theta
+    pk = (p.get("peak_by_stat_by_theta") or {}).get(k) or {}
+    return {"smear": (p.get("smear_by_theta") or {}).get(k),
+            "box": pk.get("box"), "p99": pk.get("p99"), "max": pk.get("max"),
+            "converged": (p.get("converged_by_theta") or {}).get(k),
+            "conditions": f.get("conditions")}
 
 
-rows = []
-for CASE_NAME, SPEC, THETA, OBS in CASES:
-    print("\n== %s · 빔 %+.0f도 · 관찰자 %.0f도 =="
-          % (CASE_NAME, THETA, OBS), flush=True)
-    m = dict(SPEC, margin_depths=2.0)
-    prm = SS._render_params(m)
-    cfg = {"tag": "sbudget", "out_dir": TMP, "results_dir": TMP,
-           "family": SS._render_family(m), "params": prm, "renders": [],
-           "spec_roughness": 0.19748417658131498,
-           "paint_depth": KW["paint_depth"],
-           "deep_coating": SS._coat(KW["deep_coating"])}
-    cfg.update(SS._coat(KW["coating"]))
-    BR.clear_scene()
-    p, cs, ctrl_x0 = BR.build_scene(cfg)
-    total_w = ctrl_x0 + p.face_w
-    cx, cz = total_w / 2.0, 0.0
-    ortho = total_w * 1.02
-    res_x = max(400, min(FB.RES_CAP, int(round(ortho / FB.MM_PER_PX))))
-    res_y = max(200, int(round(res_x * (p.face_h * 1.06) / ortho)))
-    BR.setup_camera(cx, cz, ortho, res_x, res_y, elev_deg=OBS)
-    mm_px = ortho / res_x
-    mm_pz = mm_px / max(math.cos(math.radians(OBS)), 1e-6)
-    w_panel, w_ctrl = BR.measurement_windows(p, ctrl_x0, None)
-    px_panel, px_ctrl = BR.to_pixel_window(w_panel), BR.to_pixel_window(w_ctrl)
-    nwin = max(FB.NWIN, int(round(p.face_h / mm_px)) | 1)
+def main():
+    rows = []
+    if os.path.exists(PATH):
+        rows = json.load(open(PATH)).get("rows", [])
+    have = {(r["case"], r["spp"], r["seed"]) for r in rows}
+    t_all = time.time()
+    for nm, spec in SHAPES:
+        for theta, obs in ANGLES:
+            case = "%s · 빔 %+.0f · 관찰 %.0f" % (nm, theta, obs)
+            print("\n== %s" % case, flush=True)
+            for spp in LADDER:
+                for seed in SEEDS:
+                    if (case, spp, seed) in have:
+                        continue
+                    t0 = time.time()
+                    r = dict(one(spec, theta, obs, spp, seed), case=case,
+                             spp=spp, seed=seed, sec=round(time.time() - t0, 1))
+                    rows.append(r)
+                    json.dump({"rows": rows}, open(PATH, "w"), indent=1,
+                              ensure_ascii=False)
+                    print("   빛줄기 %3d 씨앗 %d  뭉개기 %s  box %s  p99 %s  "
+                          "max %s  (%.0fs)"
+                          % (spp, seed, r["smear"], r["box"], r["p99"],
+                             r["max"], r["sec"]), flush=True)
 
-    bins = int(round((w_panel[3] - w_panel[2]) / mm_px))
-    cols = int(round((w_panel[1] - w_panel[0]) / mm_px))
-    print("화소 %d x %d · 곡선 점 %d 개 · 점 하나가 %d 열을 평균"
-          % (res_x, res_y, bins, cols), flush=True)
-    print("점 하나당 빛줄기 = 열 %d x 빛줄기 수\n" % cols, flush=True)
-    print("%6s %4s | %10s %10s %10s | %10s | %6s"
-          % ("빛줄기", "회", "뭉개기", "반짝임 최대", "반짝임 p99",
-             "점당 빛줄기", "초"), flush=True)
+    # verdict
+    cases = sorted({r["case"] for r in rows})
+    table = {}
+    for case in cases:
+        mine = [r for r in rows if r["case"] == case]
+        ref = {s: np.mean([r[s] for r in mine if r["spp"] == LADDER[-1]
+                           and r[s] is not None] or [np.nan]) for s in STATS}
+        table[case] = {}
+        for spp in LADDER:
+            rr = [r for r in mine if r["spp"] == spp]
+            cell = {}
+            for s in STATS:
+                v = [r[s] for r in rr if r[s] is not None]
+                if len(v) < 2 or not ref[s] or ref[s] != ref[s]:
+                    cell[s] = None
+                    continue
+                cell[s] = {"bias": float(np.mean(v) / ref[s] - 1.0),
+                           "seed_spread": float(abs(v[1] - v[0])
+                                                / max(abs(np.mean(v)), 1e-30))}
+            table[case][spp] = cell
+    enough = {}
+    for s in STATS:
+        enough[s] = None
+        for spp in LADDER:
+            ok = all(table[c][spp].get(s) is not None
+                     and abs(table[c][spp][s]["bias"]) <= TOL
+                     and table[c][spp][s]["seed_spread"] <= TOL
+                     for c in cases)
+            if ok:
+                enough[s] = spp
+                break
+    out = {"rows": rows, "table": table, "enough": enough, "tol": TOL,
+           "protocol_samples": FM.SAMPLES, "seconds": round(time.time() - t_all)}
+    json.dump(out, open(PATH, "w"), indent=1, ensure_ascii=False)
+    print("\n충분한 빛줄기 수 (열두 경우 전부, 참값과 %.0f %% · 씨앗 차 %.0f %% 안): %s"
+          % (100 * TOL, 100 * TOL, enough), flush=True)
+    print("지금 규약값 SAMPLES = %d" % FM.SAMPLES, flush=True)
+    for case in cases:
+        print("  %s" % case, flush=True)
+        for spp in LADDER:
+            c = table[case][spp]
+            print("    %3d  " % spp + "  ".join(
+                "%s %s" % (s, ("bias %+.2f%% seeds %.2f%%" % (100 * c[s]["bias"],
+                                                             100 * c[s]["seed_spread"]))
+                           if c[s] else "—") for s in ("smear", "box")),
+                  flush=True)
+    print(PATH, flush=True)
+    print("@@DONE@@", flush=True)
 
-    for spp in LADDER:
-        for k in range(REPEATS):
-            for o in [x for x in bpy.data.objects if x.name.startswith("stripe")]:
-                bpy.data.objects.remove(o, do_unlink=True)
-            BR.set_world(0.0)
-            BR.add_stripe(THETA, cx, cz, BEAM, total_w, strength=400.0,
-                          spread_deg=SPREAD, target_z=BEAM_POS)
-            BR.configure_cycles(spp, True)
-            t0 = time.time()
-            exr = os.path.join(TMP, "sb_%d_%d.exr" % (spp, k))
-            BR.render_to(exr, os.path.join(TMP, "sb.png"))
-            arr = BR.read_exr(exr, res_x, res_y)
-            pp = recentre(z_profile(arr, px_panel), mm_px, nwin)
-            pc = recentre(z_profile(arr, px_ctrl), mm_px, nwin)
-            try:
-                os.remove(exr)
-            except OSError:
-                pass
-            r = {"case": CASE_NAME, "obs_elev": OBS, "spp": spp, "rep": k,
-                 "smear": rms_width(pp, mm_pz) / rms_width(pc, mm_pz),
-                 "peak_max": float(pp.max()) / float(pc.max()),
-                 "peak_p99": p99(pp) / p99(pc),
-                 "per_bin": cols * spp,
-                 "sec": round(time.time() - t0, 1)}
-            rows.append(r)
-            json.dump(rows, open(PATH, "w"), indent=1, ensure_ascii=False)
-            print("%6d %4d | %10.4f %10.5f %10.5f | %10s | %6.1f"
-                  % (spp, k, r["smear"], r["peak_max"], r["peak_p99"],
-                     f"{r['per_bin']:,}", r["sec"]), flush=True)
 
-    # 512 를 참값으로 놓고 각 값이 몇 % 어긋나나
-    mineall = [r for r in rows if r["case"] == CASE_NAME and r["obs_elev"] == OBS]
-    ref = {k: float(np.mean([r[k] for r in mineall if r["spp"] == LADDER[-1]]))
-           for k in ("smear", "peak_max", "peak_p99")}
-    print("\n빛줄기 %d 을 참값으로 놓고 어긋난 정도" % LADDER[-1], flush=True)
-    print("%6s | %12s %12s %12s | %8s"
-          % ("빛줄기", "뭉개기", "반짝임 최대", "반짝임 p99", "회당 초"), flush=True)
-    for spp in LADDER:
-        mine = [r for r in mineall if r["spp"] == spp]
-        cell = []
-        for k in ("smear", "peak_max", "peak_p99"):
-            v = float(np.mean([r[k] for r in mine]))
-            cell.append("%+.2f %%" % (100 * (v / ref[k] - 1.0)))
-        print("%6d | %12s %12s %12s | %8.1f"
-              % (spp, cell[0], cell[1], cell[2],
-                 float(np.mean([r["sec"] for r in mine]))), flush=True)
-
-    print("\n같은 설정을 두 번 재서 갈린 폭 (렌더러 자체 흔들림)", flush=True)
-    for spp in LADDER:
-        mine = [r for r in mineall if r["spp"] == spp]
-        if len(mine) < 2:
-            continue
-        print("  빛줄기 %3d : 뭉개기 %+.2f %% · 최대 %+.2f %% · p99 %+.2f %%"
-              % (spp,
-                 100 * (mine[1]["smear"] / mine[0]["smear"] - 1),
-                 100 * (mine[1]["peak_max"] / mine[0]["peak_max"] - 1),
-                 100 * (mine[1]["peak_p99"] / mine[0]["peak_p99"] - 1)), flush=True)
-
-print("\n%s" % PATH, flush=True)
-print("@@DONE@@", flush=True)
+if __name__ == "__main__":
+    main()

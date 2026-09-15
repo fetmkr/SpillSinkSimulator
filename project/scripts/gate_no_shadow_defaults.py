@@ -48,9 +48,12 @@ FAILED = []
 # 모듈 상수와 같은 뜻인 요청 인자들. 여기 있는 이름 옆에 숫자가 박혀 있으면
 # 그게 그림자 기본값이다.
 SHADOWED = {
-    "n_phase": ("form_buildable.py", "N_PHASE"),
-    "samples": ("form_buildable.py", "SAMPLES"),
-    "beam_w": ("form_buildable.py", "STRIPE_W"),
+    "n_phase": ("form_metrics.py", "N_PHASE"),
+    "samples": ("form_metrics.py", "SAMPLES"),
+    "beam_w": ("form_metrics.py", "STRIPE_W"),
+    # 2026-09-15: `/api/crosscheck` 가 spp 를 안 받으면 Mitsuba 256, Cycles 512
+    # 로 돌았다. 이 이름은 전에 목록에 없어서 A 가 못 봤다.
+    "spp": ("form_metrics.py", "RHO_XCHECK_SAMPLES"),
 }
 
 
@@ -100,10 +103,23 @@ def a_no_or_number():
 
 # 이름 -> 그 값이 살아야 할 단 한 파일. `form_metrics` 는 bpy 가 없어도
 # 열리므로 블렌더 쪽과 Mitsuba 쪽이 둘 다 읽을 수 있다.
+#
+# 2026-09-15: 표본 수·위상 수·봉우리 읽는 법·빔 자리·빛 퍼짐도 여기로 옮겼다.
+# `form_buildable` 에 살 때는 그 파일이 bpy 를 불러서, 일반 Python 으로 띄운
+# 서버가 자기 기본값을 못 읽고 500 으로 죽었다. MM_PER_PX 는 아직 목록에
+# 없다. `mts_form` 이 "0 = 옛 고정 화소 수" 라는 다른 뜻의 0.0 을 들고 있고,
+# 요청이 늘 값을 채우지만 두 번째 자리인 것은 맞다. 아직 안 고쳤다.
 OWNER = {
     "MEAS_INSET_X": "form_metrics.py",
     "MEAS_INSET_Z": "form_metrics.py",
     "STRIPE_W": "form_metrics.py",
+    "SAMPLES": "form_metrics.py",
+    "N_PHASE": "form_metrics.py",
+    "SPREAD_DEG": "form_metrics.py",
+    "PEAK_STAT": "form_metrics.py",
+    "PEAK_BOX_MM": "form_metrics.py",
+    "BEAM_POS": "form_metrics.py",
+    "MM_PER_PX": "form_metrics.py",
 }
 
 
@@ -162,15 +178,29 @@ def c_server_matches_file():
             headers={"Content-Type": "application/json"})
         resp = urllib.request.urlopen(r, timeout=120)
         got = json.loads(resp.headers.get("X-Derived") or "{}")
-    except Exception as exc:
-        return True, "서버가 안 떠 있다 -- 건너뜀 (%s)" % type(exc).__name__
+    # 서버가 **안 떠 있을 때만** 건너뛴다. 2026-09-15 코드 리뷰: 예전에는
+    # 모든 예외를 "안 떠 있다" 로 읽어서, 떠 있는데 500 을 내는 서버를 통과시켰다.
+    # 이 검사가 잡으려던 것이 바로 그 경우다. HTTPError 는 URLError 의 자식이라
+    # 먼저 가른다.
+    except urllib.error.HTTPError as exc:
+        return False, "서버가 떠 있는데 %d 을 냈다" % exc.code
+    except urllib.error.URLError as exc:
+        if isinstance(exc.reason, ConnectionRefusedError):
+            return True, "서버가 안 떠 있다 -- 건너뜀"
+        return False, "서버에 못 닿았다 (%s)" % exc.reason
+    except (ValueError, OSError) as exc:
+        return False, "응답을 못 읽었다 (%s: %s)" % (type(exc).__name__,
+                                                   str(exc)[:80])
     m = (got.get("rig") or got).get("method") or {}
     if not m:
-        return False, "서버가 method 를 안 준다 -- 옛 코드일 수 있다"
-    want = {"samples": const("form_buildable.py", "SAMPLES"),
-            "n_phase": const("form_buildable.py", "N_PHASE"),
-            "peak_stat": const("form_buildable.py", "PEAK_STAT"),
-            "beam_pos": const("form_buildable.py", "BEAM_POS"),
+        err = (got.get("rig") or {}).get("rig_error") or got.get("rig_error")
+        return False, ("서버가 method 를 안 준다%s"
+                       % ((" -- rig_error: %s" % str(err)[:80]) if err
+                          else " -- 옛 코드일 수 있다"))
+    want = {"samples": const("form_metrics.py", "SAMPLES"),
+            "n_phase": const("form_metrics.py", "N_PHASE"),
+            "peak_stat": const("form_metrics.py", "PEAK_STAT"),
+            "beam_pos": const("form_metrics.py", "BEAM_POS"),
             "stripe_w": const("form_metrics.py", "STRIPE_W"),
             "inset_x": const("form_metrics.py", "MEAS_INSET_X"),
             "inset_z": const("form_metrics.py", "MEAS_INSET_Z")}

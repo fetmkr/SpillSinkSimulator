@@ -47,7 +47,8 @@ import math
 
 import numpy as np
 
-from form_metrics import z_profile, recentre, rms_width, mtf_at
+from form_metrics import (z_profile, recentre, rms_width, mtf_at, peak_stats,
+                          peak_ratio, PEAK_STAT)
 
 # COPIES, and the comment that used to sit here claimed they were "read from
 # there rather than copied, so the two cannot drift apart". They are copies and
@@ -57,13 +58,17 @@ from form_metrics import z_profile, recentre, rms_width, mtf_at
 # apart. mts_worker now overwrites every one of these from the request; the
 # values below are only what a bare `python mts_form.py` would use.
 GAP = 100.0                  # x gap between panel and flat control
-MM_PER_PX = 0.0              # 0 = legacy fixed pixel count; set from request
 RES_X, RES_Y = 1400, 620
 NWIN = 361
 # 빔 너비와 창 크기는 `form_metrics` 에서 읽는다. 여기 숫자를 다시 적으면
 # Cycles 와 서로 다른 실험을 하게 된다 -- 2026-08-20 에 빔이 7.5 대 2.0 으로
 # 갈라져 있었고, 그 차이를 "렌더러가 다르다" 로 읽고 있었다.
-from form_metrics import STRIPE_W, MEAS_INSET_X, MEAS_INSET_Z   # noqa: E402
+#
+# MM_PER_PX 도 같다 (2026-09-15). 여기에 `0.0` 이 "옛 고정 화소 수" 라는 다른
+# 뜻으로 따로 적혀 있었다. 서버는 늘 값을 채워 보냈지만, 채우지 않은 호출은
+# Cycles 와 다른 밀도로 쟀다. 0 을 쓰고 싶은 호출은 요청에 0 을 넣으면 된다.
+from form_metrics import (STRIPE_W, MEAS_INSET_X, MEAS_INSET_Z,  # noqa: E402
+                          MM_PER_PX)
 RHO_CONTROL = 0.05           # the matte black wall the ratio is against
 SLIT_Y = 10.0                # height of the slit above the face plane, mm
 EYE_Y = 500.0                # orthographic eye height; near_clip hides the slit
@@ -273,6 +278,7 @@ def run(mi, ply, rho, face_w, face_h, pitch, thetas=(-40.0, 40.0, 0.0),
         acc_p = np.zeros(NWIN)
         acc_c = np.zeros(NWIN)
         peaks = []
+        by_stat = {"box": [], "p99": [], "max": []}
         for pi, dz in enumerate(phases):
             # progress marker: sim_server streams these lines from the
             # subprocess so the UI bar moves during a Mitsuba form render too
@@ -285,14 +291,24 @@ def run(mi, ply, rho, face_w, face_h, pitch, thetas=(-40.0, 40.0, 0.0),
             pc = recentre(z_profile(arr, w_ctrl), NWIN)
             acc_p += pp
             acc_c += pc
-            peaks.append(float(pp.max()) / float(pc.max())
-                         if pc.max() > 0 else float("nan"))
+            # THE SAME PEAK STATISTIC AS CYCLES (2026-09-15). This took the
+            # plain maximum while Cycles had moved to p99, so the head-on
+            # cross-check compared two different statistics. Both now read
+            # `form_metrics.peak_stats` and record all three.
+            _sp = peak_stats(arr, w_panel, pp, mm_per_px, mm_per_px)
+            _sc = peak_stats(arr, w_ctrl, pc, mm_per_px, mm_per_px)
+            for _s in by_stat:
+                by_stat[_s].append(peak_ratio(_sp, _sc, _s))
+            peaks.append(peak_ratio(_sp, _sc, PEAK_STAT))
         acc_p /= n_phase
         acc_c /= n_phase
         d = {"rms_mm": rms_width(acc_p, mm_per_px),
              "rms_control_mm": rms_width(acc_c, mm_per_px),
              "peak_ratio_mean": float(np.mean(peaks)),
-             "peak_ratio_sd": float(np.std(peaks))}
+             "peak_ratio_sd": float(np.std(peaks)),
+             "peak_stat": PEAK_STAT}
+        for _s, v in by_stat.items():
+            d["peak_ratio_%s_mean" % _s] = float(np.mean(v))
         d.update(mtf_at(acc_p, mm_per_px, (10.0, 20.0, 40.0)))
         out["thetas"]["%+.0f" % theta] = d
 

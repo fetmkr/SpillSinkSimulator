@@ -75,7 +75,12 @@ def main():
         # sends only the beam compares the new rig against the old one and
         # reports the difference as renderer disagreement -- which is exactly
         # what the beam default already did (7.5 here, 2.0 there).
-        MF.STRIPE_W = float(req.get("beam_w", 7.5))
+        # NO NUMBERS HERE (2026-09-15). This read `req.get("beam_w", 7.5)`,
+        # `n_phase 6` and `spp 256` -- a third home for the beam width and a
+        # second for the other two. An omitted key now takes the protocol value
+        # from `form_metrics`, the module Cycles reads too.
+        import form_metrics as FM
+        MF.STRIPE_W = float(req.get("beam_w") or FM.STRIPE_W)
         if req.get("mm_per_px"):
             MF.MM_PER_PX = float(req["mm_per_px"])
         if req.get("full_face_window"):
@@ -86,9 +91,9 @@ def main():
         face_f = float(prm.get("face_w", 60.0))
         r = MF.run(mi, ply_f, float(req.get("rho", 0.01)), face_f, face_f,
                    float(req.get("pitch", 6.5)),
-                   thetas=tuple(req.get("thetas", (-40.0, 40.0, 0.0))),
-                   n_phase=int(req.get("n_phase", 6)),
-                   spp=int(req.get("spp", 256)))
+                   thetas=tuple(req.get("thetas") or (-40.0, 40.0, 0.0)),
+                   n_phase=int(req.get("n_phase") or FM.N_PHASE),
+                   spp=int(req.get("spp") or FM.SAMPLES))
         r.update(tris=nt_f, version=mi.__version__, variant=mi.variant())
         sys.stdout.write("\n@@RESULT@@" + json.dumps(r) + "\n")
         sys.stdout.flush()
@@ -97,9 +102,10 @@ def main():
     ply = os.path.join(out, "panel.ply")
     nv, nt = write_ply(ply, v, f)
     face = float(prm.get("face_w", 60.0))
+    import form_metrics as FM
     r = measure(mi, ply, float(req.get("rho", 0.01)), face, face,
                 theta=float(req.get("theta", 0.0)),
-                spp=int(req.get("spp", 256)))
+                spp=int(req.get("spp") or FM.RHO_XCHECK_SAMPLES))
     # Mitsuba's logger writes to stdout, so the result cannot simply BE
     # stdout -- the first attempt returned a PLY performance warning glued to
     # the front of the JSON and the caller reported a failure for a render

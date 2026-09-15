@@ -1,0 +1,482 @@
+{
+ "spec": {
+  "top": "pyramid",
+  "top_params": {
+   "pitch": 4.0,
+   "tip_flat": 0.1,
+   "apex_jitter": 0.0,
+   "tip_drop": 0.0
+  },
+  "depth": 20.0,
+  "panel": 60.0,
+  "floor": "none"
+ },
+ "published": {
+  "B7": {
+   "smear": 1.4169910167003033,
+   "head_on": 0.040000739327958154
+  },
+  "B10": {
+   "smear": 1.0938828538275263,
+   "head_on": 0.040377163771855185
+  },
+  "total_phi0_worst": 0.0017668,
+  "total_phi30_worst": 0.0025109
+ },
+ "runs": {
+  "R_spread0.05_beam7": {
+   "smear": 1.9938530937845438,
+   "smear_legacy": 1.4256906631328274,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.03164456608220921,
+    "p99": 0.029980372823369517,
+    "max": 0.04026602610233075
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 512,
+    "beam_w": 7.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.0,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "max",
+    "peak_box_mm": 2.0,
+    "beam_pos": "uniform",
+    "smear_tol": 0.02,
+    "coating_model": "fresnel_mix",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 120.2
+  },
+  "R_spread0.05_beam10": {
+   "smear": 1.5692614564366878,
+   "smear_legacy": 1.099361922846001,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.031707227001235086,
+    "p99": 0.03404698656473136,
+    "max": 0.04127164568701208
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 512,
+    "beam_w": 10.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.0,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "max",
+    "peak_box_mm": 2.0,
+    "beam_pos": "uniform",
+    "smear_tol": 0.02,
+    "coating_model": "fresnel_mix",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 116.0
+  },
+  "R_spread1_beam7": {
+   "smear": 1.3916664666727054,
+   "smear_legacy": 0.9756482943390372,
+   "converged": false,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.030876587943423028,
+    "p99": 0.027979483970087232,
+    "max": 0.037792931130337444
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 512,
+    "beam_w": 7.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.0,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "max",
+    "peak_box_mm": 2.0,
+    "beam_pos": "uniform",
+    "smear_tol": 0.02,
+    "coating_model": "fresnel_mix",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 119.2
+  },
+  "R_spread1_beam10": {
+   "smear": 1.3055757374799661,
+   "smear_legacy": 0.9350871262817997,
+   "converged": false,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.031029267836595313,
+    "p99": 0.02858291131904131,
+    "max": 0.038132860231556785
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 512,
+    "beam_w": 10.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.0,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "max",
+    "peak_box_mm": 2.0,
+    "beam_pos": "uniform",
+    "smear_tol": 0.02,
+    "coating_model": "fresnel_mix",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 120.2
+  },
+  "R_total": {
+   "planes": {
+    "0": {
+     "0": 0.0009781806729733944,
+     "-20": 0.0012492017121985555,
+     "-40": 0.0015165696386247873,
+     "20": 0.0012419819831848145,
+     "40": 0.001515891752205789
+    },
+    "30": {
+     "0": 0.0009793619392439723,
+     "-20": 0.0012475858675315976,
+     "-40": 0.0019397314172238111,
+     "20": 0.0012435107491910458,
+     "40": 0.0019327334593981504
+    }
+   },
+   "worst_phi0": 0.0015165696386247873,
+   "worst_phi30": 0.0019397314172238111,
+   "conditions": {
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "deep_until": null,
+    "paint_fade": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null,
+    "thetas": [
+     0.0,
+     -20.0,
+     -40.0,
+     20.0,
+     40.0
+    ],
+    "phis": [
+     0.0,
+     30.0
+    ],
+    "samples": 256,
+    "mode": "hemi_view",
+    "margin_depths": 2.0,
+    "coating_model": "fresnel_mix"
+   }
+  },
+  "T_beam7": {
+   "smear": 1.9987295896602773,
+   "smear_legacy": 1.4384976916322105,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.020370843505357162,
+    "p99": 0.01869552240782248,
+    "max": 0.028996335777929073
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 512,
+    "beam_w": 7.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.0,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "max",
+    "peak_box_mm": 2.0,
+    "beam_pos": "uniform",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit",
+     "body": 0.007584799999999999,
+     "spec_scale": 0.05987999999999999,
+     "df": 0.76,
+     "roughness": 0.3,
+     "rho0": 0.00998
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   }
+  },
+  "N_beam7": {
+   "smear": 1.9458386475616742,
+   "smear_legacy": 1.3756727819462444,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.07695453813279406,
+    "p99": 0.07733480377812282,
+    "max": 0.07747204235074207
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 16.8
+  },
+  "N_beam7.5": {
+   "smear": 1.851525010426121,
+   "smear_legacy": 1.3028119619622684,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.07695067608838863,
+    "p99": 0.07732576790188705,
+    "max": 0.07750875185640202
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 16.6
+  },
+  "N_beam10": {
+   "smear": 1.5393302984424402,
+   "smear_legacy": 1.0552188549551076,
+   "converged": true,
+   "window_mm": 60.0,
+   "head_on_by_stat": {
+    "box": 0.07696292865958415,
+    "p99": 0.07743668421365789,
+    "max": 0.07763535277872048
+   },
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 10.0,
+    "thetas": [
+     -40.0,
+     0.0,
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "seconds": 16.6
+  },
+  "N_total": {
+   "planes": {
+    "0": {
+     "0": 0.001714837271720171,
+     "-20": 0.0018496408592909575,
+     "-40": 0.0020730551332235336,
+     "20": 0.0018416278762742877,
+     "40": 0.0020737554877996445
+    },
+    "30": {
+     "0": 0.0017182545270770788,
+     "-20": 0.0017939968965947628,
+     "-40": 0.002416391158476472,
+     "20": 0.0017898083897307515,
+     "40": 0.002407422522082925
+    }
+   },
+   "worst_phi0": 0.0020737554877996445,
+   "worst_phi30": 0.002416391158476472,
+   "conditions": {
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": null,
+    "paint_depth": null,
+    "deep_until": null,
+    "paint_fade": null,
+    "floor_coating": null,
+    "floor_boundary_depth": null,
+    "thetas": [
+     0.0,
+     -20.0,
+     -40.0,
+     20.0,
+     40.0
+    ],
+    "phis": [
+     0.0,
+     30.0
+    ],
+    "samples": 256,
+    "mode": "hemi_view",
+    "margin_depths": 2.0,
+    "coating_model": "reciprocal"
+   }
+  }
+ },
+ "seconds": 656.6
+}

@@ -67,18 +67,13 @@ OUT = os.path.join(ROOT, "renders", "form_b")
 OUTJSON = os.path.join(RESULTS, "form_buildable.json")
 CAND = os.path.join(RESULTS, "form_candidates.json")
 
-# 빛줄기(표본) 수. 512 는 최대값을 쓰던 시절의 값이다 -- 최대값이 잡음을
-# 신호로 읽으니 잡음을 없애야 했다. p99 로 바꾸면 그 이유가 사라진다.
-# 실측: 모양 셋 x 각도 넷, 열두 경우에서 p99 가 4~16 개부터 512 개 값과
-# 1 % 안에서 같았다 (`gate_sample_budget.py`). 뭉개기는 4 개에서도 1 % 안.
-# 16 으로 둔다. 그보다 낮추면 어두운 자리에서 p99 도 흔들리기 시작한다.
-SAMPLES = 16
+# THE PROTOCOL CONSTANTS LIVE IN `form_metrics` (2026-09-15): SAMPLES, MM_PER_PX,
+# SPREAD_DEG, N_PHASE, PEAK_STAT, PEAK_PCT, PEAK_BOX_MM, BEAM_POS, SMEAR_TOL.
+# They were defined here, and this module imports bpy, so a server started in
+# plain Python could not read its own defaults. They are imported below and so
+# remain attributes of this module: `FB.SAMPLES = 4` still changes what
+# `run_case` renders with. Their reasons are written beside them there.
 RES_X, RES_Y = 1400, 620
-# Sampling density in mm per pixel, held FIXED so the instrument does not
-# change with the sample (see the note in run_case). Set to 0 to restore the
-# pre-2026-08-20 behaviour of a constant pixel count, which is what every
-# published number was measured with.
-MM_PER_PX = 0.215
 
 # WHERE THE OBSERVER STANDS (2026-08-27). Until now the camera sat on the panel
 # normal and nothing could move it: `setup_camera` has taken `elev_deg` from the
@@ -109,68 +104,20 @@ GAP_EST = 100.0
 # Default probe = the DEPLOYMENT beam. 숫자와 그 근거는 `form_metrics` 에
 # 한 번만 적혀 있다. 여기서 다시 적으면 Mitsuba 쪽과 갈라진다 -- 실제로
 # 2026-08-20 에 갈라져 있었다.
-from form_metrics import STRIPE_W                                  # noqa: E402
-SPREAD_DEG = 0.05
-THETAS = (-40.0, 0.0, 40.0)
-N_PHASE = 16                     # stripe positions across one pitch
-
-# HOW THE PEAK IS READ (2026-08-28). It used to be the MAXIMUM of the profile.
-# A maximum picked out of a noisy estimate is biased HIGH -- picking the largest
-# of many noisy values picks the ones the noise helped, and the bias only goes
-# away as the noise does. Statistics calls this the winner's curse (Efron 2011,
-# "the largest few of the z_i's are likely to substantially overestimate their
-# corresponding mu_i's"; Forde 2023 for the ranking-bias form).
-#
-# We measured it. Splitting the render in two -- find the position in image A,
-# read the value at that position in image B, which decouples selection from
-# estimation (Kriegeskorte 2009) -- the maximum read 2.6 % high on the darkest
-# case and up to 9x high looking head-on at a deep pyramid, where the profile
-# is nearly all noise. The 99th percentile matched the split-sample value to
-# within 1 % everywhere, and did so from 4 samples per pixel upward.
-#
-# Surface metrology reached the same answer for the same reason: Pawlus 2023
-# calls maximum height "not a stable parameter" and shows a top percentile
-# (S+-3sigma) equals the average of many per-window maxima and is steadier.
-# Radiance's evalglare never takes a point maximum either -- it thresholds,
-# groups, and AVERAGES over each glare source, and reports median/75/95
-# percentiles beside it.
-#
-# Set to "max" to reproduce a published figure. The two are NOT the same
-# quantity: the head-on target of 0.040 was set on the maximum.
-PEAK_STAT = "p99"                # "p99" or "max"
-PEAK_PCT = 99.0
-
-# BEAM POSITIONS (2026-08-28). `uniform` walks one pitch in equal steps.
-# That is the trapezoid rule on a periodic function, and mathematically it is
-# the best way to average one -- the endpoint terms cancel and the error falls
-# exponentially. Measured, it beat a golden-ratio sequence at every count.
-#
-# **It is still the wrong thing to do here, and the reason is physical, not
-# numerical.** Equal steps across one pitch land on the same features every
-# time: -25 is a valley, 0 is an apex, the rest are quarter points. A real
-# laser does not respect our grid. It falls wherever it falls.
-#
-# And it matters, because the value depends enormously on where it falls.
-# Measured on the base-50 pyramid at 512 spp, beam at 40 deg, read head-on,
-# stepping one pitch: 0.00116 in the valley rising to 0.02645 near the apex,
-# a spread of 22.7x. (Off-normal it is only 1.1x -- the sensitivity is
-# specific to looking down the axis.) Averaging six grid-locked samples of a
-# quantity that swings 23x is not an average over where the beam might land.
-#
-# `sobol` is the default for that reason. A low-discrepancy sequence fills the
-# gaps rather than repeating a lattice, needs neither periodicity nor
-# smoothness, converges like n^-1.5 on smooth parts, and is bounded at 2.72x
-# plain Monte Carlo in the worst case (Owen 2023). It is also the only option
-# that stays meaningful once `apex_jitter`, `row_offset` or an imported STEP
-# surface removes the period that `uniform` assumes exists.
-#
-# Keep `uniform` for reproducing a published figure, and for the one case it is
-# genuinely better: a smooth periodic response where you want the mean over the
-# period and nothing else.
-BEAM_POS = "sobol"               # "sobol" or "uniform"
+from form_metrics import (STRIPE_W, SAMPLES, MM_PER_PX,           # noqa: E402
+                          SPREAD_DEG, N_PHASE, PEAK_STAT, PEAK_PCT,
+                          PEAK_BOX_MM, BEAM_POS, SMEAR_TOL)
+# Beam angles. (-40, 0, 40) until 2026-09-15; +30 added so the simulator and the
+# finalist report read the room's beam range from one list (form_metrics).
+from form_metrics import FORM_THETAS as THETAS                     # noqa: E402
 # Optional per-frame progress hook, same contract as blender_render.PROGRESS_CB:
 # sim_server points it at its counter; batch sweeps leave it None.
 PROGRESS_CB = None
+# Cycles sampling seed. None keeps blender_render.SEED (0), which is what every
+# published run used. A repeat that wants an INDEPENDENT noise estimate has to
+# set a different seed: `gate_sample_budget` rendered its "two repeats" with the
+# same seed, so their spread was zero by construction (2026-09-14 audit, 7).
+CYCLES_SEED = None
 PERIODS_MM = (10.0, 20.0, 40.0)
 # PROFILE WINDOW. This was a fixed SAMPLE COUNT, so its physical length shrank
 # as the sampling got finer -- 361 samples is 77.6 mm at 0.215 mm/px but only
@@ -218,7 +165,8 @@ def beam_positions(pitch, n, mode=None):
 # its images with the SAME code. A second renderer that reimplemented `rms_width`
 # could disagree because of the statistic rather than the transport, and the
 # cross-check would prove nothing.
-from form_metrics import z_profile, recentre, rms_width, mtf_at   # noqa: E402
+from form_metrics import (z_profile, recentre, rms_width,         # noqa: E402
+                          mtf_at, peak_stats, peak_ratio, smear_ladder)
 
 
 def run_case(entry):
@@ -355,7 +303,7 @@ def run_case(entry):
             "frame is %.1f mm tall but the face is %.1f mm -- the measurement "
             "window would run off the image (ortho %.1f, %dx%d px)"
             % (_frame_h, p.face_h, ortho, res_x, res_y))
-    BR.configure_cycles(SAMPLES, True)
+    BR.configure_cycles(SAMPLES, True, seed=CYCLES_SEED)
     w_panel, w_ctrl = BR.measurement_windows(p, ctrl_x0, None)
     # ADAPTIVE WINDOW (user 2026-08-16: "측정창 키워"). The phase walk spans
     # one pitch; if the default 30 % z-inset leaves a window smaller than
@@ -380,6 +328,13 @@ def run_case(entry):
            "beam_w_mm": STRIPE_W, "spread_deg": SPREAD_DEG,
            "res_x": res_x, "res_y": res_y, "samples": SAMPLES,
            "face_w": p.face_w, "face_h": p.face_h,
+           # WHAT IT WAS MEASURED WITH, on the record (2026-09-15): the coating
+           # tree, which peak statistic `peak_ratio_*` means, and the smear
+           # tolerance. Each of these changed on that date.
+           "coating_model": BR.COATING_MODEL, "peak_stat": PEAK_STAT,
+           "peak_box_mm": PEAK_BOX_MM, "smear_tol": SMEAR_TOL,
+           "beam_pos": BEAM_POS, "cycles_seed": CYCLES_SEED,
+           "control_x0_mm": ctrl_x0,
            "rig": "v2" if MM_PER_PX else "legacy", "thetas": {}}
 
     # phases walk exactly one pitch, so the mean is over the full period rather
@@ -414,7 +369,8 @@ def run_case(entry):
         # `per_phase` 는 만들어만 놓고 아무것도 안 넣던 죽은 키였다.
         # 자리마다의 값을 실제로 들고 다닌다 -- 계산해 놓고 버리면
         # 나중에 "어느 자리가 문제였나" 를 물을 수가 없다.
-        rec = {"beam_pos_mm": list(phases), "peak_ratio": [], "rms_mm": []}
+        rec = {"beam_pos_mm": list(phases), "peak_ratio": [], "rms_mm": [],
+               "peak_box": [], "peak_p99": [], "peak_max": []}
         acc_p = np.zeros(nwin)
         acc_c = np.zeros(nwin)
         lad_p = {h: np.zeros(nwin) for h in LADDER}
@@ -444,14 +400,14 @@ def run_case(entry):
             pc = recentre(z_profile(arr, px_ctrl), nwin)
             acc_p += pp
             acc_c += pc
-            # 최대값은 위로 치우친다. 왜 그런지는 PEAK_STAT 옆 주석에.
-            if PEAK_STAT == "p99":
-                _a = float(np.percentile(pp, PEAK_PCT))
-                _b = float(np.percentile(pc, PEAK_PCT))
-            else:
-                _a, _b = float(pp.max()), float(pc.max())
-            pk = (_a / _b) if _b > 0 else float("nan")
-            rec["peak_ratio"].append(pk)
+            # 봉우리는 세 가지로 다 읽어 둔다. 기본이 무엇이고 왜 p99 를
+            # 버렸는지는 form_metrics.PEAK_STAT 옆에. `box` 는 2D 창에서
+            # 읽으니 세로 화소 크기는 기울인 만큼 늘어난 mm_per_px_z 를 쓴다.
+            _sp = peak_stats(arr, px_panel, pp, mm_per_px, mm_per_px_z)
+            _sc = peak_stats(arr, px_ctrl, pc, mm_per_px, mm_per_px_z)
+            for _s in ("box", "p99", "max"):
+                rec["peak_" + _s].append(peak_ratio(_sp, _sc, _s))
+            rec["peak_ratio"].append(peak_ratio(_sp, _sc, PEAK_STAT))
             rec["rms_mm"].append(rms_width(pp, mm_per_px_z))
             for h in LADDER:                      # same frame, wider readings
                 lad_p[h] += recentre(
@@ -468,20 +424,16 @@ def run_case(entry):
         acc_p /= N_PHASE
         acc_c /= N_PHASE
 
-        # walk the ladder outward and stop where two successive windows agree
-        curve = []
-        for h in LADDER:
-            rp = rms_width(lad_p[h], mm_per_px_z)
-            rc = rms_width(lad_c[h], mm_per_px_z)
-            curve.append({"window_mm": h, "rms_mm": rp, "rms_control_mm": rc,
-                          "smear": (rp / rc) if rc and rc == rc else None})
-        conv_i, converged = len(curve) - 1, False
-        for i in range(1, len(curve)):
-            a, b = curve[i - 1]["smear"], curve[i]["smear"]
-            if a and b and abs(b - a) / b <= 0.02:
-                conv_i, converged = i, True
-                break
-        best = curve[conv_i]
+        # THE LADDER'S VERDICT (2026-09-15). This stopped at the first two
+        # neighbouring windows that agreed and ignored every wider window
+        # already computed; a 22x smear read 1.00 that way. The value is now
+        # the widest window, and `converged` needs the last step stable AND no
+        # second moment left at the edge. See `form_metrics.smear_ladder`.
+        lad = smear_ladder(LADDER, [lad_p[h] for h in LADDER],
+                           [lad_c[h] for h in LADDER], mm_per_px_z, SMEAR_TOL)
+        curve = lad["curve"]
+        converged = lad["converged"]
+        best = lad["value"]
 
         # How wide the return actually is, so a caller that did NOT converge
         # can size the next sample instead of shrugging. z90 is the half-width
@@ -491,7 +443,9 @@ def run_case(entry):
         _w = lad_p[LADDER[-1]]
         _tot = _w.sum()
         if _tot > 1e-20:
-            _z = (np.arange(_w.size) - _w.size / 2.0) * mm_per_px
+            # mm_per_px_z, not mm_per_px: the profile runs along the tilted
+            # axis. At obs_elev 0 the two are identical.
+            _z = (np.arange(_w.size) - _w.size / 2.0) * mm_per_px_z
             _q = _w / _tot
             _c = float((_z * _q).sum())
             _d = np.abs(_z - _c)
@@ -510,6 +464,13 @@ def run_case(entry):
              "z90_mm": z90,
              "window_needed_mm": (6.0 * z90) if z90 == z90 else None,
              "window_curve": curve,
+             "smear_verdict": {k: v for k, v in lad.items()
+                               if k not in ("curve", "value")},
+             "peak_ratio_box_mean": float(np.mean(rec["peak_box"])),
+             "peak_ratio_p99_mean": float(np.mean(rec["peak_p99"])),
+             "peak_ratio_max_mean": float(np.mean(rec["peak_max"])),
+             "peak_box_by_beam_pos": [float(x) for x in rec["peak_box"]],
+             "peak_p99_by_beam_pos": [float(x) for x in rec["peak_p99"]],
              "rms_mm_legacy": rms_width(acc_p, mm_per_px_z),
              "rms_control_legacy_mm": rms_width(acc_c, mm_per_px_z),
              "peak_ratio_mean": float(np.mean(rec["peak_ratio"])),

@@ -108,7 +108,15 @@ def check_energy_setup():
 # --- B. reciprocity ---------------------------------------------------------
 
 def check_reciprocity():
-    """hemi_view (reciprocity) against angle mode (direct illumination)."""
+    """hemi_view (reciprocity) against angle mode (direct illumination).
+
+    NOT A RECIPROCITY TEST, despite the name (2026-09-14 audit). It compares
+    the response to a uniform sky read from one direction with the response to
+    one sun read head-on. Nothing requires those two to be equal for a general
+    BRDF, so a pass here says nothing about whether the coating is reciprocal,
+    and the Fresnel-mix coating that broke reciprocity by 55 % passed it.
+    The test that swaps source and viewer is `gate_coating_reciprocity.py`.
+    Kept, under this warning, because its numbers are in older logs."""
     print("\n[B] reciprocity: hemi_view == direct illumination at the same "
           "theta")
     body, spec = BR.coating_split(0.76)

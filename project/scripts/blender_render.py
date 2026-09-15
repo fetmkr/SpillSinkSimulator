@@ -104,7 +104,9 @@ def describe(p):
 # --------------------------------------------------------------------------
 
 SEED = 0            # Cycles sampling seed; set per-run to measure the spread
-GAP = 100.0          # X gap between panel and flat control
+GAP = 100.0          # X gap between panel FACE and flat control, when clear
+CONTROL_SLACK = 60.0  # clear air between the built FIELD and the control
+                      # (same value rig_v2.SLACK has used since 2026-08-20)
 # 재는 창의 크기. 숫자는 `form_metrics` 에 한 번만 적혀 있다 -- Mitsuba 쪽
 # 코드가 같은 넓이를 재야 두 렌더러의 차이를 빛 계산의 차이로 읽을 수 있다.
 from form_metrics import MEAS_INSET_X, MEAS_INSET_Z                # noqa: E402
@@ -305,9 +307,12 @@ def coating_split(diffuse_frac, rho0=MUSOU_RHO0):
 #                  against it.
 #
 # Every result records which one it used (`run()` writes `coating_model`).
-# 2026-09-14: "reciprocal" is written but NOT yet measured by the gate, so the
-# default stays on the legacy tree until it is. Nothing renders differently.
-COATING_MODEL = "fresnel_mix"
+# 2026-09-15: the default is "reciprocal". `gate_coating_reciprocity.py` measured
+# it before the switch: source/viewer swap 0.001 % (legacy tree 238 %), and the
+# flat plate under a uniform sky within 0.08 % of `brdf_model` at seven angles.
+# Set "fresnel_mix" to reproduce anything published before this date;
+# `lock.py` does.
+COATING_MODEL = "reciprocal"
 COATING_MODELS = ("reciprocal", "fresnel_mix")
 
 
@@ -1269,7 +1274,28 @@ def build_scene(cfg):
                 vt.co.z = cz + x * sa + z * ca
             ob.data.update()
 
+    # THE CONTROL PLATE GOES WHERE THE FIELD IS NOT (2026-09-15). It sat at a
+    # fixed `face_w + GAP`, measured from the FACE edge, while the built field
+    # runs past the face by its margin -- and an extruded family runs past it
+    # by up to half the face along X (`_ex` above). The regression lock's flat
+    # plate is a 500 mm ridge panel extruded to x = 750 with the control at
+    # x = 600: the panel covered the right side of the control, and the 5 %
+    # plate read 0.0439. `FINDINGS_control_overlap.md` proved the cause on
+    # 2026-08-12 and `rig_v2` repaired it for its own path; this path never
+    # got the repair. The gap is now measured from the geometry actually in
+    # the scene, after any phi rotation. Where nothing overlapped, nothing
+    # moves: the old position is kept whenever it is already clear.
+    field_hi = None
+    for ob in bpy.data.objects:
+        if ob.type != "MESH" or ob.name.startswith("control"):
+            continue
+        mw = ob.matrix_world
+        for vt in ob.data.vertices:
+            x = (mw @ vt.co).x
+            field_hi = x if field_hi is None else max(field_hi, x)
     ctrl_x0 = p.face_w + GAP
+    if field_hi is not None and field_hi + CONTROL_SLACK > ctrl_x0:
+        ctrl_x0 = field_hi + CONTROL_SLACK
     make_flat_plate(p, ctrl_x0, "control", m_ctrl)
 
     return p, cs, ctrl_x0

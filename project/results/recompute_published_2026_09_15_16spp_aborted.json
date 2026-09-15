@@ -1,0 +1,189 @@
+{
+ "meta": {
+  "date": "2026-09-15",
+  "n_published_designs": 1643,
+  "coating": {
+   "id": "musou_fit2",
+   "body": 0.0,
+   "spec_scale": 0.5034,
+   "df": 0.0,
+   "roughness": 0.8646,
+   "rho0": 0.00967
+  },
+  "coating_model": "reciprocal",
+  "totals": {
+   "thetas": [
+    0.0,
+    -20.0,
+    -40.0,
+    20.0,
+    40.0
+   ],
+   "phi": 0.0,
+   "samples": 256,
+   "mode": "hemi_view"
+  },
+  "form": {
+   "samples": 16,
+   "n_phase": 16,
+   "beam_w": 7.5,
+   "mm_per_px": 0.215,
+   "peak_stat": "box",
+   "peak_box_mm": 2.0,
+   "beam_pos": "sobol",
+   "thetas": [
+    -40.0,
+    0.0,
+    40.0
+   ]
+  }
+ },
+ "rows": {
+  "sweep_anechoic.csv|AN_pyr_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_pyr_a283",
+   "old_worst_rho": 0.0025261165574193,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 17.6678445229682,
+    "tip_flat": 0.0
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0023388690315186977,
+    "-20": 0.0024420004338026047,
+    "-40": 0.0028830450028181076,
+    "+20": 0.0026160154957324266,
+    "+40": 0.002871203003451228
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791
+   ],
+   "worst_rho": 0.0028830450028181076,
+   "total_sec": 2.2,
+   "smear": 2.710087408895752,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07810650276663822,
+    "p99": 0.07768536874513499,
+    "max": 0.07808394233903829
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 242.68551635742188,
+   "form_sec": 17.3
+  },
+  "sweep_anechoic.csv|AN_trn_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_trn_a283",
+   "old_worst_rho": 0.0047100018709897995,
+   "old_n": 1,
+   "params": {
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "kind": "pyramid",
+    "margin_depths": 2.0,
+    "pitch": 17.6678445229682,
+    "tip_flat": 3.53356890459364
+   },
+   "family": "floor",
+   "totals": {
+    "+0": 0.0022946340031921864,
+    "-20": 0.002357845427468419,
+    "-40": 0.002812750870361924,
+    "+20": 0.002603790257126093,
+    "+40": 0.002928330097347498
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791
+   ],
+   "worst_rho": 0.002928330097347498,
+   "total_sec": 2.1,
+   "smear": 3.4646506572405404,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.1271514046934043,
+    "p99": 0.08697905003614183,
+    "max": 0.08905635631917745
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 242.68551635742188,
+   "form_sec": 17.1
+  },
+  "sweep_anechoic.csv|AN_wdg_a283": {
+   "source": "sweep_anechoic.csv",
+   "design": "AN_wdg_a283",
+   "old_worst_rho": 0.0036722132936120033,
+   "old_n": 1,
+   "params": {
+    "arc_segments": 24,
+    "backing": 2.0,
+    "depth": 50.0,
+    "face_h": 60.0,
+    "face_w": 60.0,
+    "margin_depths": 2.0,
+    "micro_depth": 0.0,
+    "micro_pitch": 0.0,
+    "pitch_jitter": 0.0,
+    "pitch_mean": 17.6678445229682,
+    "pitch_seed": 23,
+    "tip_width": 0.08,
+    "valley_round": 0.0
+   },
+   "family": "ridge",
+   "totals": {
+    "+0": 0.0030620587058365345,
+    "-20": 0.002519496949389577,
+    "-40": 0.003131340956315398,
+    "+20": 0.002442046068608761,
+    "+40": 0.0030620587058365345
+   },
+   "control": [
+    0.05000012367963791,
+    0.05000012367963791,
+    0.05000012740492821,
+    0.05000012367963791,
+    0.05000012740492821
+   ],
+   "worst_rho": 0.003131340956315398,
+   "total_sec": 2.1,
+   "smear": 1.7823257641803951,
+   "smear_converged": false,
+   "smear_first_agreement_reversed": [
+    false,
+    false
+   ],
+   "head_on": {
+    "box": 0.07780253282680913,
+    "p99": 0.07700219363911767,
+    "max": 0.08390286038444189
+   },
+   "form_face_mm": 60.0,
+   "control_x0_mm": 220.0,
+   "form_sec": 17.0
+  }
+ }
+}

@@ -113,52 +113,16 @@ def in_blender(op, **req):
     In-process when the server was started by Blender, and in a subprocess when
     it was not. The caller cannot tell the difference, which is the point: the
     numbers come from one code path either way.
+
+    Both launch modes go through `run_op`. Until 2026-09-15 each unpacked the
+    request by hand: this function in a lambda per op, `cyc_worker.py` in its
+    own `if` chain. The worker's `form` branch forwarded five arguments of
+    fifteen, so a plain-Python server measured default Musou, head-on, at the
+    default density whatever the request said
+    (results/audit_2026_09_14/dispatch_probe.json).
     """
     if IN_BLENDER:
-        fn = {"measure": lambda: measure(
-                  req["spec"], req["thetas"], req["diffuse_frac"],
-                  req["roughness"], req["samples"], req.get("coating",
-                  "musou_fit"), req.get("deep_coating"),
-                  req.get("paint_depth"), req.get("deep_until"),
-                  req.get("paint_fade", 0.0), req.get("phis"),
-                  # KEYWORDS FROM HERE ON. This lambda is the place where
-                  # `coating`, `deep_coating` and `paint_depth` were silently
-                  # dropped for months; adding an argument positionally to a
-                  # call this long is how that happens again.
-                  req.get("floor_coating"),
-                  slot_df=req.get("slot_df"),
-                  slot_rough=req.get("slot_rough")),
-              "lambert": lambda: measure_lambert(
-                  req["spec"], req["theta"], req["rho"], req["samples"]),
-              # every knob the request carries must reach form(); dropping one
-              # here is invisible -- the density control silently did nothing
-              # until this was found, because the response echoed the default
-              # EVERY FINISH THE REQUEST CARRIES. This handler forwarded only
-              # `floor_coating`, so `coating`, `deep_coating` and `paint_depth`
-              # fell back to the fitted Musou: the app's "smear + head-on"
-              # button reported Musou numbers whatever coating was picked, and
-              # a 5 % painted comb read 1.64 where it should read 8.23. The
-              # totals path took all four from the start; only this one did not.
-              "form": lambda: form(req["spec"], req.get("thetas"),
-                                   req.get("n_phase"), req.get("samples"),
-                                   req.get("beam_w"), req.get("phis"),
-                                   req.get("mm_per_px"),
-                                   req.get("floor_coating"),
-                                   req.get("diffuse_frac"),
-                                   req.get("coating") or "musou_fit",
-                                   req.get("deep_coating"),
-                                   req.get("paint_depth"),
-                                   req.get("roughness"),
-                                   slot_df=req.get("slot_df"),
-                                   slot_rough=req.get("slot_rough"),
-                                   obs_elev=req.get("obs_elev")),
-              "form_lambert": lambda: form_lambert(
-                  req["spec"], req.get("rho", 0.01),
-                  int(req.get("n_phase") or FB_DEF("N_PHASE")),
-                  int(req.get("samples") or FB_DEF("SAMPLES")),
-                  beam_w=req.get("beam_w"))}[op]
-        val = on_main(fn)
-        return {"rho": val} if op in ("measure", "lambert") else val
+        return on_main(run_op, op, dict(req))
 
     import subprocess
     if not os.path.exists(BLENDER):
@@ -191,6 +155,74 @@ def in_blender(op, **req):
             print("[SIM] Blender subprocess produced no result; retrying once",
                   flush=True)
     return {"error": last}
+
+
+# WHICH REQUEST KEYS EACH OP READS. `run_op` is the only place a request is
+# turned into a call, and anything a request carries that is not listed here is
+# returned in `ignored_keys` instead of vanishing. That is the check that was
+# missing every time a knob was silently dropped.
+_OP_KEYS = {
+    "measure": {"spec", "thetas", "diffuse_frac", "roughness", "samples",
+                "coating", "deep_coating", "paint_depth", "deep_until",
+                "paint_fade", "phis", "floor_coating", "slot_df",
+                "slot_rough"},
+    "lambert": {"spec", "theta", "rho", "samples"},
+    "form": {"spec", "thetas", "n_phase", "samples", "beam_w", "phis",
+             "mm_per_px", "floor_coating", "diffuse_frac", "coating",
+             "deep_coating", "paint_depth", "roughness", "slot_df",
+             "slot_rough", "obs_elev"},
+    "form_lambert": {"spec", "rho", "n_phase", "samples", "thetas", "beam_w"},
+}
+# keys the browser sends for its own display or for the other renderer
+_NOT_FOR_CYCLES = {"renderer", "lambert_rho", "op"}
+
+
+def run_op(op, req):
+    """Turn one measurement request into one call. The only place that does.
+
+    An omitted key takes the protocol value (`FB_DEF`) or the material's own
+    value (`_coat`), never a number written here. The result carries
+    `ignored_keys`, and `measure`/`form` carry `conditions`: what was actually
+    rendered, resolved, as opposed to what was asked."""
+    if op not in _OP_KEYS:
+        return {"error": "no such op: %s" % op}
+    g = req.get
+    ignored = sorted(k for k in req
+                     if k not in _OP_KEYS[op] and k not in _NOT_FOR_CYCLES)
+    if op == "measure":
+        planes, cond = measure(
+            g("spec"), g("thetas") or [0.0], g("diffuse_frac"), g("roughness"),
+            int(g("samples") or FB_DEF("RHO_SAMPLES")),
+            coating=g("coating") or DEFAULT_COATING,
+            deep_coating=g("deep_coating"), paint_depth=g("paint_depth"),
+            deep_until=g("deep_until"), paint_fade=g("paint_fade") or 0.0,
+            phis=g("phis"), floor_coating=g("floor_coating"),
+            slot_df=g("slot_df"), slot_rough=g("slot_rough"),
+            with_conditions=True)
+        out = {"rho": planes, "conditions": cond}
+    elif op == "lambert":
+        out = {"rho": measure_lambert(
+            g("spec"), float(g("theta") or 0.0), float(req["rho"]),
+            int(g("samples") or FB_DEF("RHO_XCHECK_SAMPLES")))}
+    elif op == "form":
+        out = form(g("spec"), g("thetas"), g("n_phase"), g("samples"),
+                   beam_w=g("beam_w"), phis=g("phis"),
+                   mm_per_px=g("mm_per_px"),
+                   floor_coating=g("floor_coating"),
+                   diffuse_frac=g("diffuse_frac"),
+                   coating=g("coating") or DEFAULT_COATING,
+                   deep_coating=g("deep_coating"),
+                   paint_depth=g("paint_depth"), roughness=g("roughness"),
+                   slot_df=g("slot_df"), slot_rough=g("slot_rough"),
+                   obs_elev=g("obs_elev"))
+    else:
+        out = form_lambert(g("spec"), 0.01 if g("rho") is None else g("rho"),
+                           g("n_phase"), g("samples"),
+                           tuple(g("thetas") or (-40.0, 40.0, 0.0)),
+                           beam_w=g("beam_w"))
+    if isinstance(out, dict):
+        out["ignored_keys"] = ignored
+    return out
 
 
 RENDER_LOCK = threading.Lock()
@@ -1237,7 +1269,9 @@ def derived(p, verts, spec):
         except Exception:
             pass
         gap = float(_BR.GAP)
-        ctrl_x0 = face + gap
+        # the same rule build_scene uses since 2026-09-15: the control moves
+        # clear of the field when the field reaches past face + GAP
+        ctrl_x0 = max(face + gap, face + margin + float(_BR.CONTROL_SLACK))
         total_w = ctrl_x0 + face
         ortho = total_w * 1.02
         res_x = _FB.RES_X
@@ -1351,6 +1385,13 @@ def derived(p, verts, spec):
         d["rig"] = rig
     except Exception as _e:
         d["rig_error"] = repr(_e)[:200]
+        # THE METHOD DOES NOT NEED THE RIG. The rig readout above needs
+        # `form_buildable` and `blender_render`, which import bpy, so in a
+        # plain-Python server it fails -- and the settings table went down with
+        # it, although every value in it comes from `form_metrics`. Found by
+        # `gate_dispatch_render.py` E on 2026-09-15, once gate D stopped
+        # reading every failure as "server not running".
+        d["method"] = METHOD_DEFAULTS
     # -------------------------------------------------------------------
     dropped = DROPPED.pop(id(p), [])
     if NEEDS_MARGIN in dropped:
@@ -1513,6 +1554,16 @@ def _load_materials():
                 rho0=float(sc["reflectance"]["value"]),
                 df=float(bs["diffuse_fraction"]),
                 rough=float(bs["lobe"]["roughness"]),
+                # EXPLICIT SPLIT (2026-09-15). A material fitted directly in
+                # (body, spec_scale) carries them. Rebuilding them from
+                # (df, rho0) through `coating_split` assumes the lobe returns
+                # F0 at normal incidence, which a broad lobe does not: for
+                # musou_fit2 body + spec_scale x F0 is 0.0201 while its
+                # measured-shape THR(0) is 0.00967.
+                body=(float(bs["body"]) if bs.get("body") is not None
+                      else None),
+                spec_scale=(float(bs["spec_scale"])
+                            if bs.get("spec_scale") is not None else None),
                 src=v.get("source", ""), label=v.get("label", mid),
                 label_en=v.get("label_en", v.get("label", mid)),
                 color=v.get("color", "#3a3f47"),
@@ -1536,6 +1587,14 @@ def _load_materials():
 
 
 MATERIALS = _load_materials()
+
+# THE MUSOU A REQUEST GETS WHEN IT NAMES NONE (2026-09-15). `musou_fit` read the
+# paper's normal-incidence TIS as 0.985-0.995 where the chart shows 0.96, and its
+# flat plate rendered 67 % below the paper's THR at 80 deg. `musou_fit2` is fitted
+# to THR, TIS and the lobe shape together (material/musou_fit2.json lists what
+# the fit could not pin down). `musou_fit` stays loadable under its id, because
+# results on disk point at it.
+DEFAULT_COATING = "musou_fit2" if "musou_fit2" in MATERIALS else "musou_fit"
 
 
 def _published_ids():
@@ -1586,7 +1645,7 @@ def coatings_json():
             for k, v in MATERIALS.items()}
 
 
-def _coat(name, diffuse_frac=None, default="musou_fit", roughness=None):
+def _coat(name, diffuse_frac=None, default=None, roughness=None):
     """The material's own diffuse fraction unless the caller overrides it.
 
     `diffuse_frac` used to be required and panel-wide, so picking Musou for
@@ -1602,13 +1661,26 @@ def _coat(name, diffuse_frac=None, default="musou_fit", roughness=None):
     force every surface to it -- which is what every published batch did, so
     those rows still reproduce -- or None to let each material carry its own.
     """
-    import blender_render as BR
-    m = MATERIALS.get(name, MATERIALS[default])
+    m = MATERIALS.get(name, MATERIALS[default or DEFAULT_COATING])
     df = m["df"] if diffuse_frac is None else float(diffuse_frac)
-    body, spec = BR.coating_split(df, rho0=m["rho0"])
+    # ONE SPLIT RULE, so sending a material's own diffuse fraction gives the
+    # same shader as sending nothing (`gate_api_defaults.py` checks exactly
+    # that). For a material fitted in (body, spec_scale) the amount being split
+    # is its nominal body + spec_scale x F0, not its THR(0): a broad lobe
+    # returns far less than F0 at normal incidence, so splitting THR(0) would
+    # halve its lobe the moment anyone passed df explicitly.
+    if m.get("body") is not None:
+        rho_split = m["body"] + m["spec_scale"] * 0.04
+    else:
+        rho_split = m["rho0"]
+    # `coating_split` is arithmetic; the same line as blender_render's,
+    # written out so this runs without bpy
+    d = min(1.0, max(0.0, df))
+    body, spec = d * rho_split, (1.0 - d) * rho_split / 0.04
     rg = m["rough"] if roughness is None else float(roughness)
     return {"body": body, "spec_scale": spec, "df": df,
-            "roughness": rg, "rho0": m["rho0"]}
+            "roughness": rg, "rho0": m["rho0"],
+            "id": name if name in MATERIALS else (default or DEFAULT_COATING)}
 
 
 # --- measurement ------------------------------------------------------------
@@ -1621,9 +1693,9 @@ AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
 # background past the panel above ~69 deg; lock/sweeps use 6.5 and are safe.
 
 def measure(spec, thetas, diffuse_frac, roughness, samples,
-            coating="musou_fit", deep_coating=None, paint_depth=None,
+            coating=None, deep_coating=None, paint_depth=None,
             deep_until=None, paint_fade=0.0, phis=None, floor_coating=None,
-            slot_df=None, slot_rough=None):
+            slot_df=None, slot_rough=None, with_conditions=False):
     """`diffuse_frac`/`roughness` are PANEL-WIDE and stay for the batches that
     published with them. `slot_df`/`slot_rough` are per-slot dicts keyed
     'coating' / 'deep_coating' / 'floor_coating'; anything they name wins for
@@ -1637,6 +1709,7 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     _t("measure: enter")
     import blender_render as BR
     from cone3d_sweep import COAT
+    coating = coating or DEFAULT_COATING
     # ONE ROUGHNESS RULE FOR THE WHOLE PANEL. See `_coat`.
     cc = _coat(coating, _pick("coating", diffuse_frac, slot_df),
                roughness=_pick("coating", roughness, slot_rough))
@@ -1705,7 +1778,7 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     if floor_coating:
         cfg["floor_coating"] = _coat(
             floor_coating, _pick("floor_coating", diffuse_frac, slot_df),
-            default="musou_fit",
+            default=DEFAULT_COATING,
             roughness=_pick("floor_coating", roughness, slot_rough))
         cfg["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
@@ -1731,7 +1804,28 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
     finally:
         _prog(n_all, n_all)
     _t("measure: BR.run returned")
-    return planes
+    if not with_conditions:
+        return planes
+    return planes, {
+        "coating": _finish_record(cc),
+        "deep_coating": _finish_record(cfg.get("deep_coating")),
+        "paint_depth": cfg.get("paint_depth"),
+        "deep_until": cfg.get("deep_until"),
+        "paint_fade": cfg.get("paint_fade"),
+        "floor_coating": _finish_record(cfg.get("floor_coating")),
+        "floor_boundary_depth": cfg.get("floor_boundary_depth"),
+        "thetas": [float(t) for t in thetas], "phis": phis,
+        "samples": int(samples), "mode": "hemi_view",
+        "margin_depths": m["margin_depths"],
+        "coating_model": BR.COATING_MODEL}
+
+
+def _finish_record(c):
+    """A resolved finish as it went into the shader, for a result's record."""
+    if not c:
+        return None
+    return {k: c.get(k) for k in ("id", "body", "spec_scale", "df",
+                                  "roughness", "rho0")}
 
 
 def measure_lambert(spec, theta, rho, samples):
@@ -1800,7 +1894,7 @@ def _render_params(spec):
 
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
          phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
-         coating="musou_fit", deep_coating=None, paint_depth=None,
+         coating=None, deep_coating=None, paint_depth=None,
          roughness=None, slot_df=None, slot_rough=None, obs_elev=None):
     """The other two axes, through `form_buildable`'s own code.
 
@@ -1821,6 +1915,8 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     one beside it.
     """
     import form_buildable as FB
+    import blender_render as BR
+    coating = coating or DEFAULT_COATING
     m = dict(spec, margin_depths=2.0)
     prm = _render_params(m)
     pitch = (spec.get("top_params") or {}).get("pitch") \
@@ -1875,7 +1971,7 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     if floor_coating:
         entry["floor_coating"] = _coat(
             floor_coating, _pick("floor_coating", diffuse_frac, slot_df),
-            default="musou_fit",
+            default=DEFAULT_COATING,
             roughness=_pick("floor_coating", roughness, slot_rough))
         entry["floor_boundary_depth"] = (
             float(spec.get("depth", 50.0) or 50.0)
@@ -1914,7 +2010,11 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # 되돌려진 값을 읽으면 이번에 무엇으로 쟀는지가 아니라 파일에 적힌
     # 값이 나온다. 그래서 여기서 붙잡아 둔다.
     used = {"n_phase": FB.N_PHASE, "samples": FB.SAMPLES,
-            "beam_w": FB.STRIPE_W, "thetas": list(FB.THETAS)}
+            "beam_w": FB.STRIPE_W, "thetas": list(FB.THETAS),
+            "mm_per_px": FB.MM_PER_PX, "obs_elev_deg": FB.OBS_ELEV,
+            "peak_stat": FB.PEAK_STAT, "peak_box_mm": FB.PEAK_BOX_MM,
+            "beam_pos": FB.BEAM_POS, "smear_tol": FB.SMEAR_TOL,
+            "coating_model": BR.COATING_MODEL}
     n_frames = FB.N_PHASE * len(FB.THETAS)
     planes = {}
     try:
@@ -1966,6 +2066,25 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
                 "peak": (t.get("+0") or {}).get("peak_ratio_mean"),
                 "peak_by_theta": {k: (v or {}).get("peak_ratio_mean")
                                   for k, v in t.items()},
+                # all three statistics at theta 0, so `peak` can be put beside
+                # a number published under p99 or max (see PEAK_STAT)
+                "peak_by_stat": {s: (t.get("+0") or {}).get(
+                                     "peak_ratio_%s_mean" % s)
+                                 for s in ("box", "p99", "max")},
+                "smear_verdict": {k: (v or {}).get("smear_verdict")
+                                  for k, v in (("-40", a), ("+40", b))},
+                # per rendered angle, so a caller that asks for one angle can
+                # read that angle's smear and every peak statistic
+                "smear_by_theta": {
+                    k: ((v or {}).get("rms_mm") / v["rms_control_mm"]
+                        if (v or {}).get("rms_control_mm") else None)
+                    for k, v in t.items()},
+                "converged_by_theta": {k: (v or {}).get("converged")
+                                       for k, v in t.items()},
+                "peak_by_stat_by_theta": {
+                    k: {s: (v or {}).get("peak_ratio_%s_mean" % s)
+                        for s in ("box", "p99", "max")}
+                    for k, v in t.items()},
                 "rms_by_theta": {k: (v or {}).get("rms_mm")
                                  for k, v in t.items()},
                 "converged": (all(conv) if conv else None),
@@ -2013,8 +2132,17 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
             "n_phase": used["n_phase"],
             "samples": used["samples"],
             "beam_w": used["beam_w"], "reduced": True,
-            "peak_stat": getattr(FB, "PEAK_STAT", "max"),
-            "beam_pos": getattr(FB, "BEAM_POS", "uniform"),
+            "peak_stat": used["peak_stat"],
+            "beam_pos": used["beam_pos"],
+            # WHAT WAS RENDERED, resolved, beside what was asked (2026-09-15)
+            "conditions": dict(
+                used, phis=phis,
+                coating=_finish_record(entry.get("coating") and dict(
+                    cc, roughness=entry.get("roughness"))),
+                deep_coating=_finish_record(entry.get("deep_coating")),
+                paint_depth=entry.get("paint_depth"),
+                floor_coating=_finish_record(entry.get("floor_coating")),
+                floor_boundary_depth=entry.get("floor_boundary_depth")),
             "mm_per_px": float(mm_per_px or PROTOCOL_MMPX),
             # 어느 각도에서 본 값인지, 그리고 기울인 만큼 늘어난 세로 환산.
             # 결과가 스스로 조건을 말해야 나중에 가릴 수 있다.
@@ -2027,7 +2155,7 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
                                   and float(mm_per_px) > PROTOCOL_MMPX * 1.01)}
 
 
-def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
+def form_lambert(spec, rho=0.01, n_phase=None, samples=None,
                  thetas=(-40.0, 40.0, 0.0), beam_w=None):
     """The form axes in Cycles with a PURE LAMBERTIAN, for the cross-check.
 
@@ -2053,9 +2181,9 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
     # the response says so, because a PEAK statistic dilutes with pixel
     # size even where an area average does not.
     old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX)
-    FB.N_PHASE = int(n_phase)
+    FB.N_PHASE = int(n_phase or FB.N_PHASE)
     FB.THETAS = tuple(thetas)
-    FB.SAMPLES = int(samples)
+    FB.SAMPLES = int(samples or FB.SAMPLES)
     FB.STRIPE_W = float(beam_w or FB.STRIPE_W)
     FB.PROGRESS_CB = _prog
     _prog(0, FB.N_PHASE * len(FB.THETAS))
@@ -2074,14 +2202,16 @@ def form_lambert(spec, rho=0.01, n_phase=6, samples=256,
 
 
 def FB_MMPX():
-    import form_buildable as _FB
-    return _FB.MM_PER_PX or 0.215
+    """0 means the legacy constant pixel count; the Mitsuba worker reads 0 as
+    'not set' and does the same. `or 0.215` used to sit here, a second home."""
+    import form_metrics as _FM
+    return _FM.MM_PER_PX
 
 
 def FB_BEAM():
-    """빔 너비의 정본은 `form_buildable.STRIPE_W` 다. 여기에 숫자를 안 적는다."""
-    import form_buildable as _FB
-    return float(_FB.STRIPE_W)
+    """빔 너비의 정본은 `form_metrics.STRIPE_W` 다. 여기에 숫자를 안 적는다."""
+    import form_metrics as _FM
+    return float(_FM.STRIPE_W)
 
 
 def FB_DEF(name):
@@ -2090,24 +2220,24 @@ def FB_DEF(name):
     숫자를 여기 적지 않는 것이 요점이다. 상수가 두 군데 살면 한 군데만
     고치게 되고, 그러면 화면과 파일이 조용히 갈라진다.
 
-    `form_metrics` 를 먼저 본다. 거기 있는 값은 bpy 없이도 열리므로 Mitsuba
-    쪽 코드도 같은 값을 읽을 수 있다. 없으면 `form_buildable` 을 본다.
+    **`form_metrics` 만 본다** (2026-09-15). 전에는 거기 없으면
+    `form_buildable` 을 봤는데, 그 파일은 bpy 를 불러서 일반 Python 으로 띄운
+    서버에서 `/api/form` Mitsuba 경로가 500 으로 죽었다. 설정을 전부
+    `form_metrics` 로 옮겼으니 없는 이름은 AttributeError 로 바로 드러난다.
     """
     import form_metrics as _FM
-    if hasattr(_FM, name):
-        return getattr(_FM, name)
-    import form_buildable as _FB
-    return getattr(_FB, name)
+    return getattr(_FM, name)
 
 
-def form_mitsuba(spec, rho=0.01, n_phase=6, spp=256, beam_w=None,
+def form_mitsuba(spec, rho=0.01, n_phase=None, spp=None, beam_w=None,
                  mm_per_px=None):
     """The same, in Mitsuba, as a subprocess."""
     return _mts(dict(_mts_req(spec, rho=rho), op="form",
                      pitch=(spec.get("top_params") or {}).get("pitch")
                      or (spec.get("top_params") or {}).get("pitch_mean")
                      or 6.5,
-                     n_phase=int(n_phase), spp=int(spp),
+                     n_phase=int(n_phase or FB_DEF("N_PHASE")),
+                     spp=int(spp or FB_DEF("SAMPLES")),
                      beam_w=float(beam_w or FB_BEAM()),
                      mm_per_px=float(mm_per_px or FB_MMPX()),
                      full_face_window=True))
@@ -2135,7 +2265,7 @@ def _mts_python():
     return None
 
 
-def _mts_req(spec, rho=0.01, theta=0.0, spp=256):
+def _mts_req(spec, rho=0.01, theta=0.0, spp=None):
     m = dict(spec, margin_depths=2.0)
     return {"family": _render_family(m), "params": _render_params(m),
             "rho": rho, "theta": theta, "spp": spp}
@@ -2182,7 +2312,7 @@ def _mts(req):
     return {"error": "".join(lines)[-300:]}
 
 
-def measure_mitsuba(spec, theta=0.0, rho=0.01, spp=256):
+def measure_mitsuba(spec, theta=0.0, rho=0.01, spp=None):
     """The same design in the other renderer, as a subprocess.
 
     Returns Cycles' answer for the SAME Lambertian alongside it, because a
@@ -2195,7 +2325,8 @@ def measure_mitsuba(spec, theta=0.0, rho=0.01, spp=256):
                          "~/.spillsink/mts_env/bin/python, or set MTS_PYTHON."}
     m = dict(spec, margin_depths=2.0)
     req = {"family": _render_family(m), "params": _render_params(m),
-           "rho": rho, "theta": theta, "spp": spp}
+           "rho": rho, "theta": theta,
+           "spp": int(spp or FB_DEF("RHO_XCHECK_SAMPLES"))}
     p = subprocess.run([venv, os.path.join(HERE, "mts_worker.py")],
                        input=json.dumps(req), capture_output=True, text=True,
                        timeout=900)
@@ -2328,6 +2459,26 @@ def presets():
                 "pitch_seed", "width_seed", "margin_depth_ref"}
         tp = dict(prm.get("top_params") or
                   {k: v for k, v in prm.items() if k not in drop})
+        # THE PRESET MUST BUILD THE PUBLISHED PART (2026-09-15). `_render_params`
+        # fills any key the spec leaves out from NORMAL, and a published row
+        # that simply never set a field was measured with the DATACLASS default,
+        # not NORMAL's. P1_groove_p13_t04 has no micro_depth: it was built
+        # smooth (default 0.0), but the preset rebuilt it with NORMAL's 0.3 mm
+        # micro-grooves -- a different part under the published name. Found
+        # while lining the simulator up with the finalist report. So every
+        # NORMAL key the row does not carry is pinned to the dataclass default.
+        if not stacked:
+            try:
+                import dataclasses as _dc
+                _mod, _cn, _fx = FAMILIES[top]
+                _C = _cls(_mod, _cn)
+                _dflt = {f.name: f.default for f in _dc.fields(_C)
+                         if f.default is not _dc.MISSING}
+                for _k in NORMAL.get(top, {}):
+                    if _k != "depth" and _k not in tp and _k in _dflt:
+                        tp[_k] = _dflt[_k]
+            except Exception:
+                pass
         fp = {k: v for k, v in (prm.get("bot_params") or {}).items()
               if k not in drop}
         depth = (prm.get("top_depth", 0) + prm.get("bot_depth", 0)) \
@@ -2474,6 +2625,22 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(coatings_json()))
         if p == "/api/presets":
             return self._send(200, json.dumps({"presets": presets()}))
+        # THE ROOM PROTOCOL, from its one home (form_metrics). The totals button
+        # asks for these angles instead of carrying its own list, so a number
+        # read off the screen was measured at the angles the report ranks on.
+        if p == "/api/protocol":
+            import form_metrics as _FM
+            return self._send(200, json.dumps({
+                "total_thetas": list(_FM.ROOM_TOTAL_THETAS),
+                "total_phis": list(_FM.ROOM_TOTAL_PHIS),
+                "form_thetas": list(_FM.FORM_THETAS),
+                "form_phis": list(_FM.FORM_PHIS),
+                "observers": list(_FM.ROOM_OBSERVERS),
+                "rank_total_thetas": list(_FM.RANK_TOTAL_THETAS),
+                "rank_beams": list(_FM.RANK_BEAMS),
+                "rank_observers": list(_FM.RANK_OBSERVERS),
+                "rho_samples": _FM.RHO_SAMPLES, "samples": _FM.SAMPLES,
+                "peak_stat": _FM.PEAK_STAT, "peak_box_mm": _FM.PEAK_BOX_MM}))
         if p == "/api/health":
             return self._send(200, json.dumps({"ok": True, "port": PORT}))
         if p == "/api/progress":
@@ -2690,50 +2857,15 @@ class H(BaseHTTPRequestHandler):
                     out["rho"] = mts
                     out["seconds"] = round(time.perf_counter() - t0, 2)
                     return self._send(200, json.dumps(out))
-                r = in_blender("measure", spec=req["spec"],
-                               thetas=req.get("thetas", [0.0]),
-                               # NOT 0.76 AND NOT 0.30. Those were the values
-                               # this study ran on before 2026-08-22, and both
-                               # were withdrawn: the diffuse fraction was an
-                               # assumption (measured 0.99 for black paint,
-                               # 0.993 for Musou) and 0.30 was a roughness
-                               # slider with no source, replaced by 0.1975
-                               # (alpha 0.039, MERL paint-black).
-                               #
-                               # `None` is what the rest of the code means by
-                               # "use the material's own value" -- `_coat` is
-                               # built on it, and /api/form and the mitsuba
-                               # path already passed it. This one handler kept
-                               # the old constants, so a caller that simply
-                               # omitted the key silently measured a material
-                               # nobody uses any more. Found 2026-08-27 by
-                               # probing the API directly: omitting the key
-                               # gave 0.07863 % where the material's own value
-                               # gives 0.09807 %, a 25 % error, and sending
-                               # 0.76 by hand reproduced the omitted case
-                               # exactly.
-                               #
-                               # The browser was never affected -- it sends
-                               # `diffuse_frac: null` explicitly, and a present
-                               # key beats a .get default.
-                               diffuse_frac=req.get("diffuse_frac"),
-                               roughness=req.get("roughness"),
-                               samples=int(req.get("samples")
-                                           or FB_DEF("RHO_SAMPLES")),
-                               coating=req.get("coating", "musou_fit"),
-                               deep_coating=req.get("deep_coating"),
-                               paint_depth=req.get("paint_depth"),
-                               deep_until=req.get("deep_until"),
-                               paint_fade=req.get("paint_fade", 0.0),
-                               phis=req.get("phis"),
-                               # dropped here until 2026-08-20: the dispatch
-                               # lambda and measure() both handled it, so it
-                               # looked wired end to end while the handler
-                               # quietly never sent it
-                               floor_coating=req.get("floor_coating"),
-                               # per-slot overrides; absent = the material's own
-                               slot_df=req.get("slot_df"),
-                               slot_rough=req.get("slot_rough"))
+                # THE WHOLE REQUEST GOES THROUGH (2026-09-15). This handler used
+                # to list the arguments by hand, and so did the dispatch lambda
+                # behind it, and so did cyc_worker -- three lists, and a knob
+                # dropped from any one of them vanished silently (floor_coating
+                # until 2026-08-20; diffuse_frac defaulting to a withdrawn 0.76
+                # until 2026-08-27). `run_op` is now the only list, it fills an
+                # omitted key from the material or the protocol, and it names
+                # every key it did not use in `ignored_keys`.
+                r = in_blender("measure", **req)
                 if "error" in r:
                     return self._send(200, json.dumps(r))
                 # `rho` stays the phi-0 plane so old callers keep working;
@@ -2742,6 +2874,8 @@ class H(BaseHTTPRequestHandler):
                 return self._send(200, json.dumps(
                     {"rho": planes.get("0") or next(iter(planes.values())),
                      "rho_planes": planes,
+                     "conditions": r.get("conditions"),
+                     "ignored_keys": r.get("ignored_keys"),
                      "seconds": round(time.perf_counter() - t0, 2)}))
             if self.path == "/api/form":
                 t0 = time.perf_counter()
@@ -2757,7 +2891,16 @@ class H(BaseHTTPRequestHandler):
                     out = {"renderer": rend, "lambert_rho": rho0,
                            "smear": m["smear"], "head_on": m["head_on"],
                            "mitsuba": {"smear": m["smear"],
-                                       "head_on": m["head_on"]}}
+                                       "head_on": m["head_on"]},
+                           # the conditions this path ran at; the readout
+                           # showed dashes for these (code review, 2026-09-15)
+                           "beam_w": float(req.get("beam_w") or FB_BEAM()),
+                           "n_phase": int(req.get("n_phase")
+                                          or FB_DEF("N_PHASE")),
+                           "samples": int(req.get("samples")
+                                          or FB_DEF("SAMPLES")),
+                           "peak_stat": FB_DEF("PEAK_STAT"),
+                           "beam_pos": "uniform (mts_form walks equal steps)"}
                     if rend == "both":
                         c = in_blender("form_lambert", spec=req["spec"],
                                        rho=rho0,
@@ -2790,32 +2933,20 @@ class H(BaseHTTPRequestHandler):
                 # again. Bounded, and every attempt is reported.
                 spec_i = dict(req["spec"])
                 tries, GROW_MAX, FACE_MAX = [], 3, 2000.0
-                out = None
+                out = first = None
+                measured_face = None
                 for _ in range(GROW_MAX):
-                    out = in_blender("form", spec=spec_i, thetas=None,
-                                     n_phase=req.get("n_phase"),
-                                     samples=req.get("samples"),
-                                     beam_w=req.get("beam_w"),
-                                     phis=req.get("phis"),
-                                     mm_per_px=req.get("mm_per_px"),
-                                     # THE FINISH, which this call dropped.
-                                     # Fixing the dispatch lambda alone was not
-                                     # enough: the coating has to be put into
-                                     # the request here as well, or the lambda
-                                     # never sees it.
-                                     floor_coating=req.get("floor_coating"),
-                                     slot_df=req.get("slot_df"),
-                                     slot_rough=req.get("slot_rough"),
-                                     diffuse_frac=req.get("diffuse_frac"),
-                                     coating=req.get("coating") or "musou_fit",
-                                     deep_coating=req.get("deep_coating"),
-                                     paint_depth=req.get("paint_depth"),
-                                     roughness=req.get("roughness"),
-                                     # 관찰자가 어디서 보나. 안 보내면 판 법선.
-                                     obs_elev=req.get("obs_elev"))
+                    # The whole request, with the grown sample. `thetas` stays
+                    # None: the readout is defined at the protocol angles
+                    # (form_metrics.FORM_THETAS). See `run_op`.
+                    out = in_blender("form", **dict(req, spec=spec_i,
+                                                    thetas=None))
                     if "error" in out:
                         return self._send(200, json.dumps(out))
+                    measured_face = spec_i.get("panel")
+                    first = first or out
                     tries.append({"face_mm": out.get("face_mm"),
+                                  "panel_mm": measured_face,
                                   "smear": out.get("smear"),
                                   "converged": out.get("converged")})
                     if out.get("converged") is not False:
@@ -2826,21 +2957,40 @@ class H(BaseHTTPRequestHandler):
                     if grow <= face * 1.05 or grow > FACE_MAX:
                         break
                     spec_i["panel"] = min(grow, FACE_MAX)
-                out["seconds"] = round(time.perf_counter() - t0, 1)
-                out["sample_face_mm"] = spec_i.get("panel")
-                out["requested_face_mm"] = req["spec"].get("panel")
-                out["grow_attempts"] = tries
-                return self._send(200, json.dumps(out))
+                # THE REQUESTED PANEL COMES FIRST (2026-09-15). This returned
+                # the last grown sample as the answer, so a number read off the
+                # screen could be a 400 mm panel's when the design and every
+                # report row said 116. The measurement at the panel that was
+                # asked for is the reading; a grown sample is shown beside it as
+                # what a wider wall would give. `sample_face_mm` used to report
+                # the next panel to TRY even when the loop stopped before
+                # measuring it; it now reports the panel that was measured.
+                res = first
+                if out is not first:
+                    res = dict(first, grown={
+                        "panel_mm": measured_face, "face_mm": out.get("face_mm"),
+                        "smear": out.get("smear"),
+                        "converged": out.get("converged"),
+                        "planes": out.get("planes")})
+                res["seconds"] = round(time.perf_counter() - t0, 1)
+                res["sample_face_mm"] = req["spec"].get("panel")
+                res["requested_face_mm"] = req["spec"].get("panel")
+                res["grown_face_mm"] = measured_face if out is not first else None
+                res["grow_attempts"] = tries
+                return self._send(200, json.dumps(res))
             if self.path == "/api/crosscheck":
                 t0 = time.perf_counter()
                 th = float(req.get("theta", 0.0))
                 rho = float(req.get("rho", 0.01))
-                mts = measure_mitsuba(req["spec"], th, rho,
-                                      int(req.get("spp", 256)))
+                # ONE SAMPLE COUNT FOR BOTH CODES. An omitted `spp` gave
+                # Mitsuba 256 and Cycles 512, and the difference read as
+                # renderer disagreement (code review, 2026-09-15).
+                spp = int(req.get("spp") or FB_DEF("RHO_XCHECK_SAMPLES"))
+                mts = measure_mitsuba(req["spec"], th, rho, spp)
                 cyc = None
                 if "error" not in mts:
                     r = in_blender("lambert", spec=req["spec"], theta=th,
-                                    rho=rho, samples=int(req.get("spp", 512)))
+                                   rho=rho, samples=spp)
                     if "error" in r:
                         return self._send(200, json.dumps(
                             {"mitsuba": mts, "cycles": None,
@@ -2936,11 +3086,37 @@ class H(BaseHTTPRequestHandler):
                 # withdrawn five days earlier. The browser always sent all
                 # three, so it never showed; `gate_api_defaults.py` is what
                 # made it visible.
-                _rv = _coat(str(req.get("coating", "musou_fit")),
+                _rv = _coat(str(req.get("coating") or DEFAULT_COATING),
                             req.get("diffuse_frac"),
                             roughness=req.get("roughness"))
                 if req.get("rho") is not None:
                     _rv = dict(_rv, rho0=float(req["rho"]))
+                # THE RENDER'S MATERIAL, SLOT BY SLOT (2026-09-15). `fitted`
+                # used one diffuse fraction and one roughness for the whole
+                # panel and a constant rho per bounce; the audit's section 8.
+                # With the finishes the totals button sends, the tracer now
+                # samples the same BRDF per depth band. See raytrace_viz.
+                layers = None
+                if str(req.get("mode", "fitted")) == "fitted":
+                    def _lay(c):
+                        return {"id": c.get("id"), "body": c["body"],
+                                "spec_scale": c["spec_scale"],
+                                "alpha": float(c["roughness"]) ** 2}
+                    sp_ = req.get("spec", {})
+                    layers = {"top": _lay(_rv), "deep": None,
+                              "paint_depth": None, "floor": None,
+                              "floor_depth": None}
+                    if req.get("paint_depth") is not None \
+                            and req.get("deep_coating"):
+                        layers["deep"] = _lay(_coat(req["deep_coating"],
+                                                    default="anodised"))
+                        layers["paint_depth"] = float(req["paint_depth"])
+                    if req.get("floor_coating"):
+                        layers["floor"] = _lay(_coat(req["floor_coating"]))
+                        dep = float(sp_.get("depth", 50.0) or 50.0)
+                        layers["floor_depth"] = (
+                            dep - float(sp_.get("floor_depth", 0.0) or 0.0)
+                            if sp_.get("floor", "none") != "none" else dep)
                 out = RV.trace(v, f, fw, fw,
                                theta_deg=float(req.get("theta", 0.0)),
                                phi_deg=float(req.get("phi", 0.0)),
@@ -2950,7 +3126,8 @@ class H(BaseHTTPRequestHandler):
                                                                   "fitted")),
                                diffuse_frac=_rv["df"],
                                roughness=_rv["roughness"],
-                               seed=int(req.get("seed", 23)))
+                               seed=int(req.get("seed", 23)),
+                               layers=layers)
                 out["seconds"] = round(time.perf_counter() - t0, 2)
                 return self._send(200, json.dumps(out))
             if self.path == "/api/published":
@@ -2992,19 +3169,23 @@ def _snap_method_defaults():
     화면 표는 "이 시뮬레이터의 설정" 을 보이는 자리다. 남이 지금 무엇으로
     재고 있는지가 아니다. 그래서 아무것도 안 돌 때의 값을 여기 붙잡아 둔다.
     """
+    # `form_metrics` only: it opens without bpy, so a plain-Python server has
+    # these too. It used to import `form_buildable`, fail silently, and leave
+    # METHOD_DEFAULTS None in that launch mode (code review, 2026-09-15).
     global METHOD_DEFAULTS
-    try:
-        import form_buildable as _FB
-        import form_metrics as _FM
-    except Exception:
-        return
+    import form_metrics as _FM
     METHOD_DEFAULTS = {
-        "mm_per_px": _FB.MM_PER_PX, "samples": _FB.SAMPLES,
-        "n_phase": _FB.N_PHASE, "stripe_w": _FM.STRIPE_W,
-        "spread_deg": _FB.SPREAD_DEG,
+        "mm_per_px": _FM.MM_PER_PX, "samples": _FM.SAMPLES,
+        "n_phase": _FM.N_PHASE, "stripe_w": _FM.STRIPE_W,
+        "spread_deg": _FM.SPREAD_DEG,
         "inset_x": _FM.MEAS_INSET_X, "inset_z": _FM.MEAS_INSET_Z,
-        "peak_stat": getattr(_FB, "PEAK_STAT", "max"),
-        "beam_pos": getattr(_FB, "BEAM_POS", "uniform"),
+        "peak_stat": _FM.PEAK_STAT, "peak_box_mm": _FM.PEAK_BOX_MM,
+        "beam_pos": _FM.BEAM_POS, "smear_tol": _FM.SMEAR_TOL,
+        "default_coating": DEFAULT_COATING,
+        "rho_samples": _FM.RHO_SAMPLES,
+        "total_thetas": list(_FM.ROOM_TOTAL_THETAS),
+        "total_phis": list(_FM.ROOM_TOTAL_PHIS),
+        "form_thetas": list(_FM.FORM_THETAS),
         "doc": "report/METHOD.html",
     }
 

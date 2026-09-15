@@ -409,8 +409,13 @@ details.why p{margin:.4em 0 0}
     <div class="sl" id="pdwrap">
       <span class="nm">covered from the top <b id="v_pcov">10</b> %<br>
         <span class="note" id="pdfrac"></span></span>
-      <input type="range" id="pcov" min="0" max="100" step="1" value="10">
-      <input type="number" id="n_pcov" min="0" max="100" step="1" value="10">
+      <input type="range" id="pcov" min="0" max="100" step="any" value="10">
+      <input type="number" id="n_pcov" min="0" max="100" step="any" value="10">
+      <!-- MILLIMETRES, EXACTLY (2026-09-15). The percentage was rounded to a
+           whole number, so 20 mm on a 22 mm pyramid could only be 91 % =
+           20.02 mm and a report row could not be re-entered exactly. -->
+      <label style="font-size:11px">or mm from the tip
+        <input type="number" id="n_pdmm" min="0" step="any" style="width:5.5em"></label>
       <input type="hidden" id="pd" value="10"><input type="hidden" id="n_pd" value="10">
       <span id="v_pd" style="display:none">10</span></div>
     <div class="row" style="margin:6px 0 2px">
@@ -490,7 +495,7 @@ details.why p{margin:.4em 0 0}
       <span class="sub">flat plate = 1.0 by definition &middot; target: 1.42 at beam 7&#8202;mm (final sample)</span></div>
     <div class="ax" id="ax_head"><span class="nm">정면 반짝임 head-on &darr; <i id="ax_beam2"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">flat matte patch = 1.0 &middot; target: 0.040 (beam 7/10&#8202;mm) &middot; tip ladder 0.1/0.2/0.4 &rarr; 0.032/0.052/0.107</span></div>
+      <span class="sub">flat matte patch = 1.0 &middot; old target 0.040 was read as the <b>maximum</b> with the old coating &mdash; not comparable to today&rsquo;s 2&#8202;mm box peak; re-measure the reference sample</span></div>
   </div>
 
   <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
@@ -1089,9 +1094,11 @@ async function measure(thetas){
     const R = $('#renderer').value;
     const r = await fetch('/api/measure', {method:'POST', body: JSON.stringify({
       spec: LAST, thetas, renderer: R,
-      // three azimuth planes for the published path; the Mitsuba worker has
-      // no phi rotation, so cross-check modes stay in the phi-0 plane
-      phis: R === 'cycles' ? [0, 45, 90] : undefined,
+      // AZIMUTH PLANES FROM THE ROOM PROTOCOL (2026-09-15), read from the
+      // server (`/api/protocol` -> form_metrics.ROOM_TOTAL_PHIS) so the screen
+      // measures what the finalist report ranks on. The Mitsuba worker has no
+      // phi rotation, so cross-check modes stay in the phi-0 plane.
+      phis: R === 'cycles' ? PROTO.total_phis : undefined,
       // PANEL-WIDE VALUES ARE GONE (2026-08-24): they forced one diffuse
       // fraction and one roughness onto all three slots. `slotOverrides()`
       // above carries whatever the user changed, per slot; null lets each
@@ -1143,7 +1150,7 @@ async function measure(thetas){
     const nPl = series.length;
     $('#rho').innerHTML = (100*worst).toFixed(5) + ' %'
       + `<small>${who}${R!=='cycles'?' · Lambertian &rho;=0.01':''}`
-      + ` · 가장 밝은 각도 (5&theta; &times; ${nPl} 평면)`
+      + ` · 가장 밝은 각도 (${thetas.length}&theta; &times; ${nPl} 평면)`
       + (nPl>1 ? ` (at &theta; ${wTh}&deg;, &phi; ${wPhi}&deg;)` : '')
       + ` · ${j.seconds}s`
       + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}`
@@ -1151,7 +1158,16 @@ async function measure(thetas){
       // beside it is not a result -- the same panel reads 0.10 % or 0.47 %
       // depending only on what it is painted with, and the reader cannot tell
       // which from the number alone.
-      + `</small>`;
+      + `</small>`
+      // EVERY ANGLE, not only the brightest (2026-09-15), so a reading can be
+      // checked cell by cell against the finalist report's totals table.
+      + `<div class="scroll" style="margin-top:6px"><table style="font-size:11px;font-variant-numeric:tabular-nums">`
+      + `<tr><th>&phi; \\ &theta;</th>`
+      + series[0].vals.map(([t]) => `<th>${t}&deg;</th>`).join('') + `</tr>`
+      + series.map(s => `<tr><td>${s.phi}&deg;</td>`
+          + s.vals.map(([, v]) => `<td style="text-align:right">${(100*v).toFixed(3)}</td>`).join('')
+          + `</tr>`).join('')
+      + `</table><small>% · 입사각(&theta;) x 방위(&phi;)</small></div>`;
     // THE NUMBER FIRST, the caption second. Building both in one template
     // meant a throw anywhere in the caption threw away the measurement too:
     // the readout stayed at "not measured" after a render that had actually
@@ -2601,6 +2617,8 @@ addEventListener('resize', () => draw());
 
   // ---- presets: open on something real, not on dataclass defaults
   const PRE = (await (await fetch('/api/presets')).json()).presets;
+  // the measurement protocol's angle lists, from their one home on the server
+  window.PROTO = await (await fetch('/api/protocol')).json();
   const named = PRE.filter(p => p.headline)
                    .sort((a,b) => a.headline.localeCompare(b.headline));
   // USER DESIGNS live in this browser (localStorage): the current sliders can
@@ -2765,7 +2783,8 @@ addEventListener('resize', () => draw());
                                        ? null : +$('#pd').value,
                               floor_coating: NOTOP() ? null : FLOORMAT(),
                               ...slotOverrides(),
-                              phis: R === 'cycles' ? [0, 45, 90] : undefined})});
+                              // one plane, from the protocol (form_metrics.FORM_PHIS)
+                              phis: R === 'cycles' ? PROTO.form_phis : undefined})});
       const j = await r.json();
       if(j.error) throw new Error(j.error);
       const num = v => v==null ? '\u2014' : (+v).toFixed(4);
@@ -2788,8 +2807,25 @@ addEventListener('resize', () => draw());
         // per-plane rows use a bare "\u03c6 N\u00b0" dt so the dashboard mirror (which
         // greps dt for smear/head) keeps reading the WORST rows, not a plane
         const P = j.planes || null;
+        // PER BEAM ANGLE, per plane (2026-09-15): the finalist report ranks on
+        // the brightest box over beams -40/+30/+40, so the screen shows every
+        // beam, every statistic, and the smear each angle gave.
+        const beamTable = d => {
+          const pk = d.peak_by_stat_by_theta || {}, sm = d.smear_by_theta || {},
+                cv = d.converged_by_theta || {};
+          const ks = Object.keys(pk).sort((a, b) => (+a) - (+b));
+          if(!ks.length) return '';
+          const f = (v, n) => v == null ? '\u2014' : (+v).toFixed(n);
+          return `<div class="scroll"><table style="font-size:11px;font-variant-numeric:tabular-nums">`
+            + `<tr><th>beam</th><th>box</th><th>p99</th><th>max</th><th>smear</th></tr>`
+            + ks.map(k => `<tr><td>${k}&deg;</td><td style="text-align:right"><b>${f(pk[k].box, 4)}</b></td>`
+                + `<td style="text-align:right">${f(pk[k].p99, 4)}</td><td style="text-align:right">${f(pk[k].max, 4)}</td>`
+                + `<td style="text-align:right">${f(sm[k], 3)}${cv[k] === false ? ' <small>\ud558\ud55c</small>' : ''}</td></tr>`).join('')
+            + `</table></div>`;
+        };
         const planeRows = P ? Object.entries(P).map(([p, d]) =>
-          `<div><dt>&phi; ${p}&deg;</dt><dd>smear ${d.smear!=null?d.smear.toFixed(2)+'\u00d7':'\u2014'} &middot; head-on ${d.peak!=null?(+d.peak).toFixed(4):'\u2014'}</dd></div>`).join('') : '';
+          `<div><dt>&phi; ${p}&deg;</dt><dd>smear &plusmn;40 ${d.smear!=null?d.smear.toFixed(3)+'\u00d7':'\u2014'} &middot; head-on (beam 0) ${d.peak!=null?(+d.peak).toFixed(4):'\u2014'}${beamTable(d)}</dd></div>`).join('') : '';
+        const grownRow = j.grown ? `<div><dt>wider sample</dt><dd>panel ${(+j.grown.panel_mm).toFixed(0)} mm gives smear ${j.grown.smear!=null?(+j.grown.smear).toFixed(3):'\u2014'}${j.grown.converged===false?' (still a lower bound)':''}. The readings above are for the ${(+j.requested_face_mm).toFixed(0)} mm panel you set.</dd></div>` : '';
         // CONVERGENCE IS PART OF THE READING, NOT A FOOTNOTE (2026-08-20).
         // The smear window used to be 40 % of the panel, so a design whose
         // return is wider than that read low -- and because rms divides by the
@@ -2808,8 +2844,9 @@ addEventListener('resize', () => draw());
              draft ? ' <b style="color:var(--a)">DRAFT — coarser than the '
                      + (+j.protocol_mm_per_px).toFixed(3)
                      + ' protocol; head-on dilutes, do not quote</b>' : ''}</dd></div>`;
-  const grew = j.sample_face_mm && j.requested_face_mm
-                     && j.sample_face_mm > j.requested_face_mm * 1.01;
+  // the server now returns the REQUESTED panel's reading and puts any grown
+  // sample under `grown`; the old "sample grown" row is replaced by grownRow
+  const grew = false;
         const convRow = (conv == null ? '' :
           `<div><dt>window</dt><dd>${j.window_mm?j.window_mm.toFixed(0)+' mm':'\u2014'}${
              j.face_mm?' of a '+j.face_mm.toFixed(0)+' mm sample':''} &middot; ${
@@ -2823,7 +2860,7 @@ addEventListener('resize', () => draw());
         $('#formout').innerHTML =
           `<div><dt>smear${P?' (밝은 쪽 '+Object.keys(P).length+' 평면 중)':''}</dt><dd>${smearTxt}</dd></div>
            <div><dt>head-on brightness${P?' (가장 밝은 평면)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
-          + densRow + convRow + planeRows +
+          + densRow + convRow + grownRow + planeRows +
           `<div><dt>renderer</dt><dd>${who}</dd></div>
            <div><dt>beam</dt><dd>${j.beam_w!=null?j.beam_w.toFixed(1)+' mm':'&mdash;'}</dd></div>
            <div><dt>peak read as</dt><dd>${j.peak_stat||'&mdash;'}</dd></div>
@@ -2856,7 +2893,9 @@ addEventListener('resize', () => draw());
   // looked painted when it was not.
   $('#coat').innerHTML =
     '<option value="none">— not painted —</option>' + opts;
-  $('#coat').value = 'musou_fit';
+  // musou_fit2 (2026-09-15): fitted to the paper's THR, TIS and lobe shape
+  // together. musou_fit is still on the list for reproducing old numbers.
+  $('#coat').value = CO.musou_fit2 ? 'musou_fit2' : 'musou_fit';
   // EVERY SLOT OFFERS EVERY MATERIAL (2026-08-24).
   // There used to be a `BOUGHT` filter here with the comment "Musou is never
   // a base -- it is the thing painted on". I wrote that; no measurement said
@@ -2899,13 +2938,25 @@ addEventListener('resize', () => draw());
     if($('#pd')) $('#pd').value = mm;
     if($('#n_pd')) $('#n_pd').value = mm;
     if($('#v_pd')) $('#v_pd').textContent = mm.toFixed(2);
-    if($('#v_pcov')) $('#v_pcov').textContent = String(Math.round(pc));
-    if($('#n_pcov')) $('#n_pcov').value = String(Math.round(pc));
+    // not rounded: the value sent is the value shown
+    if($('#v_pcov')) $('#v_pcov').textContent = (+pc.toFixed(3)).toString();
+    if($('#n_pcov') && document.activeElement !== $('#n_pcov'))
+      $('#n_pcov').value = String(+pc.toFixed(4));
+    if($('#n_pdmm') && document.activeElement !== $('#n_pdmm'))
+      $('#n_pdmm').value = String(+mm.toFixed(4));
     const el = $('#pdfrac');
     if(el) el.innerHTML = d > 0
       ? `= top ${mm.toFixed(2)} mm of ${d} mm`
       : '';
     return {pc, mm, d};
+  };
+  // typing millimetres sets the coverage to exactly that depth, through the
+  // same input event the slider fires, so every listener runs as if dragged
+  if($('#n_pdmm')) $('#n_pdmm').onchange = e => {
+    const d = +($('#depth') ? $('#depth').value : 0) || 0;
+    const mm = Math.max(0, +e.target.value || 0);
+    $('#pcov').value = d > 0 ? Math.min(100, 100 * mm / d) : 0;
+    $('#pcov').dispatchEvent(new Event('input'));
   };
 
   // paintFrac() was the millimetre-era writer for #pdfrac. pcovSync() owns
@@ -3076,6 +3127,18 @@ addEventListener('resize', () => draw());
         prog.set(out.length, THS.length);
         const r = await fetch('/api/rays', {method:'POST', body: JSON.stringify(
           {spec: LAST, theta: th, phi, n_rays: nr, max_bounces: mb, rho, mode,
+           // THE SAME FINISHES THE TOTALS BUTTON SENDS (2026-09-15), so the
+           // tracer can pick the top / below-paint / floor material by the
+           // depth of each hit instead of one pair for the whole panel.
+           floor_coating: NOTOP() ? null : FLOORMAT(),
+           coating: (NOTOP() || NOPAINT() || +$('#pcov').value <= 0)
+                      ? $('#deepcoat').value : $('#coat').value,
+           deep_coating: (NOTOP() || NOPAINT() || +$('#pcov').value >= 100
+                          || +$('#pcov').value <= 0)
+                         ? null : ($('#deepcoat').value || null),
+           paint_depth: (NOTOP() || NOPAINT() || +$('#pcov').value >= 100
+                         || +$('#pcov').value <= 0)
+                        ? null : (+$('#depth').value * +$('#pcov').value / 100),
            // the SAME two sliders the Render uses. The trace ignored both
            // until now, so it could not be compared with Render on a painted
            // panel: one was a pure mode, the other a 76/24 mix.
@@ -3135,7 +3198,10 @@ addEventListener('resize', () => draw());
       `<div><dt>failed</dt><dd>${String(e).slice(0,200)}</dd></div>`; }
     finally{ b.disabled=false; setBusy(-1); prog.stop(); }
   };
-  $('#m5').onclick = () => measure([0,-20,-40,20,40]);
+  // THE ROOM'S ANGLES, not a list written here (2026-09-15). The totals button
+  // used to measure [0, -20, -40, 20, 40]; the finalist report ranks on 30 and
+  // 45 degrees too. Both now read form_metrics.ROOM_TOTAL_THETAS.
+  $('#m5').onclick = () => measure(PROTO.total_thetas);
   $('#step').onclick = async () => {
     const b = $('#step'), tag = $('#stepsize'), was = tag.textContent;
     b.disabled = true; tag.textContent = 'building…';
@@ -3211,7 +3277,7 @@ addEventListener('resize', () => draw());
       ['모양 뭉개기 · smear ↑', '#ax_smear', () => '',
        'flat plate = 1.0 by definition · study best 1.42 (beam 7 mm)'],
       ['정면 반짝임 · head-on ↓', '#ax_head', () => '',
-       'flat matte patch = 1.0 · study best 0.040'],
+       'flat matte patch = 1.0 · old study best 0.040 was a maximum, old coating — not comparable'],
     ].map(([nm, id, note, base]) => {
       const v = $(id).querySelector('.val').textContent.trim();
       const big = v === '—' ? '<span class="dim">not measured</span>'

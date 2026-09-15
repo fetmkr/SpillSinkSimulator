@@ -1,0 +1,169 @@
+{
+ "peak_padding": [
+  {
+   "nwin": 361,
+   "p99": 1.0,
+   "maximum": 1.0,
+   "box": 0.8
+  },
+  {
+   "nwin": 465,
+   "p99": 1.0,
+   "maximum": 1.0,
+   "box": 0.8
+  },
+  {
+   "nwin": 931,
+   "p99": 0.1,
+   "maximum": 1.0,
+   "box": 0.8
+  },
+  {
+   "nwin": 2327,
+   "p99": 0.1,
+   "maximum": 1.0,
+   "box": 0.8
+  }
+ ],
+ "peak_padding_2d": [
+  {
+   "pad": 0,
+   "box": 0.20000000000000057,
+   "p99_of_x_mean": 0.11350000000000002
+  },
+  {
+   "pad": 50,
+   "box": 0.20000000000000057,
+   "p99_of_x_mean": 0.11350000000000002
+  },
+  {
+   "pad": 400,
+   "box": 0.20000000000000057,
+   "p99_of_x_mean": 0.09999999999999999
+  }
+ ],
+ "false_convergence": {
+  "value": {
+   "window_mm": 100.0,
+   "rms_mm": 17.779806804350716,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 22.224758505437133
+  },
+  "converged": true,
+  "stable": true,
+  "control_stable": true,
+  "edge_ok": true,
+  "tol": 0.02,
+  "first_agreement": {
+   "window_mm": 48.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "first_agreement_reversed": true,
+  "band_energy": 3.5090686703730185e-173,
+  "band_moment": 2.5581739064660065e-172,
+  "edge_energy": 5.4052065796611945e-108,
+  "edge_moment": 3.4641620612752474e-107,
+  "curve": [
+   {
+    "window_mm": 24.0,
+    "rms_mm": 0.8000000000000455,
+    "rms_control_mm": 0.8000000000000455,
+    "smear": 1.0
+   },
+   {
+    "window_mm": 48.0,
+    "rms_mm": 0.8000000000000455,
+    "rms_control_mm": 0.8000000000000455,
+    "smear": 1.0
+   },
+   {
+    "window_mm": 96.0,
+    "rms_mm": 17.779806804350716,
+    "rms_control_mm": 0.8000000000000455,
+    "smear": 22.224758505437133
+   },
+   {
+    "window_mm": 100.0,
+    "rms_mm": 17.779806804350716,
+    "rms_control_mm": 0.8000000000000455,
+    "smear": 22.224758505437133
+   }
+  ]
+ },
+ "edge": {
+  "value": {
+   "window_mm": 72.0,
+   "rms_mm": 17.779563246125054,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 22.224454057655056
+  },
+  "converged": false,
+  "stable": false,
+  "control_stable": true,
+  "edge_ok": false,
+  "tol": 0.02,
+  "first_agreement": {
+   "window_mm": 48.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "first_agreement_reversed": true,
+  "band_energy": 0.2729936257744546,
+  "band_moment": 0.9985281077490062,
+  "edge_energy": 0.2728043019343529,
+  "edge_moment": 0.9979045019212744
+ },
+ "clean": {
+  "value": {
+   "window_mm": 96.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "converged": true,
+  "stable": true,
+  "control_stable": true,
+  "edge_ok": true,
+  "tol": 0.02,
+  "first_agreement": {
+   "window_mm": 48.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "first_agreement_reversed": false,
+  "band_energy": 1.2536405025965104e-197,
+  "band_moment": 1.1297498269398201e-194,
+  "edge_energy": 0.0,
+  "edge_moment": 0.0
+ },
+ "known_limit_outside_frame": {
+  "value": {
+   "window_mm": 48.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "converged": true,
+  "stable": true,
+  "control_stable": true,
+  "edge_ok": true,
+  "tol": 0.02,
+  "first_agreement": {
+   "window_mm": 48.0,
+   "rms_mm": 0.8000000000000455,
+   "rms_control_mm": 0.8000000000000455,
+   "smear": 1.0
+  },
+  "first_agreement_reversed": false,
+  "band_energy": 7.874389515149424e-51,
+  "band_moment": 1.785322929003619e-48,
+  "edge_energy": 1.3586501461692763e-89,
+  "edge_moment": 1.2213942194214372e-86
+ },
+ "failed": [],
+ "_note": "\ud569\uc131 \ubc18\ub840. \uc2e4\uc81c \ud328\ub110 \uce21\uc815\uc774 \uc544\ub2c8\ub2e4."
+}

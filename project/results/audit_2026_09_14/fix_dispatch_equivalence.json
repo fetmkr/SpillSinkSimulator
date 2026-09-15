@@ -1,0 +1,149 @@
+{
+ "ops": {
+  "measure": {
+   "call": {
+    "spec": {
+     "top": "comb",
+     "depth": 40,
+     "panel": 100,
+     "floor": "none",
+     "top_params": {
+      "pitch": 9.53
+     }
+    },
+    "thetas": [
+     40.0,
+     -20.0
+    ],
+    "diffuse_frac": 0.91,
+    "roughness": 0.2,
+    "samples": 48,
+    "coating": "wall_5pct",
+    "deep_coating": "anodised",
+    "paint_depth": 15.0,
+    "deep_until": 38.0,
+    "paint_fade": 3.0,
+    "phis": [
+     45.0,
+     90.0
+    ],
+    "floor_coating": "musou_air",
+    "slot_df": {
+     "coating": 0.92
+    },
+    "slot_rough": {
+     "coating": 0.3
+    },
+    "with_conditions": true
+   },
+   "missing": [],
+   "ignored_in": [],
+   "ignored_worker": []
+  },
+  "form": {
+   "call": {
+    "spec": {
+     "top": "comb",
+     "depth": 40,
+     "panel": 100,
+     "floor": "none",
+     "top_params": {
+      "pitch": 9.53
+     }
+    },
+    "thetas": [
+     40.0
+    ],
+    "n_phase": 5,
+    "samples": 24,
+    "beam_w": 9.0,
+    "phis": [
+     45.0,
+     90.0
+    ],
+    "mm_per_px": 0.05,
+    "floor_coating": "musou_air",
+    "diffuse_frac": 0.91,
+    "coating": "wall_5pct",
+    "deep_coating": "anodised",
+    "paint_depth": 15.0,
+    "roughness": 0.2,
+    "slot_df": {
+     "coating": 0.92
+    },
+    "slot_rough": {
+     "coating": 0.3
+    },
+    "obs_elev": 40.0
+   },
+   "missing": [],
+   "ignored_in": [],
+   "ignored_worker": []
+  },
+  "lambert": {
+   "call": {
+    "spec": {
+     "top": "comb",
+     "depth": 40,
+     "panel": 100,
+     "floor": "none",
+     "top_params": {
+      "pitch": 9.53
+     }
+    },
+    "theta": 35.0,
+    "rho": 0.03,
+    "samples": 40
+   },
+   "missing": [],
+   "ignored_in": [],
+   "ignored_worker": []
+  },
+  "form_lambert": {
+   "call": {
+    "spec": {
+     "top": "comb",
+     "depth": 40,
+     "panel": 100,
+     "floor": "none",
+     "top_params": {
+      "pitch": 9.53
+     }
+    },
+    "rho": 0.03,
+    "n_phase": 5,
+    "samples": 24,
+    "thetas": [
+     -30.0,
+     30.0
+    ],
+    "beam_w": 9.0
+   },
+   "missing": [],
+   "ignored_in": [],
+   "ignored_worker": []
+  },
+  "audit_form": {
+   "ignored": [],
+   "lost": []
+  },
+  "audit_measure": {
+   "ignored": [
+    "beam_w",
+    "mm_per_px",
+    "n_phase",
+    "obs_elev"
+   ],
+   "lost": []
+  },
+  "http_measure": {
+   "lost": [],
+   "ignored": []
+  },
+  "http_form": {
+   "lost": [],
+   "ignored": []
+  }
+ },
+ "failed": []
+}

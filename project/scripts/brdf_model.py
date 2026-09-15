@@ -209,6 +209,94 @@ def rs(theta_i_deg, body, spec_scale, alpha, ior=1.5, fresnel="exact", **kw):
                      **kw)["rs"]
 
 
+# --- scalar versions, for per-ray use in plain Python -------------------------
+#
+# `raytrace_viz` evaluates the BRDF once per bounce for a few hundred thousand
+# bounces; numpy on scalars costs ~20 us per operation there. These are the SAME
+# formulas written for one direction pair. `gate_rays_brdf.py` checks them
+# against the array versions above on random directions, so the two cannot
+# drift apart silently.
+
+def fresnel_scalar(c, n=1.5):
+    c = min(max(c, 0.0), 1.0)
+    ct = math.sqrt(max(1.0 - (1.0 - c * c) / (n * n), 0.0))
+    rs = (c - n * ct) / (c + n * ct)
+    rp = (n * c - ct) / (n * c + ct)
+    return 0.5 * (rs * rs + rp * rp)
+
+
+def ggx_d_scalar(cos_h, alpha):
+    a2 = alpha * alpha
+    c2 = min(max(cos_h, 0.0), 1.0) ** 2
+    den = c2 * (a2 - 1.0) + 1.0
+    return a2 / (math.pi * den * den)
+
+
+def smith_g2_scalar(ci, co, alpha):
+    def lam(c):
+        c = min(max(c, 1e-9), 1.0)
+        t2 = (1.0 - c * c) / (c * c)
+        return 0.5 * (math.sqrt(1.0 + alpha * alpha * t2) - 1.0)
+    return 1.0 / (1.0 + lam(ci) + lam(co))
+
+
+def brdf_scalar(wi, wo, body, spec_scale, alpha, ior=1.5):
+    """f_r for two unit 3-tuples in the local frame (z = normal)."""
+    ci, co = wi[2], wo[2]
+    if ci <= 0.0 or co <= 0.0:
+        return 0.0
+    hx, hy, hz = wi[0] + wo[0], wi[1] + wo[1], wi[2] + wo[2]
+    hn = math.sqrt(hx * hx + hy * hy + hz * hz)
+    if hn <= 0.0:
+        return body / math.pi
+    hx, hy, hz = hx / hn, hy / hn, hz / hn
+    cos_hi = wi[0] * hx + wi[1] * hy + wi[2] * hz
+    spec = (spec_scale * ggx_d_scalar(hz, alpha) * smith_g2_scalar(ci, co, alpha)
+            * fresnel_scalar(cos_hi, ior) / (4.0 * max(ci, 1e-9) * max(co, 1e-9)))
+    return body / math.pi + spec
+
+
+def sample_scalar(wi, body, spec_scale, alpha, u0, u1, u2, ior=1.5):
+    """Draw an outgoing direction for the lobe mixture and return
+    (wo, throughput) with throughput = f * cos_o / pdf, or (None, 0.0) when the
+    draw lands below the surface (energy the model says is not reflected).
+
+    The Lambert leg is chosen with probability body / (body + spec_scale x
+    F(cos_i)), the lobe leg samples the microfacet normal from D(h) cos(h).
+    The pdf is the full mixture density, so the estimate is unbiased whichever
+    leg drew the direction."""
+    ci = wi[2]
+    if ci <= 0.0:
+        return None, 0.0
+    ps = spec_scale * fresnel_scalar(ci, ior)
+    pd = body / (body + ps) if body + ps > 0.0 else 1.0
+    if u0 < pd:
+        r = math.sqrt(u1)
+        a = 2.0 * math.pi * u2
+        wo = (r * math.cos(a), r * math.sin(a), math.sqrt(max(0.0, 1.0 - u1)))
+    else:
+        a2 = alpha * alpha
+        t2 = a2 * u1 / max(1.0 - u1, 1e-12)
+        ch = 1.0 / math.sqrt(1.0 + t2)
+        sh = math.sqrt(max(0.0, 1.0 - ch * ch))
+        ph = 2.0 * math.pi * u2
+        h = (sh * math.cos(ph), sh * math.sin(ph), ch)
+        d = wi[0] * h[0] + wi[1] * h[1] + wi[2] * h[2]
+        wo = (2 * d * h[0] - wi[0], 2 * d * h[1] - wi[1], 2 * d * h[2] - wi[2])
+    co = wo[2]
+    if co <= 0.0:
+        return None, 0.0
+    hx, hy, hz = wi[0] + wo[0], wi[1] + wo[1], wi[2] + wo[2]
+    hn = math.sqrt(hx * hx + hy * hy + hz * hz) or 1.0
+    hz_ = hz / hn
+    oh = abs((wo[0] * hx + wo[1] * hy + wo[2] * hz) / hn)
+    pdf = (pd * co / math.pi
+           + (1.0 - pd) * ggx_d_scalar(hz_, alpha) * hz_ / (4.0 * max(oh, 1e-12)))
+    if pdf <= 0.0:
+        return None, 0.0
+    return wo, brdf_scalar(wi, wo, body, spec_scale, alpha, ior) * co / pdf
+
+
 def reciprocity_gap(body, spec_scale, alpha, ior=1.5, fresnel="exact",
                     pairs=((80.0, -65.0), (60.0, -40.0), (45.0, 20.0))):
     """|f(a->b) - f(b->a)| / f(a->b) for in-plane direction pairs. Zero to

@@ -1,0 +1,8247 @@
+{
+ "rows": [
+  {
+   "smear": 0.9999006405291989,
+   "box": 0.18015360676662018,
+   "p99": 0.1822008389447285,
+   "max": 0.18153644890825857,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 1,
+   "sec": 6.5
+  },
+  {
+   "smear": 1.0003983118457653,
+   "box": 0.18109369418072377,
+   "p99": 0.18226318249963125,
+   "max": 0.18104131392245398,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 2,
+   "sec": 6.3
+  },
+  {
+   "smear": 0.999946543204419,
+   "box": 0.18076258961492564,
+   "p99": 0.18229149622905047,
+   "max": 0.1821876275007283,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.9
+  },
+  {
+   "smear": 1.00007262817025,
+   "box": 0.18285490157138712,
+   "p99": 0.18253020241150747,
+   "max": 0.18229103052199389,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.8
+  },
+  {
+   "smear": 0.999914231520139,
+   "box": 0.1818076746525654,
+   "p99": 0.18224438924473912,
+   "max": 0.18202654491559073,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 1,
+   "sec": 7.9
+  },
+  {
+   "smear": 1.0000018141582816,
+   "box": 0.18199270833586823,
+   "p99": 0.1820544045249119,
+   "max": 0.1817309056893162,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 2,
+   "sec": 7.9
+  },
+  {
+   "smear": 1.0001041339510097,
+   "box": 0.1817005973804488,
+   "p99": 0.1819764779202065,
+   "max": 0.1821702419755888,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 1,
+   "sec": 9.7
+  },
+  {
+   "smear": 0.9999785128736377,
+   "box": 0.18197199815996773,
+   "p99": 0.18199645702749107,
+   "max": 0.18213507480300714,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 2,
+   "sec": 9.7
+  },
+  {
+   "smear": 1.000034268058256,
+   "box": 0.18194033312593433,
+   "p99": 0.18202732808577654,
+   "max": 0.1819364530923418,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 1,
+   "sec": 13.5
+  },
+  {
+   "smear": 1.0000989174185602,
+   "box": 0.18216889028679237,
+   "p99": 0.18200780795716898,
+   "max": 0.18206445722427936,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 2,
+   "sec": 13.4
+  },
+  {
+   "smear": 1.0000634909874275,
+   "box": 0.18197374534234398,
+   "p99": 0.18199640483819274,
+   "max": 0.18198436312507033,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 1,
+   "sec": 36.1
+  },
+  {
+   "smear": 1.0000851145129244,
+   "box": 0.18199886908714397,
+   "p99": 0.18199219970057817,
+   "max": 0.1819911464296155,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 2,
+   "sec": 36.2
+  },
+  {
+   "smear": 1.0005442582977795,
+   "box": 0.14635145948532552,
+   "p99": 0.1476845917992932,
+   "max": 0.14922438941912333,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 1,
+   "sec": 6.2
+  },
+  {
+   "smear": 1.000328485380159,
+   "box": 0.14863595695193135,
+   "p99": 0.14866217980505003,
+   "max": 0.14779427217733151,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 2,
+   "sec": 6.2
+  },
+  {
+   "smear": 1.000227531383975,
+   "box": 0.14664280490487167,
+   "p99": 0.14754111107693813,
+   "max": 0.1483713440570204,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.6
+  },
+  {
+   "smear": 0.9998513850109225,
+   "box": 0.1449971561423235,
+   "p99": 0.14799015841724164,
+   "max": 0.1483371523271272,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.7
+  },
+  {
+   "smear": 1.0000074992539463,
+   "box": 0.1475450495320518,
+   "p99": 0.1478262678359804,
+   "max": 0.14765768173824442,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 1,
+   "sec": 7.7
+  },
+  {
+   "smear": 0.999946323316472,
+   "box": 0.14749139454135074,
+   "p99": 0.14787586472705058,
+   "max": 0.1478233709821738,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 2,
+   "sec": 7.6
+  },
+  {
+   "smear": 1.0001835178686882,
+   "box": 0.14742509457894162,
+   "p99": 0.1478408392324395,
+   "max": 0.14787647235208515,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 1,
+   "sec": 9.4
+  },
+  {
+   "smear": 1.0000407165281426,
+   "box": 0.14821219909701955,
+   "p99": 0.14785260539855163,
+   "max": 0.14783777035970996,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 2,
+   "sec": 9.4
+  },
+  {
+   "smear": 1.0000537457445349,
+   "box": 0.14776532943179985,
+   "p99": 0.14790686931472552,
+   "max": 0.14791004210116473,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 1,
+   "sec": 12.7
+  },
+  {
+   "smear": 1.00010711772439,
+   "box": 0.1479106977212046,
+   "p99": 0.14786228503753765,
+   "max": 0.14789668807475376,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 2,
+   "sec": 12.7
+  },
+  {
+   "smear": 1.0000590473478577,
+   "box": 0.14787971803806088,
+   "p99": 0.14787808941116948,
+   "max": 0.14786292232531695,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 1,
+   "sec": 32.9
+  },
+  {
+   "smear": 1.0001124501319423,
+   "box": 0.1478809033616587,
+   "p99": 0.14787290234261402,
+   "max": 0.1478820769780929,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 2,
+   "sec": 32.9
+  },
+  {
+   "smear": 0.9992834172201335,
+   "box": 0.15728839008283035,
+   "p99": 0.15658862942558388,
+   "max": 0.15514312137577707,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 1,
+   "sec": 6.1
+  },
+  {
+   "smear": 1.0003821351235227,
+   "box": 0.15719709337151444,
+   "p99": 0.1555354883429291,
+   "max": 0.1555150672699281,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 2,
+   "sec": 6.1
+  },
+  {
+   "smear": 0.9996180861776475,
+   "box": 0.15514023754315617,
+   "p99": 0.15604774889954603,
+   "max": 0.1566933940383066,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.4
+  },
+  {
+   "smear": 0.9997658422306911,
+   "box": 0.1562384723463175,
+   "p99": 0.1559997458187385,
+   "max": 0.15577772978873117,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.4
+  },
+  {
+   "smear": 0.9996211001181728,
+   "box": 0.15633177890424582,
+   "p99": 0.15615436002108574,
+   "max": 0.15641375671320257,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 1,
+   "sec": 7.3
+  },
+  {
+   "smear": 0.9998239384624527,
+   "box": 0.15681509530773935,
+   "p99": 0.15621008858617902,
+   "max": 0.1555394393583289,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 2,
+   "sec": 7.3
+  },
+  {
+   "smear": 0.999738426159752,
+   "box": 0.1559607750251623,
+   "p99": 0.15609706823325403,
+   "max": 0.15616682547665273,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 1,
+   "sec": 8.5
+  },
+  {
+   "smear": 0.9997992895456169,
+   "box": 0.15610204221369067,
+   "p99": 0.15598609181052275,
+   "max": 0.15611851106525382,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 2,
+   "sec": 8.5
+  },
+  {
+   "smear": 0.9997869958248784,
+   "box": 0.15588060025475406,
+   "p99": 0.15607403698179406,
+   "max": 0.15611659864448837,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 1,
+   "sec": 11.3
+  },
+  {
+   "smear": 0.9998323541823131,
+   "box": 0.1562314531597359,
+   "p99": 0.1560133018937393,
+   "max": 0.15609194906217716,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 2,
+   "sec": 11.2
+  },
+  {
+   "smear": 0.9997500483555957,
+   "box": 0.1560425818295778,
+   "p99": 0.15605765211350436,
+   "max": 0.15603929885719048,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 1,
+   "sec": 27.1
+  },
+  {
+   "smear": 0.9997690659811488,
+   "box": 0.15603514181624742,
+   "p99": 0.15605200343420264,
+   "max": 0.1560526171541738,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 2,
+   "sec": 27.0
+  },
+  {
+   "smear": 1.0006275136874854,
+   "box": 0.15464013305608232,
+   "p99": 0.15362831337752225,
+   "max": 0.15502135940829057,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 1,
+   "sec": 6.3
+  },
+  {
+   "smear": 1.0001200863874207,
+   "box": 0.15470036050410116,
+   "p99": 0.15463685236136293,
+   "max": 0.15379602914497117,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 2,
+   "sec": 6.3
+  },
+  {
+   "smear": 1.0002620716102133,
+   "box": 0.15320283723515332,
+   "p99": 0.15349202602871193,
+   "max": 0.1542570714601524,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.7
+  },
+  {
+   "smear": 0.9998799241937562,
+   "box": 0.15186458806866782,
+   "p99": 0.15394978783279045,
+   "max": 0.1543258460076633,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.7
+  },
+  {
+   "smear": 1.00004961614666,
+   "box": 0.15373304789473866,
+   "p99": 0.15378593770978866,
+   "max": 0.1535939607697845,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 1,
+   "sec": 7.8
+  },
+  {
+   "smear": 0.9999623289514417,
+   "box": 0.15285409496461505,
+   "p99": 0.15384020675167356,
+   "max": 0.15378260259866217,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 2,
+   "sec": 7.8
+  },
+  {
+   "smear": 1.0001567492751124,
+   "box": 0.15343564167615253,
+   "p99": 0.1538035506307247,
+   "max": 0.15383410747208642,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 1,
+   "sec": 9.5
+  },
+  {
+   "smear": 1.0000684352983422,
+   "box": 0.15393170745685825,
+   "p99": 0.15381267258152675,
+   "max": 0.153796532704694,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 2,
+   "sec": 9.5
+  },
+  {
+   "smear": 1.0000357644889692,
+   "box": 0.1536911023590196,
+   "p99": 0.15386553857786192,
+   "max": 0.15387208178491585,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 1,
+   "sec": 13.1
+  },
+  {
+   "smear": 1.0001212784632205,
+   "box": 0.15387265567189368,
+   "p99": 0.15382389426461446,
+   "max": 0.15385870398850693,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 2,
+   "sec": 13.2
+  },
+  {
+   "smear": 1.0000545986639684,
+   "box": 0.15383910462270756,
+   "p99": 0.1538390048414922,
+   "max": 0.1538235749176562,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 1,
+   "sec": 34.9
+  },
+  {
+   "smear": 1.0000905636266673,
+   "box": 0.15382232535346735,
+   "p99": 0.15383354613646721,
+   "max": 0.15384324829845347,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "민판 (평판) · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 2,
+   "sec": 34.9
+  },
+  {
+   "smear": 1.0235728551419947,
+   "box": 0.02519480077154962,
+   "p99": 0.0069901288573266055,
+   "max": 0.008121262499832603,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 1,
+   "sec": 5.8
+  },
+  {
+   "smear": 1.049524328493353,
+   "box": 0.022226527428186288,
+   "p99": 0.006513284266527253,
+   "max": 0.00884733977464984,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 2,
+   "sec": 5.8
+  },
+  {
+   "smear": 1.0410324929343353,
+   "box": 0.021575969490940695,
+   "p99": 0.006601846017119042,
+   "max": 0.007399872344108773,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.2
+  },
+  {
+   "smear": 1.0485449657276982,
+   "box": 0.021409088633536175,
+   "p99": 0.006621624128776251,
+   "max": 0.007368270613086358,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.1
+  },
+  {
+   "smear": 1.0427812940644288,
+   "box": 0.020235460043290632,
+   "p99": 0.00616330873697607,
+   "max": 0.006968841868205397,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 1,
+   "sec": 6.7
+  },
+  {
+   "smear": 1.0459057623940449,
+   "box": 0.020379242337771206,
+   "p99": 0.006402350304000959,
+   "max": 0.007277209799585656,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 2,
+   "sec": 6.8
+  },
+  {
+   "smear": 1.0444217553535144,
+   "box": 0.019864159852718916,
+   "p99": 0.00618189585060756,
+   "max": 0.0068251383554820775,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 1,
+   "sec": 7.7
+  },
+  {
+   "smear": 1.0455513496142232,
+   "box": 0.020794653277898957,
+   "p99": 0.006291478162069366,
+   "max": 0.006929678157931439,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 2,
+   "sec": 7.7
+  },
+  {
+   "smear": 1.045965987818602,
+   "box": 0.019610536004845802,
+   "p99": 0.006165351771784569,
+   "max": 0.006735054161241775,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 1,
+   "sec": 9.9
+  },
+  {
+   "smear": 1.0428769196857888,
+   "box": 0.01994920742666509,
+   "p99": 0.00620479560527195,
+   "max": 0.006553432148119386,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 2,
+   "sec": 9.9
+  },
+  {
+   "smear": 1.0449999429891503,
+   "box": 0.0193962562158565,
+   "p99": 0.006177287084747766,
+   "max": 0.006427872891464171,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 1,
+   "sec": 23.6
+  },
+  {
+   "smear": 1.043813485110892,
+   "box": 0.019449935763098024,
+   "p99": 0.006237203719680674,
+   "max": 0.006384550869487638,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 2,
+   "sec": 23.7
+  },
+  {
+   "smear": 1.0016550598498235,
+   "box": 0.12004601631659442,
+   "p99": 0.11037826466347457,
+   "max": 0.10999633071773082,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 1,
+   "sec": 5.7
+  },
+  {
+   "smear": 1.001946526249617,
+   "box": 0.11988290096932333,
+   "p99": 0.11031135207314047,
+   "max": 0.11046689932188018,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 2,
+   "sec": 5.7
+  },
+  {
+   "smear": 1.0013341751039146,
+   "box": 0.1207029347365659,
+   "p99": 0.1104844246498902,
+   "max": 0.11018367120642433,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.0
+  },
+  {
+   "smear": 1.001468649979518,
+   "box": 0.12029789390670378,
+   "p99": 0.1108357996846889,
+   "max": 0.11189230829412698,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.0
+  },
+  {
+   "smear": 1.001331410694812,
+   "box": 0.12170053089616872,
+   "p99": 0.1107195466672615,
+   "max": 0.11081486551380072,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 1,
+   "sec": 6.6
+  },
+  {
+   "smear": 1.001392120487018,
+   "box": 0.12035579172349167,
+   "p99": 0.11064391829135738,
+   "max": 0.11156717613181186,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 2,
+   "sec": 6.5
+  },
+  {
+   "smear": 1.0016117451316158,
+   "box": 0.12081317428128477,
+   "p99": 0.11096843860108851,
+   "max": 0.11172096224097965,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 1,
+   "sec": 7.5
+  },
+  {
+   "smear": 1.0014622540941518,
+   "box": 0.12049097045911564,
+   "p99": 0.11105130641283664,
+   "max": 0.11161254827397736,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 2,
+   "sec": 7.4
+  },
+  {
+   "smear": 1.0015465501024867,
+   "box": 0.1211275019637141,
+   "p99": 0.11112058086728449,
+   "max": 0.11177591185034474,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 1,
+   "sec": 9.4
+  },
+  {
+   "smear": 1.0015377146186564,
+   "box": 0.12104977357641747,
+   "p99": 0.11111239606591987,
+   "max": 0.11192864718791887,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 2,
+   "sec": 9.5
+  },
+  {
+   "smear": 1.001524602494759,
+   "box": 0.12147187403410237,
+   "p99": 0.1111664356463707,
+   "max": 0.11185834900344827,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 1,
+   "sec": 21.4
+  },
+  {
+   "smear": 1.0015325246969036,
+   "box": 0.12141228224932189,
+   "p99": 0.11111633647067047,
+   "max": 0.11205909812387588,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 2,
+   "sec": 21.4
+  },
+  {
+   "smear": 1.0589675459481558,
+   "box": 0.11525635531495959,
+   "p99": 0.10300006398839925,
+   "max": 0.1040485586319024,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 1,
+   "sec": 5.6
+  },
+  {
+   "smear": 1.060214787165385,
+   "box": 0.11471520074445549,
+   "p99": 0.10265686351409423,
+   "max": 0.104926731211715,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 2,
+   "sec": 5.7
+  },
+  {
+   "smear": 1.0574967541638742,
+   "box": 0.11429784152808047,
+   "p99": 0.10352125922084968,
+   "max": 0.10414810791096354,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.0
+  },
+  {
+   "smear": 1.0591999475921343,
+   "box": 0.1143190777449855,
+   "p99": 0.10326245700341344,
+   "max": 0.10479202207080664,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.0
+  },
+  {
+   "smear": 1.0574051644272309,
+   "box": 0.11564642813836817,
+   "p99": 0.10377311836367768,
+   "max": 0.10449083493450159,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 1,
+   "sec": 6.5
+  },
+  {
+   "smear": 1.0583283888691821,
+   "box": 0.1157884321554299,
+   "p99": 0.10360896007471848,
+   "max": 0.10490432377792841,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 2,
+   "sec": 6.5
+  },
+  {
+   "smear": 1.0578685482739678,
+   "box": 0.1157258527099652,
+   "p99": 0.10366604039360652,
+   "max": 0.104396969136519,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 1,
+   "sec": 7.3
+  },
+  {
+   "smear": 1.0583809854161315,
+   "box": 0.11571852934574339,
+   "p99": 0.10373616648647954,
+   "max": 0.10443400467230769,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 2,
+   "sec": 7.3
+  },
+  {
+   "smear": 1.0580044065257443,
+   "box": 0.11606814700062534,
+   "p99": 0.10372055870887836,
+   "max": 0.10455429177927791,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 1,
+   "sec": 9.0
+  },
+  {
+   "smear": 1.0582057713452513,
+   "box": 0.1161688532770623,
+   "p99": 0.1038042116824629,
+   "max": 0.10456068812485533,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 2,
+   "sec": 9.0
+  },
+  {
+   "smear": 1.0581838178552192,
+   "box": 0.11652135200521205,
+   "p99": 0.10378075284856128,
+   "max": 0.10461365119861207,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 1,
+   "sec": 20.4
+  },
+  {
+   "smear": 1.0581451900460597,
+   "box": 0.11643303949417252,
+   "p99": 0.10378330200958147,
+   "max": 0.10468783969875844,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 2,
+   "sec": 20.4
+  },
+  {
+   "smear": 1.002772818856144,
+   "box": 0.10047670767469097,
+   "p99": 0.09120893169593625,
+   "max": 0.09191105178269085,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 1,
+   "sec": 5.8
+  },
+  {
+   "smear": 1.003554407914242,
+   "box": 0.10009949107449355,
+   "p99": 0.09094617875290821,
+   "max": 0.09207538531340803,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 2,
+   "sec": 5.8
+  },
+  {
+   "smear": 1.0024186863259714,
+   "box": 0.10170799706603349,
+   "p99": 0.09141318751450211,
+   "max": 0.09189768651270064,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 1,
+   "sec": 6.0
+  },
+  {
+   "smear": 1.0030801317090003,
+   "box": 0.10049930486614095,
+   "p99": 0.09129036090798062,
+   "max": 0.09270379686022528,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 2,
+   "sec": 6.1
+  },
+  {
+   "smear": 1.0027774232207458,
+   "box": 0.1018640466892553,
+   "p99": 0.09144890823761166,
+   "max": 0.09226816946253708,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 1,
+   "sec": 6.5
+  },
+  {
+   "smear": 1.0031043675984874,
+   "box": 0.10056390761926705,
+   "p99": 0.09149795561915397,
+   "max": 0.0922733578715465,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 2,
+   "sec": 6.6
+  },
+  {
+   "smear": 1.0028481712163513,
+   "box": 0.10184707947884808,
+   "p99": 0.09163335391134067,
+   "max": 0.09242207908620798,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 1,
+   "sec": 7.5
+  },
+  {
+   "smear": 1.0029666731409785,
+   "box": 0.1017891255559687,
+   "p99": 0.09164569107841193,
+   "max": 0.09225346048152648,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 2,
+   "sec": 7.5
+  },
+  {
+   "smear": 1.0027613312079353,
+   "box": 0.10231943282448519,
+   "p99": 0.09175094113503468,
+   "max": 0.09263355029478529,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 1,
+   "sec": 9.6
+  },
+  {
+   "smear": 1.0028663817674697,
+   "box": 0.1019619330825994,
+   "p99": 0.09177902198400947,
+   "max": 0.09251743278859656,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 2,
+   "sec": 9.6
+  },
+  {
+   "smear": 1.0027548961741652,
+   "box": 0.10248497127382897,
+   "p99": 0.09182824327147607,
+   "max": 0.09269839487294237,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 1,
+   "sec": 21.7
+  },
+  {
+   "smear": 1.00275733739739,
+   "box": 0.10246186867296554,
+   "p99": 0.09184203953617774,
+   "max": 0.09266940790103498,
+   "converged": true,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 2,
+   "sec": 21.7
+  },
+  {
+   "smear": 8.010675493274016,
+   "box": 0.3285529314007469,
+   "p99": 0.0036486262091620387,
+   "max": 0.08557154003715149,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 1,
+   "sec": 10.5
+  },
+  {
+   "smear": 7.988107316377325,
+   "box": 0.3222344865415271,
+   "p99": 0.003668855548142867,
+   "max": 0.0846611339879584,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 4,
+   "seed": 2,
+   "sec": 10.5
+  },
+  {
+   "smear": 7.995475509900082,
+   "box": 0.3260599914938399,
+   "p99": 0.0036014739146384405,
+   "max": 0.08478134113396583,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 1,
+   "sec": 13.0
+  },
+  {
+   "smear": 7.997555136241394,
+   "box": 0.3320286577780106,
+   "p99": 0.003607895419821696,
+   "max": 0.08490440589122597,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 8,
+   "seed": 2,
+   "sec": 12.9
+  },
+  {
+   "smear": 7.99695967508583,
+   "box": 0.33376380607108314,
+   "p99": 0.003564506309888574,
+   "max": 0.08474249404414609,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 1,
+   "sec": 17.5
+  },
+  {
+   "smear": 7.99897912102149,
+   "box": 0.33415421714008164,
+   "p99": 0.0035374240420235114,
+   "max": 0.0853181701989906,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 16,
+   "seed": 2,
+   "sec": 17.5
+  },
+  {
+   "smear": 7.997571410213555,
+   "box": 0.335689288122775,
+   "p99": 0.0035237277197057025,
+   "max": 0.08524630136110731,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 1,
+   "sec": 26.6
+  },
+  {
+   "smear": 7.995368681707239,
+   "box": 0.33557485467380344,
+   "p99": 0.003523209264100991,
+   "max": 0.08549352221926343,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 32,
+   "seed": 2,
+   "sec": 26.6
+  },
+  {
+   "smear": 7.9992817294756335,
+   "box": 0.3371455996371712,
+   "p99": 0.0035087251117460684,
+   "max": 0.0853057253706274,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 1,
+   "sec": 44.7
+  },
+  {
+   "smear": 7.996232377753082,
+   "box": 0.33705545695909744,
+   "p99": 0.003510551013060895,
+   "max": 0.0854641896817598,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 64,
+   "seed": 2,
+   "sec": 44.9
+  },
+  {
+   "smear": 7.997026123185805,
+   "box": 0.3362569222011911,
+   "p99": 0.0034978923685254903,
+   "max": 0.08542933550484957,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 1,
+   "sec": 171.9
+  },
+  {
+   "smear": 7.997743525412556,
+   "box": 0.33656456878495955,
+   "p99": 0.0035015223838047362,
+   "max": 0.08538715374763538,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 0.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0",
+   "spp": 256,
+   "seed": 2,
+   "sec": 159.4
+  },
+  {
+   "smear": 1.375894174080362,
+   "box": 0.9026005144109897,
+   "p99": 0.45837567400926627,
+   "max": 0.4643039851662078,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 1,
+   "sec": 10.8
+  },
+  {
+   "smear": 1.376259123610272,
+   "box": 0.908751471977991,
+   "p99": 0.4581015605274912,
+   "max": 0.4662795526394007,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 4,
+   "seed": 2,
+   "sec": 11.1
+  },
+  {
+   "smear": 1.3740843591558278,
+   "box": 0.9131572559686386,
+   "p99": 0.45833242202963353,
+   "max": 0.46383218975425133,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 1,
+   "sec": 13.3
+  },
+  {
+   "smear": 1.3786826468121391,
+   "box": 0.9112395975074803,
+   "p99": 0.4588865996976602,
+   "max": 0.4667705793189941,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 8,
+   "seed": 2,
+   "sec": 13.2
+  },
+  {
+   "smear": 1.377203252705608,
+   "box": 0.9213287429022051,
+   "p99": 0.4589306005176162,
+   "max": 0.465558672666214,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 1,
+   "sec": 17.6
+  },
+  {
+   "smear": 1.3790745277965604,
+   "box": 0.9221089217645356,
+   "p99": 0.458865263031183,
+   "max": 0.46532545508969436,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 16,
+   "seed": 2,
+   "sec": 17.7
+  },
+  {
+   "smear": 1.3742777434462174,
+   "box": 0.9210839484938418,
+   "p99": 0.45932748440379545,
+   "max": 0.4664347370933477,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 1,
+   "sec": 26.8
+  },
+  {
+   "smear": 1.3768299655512293,
+   "box": 0.9217727912716703,
+   "p99": 0.45942012888775585,
+   "max": 0.4665470275143496,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 32,
+   "seed": 2,
+   "sec": 26.9
+  },
+  {
+   "smear": 1.376388864662826,
+   "box": 0.9224513794368299,
+   "p99": 0.45946955545533735,
+   "max": 0.4664314633875456,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 1,
+   "sec": 45.1
+  },
+  {
+   "smear": 1.378327383501134,
+   "box": 0.9227254929059893,
+   "p99": 0.45942905762965325,
+   "max": 0.4666288005350197,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 64,
+   "seed": 2,
+   "sec": 45.6
+  },
+  {
+   "smear": 1.3779168551777827,
+   "box": 0.9232528034045865,
+   "p99": 0.4594817823135561,
+   "max": 0.46651401074050625,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 1,
+   "sec": 162.3
+  },
+  {
+   "smear": 1.3790676650415405,
+   "box": 0.9232144927635169,
+   "p99": 0.45949238244,
+   "max": 0.46642033815523337,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 40.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40",
+   "spp": 256,
+   "seed": 2,
+   "sec": 159.0
+  },
+  {
+   "smear": 8.60610636577398,
+   "box": 0.7055240825774479,
+   "p99": 0.051247712469028345,
+   "max": 0.06803654289764854,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 1,
+   "sec": 10.6
+  },
+  {
+   "smear": 8.605675176188857,
+   "box": 0.7131318334696315,
+   "p99": 0.05189545756994247,
+   "max": 0.06700113368462154,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 4,
+   "seed": 2,
+   "sec": 11.0
+  },
+  {
+   "smear": 8.60133030286127,
+   "box": 0.712545046827205,
+   "p99": 0.050971351200060966,
+   "max": 0.06667878590459264,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 1,
+   "sec": 13.6
+  },
+  {
+   "smear": 8.601642214156051,
+   "box": 0.7226815999944332,
+   "p99": 0.051408140840596514,
+   "max": 0.06684468029070807,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 8,
+   "seed": 2,
+   "sec": 13.4
+  },
+  {
+   "smear": 8.602791728928397,
+   "box": 0.7286751544736105,
+   "p99": 0.050975395388552586,
+   "max": 0.06591306856295365,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 1,
+   "sec": 17.6
+  },
+  {
+   "smear": 8.602514656192453,
+   "box": 0.7340983736393123,
+   "p99": 0.05095358268872821,
+   "max": 0.0659122160469118,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 16,
+   "seed": 2,
+   "sec": 17.7
+  },
+  {
+   "smear": 8.602131726138868,
+   "box": 0.7393140349027733,
+   "p99": 0.05100583177487806,
+   "max": 0.06577072815676312,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 1,
+   "sec": 27.0
+  },
+  {
+   "smear": 8.603588082896685,
+   "box": 0.7378596372126156,
+   "p99": 0.05100831861390544,
+   "max": 0.06590936639378361,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 32,
+   "seed": 2,
+   "sec": 27.0
+  },
+  {
+   "smear": 8.60229413916284,
+   "box": 0.7395513373117033,
+   "p99": 0.05102056616555989,
+   "max": 0.06593699504471348,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 1,
+   "sec": 45.5
+  },
+  {
+   "smear": 8.603595435694048,
+   "box": 0.7398369999834125,
+   "p99": 0.050972347884422925,
+   "max": 0.06578181402222912,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 64,
+   "seed": 2,
+   "sec": 45.5
+  },
+  {
+   "smear": 8.602790120833955,
+   "box": 0.7413886050472108,
+   "p99": 0.05101642785369295,
+   "max": 0.0657631296060014,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 1,
+   "sec": 157.6
+  },
+  {
+   "smear": 8.603028255901968,
+   "box": 0.7416801568374936,
+   "p99": 0.05101493600831039,
+   "max": 0.06577022074656418,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     40.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 60.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60",
+   "spp": 256,
+   "seed": 2,
+   "sec": 166.0
+  },
+  {
+   "smear": 1.5618353174876833,
+   "box": 0.6582710461934012,
+   "p99": 0.3480005312061673,
+   "max": 0.3499755287290491,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 1,
+   "sec": 10.8
+  },
+  {
+   "smear": 1.5630505444757994,
+   "box": 0.6602298361869797,
+   "p99": 0.34797644415496204,
+   "max": 0.3524592242793253,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 4,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 4,
+   "seed": 2,
+   "sec": 10.7
+  },
+  {
+   "smear": 1.5652395811195872,
+   "box": 0.6587697553927924,
+   "p99": 0.3481367833056326,
+   "max": 0.35108533867317204,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 1,
+   "sec": 13.1
+  },
+  {
+   "smear": 1.56925767604369,
+   "box": 0.6631291197874666,
+   "p99": 0.3482773553695677,
+   "max": 0.35276713844823854,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 8,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 8,
+   "seed": 2,
+   "sec": 13.1
+  },
+  {
+   "smear": 1.565582662917031,
+   "box": 0.6635099528282167,
+   "p99": 0.34825178865742434,
+   "max": 0.3514620102278303,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 1,
+   "sec": 17.9
+  },
+  {
+   "smear": 1.5673005406576386,
+   "box": 0.6632680553641221,
+   "p99": 0.3481991811631954,
+   "max": 0.3519765111563639,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 16,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 16,
+   "seed": 2,
+   "sec": 18.1
+  },
+  {
+   "smear": 1.566357782308823,
+   "box": 0.6642918966758452,
+   "p99": 0.34812736776990405,
+   "max": 0.3516545252319252,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 1,
+   "sec": 27.3
+  },
+  {
+   "smear": 1.5654186546390767,
+   "box": 0.6645486719431233,
+   "p99": 0.34820819985323226,
+   "max": 0.3523244532053652,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 32,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 32,
+   "seed": 2,
+   "sec": 27.6
+  },
+  {
+   "smear": 1.567193358465934,
+   "box": 0.6649641653301748,
+   "p99": 0.3480625788487145,
+   "max": 0.3517529322478209,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 1,
+   "sec": 45.3
+  },
+  {
+   "smear": 1.5663489776714572,
+   "box": 0.6653202841655066,
+   "p99": 0.348164084648057,
+   "max": 0.351830651124441,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 64,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 64,
+   "seed": 2,
+   "sec": 45.8
+  },
+  {
+   "smear": 1.567963440981,
+   "box": 0.6653907828803883,
+   "p99": 0.3482306294755448,
+   "max": 0.3518138452124956,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 1,
+   "sec": 159.3
+  },
+  {
+   "smear": 1.567949363450573,
+   "box": 0.6654032258855473,
+   "p99": 0.34823726384051856,
+   "max": 0.3518382293782732,
+   "converged": false,
+   "conditions": {
+    "n_phase": 16,
+    "samples": 256,
+    "beam_w": 7.5,
+    "thetas": [
+     30.0
+    ],
+    "mm_per_px": 0.215,
+    "obs_elev_deg": 30.0,
+    "peak_stat": "box",
+    "peak_box_mm": 2.0,
+    "beam_pos": "sobol",
+    "smear_tol": 0.02,
+    "coating_model": "reciprocal",
+    "phis": [
+     0.0
+    ],
+    "coating": {
+     "id": "musou_fit2",
+     "body": 0.0,
+     "spec_scale": 0.5034,
+     "df": 0.0,
+     "roughness": 0.8646,
+     "rho0": 0.00967
+    },
+    "deep_coating": {
+     "id": "wall_5pct",
+     "body": 0.0495,
+     "spec_scale": 0.012500000000000011,
+     "df": 0.99,
+     "roughness": 0.1975,
+     "rho0": 0.05
+    },
+    "paint_depth": 20.0,
+    "floor_coating": null,
+    "floor_boundary_depth": null
+   },
+   "case": "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30",
+   "spp": 256,
+   "seed": 2,
+   "sec": 155.3
+  }
+ ],
+ "table": {
+  "민판 (평판) · 빔 +30 · 관찰 30": {
+   "4": {
+    "smear": {
+     "bias": 0.0003011970309094725,
+     "seed_spread": 0.0005072376945954628
+    },
+    "box": {
+     "bias": 0.005457504322652795,
+     "seed_spread": 0.0003893925901887965
+    },
+    "p99": {
+     "bias": 0.0019261216479731225,
+     "seed_spread": 0.006543321113972105
+    },
+    "max": {
+     "bias": 0.0037396470803219284,
+     "seed_spread": 0.007935629978996847
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -1.583128428017666e-06,
+     "seed_spread": 0.0003821202867184831
+    },
+    "box": {
+     "bias": -0.008431361293986805,
+     "seed_spread": 0.008773464850616048
+    },
+    "p99": {
+     "bias": -0.0007499437818668797,
+     "seed_spread": 0.0029778760301273875
+    },
+    "max": {
+     "bias": 0.002977552932519556,
+     "seed_spread": 0.00044574435989681367
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -6.660376208977858e-05,
+     "seed_spread": 8.728667389450265e-05
+    },
+    "box": {
+     "bias": -0.003491783539146809,
+     "seed_spread": 0.005733788585693063
+    },
+    "p99": {
+     "bias": -0.000150830863363427,
+     "seed_spread": 0.0003528246403108071
+    },
+    "max": {
+     "bias": -0.0009434226434584803,
+     "seed_spread": 0.0012274314398626196
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 4.0008237565780647e-05,
+     "seed_spread": 8.830403441706452e-05
+    },
+    "box": {
+     "bias": -0.0009558586631639443,
+     "seed_spread": 0.00322783654220243
+    },
+    "p99": {
+     "bias": -0.00018307699380049058,
+     "seed_spread": 5.930734541107081e-05
+    },
+    "max": {
+     "bias": -0.00011760461836929359,
+     "seed_spread": 0.0002442849474995056
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 5.939899652362968e-06,
+     "seed_spread": 8.550726009499278e-05
+    },
+    "box": {
+     "bias": -0.00031746568059953795,
+     "seed_spread": 0.001180589768030086
+    },
+    "p99": {
+     "bias": 5.486958281886167e-05,
+     "seed_spread": 0.000270690565241369
+    },
+    "max": {
+     "bias": 0.0002078955301207941,
+     "seed_spread": 8.69448038830262e-05
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 3.5962352510130995e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.000109076196138771
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 3.5483861057125055e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.00012788756741224293
+    }
+   }
+  },
+  "민판 (평판) · 빔 +40 · 관찰 0": {
+   "4": {
+    "smear": {
+     "bias": 7.51678521280219e-05,
+     "seed_spread": 0.000497596937673271
+    },
+    "box": {
+     "bias": -0.007487688287800998,
+     "seed_spread": 0.005204675088994615
+    },
+    "p99": {
+     "bias": 0.0013061312899926847,
+     "seed_spread": 0.0003421108874104474
+    },
+    "max": {
+     "bias": -0.003840221903070873,
+     "seed_spread": 0.0027311933414723146
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -6.471225454285356e-05,
+     "seed_spread": 0.00012608375723163328
+    },
+    "box": {
+     "bias": -0.0009756867112977741,
+     "seed_spread": 0.011508313033211079
+    },
+    "p99": {
+     "bias": 0.0022887917132534685,
+     "seed_spread": 0.0013086183379250444
+    },
+    "max": {
+     "bias": 0.0013823690188714544,
+     "seed_spread": 0.0005674023375005306
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.00011627127169033802,
+     "seed_spread": 8.758631476738724e-05
+    },
+    "box": {
+     "bias": -0.00047319890075858684,
+     "seed_spread": 0.0010172264349084805
+    },
+    "p99": {
+     "bias": 0.0008521948956978775,
+     "seed_spread": 0.0010430159148281924
+    },
+    "max": {
+     "bias": -0.0005991033573815585,
+     "seed_spread": 0.0016254744791227393
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -3.297688757875061e-05,
+     "seed_spread": 0.00012561588649494585
+    },
+    "box": {
+     "bias": -0.0008242897327361831,
+     "seed_spread": 0.0014925555724957815
+    },
+    "p99": {
+     "bias": -4.3049674846806774e-05,
+     "seed_spread": 0.000109783477650306
+    },
+    "max": {
+     "bias": 0.000906124767332761,
+     "seed_spread": 0.00019306428406049668
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": -7.709438935354918e-06,
+     "seed_spread": 6.464505541299411e-05
+    },
+    "box": {
+     "bias": 0.0003753276423086316,
+     "seed_spread": 0.0012554318658330955
+    },
+    "p99": {
+     "bias": 0.0001278378047948614,
+     "seed_spread": 0.00010724310196948314
+    },
+    "max": {
+     "bias": 6.978700837989571e-05,
+     "seed_spread": 0.0007033176473444337
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 2.162191892879839e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.00013805294027061844
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 2.310587508581104e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 3.727341190332421e-05
+    }
+   }
+  },
+  "민판 (평판) · 빔 +40 · 관찰 40": {
+   "4": {
+    "smear": {
+     "bias": 0.0003505930361582532,
+     "seed_spread": 0.00021567880146520498
+    },
+    "box": {
+     "bias": -0.0026142931361294863,
+     "seed_spread": 0.015488779109272552
+    },
+    "p99": {
+     "bias": 0.002014464421663531,
+     "seed_spread": 0.006597595111054779
+    },
+    "max": {
+     "bias": 0.0043066232600548204,
+     "seed_spread": 0.009629814060201037
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -4.6286573435860845e-05,
+     "seed_spread": 0.0003761315315802596
+    },
+    "box": {
+     "bias": -0.013932417145402831,
+     "seed_spread": 0.011285481980172485
+    },
+    "p99": {
+     "bias": -0.0007429299164841696,
+     "seed_spread": 0.0030389159229890507
+    },
+    "max": {
+     "bias": 0.0032578643189475898,
+     "seed_spread": 0.00023047354767320342
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.00010882812281642895,
+     "seed_spread": 6.117734998061914e-05
+    },
+    "box": {
+     "bias": -0.0024485251717749623,
+     "seed_spread": 0.00036371771541358563
+    },
+    "p99": {
+     "bias": -0.00016520381034990095,
+     "seed_spread": 0.00033545169688353884
+    },
+    "max": {
+     "bias": -0.0008924802908359952,
+     "seed_spread": 0.0011214881117006656
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 2.6366197647398337e-05,
+     "seed_spread": 0.00014278533185417962
+    },
+    "box": {
+     "bias": -0.00041698493590791585,
+     "seed_spread": 0.005324798561717626
+    },
+    "p99": {
+     "bias": -0.00019457964435254382,
+     "seed_spread": 7.95835438746636e-05
+    },
+    "max": {
+     "bias": -0.00010399699635554871,
+     "seed_spread": 0.0002617526434998487
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": -5.316549550049565e-06,
+     "seed_spread": 5.3367687399559446e-05
+    },
+    "box": {
+     "bias": -0.0002860226838677926,
+     "seed_spread": 0.0009832943901774815
+    },
+    "p99": {
+     "bias": 6.141179230523264e-05,
+     "seed_spread": 0.0003014802357298556
+    },
+    "max": {
+     "bias": 0.00020873006358201884,
+     "seed_spread": 9.028886126448829e-05
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 5.339820525579714e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 8.015425395173861e-06
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 3.507726905460387e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.00012953492245740077
+    }
+   }
+  },
+  "민판 (평판) · 빔 +40 · 관찰 60": {
+   "4": {
+    "smear": {
+     "bias": 7.323661267455428e-05,
+     "seed_spread": 0.0010989016659325853
+    },
+    "box": {
+     "bias": 0.007715256893030098,
+     "seed_spread": 0.000580610019343977
+    },
+    "p99": {
+     "bias": 4.633698621292481e-05,
+     "seed_spread": 0.006748219843977849
+    },
+    "max": {
+     "bias": -0.004593926635404699,
+     "seed_spread": 0.0023945668116619775
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -6.760922035531358e-05,
+     "seed_spread": 0.00014780158122132048
+    },
+    "box": {
+     "bias": -0.0022398707225409487,
+     "seed_spread": 0.0070540134458848885
+    },
+    "p99": {
+     "bias": -0.00019916342963943734,
+     "seed_spread": 0.00030766522160918504
+    },
+    "max": {
+     "bias": 0.0012150517082272216,
+     "seed_spread": 0.005860792756531796
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -3.704678569349529e-05,
+     "seed_spread": 0.0002028946436295159
+    },
+    "box": {
+     "bias": 0.0034259111918328866,
+     "seed_spread": 0.003086835241193218
+    },
+    "p99": {
+     "bias": 0.0008163575045785354,
+     "seed_spread": 0.00035681759138569594
+    },
+    "max": {
+     "bias": -0.0004444842455570974,
+     "seed_spread": 0.005605439315154116
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 9.302921132992026e-06,
+     "seed_spread": 6.0877457211156095e-05
+    },
+    "box": {
+     "bias": -4.776504647008295e-05,
+     "seed_spread": 0.0009053766147360909
+    },
+    "p99": {
+     "bias": -8.489165092862017e-05,
+     "seed_spread": 0.0007111977635429756
+    },
+    "max": {
+     "bias": 0.0006197550164523946,
+     "seed_spread": 0.00030942478397428836
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 5.012988859598444e-05,
+     "seed_spread": 4.536699190725992e-05
+    },
+    "box": {
+     "bias": 0.00011000390628246315,
+     "seed_spread": 0.002248249634344711
+    },
+    "p99": {
+     "bias": -7.150266509525771e-05,
+     "seed_spread": 0.00038921853269405774
+    },
+    "max": {
+     "bias": 0.00037370944044901044,
+     "seed_spread": 0.00015790459609308426
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 1.902219930458395e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 4.7680515247755477e-05
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 3.619676098652162e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 8.534855470480213e-05
+    }
+   }
+  },
+  "벌집 9.53 / 깊이 40 · 빔 +30 · 관찰 30": {
+   "4": {
+    "smear": {
+     "bias": 0.0004063765781070483,
+     "seed_spread": 0.0007791242103175094
+    },
+    "box": {
+     "bias": -0.02132573109565694,
+     "seed_spread": 0.003761329634819922
+    },
+    "p99": {
+     "bias": -0.00824941485169961,
+     "seed_spread": 0.002884936276348128
+    },
+    "max": {
+     "bias": -0.0074520259570795,
+     "seed_spread": 0.001786365705112788
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -6.689331712550484e-06,
+     "seed_spread": 0.0006596317854497888
+    },
+    "box": {
+     "bias": -0.013367066383318083,
+     "seed_spread": 0.011954980738509343
+    },
+    "p99": {
+     "bias": -0.005263422968556419,
+     "seed_spread": 0.0013445453860312406
+    },
+    "max": {
+     "bias": -0.00413404803630224,
+     "seed_spread": 0.008733519718215576
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": 0.00018427075212579247,
+     "seed_spread": 0.00032598568792838216
+    },
+    "box": {
+     "bias": -0.012290434138560569,
+     "seed_spread": 0.012845449873061533
+    },
+    "p99": {
+     "bias": -0.003938682620997391,
+     "seed_spread": 0.0005361926464146306
+    },
+    "max": {
+     "bias": -0.004457491686953197,
+     "seed_spread": 5.623025976190106e-05
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 0.00015088952373809583,
+     "seed_spread": 0.00011815838830849331
+    },
+    "box": {
+     "bias": -0.006394999368216636,
+     "seed_spread": 0.0005691907573063917
+    },
+    "p99": {
+     "bias": -0.002130109519735912,
+     "seed_spread": 0.0001346271426932691
+    },
+    "max": {
+     "bias": -0.0037345385546107,
+     "seed_spread": 0.0018261065333955559
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 5.758100195873972e-05,
+     "seed_spread": 0.00010475579177006211
+    },
+    "box": {
+     "bias": -0.003247056845973817,
+     "seed_spread": 0.00350007197473304
+    },
+    "p99": {
+     "bias": -0.0007639760034375831,
+     "seed_spread": 0.0003060083323460242
+    },
+    "max": {
+     "bias": -0.0011696728738802564,
+     "seed_spread": 0.0012543007253322093
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 2.4345134213748032e-06
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.00022544969094837573
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 0.00015022859975798777
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.00031275088201526463
+    }
+   }
+  },
+  "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 0": {
+   "4": {
+    "smear": {
+     "bias": -0.007524005855798377,
+     "seed_spread": 0.025036427193297645
+    },
+    "box": {
+     "bias": 0.2207458642388187,
+     "seed_spread": 0.12518727146827835
+    },
+    "p99": {
+     "bias": 0.08771381255822286,
+     "seed_spread": 0.07062578718813008
+    },
+    "max": {
+     "bias": 0.3243865946892379,
+     "seed_spread": 0.08557891369863968
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": 0.0003657725250674204,
+     "seed_spread": 0.007190422888819963
+    },
+    "box": {
+     "bias": 0.10654496450423334,
+     "seed_spread": 0.007764598429587493
+    },
+    "p99": {
+     "bias": 0.06516411782094811,
+     "seed_spread": 0.0029913648140762303
+    },
+    "max": {
+     "bias": 0.15264240652137429,
+     "seed_spread": 0.004279716293918721
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -6.049924797923989e-05,
+     "seed_spread": 0.002991801304034387
+    },
+    "box": {
+     "bias": 0.045525965661329826,
+     "seed_spread": 0.007080307674376454
+    },
+    "p99": {
+     "bias": 0.012176756898854446,
+     "seed_spread": 0.03804680140458483
+    },
+    "max": {
+     "bias": 0.11189357560967417,
+     "seed_spread": 0.04329170475738888
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 0.0005551845138940248,
+     "seed_spread": 0.001080965355988384
+    },
+    "box": {
+     "bias": 0.04666148879265597,
+     "seed_spread": 0.04577081097723135
+    },
+    "p99": {
+     "bias": 0.004743102973460811,
+     "seed_spread": 0.017570596592459402
+    },
+    "max": {
+     "bias": 0.07355304273761387,
+     "seed_spread": 0.015200464847701212
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 1.4112990634584932e-05,
+     "seed_spread": 0.0029576835306431917
+    },
+    "box": {
+     "bias": 0.01836863322260629,
+     "seed_spread": 0.017122023170126097
+    },
+    "p99": {
+     "bias": -0.0035719086727346028,
+     "seed_spread": 0.006377261690598624
+    },
+    "max": {
+     "bias": 0.037156322432937205,
+     "seed_spread": 0.027335244796759733
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 0.0011360113472053993
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.0027636967489943678
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 0.009652693111107611
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.006762502206423185
+    }
+   }
+  },
+  "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 40": {
+   "4": {
+    "smear": {
+     "bias": 0.0002718139689512622,
+     "seed_spread": 0.00029094247261094786
+    },
+    "box": {
+     "bias": -0.012167277778538987,
+     "seed_spread": 0.0013596972729778248
+    },
+    "p99": {
+     "bias": -0.007167246319868981,
+     "seed_spread": 0.0006063954555139861
+    },
+    "max": {
+     "bias": -0.015426297200275885,
+     "seed_spread": 0.004268907827076763
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -0.00012695699227838197,
+     "seed_spread": 0.00013428668455943603
+    },
+    "box": {
+     "bias": -0.007754016025470545,
+     "seed_spread": 0.0033613231302342264
+    },
+    "p99": {
+     "bias": -0.004330285128688494,
+     "seed_spread": 0.003175263678275675
+    },
+    "max": {
+     "bias": -0.008223868440790816,
+     "seed_spread": 0.015387860420972796
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.00016654343268818206,
+     "seed_spread": 6.0627232127487026e-05
+    },
+    "box": {
+     "bias": -0.003408347734291217,
+     "seed_spread": 0.011110960937715476
+    },
+    "p99": {
+     "bias": -0.004135755324925716,
+     "seed_spread": 0.000683295917131215
+    },
+    "max": {
+     "bias": -0.006857015839585201,
+     "seed_spread": 0.006765929590753686
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": 8.423141744540175e-06,
+     "seed_spread": 0.00014926162240811827
+    },
+    "box": {
+     "bias": -0.00650520629752438,
+     "seed_spread": 0.0026705204132798006
+    },
+    "p99": {
+     "bias": -0.0011832995450385964,
+     "seed_spread": 0.0007464904686106176
+    },
+    "max": {
+     "bias": -0.0026078209619596615,
+     "seed_spread": 0.0009708705760484142
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 1.354805567554962e-05,
+     "seed_spread": 8.821879324761717e-06
+    },
+    "box": {
+     "bias": -0.0029103616889188944,
+     "seed_spread": 0.0006419131367570775
+    },
+    "p99": {
+     "bias": -0.00022401728826104694,
+     "seed_spread": 7.365964743461024e-05
+    },
+    "max": {
+     "bias": -0.0009507436414254444,
+     "seed_spread": 0.0013655093864045733
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 7.910111036747133e-06
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.0004907012930965832
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 0.00045076975802560827
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.0017930636759489514
+    }
+   }
+  },
+  "벌집 9.53 / 깊이 40 · 빔 +40 · 관찰 60": {
+   "4": {
+    "smear": {
+     "bias": 0.001348242736175953,
+     "seed_spread": 0.0011770966544410843
+    },
+    "box": {
+     "bias": -0.012804375228862686,
+     "seed_spread": 0.004706273939063077
+    },
+    "p99": {
+     "bias": -0.009188138846837779,
+     "seed_spread": 0.0033376018836113997
+    },
+    "max": {
+     "bias": -0.0015585223609948518,
+     "seed_spread": 0.008404559031546367
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": 0.0001737413480402683,
+     "seed_spread": 0.0016092937895609881
+    },
+    "box": {
+     "bias": -0.01861940527671946,
+     "seed_spread": 0.00018577992366054446
+    },
+    "p99": {
+     "bias": -0.0037595075621977836,
+     "seed_spread": 0.0025031198990113843
+    },
+    "max": {
+     "bias": -0.0017265090375181424,
+     "seed_spread": 0.006163623616959301
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.0002813620201033151,
+     "seed_spread": 0.0008727227873404251
+    },
+    "box": {
+     "bias": -0.006522869973844325,
+     "seed_spread": 0.0012271618621452212
+    },
+    "p99": {
+     "bias": -0.000876724150869701,
+     "seed_spread": 0.0015831482661889259
+    },
+    "max": {
+     "bias": 0.0004475257899878571,
+     "seed_spread": 0.003949363929609063
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -3.7552861999912146e-05,
+     "seed_spread": 0.0004842880142495399
+    },
+    "box": {
+     "bias": -0.006481996042044802,
+     "seed_spread": 6.328400937419411e-05
+    },
+    "p99": {
+     "bias": -0.0007797495484818118,
+     "seed_spread": 0.0006762328514041645
+    },
+    "max": {
+     "bias": -0.0022480350547264827,
+     "seed_spread": 0.00035469389538546033
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": -5.614912891127588e-05,
+     "seed_spread": 0.00019030701355904654
+    },
+    "box": {
+     "bias": -0.00307953508444081,
+     "seed_spread": 0.0008672715916632347
+    },
+    "p99": {
+     "bias": -0.00018926430603960487,
+     "seed_spread": 0.0008061974811660967
+    },
+    "max": {
+     "bias": -0.0008911116324953339,
+     "seed_spread": 6.117539336829892e-05
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 3.650454066009035e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.0007581957178064756
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 2.4562644258708058e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.0007089151618394288
+    }
+   }
+  },
+  "피라미드 밑변 50 / 높이 250 · 빔 +30 · 관찰 30": {
+   "4": {
+    "smear": {
+     "bias": -0.0035163421803398043,
+     "seed_spread": 0.0007777736799336885
+    },
+    "box": {
+     "bias": -0.009237437428016526,
+     "seed_spread": 0.0029712380473226985
+    },
+    "p99": {
+     "bias": -0.000704868034327566,
+     "seed_spread": 6.921795420824058e-05
+    },
+    "max": {
+     "bias": -0.001730004964601961,
+     "seed_spread": 0.007071676165335205
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -0.0004513987972802891,
+     "seed_spread": 0.002563789082871463
+    },
+    "box": {
+     "bias": -0.006684079975626922,
+     "seed_spread": 0.006595609507693628
+    },
+    "p99": {
+     "bias": -7.718179312909967e-05,
+     "seed_spread": 0.0004037024986383904
+    },
+    "max": {
+     "bias": 0.00028480343891290616,
+     "seed_spread": 0.0047788416741663155
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.0009660985639085018,
+     "seed_spread": 0.0010966752534198355
+    },
+    "box": {
+     "bias": -0.003017747710872931,
+     "seed_spread": 0.0003646389412560483
+    },
+    "p99": {
+     "bias": -2.4299031736951804e-05,
+     "seed_spread": 0.0001510730733635639
+    },
+    "max": {
+     "bias": -0.00030349261273587835,
+     "seed_spread": 0.0014628170419817234
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -0.001319031408599236,
+     "seed_spread": 0.0005997411939541819
+    },
+    "box": {
+     "bias": -0.0014678756697880102,
+     "seed_spread": 0.0003864651235699941
+    },
+    "p99": {
+     "bias": -0.00018999539561970202,
+     "seed_spread": 0.0002321641664926571
+    },
+    "max": {
+     "bias": 0.00046458165665419493,
+     "seed_spread": 0.0019032613017142422
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": -0.0007559101422820458,
+     "seed_spread": 0.0005389305162653367
+    },
+    "box": {
+     "bias": -0.0003828986807107304,
+     "seed_spread": 0.0005354025381065333
+    },
+    "p99": {
+     "bias": -0.00034636172263902143,
+     "seed_spread": 0.0002915883710419072
+    },
+    "max": {
+     "bias": -9.733676767287314e-05,
+     "seed_spread": 0.0002209229392408766
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 8.978266491996787e-06
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 1.8700121997921457e-05
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 1.905145962203903e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 6.930745082158298e-05
+    }
+   }
+  },
+  "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 0": {
+   "4": {
+    "smear": {
+     "bias": 0.0002509045857583825,
+     "seed_spread": 0.0028212367359693514
+    },
+    "box": {
+     "bias": -0.032748765220893095,
+     "seed_spread": 0.019417845781954695
+    },
+    "p99": {
+     "bias": 0.04544194282368941,
+     "seed_spread": 0.005529043912035373
+    },
+    "max": {
+     "bias": -0.0034177919820850278,
+     "seed_spread": 0.010696020072607315
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -0.00010872319483734572,
+     "seed_spread": 0.0002600665736627034
+    },
+    "box": {
+     "bias": -0.02189710333524908,
+     "seed_spread": 0.018139398972387064
+    },
+    "p99": {
+     "bias": 0.029996019604355162,
+     "seed_spread": 0.001781433267001927
+    },
+    "max": {
+     "bias": -0.00661963158382084,
+     "seed_spread": 0.0014505019946296997
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": 7.309561404422737e-05,
+     "seed_spread": 0.00025249483151950616
+    },
+    "box": {
+     "bias": -0.00728791788115879,
+     "seed_spread": 0.0011690388803150431
+    },
+    "p99": {
+     "bias": 0.01464631018582363,
+     "seed_spread": 0.007626734288592678
+    },
+    "max": {
+     "bias": -0.004424777799004187,
+     "seed_spread": 0.0067702446936401695
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -0.00011438468435387428,
+     "seed_spread": 0.00027546260958345714
+    },
+    "box": {
+     "bias": -0.002314652861771127,
+     "seed_spread": 0.000340949088967589
+    },
+    "p99": {
+     "bias": 0.0067894578558365115,
+     "seed_spread": 0.00014714353368080714
+    },
+    "max": {
+     "bias": -0.0004488189193543324,
+     "seed_spread": 0.002895878102389511
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 4.6543879449911785e-05,
+     "seed_spread": 0.0003812758629837747
+    },
+    "box": {
+     "bias": 0.0020504184670082637,
+     "seed_spread": 0.000267405923475908
+    },
+    "p99": {
+     "bias": 0.0028375761659393817,
+     "seed_spread": 0.0005202534513134888
+    },
+    "max": {
+     "bias": -0.00027265634776563186,
+     "seed_spread": 0.0018558808919449596
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 8.970460250600543e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.0009144968996681629
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 0.0010372339424627986
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.000493883903114848
+    }
+   }
+  },
+  "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 40": {
+   "4": {
+    "smear": {
+     "bias": -0.0017523575099018807,
+     "seed_spread": 0.00026521017576751647
+    },
+    "box": {
+     "bias": -0.019017563891868594,
+     "seed_spread": 0.006791565210098766
+    },
+    "p99": {
+     "bias": -0.002717084236495637,
+     "seed_spread": 0.0005981893961908131
+    },
+    "max": {
+     "bias": -0.002519803341911042,
+     "seed_spread": 0.004245868087998706
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -0.0015297562320084612,
+     "seed_spread": 0.0033408476971296757
+    },
+    "box": {
+     "bias": -0.011952793714671506,
+     "seed_spread": 0.0021022382904295274
+    },
+    "p99": {
+     "bias": -0.0019098937636979896,
+     "seed_spread": 0.0012083867754575327
+    },
+    "max": {
+     "bias": -0.0024991896002691805,
+     "seed_spread": 0.0063150243313138486
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -0.0002563451887276358,
+     "seed_spread": 0.001357827650166297
+    },
+    "box": {
+     "bias": -0.0016407718174321628,
+     "seed_spread": 0.0008464391037291156
+    },
+    "p99": {
+     "bias": -0.0012821918721434011,
+     "seed_spread": 0.0001423791259649672
+    },
+    "max": {
+     "bias": -0.002197604946433729,
+     "seed_spread": 0.0005010668236052914
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -0.0021316083491861315,
+     "seed_spread": 0.0018554141640218815
+    },
+    "box": {
+     "bias": -0.0019553860553522817,
+     "seed_spread": 0.0007475814727912014
+    },
+    "p99": {
+     "bias": -0.00024652647560075014,
+     "seed_spread": 0.00020167559103307945
+    },
+    "max": {
+     "bias": 5.0824275056315926e-05,
+     "seed_spread": 0.00024071300267938477
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": -0.0008227365945395748,
+     "seed_spread": 0.001407418161199091
+    },
+    "box": {
+     "bias": -0.0006988609156317604,
+     "seed_spread": 0.00029711348897556544
+    },
+    "p99": {
+     "bias": -8.221304957556352e-05,
+     "seed_spread": 8.814427425925206e-05
+    },
+    "max": {
+     "bias": 0.00013496665330725577,
+     "seed_spread": 0.00042298907177657955
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 0.0008348322997956252
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 4.149614905081953e-05
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 2.306947648910417e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.00020081281257089447
+    }
+   }
+  },
+  "피라미드 밑변 50 / 높이 250 · 빔 +40 · 관찰 60": {
+   "4": {
+    "smear": {
+     "bias": 0.00034657841297303094,
+     "seed_spread": 5.010400394313571e-05
+    },
+    "box": {
+     "bias": -0.043432137128806114,
+     "seed_spread": 0.010725293999945656
+    },
+    "p99": {
+     "bias": 0.010896709941770277,
+     "seed_spread": 0.01256011620874913
+    },
+    "max": {
+     "bias": 0.026642111831800985,
+     "seed_spread": 0.015335115935532098
+    }
+   },
+   "8": {
+    "smear": {
+     "bias": -0.00016540100890805043,
+     "seed_spread": 3.626248829651537e-05
+    },
+    "box": {
+     "bias": -0.03225886505914122,
+     "seed_spread": 0.014125369243493264
+    },
+    "p99": {
+     "bias": 0.003411972215964676,
+     "seed_spread": 0.00853275654780721
+    },
+    "max": {
+     "bias": 0.015130123557263397,
+     "seed_spread": 0.0024848723725128946
+    }
+   },
+   "16": {
+    "smear": {
+     "bias": -2.9756888272558513e-05,
+     "seed_spread": 3.220782353328271e-05
+    },
+    "box": {
+     "bias": -0.013684620897813415,
+     "seed_spread": 0.007414981282438281
+    },
+    "p99": {
+     "bias": -0.0010034736462115612,
+     "seed_spread": 0.00042799800872794086
+    },
+    "max": {
+     "bias": 0.0022194694844870355,
+     "seed_spread": 1.2934029224617748e-05
+    }
+   },
+   "32": {
+    "smear": {
+     "bias": -5.728742348165561e-06,
+     "seed_spread": 0.00016928751298767364
+    },
+    "box": {
+     "bias": -0.003974926800982659,
+     "seed_spread": 0.001969162756705347
+    },
+    "p99": {
+     "bias": -0.00016870766564602846,
+     "seed_spread": 4.8754785839038144e-05
+    },
+    "max": {
+     "bias": 0.0011156425164251527,
+     "seed_spread": 0.0021056825254219306
+    }
+   },
+   "64": {
+    "smear": {
+     "bias": 4.138025835764836e-06,
+     "seed_spread": 0.00015126175552234705
+    },
+    "box": {
+     "bias": -0.0024816277465864456,
+     "seed_spread": 0.0003861902443160429
+    },
+    "p99": {
+     "bias": -0.0003768430663392275,
+     "seed_spread": 0.0009455221784002299
+    },
+    "max": {
+     "bias": 0.001409974838167738,
+     "seed_spread": 0.002356246971615104
+    }
+   },
+   "256": {
+    "smear": {
+     "bias": 0.0,
+     "seed_spread": 2.7680760403139268e-05
+    },
+    "box": {
+     "bias": 0.0,
+     "seed_spread": 0.00039317366500555385
+    },
+    "p99": {
+     "bias": 0.0,
+     "seed_spread": 2.924287838746471e-05
+    },
+    "max": {
+     "bias": 0.0,
+     "seed_spread": 0.0001078227011440552
+    }
+   }
+  }
+ },
+ "enough": {
+  "smear": 8,
+  "box": 256,
+  "p99": 64,
+  "max": 256
+ },
+ "tol": 0.01,
+ "protocol_samples": 16,
+ "seconds": 3262
+}

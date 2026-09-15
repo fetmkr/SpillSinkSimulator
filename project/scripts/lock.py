@@ -32,6 +32,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import blender_render as BR                                        # noqa: E402
 from cone3d_sweep import COAT                                      # noqa: E402
 
+# THE LOCK GUARDS PUBLISHED NUMBERS, so it renders with the coating tree they
+# were published with. The default moved to "reciprocal" on 2026-09-15 because
+# the old tree is not reciprocal (gate_coating_reciprocity.py); without this pin
+# every lock case would read as drift when what moved is the material model.
+BR.COATING_MODEL = "fresnel_mix"
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RENDERS = os.path.join(ROOT, "renders", "lock")
 LOCK = os.path.join(ROOT, "results", "LOCK.json")
