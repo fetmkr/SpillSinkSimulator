@@ -74,9 +74,8 @@ def ui_controls(row):
             "top": spec.get("top"), "depth": depth}
 
 
-def ui_body(row, which, obs=0.0, proto=None, seed=None):
-    """index.html's request builder, transcribed. `seed` is the #seed box
-    (empty = None = default seed)."""
+def ui_body(row, which, obs=0.0, proto=None):
+    """index.html's request builder, transcribed."""
     c = ui_controls(row)
     NOTOP = c["top"] in ("none", "flat")
     NOPAINT = c["coat"] == "none"
@@ -88,7 +87,7 @@ def ui_body(row, which, obs=0.0, proto=None, seed=None):
             "roughness": None, "floor_coating": None if NOTOP else FLOORMAT,
             "slot_df": None, "slot_rough": None, "coating": coating,
             "deep_coating": None if no_deep else c["deepcoat"],
-            "paint_depth": None if no_deep else pd, "cycles_seed": seed}
+            "paint_depth": None if no_deep else pd}
     if which == "measure":
         body.update(thetas=proto["total_thetas"], phis=proto["total_phis"])
     else:

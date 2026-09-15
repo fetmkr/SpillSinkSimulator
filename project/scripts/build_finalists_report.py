@@ -456,33 +456,47 @@ def main():
                          "reproduce_finalists_server.json")
     ui_p = os.path.join(ROOT, "results", "audit_2026_09_14",
                         "fix_finalists_ui_path.json")
-    rep = (json.load(open(rep_p)).get("rows") or {}) if os.path.exists(rep_p) else {}
+    rep_all = json.load(open(rep_p)) if os.path.exists(rep_p) else {}
+    rep = rep_all.get("rows") or {}
+    picked = (rep_all.get("meta") or {}).get("picked_at_random") or []
     uip = json.load(open(ui_p)) if os.path.exists(ui_p) else {}
     n_all = len(data["rows"])
     ui_same = sum(1 for v in uip.values()
                   if isinstance(v, dict) and "skip" not in v
                   and not any(v.values()))
-    done = [v for v in rep.values() if not v.get("error")]
-    ok = [v for v in done if v.get("missing") == 0 and v.get("converged_same")
-          and (v.get("max_abs_rel") or 0) <= 1e-3]
-    worst = max((v.get("max_abs_rel") or 0 for v in done), default=None)
-    if len(ok) == n_all and ui_same == n_all:
-        verdict = ('시뮬레이터도 잘 검증됐다. 보고서의 모든 후보를 시뮬레이터 화면과 같은 '
-                   '요청으로 다시 재서 같은 값을 얻었다.')
+    done = {k: v for k, v in rep.items() if not v.get("error")}
+    # 총량만 견준 행: 사용자가 "비슷한 값 나오면 그만해" 로 멈춘 것 (밑변 50/250, 판 키우기로 몇 시간)
+    partial = [k for k, v in done.items() if v.get("totals_only")]
+    ok = {k for k, v in done.items()
+          if (v.get("totals_only") and (v.get("max_abs_rel_total") or 0) <= 1e-3)
+          or (v.get("missing") == 0 and v.get("converged_same")
+              and (v.get("max_abs_rel") or 0) <= 1e-3)}
+    worst = max((v.get("max_abs_rel") or v.get("max_abs_rel_total") or 0
+                 for v in done.values()), default=None)
+    # 전부가 아니라 차례로 잰 것 + 무작위로 뽑은 2 개로 끝낸다 (사용자 지시 2026-09-15)
+    finished = (ui_same == n_all and done and len(ok) == len(done)
+                and picked and all(k in ok for k in picked))
+    if finished:
+        verdict = ('시뮬레이터도 잘 검증됐다. 다시 잰 후보가 모두 보고서와 같은 값을 냈다.')
     else:
-        verdict = ('시뮬레이터 검증 진행 중: 다시 잰 후보 %d / %d.' % (len(done), n_all))
+        verdict = ('시뮬레이터 검증 진행 중: 다시 잰 후보 %d 개, 무작위로 뽑은 후보 %d / %d 끝.'
+                   % (len(done), sum(1 for k in picked if k in done), len(picked) or 2))
     o.write('<section><div class="card"><h2 style="margin:0">시뮬레이터 검증</h2>'
             '<p><b>%s</b></p><ul>'
             '<li>화면이 보내는 요청과 이 보고서의 측정 호출을 견줬다. %d / %d 후보가 같다.</li>'
             '<li>켜 둔 시뮬레이터 서버에 화면과 같은 요청을 보내 실제로 다시 렌더했다. '
-            '%d / %d 후보가 끝났고, 모든 칸(총량 각도·방위, 관객별 뭉개기와 수렴, '
-            '빔별 반짝임)이 보고서와 맞았다. 가장 큰 차이는 %s 다.</li>'
-            '<li>같은 렌더 씨앗으로 잰 비교라 경로가 같다는 확인이다. 씨앗을 바꿨을 때의 '
-            '흔들림은 따로 잰다.</li></ul>'
+            '다시 잰 후보는 %d 개다 (차례대로 %d 개, 남은 후보에서 무작위로 뽑은 %s). '
+            '견준 칸(총량 각도·방위, 관객별 뭉개기와 수렴, 빔별 반짝임)이 보고서와 맞은 '
+            '후보가 %d 개이고, 가장 큰 차이는 %s 다.</li>%s</ul>'
             '<p class="tag">scripts/gate_finalists_ui_path.py, '
             'scripts/reproduce_finalists_server.py</p></div></section>\n'
-            % (verdict, ui_same, n_all, len(ok), n_all,
-               "—" if worst is None else "%.3f %%" % (100 * worst)))
+            % (verdict, ui_same, n_all, len(done),
+               len([k for k in done if k not in picked]),
+               ", ".join(k.split(" | ")[0] for k in picked) or "없음",
+               len(ok), "—" if worst is None else "%.3f %%" % (100 * worst),
+               "".join('<li>%s 는 총량 14 칸(입사각 × 방위)만 견줬다. 뭉개기·반짝임은 판을 키워 '
+                       '다시 재느라 몇 시간이 걸려, 총량이 같게 나온 데서 멈췄다.</li>'
+                       % k.split(" | ")[0] for k in partial)))
 
     # --- caveats
     o.write('<section><div class="card verdict"><h2 style="margin:0">견줄 때 주의</h2><ul>'

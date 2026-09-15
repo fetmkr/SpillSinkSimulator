@@ -91,6 +91,10 @@ def main():
     # the slowest row (panel 500, smear does not converge, so the server also
     # grows the sample) goes last
     keys = sorted(data["rows"], key=lambda k: "50/높이 250" in k)
+    # 사용자 지시 (2026-09-15): 전부 말고 무작위로 뽑은 후보만. REPRO_KEYS 에 JSON 목록.
+    if os.environ.get("REPRO_KEYS"):
+        keys = json.loads(os.environ["REPRO_KEYS"])
+        state["meta"]["picked_at_random"] = keys
     for key in keys:
         row = data["rows"][key]
         if key in state["rows"] and "error" not in state["rows"][key]:
