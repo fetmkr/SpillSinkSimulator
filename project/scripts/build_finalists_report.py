@@ -450,6 +450,40 @@ def main():
                        panel_of(rows[i]), fmt(M[i])))
         o.write('</tbody></table></div></section>\n')
 
+    # --- simulator check (2026-09-15): the screen's request, sent to the running
+    # server, gives the report's numbers. Reads what the two check scripts wrote.
+    rep_p = os.path.join(ROOT, "results", "audit_2026_09_14",
+                         "reproduce_finalists_server.json")
+    ui_p = os.path.join(ROOT, "results", "audit_2026_09_14",
+                        "fix_finalists_ui_path.json")
+    rep = (json.load(open(rep_p)).get("rows") or {}) if os.path.exists(rep_p) else {}
+    uip = json.load(open(ui_p)) if os.path.exists(ui_p) else {}
+    n_all = len(data["rows"])
+    ui_same = sum(1 for v in uip.values()
+                  if isinstance(v, dict) and "skip" not in v
+                  and not any(v.values()))
+    done = [v for v in rep.values() if not v.get("error")]
+    ok = [v for v in done if v.get("missing") == 0 and v.get("converged_same")
+          and (v.get("max_abs_rel") or 0) <= 1e-3]
+    worst = max((v.get("max_abs_rel") or 0 for v in done), default=None)
+    if len(ok) == n_all and ui_same == n_all:
+        verdict = ('시뮬레이터도 잘 검증됐다. 보고서의 모든 후보를 시뮬레이터 화면과 같은 '
+                   '요청으로 다시 재서 같은 값을 얻었다.')
+    else:
+        verdict = ('시뮬레이터 검증 진행 중: 다시 잰 후보 %d / %d.' % (len(done), n_all))
+    o.write('<section><div class="card"><h2 style="margin:0">시뮬레이터 검증</h2>'
+            '<p><b>%s</b></p><ul>'
+            '<li>화면이 보내는 요청과 이 보고서의 측정 호출을 견줬다. %d / %d 후보가 같다.</li>'
+            '<li>켜 둔 시뮬레이터 서버에 화면과 같은 요청을 보내 실제로 다시 렌더했다. '
+            '%d / %d 후보가 끝났고, 모든 칸(총량 각도·방위, 관객별 뭉개기와 수렴, '
+            '빔별 반짝임)이 보고서와 맞았다. 가장 큰 차이는 %s 다.</li>'
+            '<li>같은 렌더 씨앗으로 잰 비교라 경로가 같다는 확인이다. 씨앗을 바꿨을 때의 '
+            '흔들림은 따로 잰다.</li></ul>'
+            '<p class="tag">scripts/gate_finalists_ui_path.py, '
+            'scripts/reproduce_finalists_server.py</p></div></section>\n'
+            % (verdict, ui_same, n_all, len(ok), n_all,
+               "—" if worst is None else "%.3f %%" % (100 * worst)))
+
     # --- caveats
     o.write('<section><div class="card verdict"><h2 style="margin:0">견줄 때 주의</h2><ul>'
             '<li><b>판 크기가 다르다.</b> 발표 설계와 표준 샘플은 60 mm, 발주 사양은 '

@@ -165,12 +165,12 @@ _OP_KEYS = {
     "measure": {"spec", "thetas", "diffuse_frac", "roughness", "samples",
                 "coating", "deep_coating", "paint_depth", "deep_until",
                 "paint_fade", "phis", "floor_coating", "slot_df",
-                "slot_rough"},
+                "slot_rough", "cycles_seed"},
     "lambert": {"spec", "theta", "rho", "samples"},
     "form": {"spec", "thetas", "n_phase", "samples", "beam_w", "phis",
              "mm_per_px", "floor_coating", "diffuse_frac", "coating",
              "deep_coating", "paint_depth", "roughness", "slot_df",
-             "slot_rough", "obs_elev"},
+             "slot_rough", "obs_elev", "cycles_seed"},
     "form_lambert": {"spec", "rho", "n_phase", "samples", "thetas", "beam_w"},
 }
 # keys the browser sends for its own display or for the other renderer
@@ -198,7 +198,7 @@ def run_op(op, req):
             deep_until=g("deep_until"), paint_fade=g("paint_fade") or 0.0,
             phis=g("phis"), floor_coating=g("floor_coating"),
             slot_df=g("slot_df"), slot_rough=g("slot_rough"),
-            with_conditions=True)
+            cycles_seed=g("cycles_seed"), with_conditions=True)
         out = {"rho": planes, "conditions": cond}
     elif op == "lambert":
         out = {"rho": measure_lambert(
@@ -214,7 +214,7 @@ def run_op(op, req):
                    deep_coating=g("deep_coating"),
                    paint_depth=g("paint_depth"), roughness=g("roughness"),
                    slot_df=g("slot_df"), slot_rough=g("slot_rough"),
-                   obs_elev=g("obs_elev"))
+                   obs_elev=g("obs_elev"), cycles_seed=g("cycles_seed"))
     else:
         out = form_lambert(g("spec"), 0.01 if g("rho") is None else g("rho"),
                            g("n_phase"), g("samples"),
@@ -1695,11 +1695,16 @@ AUDIT_THETA_LIMIT = 60.0  # 2026-08-17 audit: margin_depths=2.0 leaks
 def measure(spec, thetas, diffuse_frac, roughness, samples,
             coating=None, deep_coating=None, paint_depth=None,
             deep_until=None, paint_fade=0.0, phis=None, floor_coating=None,
-            slot_df=None, slot_rough=None, with_conditions=False):
+            slot_df=None, slot_rough=None, cycles_seed=None,
+            with_conditions=False):
     """`diffuse_frac`/`roughness` are PANEL-WIDE and stay for the batches that
     published with them. `slot_df`/`slot_rough` are per-slot dicts keyed
     'coating' / 'deep_coating' / 'floor_coating'; anything they name wins for
-    that slot only. Neither given, each material carries its own."""
+    that slot only. Neither given, each material carries its own.
+
+    `cycles_seed` None keeps `blender_render.SEED`. 결론을 내는 측정은 원래
+    씨앗에 무작위 씨앗 두 개를 더해 세 번 잰다 (사용자 규칙, 2026-09-15).
+    같은 씨앗으로 다시 재면 같은 빛줄기를 다시 쏘는 것이라 흔들림이 0 으로 보인다."""
     slot_df = slot_df or {}
     slot_rough = slot_rough or {}
 
@@ -1744,6 +1749,8 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
                        for t in thetas]}
     cfg.update({k: v2 for k, v2 in COAT.items() if k != "spec_roughness"})
     cfg["material_mode"] = "coating"
+    if cycles_seed is not None:
+        cfg["cycles_seed"] = int(cycles_seed)
     # Paint only reaches so far into a cell; below `paint_depth` the surface
     # is whatever the part was bought as. Without BOTH a depth and a deep
     # coating there is no split and the whole mesh keeps one finish.
@@ -1816,6 +1823,7 @@ def measure(spec, thetas, diffuse_frac, roughness, samples,
         "floor_boundary_depth": cfg.get("floor_boundary_depth"),
         "thetas": [float(t) for t in thetas], "phis": phis,
         "samples": int(samples), "mode": "hemi_view",
+        "cycles_seed": cfg.get("cycles_seed", BR.SEED),
         "margin_depths": m["margin_depths"],
         "coating_model": BR.COATING_MODEL}
 
@@ -1895,7 +1903,8 @@ def _render_params(spec):
 def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
          phis=None, mm_per_px=None, floor_coating=None, diffuse_frac=None,
          coating=None, deep_coating=None, paint_depth=None,
-         roughness=None, slot_df=None, slot_rough=None, obs_elev=None):
+         roughness=None, slot_df=None, slot_rough=None, obs_elev=None,
+         cycles_seed=None):
     """The other two axes, through `form_buildable`'s own code.
 
     NOT reimplemented here. `form_buildable.run_case` is what produced every
@@ -1992,9 +2001,12 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
     # forget, and a module constant left changed follows the next caller into
     # a different answer.
     old = (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W, FB.MM_PER_PX,
-           FB.OBS_ELEV)
+           FB.OBS_ELEV, FB.CYCLES_SEED)
     if obs_elev is not None:
         FB.OBS_ELEV = float(obs_elev)
+    # 씨앗도 같은 되돌림 묶음에 넣는다. 안 받으면 FB 에 적힌 값 (None = BR.SEED).
+    if cycles_seed is not None:
+        FB.CYCLES_SEED = int(cycles_seed)
     PROTOCOL_MMPX = FB.MM_PER_PX
     if mm_per_px:
         FB.MM_PER_PX = float(mm_per_px)
@@ -2014,6 +2026,8 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
             "mm_per_px": FB.MM_PER_PX, "obs_elev_deg": FB.OBS_ELEV,
             "peak_stat": FB.PEAK_STAT, "peak_box_mm": FB.PEAK_BOX_MM,
             "beam_pos": FB.BEAM_POS, "smear_tol": FB.SMEAR_TOL,
+            "cycles_seed": (BR.SEED if FB.CYCLES_SEED is None
+                            else FB.CYCLES_SEED),
             "coating_model": BR.COATING_MODEL}
     n_frames = FB.N_PHASE * len(FB.THETAS)
     planes = {}
@@ -2098,7 +2112,7 @@ def form(spec, thetas=None, n_phase=None, samples=None, beam_w=None,
                                  if a and b and a.get("rms_mm_legacy") else None)}
     finally:
         (FB.N_PHASE, FB.THETAS, FB.SAMPLES, FB.STRIPE_W,
-         FB.MM_PER_PX, FB.OBS_ELEV) = old
+         FB.MM_PER_PX, FB.OBS_ELEV, FB.CYCLES_SEED) = old
         _prog(len(phis) * n_frames, len(phis) * n_frames)
     # the dashboard reports the WORST plane: smear-up is good so worst is the
     # lowest; head-on-down is good so worst is the highest

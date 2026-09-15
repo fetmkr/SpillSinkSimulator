@@ -34,6 +34,7 @@
     "slot_rough": {
      "coating": 0.3
     },
+    "cycles_seed": 7,
     "with_conditions": true
    },
    "missing": [],
@@ -74,7 +75,8 @@
     "slot_rough": {
      "coating": 0.3
     },
-    "obs_elev": 40.0
+    "obs_elev": 40.0,
+    "cycles_seed": 7
    },
    "missing": [],
    "ignored_in": [],

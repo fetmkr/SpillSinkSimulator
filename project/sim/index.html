@@ -520,6 +520,13 @@ details.why p{margin:.4em 0 0}
   <div class="row"><label for="obs">관찰자 각도 (판 법선에서, 도)</label>
    <input type="number" id="obs" value="0" min="0" max="80" step="5"
     style="width:5.5em"></div>
+  <!-- RENDER SEED (2026-09-15). Empty = the default seed 0, which is what the
+       report's first run used. The report also lists two random seeds per
+       candidate; type one here to reproduce that run. Same seed, same rays:
+       a repeat at the same seed shows zero spread by construction. -->
+  <div class="row"><label for="seed">렌더 씨앗 (비우면 0)</label>
+   <input type="number" id="seed" value="" min="0" step="1"
+    style="width:7em"></div>
   <div class="row"><label for="beamw">beam width at wall, mm</label>
    <input type="number" id="beamw" value="7.5" min="0.5" max="60" step="0.5"
     style="width:5.5em"></div>
@@ -1107,6 +1114,7 @@ async function measure(thetas){
       // gave the constant a second home in the browser; the server reads it
       // from `form_metrics.RHO_SAMPLES` instead.
       diffuse_frac: null, roughness: null,
+      cycles_seed: $('#seed').value === '' ? null : parseInt($('#seed').value, 10),
       // 0 % painted means the panel IS the base material, so that is what the
       // server is told to coat with; 100 % means there is nothing below.
       // ALWAYS SENT (2026-08-23). `floor: none` does not mean there is
@@ -2769,6 +2777,8 @@ addEventListener('resize', () => draw());
                               // which is what every published figure used, so
                               // an untouched control changes nothing.
                               obs_elev: parseFloat($('#obs').value) || 0,
+                              cycles_seed: $('#seed').value === '' ? null
+                                           : parseInt($('#seed').value, 10),
                               diffuse_frac: null, roughness: null,
                               coating: (NOTOP() || NOPAINT()
                                         || +$('#pcov').value <= 0)

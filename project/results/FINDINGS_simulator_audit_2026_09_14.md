@@ -330,6 +330,15 @@ THR 7 점, TIS 7 점, 그림 5 덩어리 모양 25 점을 같이 맞췄다 (`scr
 - 사용자가 화면에서 재현하려고 기준을 한 곳으로 모았다. 각도·방위·빛줄기는 `form_metrics` 에 두고 화면은 `/api/protocol` 로 받는다. `/api/form` 은 요청한 판 크기 값을 먼저 돌려준다. V 홈 프리셋이 잔 홈을 붙이던 것을 고쳤다.
 - `scripts/gate_finalists_ui_path.py` 로 화면 요청과 측정 요청을 대조했다. 바닥판 칸만 달라 6 개를 다시 쟀고 차이는 0.23 % 이하였다.
 
+**조치 11. 켜 둔 서버로 보고서 재현, 그리고 씨앗 세 개 규칙**
+
+- `scripts/reproduce_finalists_server.py`: 화면 요청 본문을 서버를 새로 켠 뒤 실제 `/api/measure`·`/api/form` 에 보내 14 행을 다시 렌더하고 보고서 JSON 과 칸마다 견준다. 결과 `results/audit_2026_09_14/reproduce_finalists_server.json`. 첫 다섯 행의 가장 큰 차는 0.07 %, 0.001 %, 0.00001 %, 0.00002 %, 0.00001 % 였다.
+- 이 일치는 **경로가 같다는 증거일 뿐이다.** 같은 코드, 같은 조건, 같은 씨앗(0)이라 같은 빛줄기를 다시 쏜 것이다. 흔들림 크기는 말해 주지 않는다 (빛줄기 256 에서 씨앗을 바꾸면 box 가 최대 1.3 %, sample_budget_v2).
+- 사용자 규칙 (2026-09-15): 결론은 씨앗 0 에 무작위 씨앗 2 개를 더해 세 번 잰 값으로 낸다. 차이가 흔들림보다 클 때만 순서를 말한다.
+- 그래서 씨앗을 요청 칸으로 열었다. `cycles_seed` 가 `run_op` 의 measure·form 키 목록에 들어갔고 `measure()`, `form()` 이 받는다. 결과의 `conditions.cycles_seed` 에 실제로 쓴 씨앗이 적힌다. 화면에 "렌더 씨앗" 칸을 넣었고, 비우면 0 이다. `gate_dispatch_equivalence` 요청에 씨앗 7 을 넣어 0 실패, `gate_finalists_ui_path` 14 개 모두 같음.
+- `scripts/measure_finalists_seeds.py`: 씨앗 두 개를 `secrets` 로 한 번 뽑아 `results/finalists_2026_09_15_seeds.json` 에 적고, 14 개를 화면 요청 모양으로 서버에서 잰다. 서버가 돌려준 씨앗이 보낸 씨앗과 다르면 멈춘다 (옛 서버 방지).
+- 기존 결과와 보고서는 그대로 둔다. 씨앗 두 개 값이 나오면 여기에 적는다.
+
 **다음 세션 시작점**
 
 1. 시뮬레이터 서버를 다시 켠다 (옛 서버는 옛 기준). mts_worker 가 남아 있으면 같이 끈다.
