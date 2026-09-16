@@ -1,0 +1,50 @@
+{
+ "schema": "spillsink.material/2",
+ "id": "alu_lambert",
+ "label": "맨 알루미늄 — 완전 확산 가정 (범위의 나쁜 쪽 끝)",
+ "label_en": "bare aluminium — fully diffuse assumption (pessimistic end)",
+ "color": "#8b96a1",
+ "scattering": {
+  "band": "visible_rgb",
+  "band_note": "가시광 RGB 가중. 알루미늄은 400~700 nm 에서 거의 평평하고 근적외에서 97 % 까지 오른다. 레이저 445/520/635 nm 는 모두 평평한 구간이라 이 한 값으로 셋을 다 본다 [추정 — 파장별 표는 아직 없다].",
+  "reflectance": {
+   "model": "constant",
+   "value": 0.86,
+   "angles_deg": null,
+   "values": null
+  },
+  "spectral": null,
+  "transmittance": 0.0,
+  "absorption": 0.14,
+  "laser_lines_nm": [
+   445,
+   520,
+   635
+  ]
+ },
+ "bsdf": {
+  "model": "lambert_plus_ggx",
+  "diffuse_fraction": 1.0,
+  "lobe": {
+   "type": "ggx",
+   "roughness": 0.0,
+   "ior": 1.5,
+   "alpha_ggx": 0.0,
+   "_단위": "roughness 를 렌더러가 제곱해 GGX alpha 로 쓴다. roughness = sqrt(alpha_ggx).",
+   "_금속_주의": "이 모델은 유전체 프레넬(굴절률 1.5)이라 금속의 프레넬이 아니다. 총반사율을 맞춰 넣었으므로 총량은 맞지만, 스치는 각에서 금속 특유의 반사 상승은 안 들어간다 [모름 — 벌집 벽이 받는 각이 거기다]."
+  },
+  "table": null,
+  "anisotropic": false
+ },
+ "provenance": {
+  "reflectance": "measured",
+  "diffuse_fraction": "guessed",
+  "roughness": "guessed",
+  "_등급": "measured 장비로 잰 값 / bounded 범위만 묶인 값 / guessed 순서만 맞춘 값",
+  "_확산비율": "[guessed] 1.0 은 측정값이 아니라 범위의 끝이다. 논문(Pozzobon 2019)은 무광 면이 확산 우세라고만 적고 값을 안 준다. 그리고 이 시뮬레이터는 0.953 미만을 아예 못 그린다.",
+  "_거칠기": "[guessed] 알루미늄 포일의 광택 덩어리 폭을 준 논문을 못 찾았다. 밝은 면은 아노다이징 연마(alpha 0.024) 근처, 무광 면은 아노다이징 그대로(alpha 0.19) 근처로 놓았다. 순서만 맞춘 값이다."
+ },
+ "source": "Pozzobon & Levasseur 2019, Biotechnology Reports 25:e00399 (doi 10.1016/j.btre.2019.e00399). 적분구, 250~2500 nm, 시료 2 개씩. 가시광 총반사 약 86 %, 밝은 면과 무광 면이 같다. 정반사는 밝은 면이 높고 확산은 무광 면이 높다고만 적혀 있고 그 비율의 수치는 본문에서 못 읽었다 (원문 유료, 초록과 자료 저장소에도 값이 없음).",
+ "_이_파일의_쓰임": "맨 알루미늄을 **완전 확산체**로 놓은 것. 실제 압연 알루미늄은 정반사가 상당히 있으므로 이것은 우리에게 **불리한 쪽 끝**이다. 이 값으로도 괜찮다면 실물은 더 괜찮다. 이 값으로 안 되면 거울 쪽을 따로 봐야 한다.",
+ "_모델_한계": "이 시뮬레이터의 도료 모델은 유전체(굴절률 1.5) 프레넬 + 램버시안이다. 정면 정반사가 최대 4 % 라, 총반사 86 % 인 금속은 확산 비율 0.953 이상일 때만 표현된다. 거울에 가까운 알루미늄은 금속(도체) 모델이 있어야 하고 지금 없다. blender_render.py 327 줄에서 Metallic 이 0.0 으로 박혀 있다."
+}
