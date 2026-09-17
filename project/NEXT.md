@@ -425,6 +425,8 @@ pitch 정확히 **9.53 과 6.35** 에서 `topology="comb"` 이 다른 격자를 
 
 ## X. 내가 할 것
 
+0. (끝남 2026-09-17) 진행표 https://claude.ai/artifact/H6ywiNQ91g7MhCd337zhNR, 화면 시연 설계 여섯,
+   결론 벌집 반짝임 0.1453 · 뭉개기 1.03~1.10 (관객 20~60). 아래 1·3 은 끝났다.
 1. `results/window_50x50_2026_09_17.json` 의 결론 벌집 반짝임·뭉개기 (관객 20/40/60,
    두 창) 가 끝나면 CONTEXT 표에 더한다. `zsh scripts/run_batch.sh scripts/window_50x50.py
    window_50x50` 는 이어 돌기가 된다.

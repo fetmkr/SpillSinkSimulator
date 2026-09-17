@@ -1,0 +1,331 @@
+<title>벌집 시연 진행표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#646b77; --line:#dfdcd6; --soft:#efede8;
+  --cy:#2a8f88; --cy-soft:#e3f1ef; --pk:#b8577a; --warn:#a86c12; --warn-soft:#f7ecd9;
+  --bad:#b63f36; --good:#3a8452;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --kr:"IBM Plex Sans KR","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#9aa2ae; --line:#2d323c; --soft:#20242c;
+  --cy:#4ec9c0; --cy-soft:#17302e; --pk:#d98aa4; --warn:#e0a44e; --warn-soft:#2e2517;
+  --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#9aa2ae; --line:#2d323c; --soft:#20242c;
+  --cy:#4ec9c0; --cy-soft:#17302e; --pk:#d98aa4; --warn:#e0a44e; --warn-soft:#2e2517;
+  --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);font-size:16px;line-height:1.7;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:18px;padding-block:44px 88px;display:flex;flex-direction:column;gap:40px}
+header{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:22px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+h2{margin:0;font-size:21px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:16px;font-weight:700}
+p{margin:0;max-width:66ch}
+.sub{color:var(--muted);font-size:15px}
+section{display:flex;flex-direction:column;gap:14px}
+.num,td.n,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n{text-align:right;white-space:nowrap}
+tr.hero td{background:var(--cy-soft);font-weight:600}
+.note{font-size:13px;color:var(--muted)}
+code{font-family:var(--mono);font-size:13px;background:var(--soft);padding:1px 5px;border-radius:3px}
+
+/* the conclusion strip */
+.verdict{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.ax{border-top:3px solid var(--cy);padding-top:8px;display:flex;flex-direction:column;gap:2px}
+.ax .k{font-size:13px;color:var(--muted)}
+.ax .v{font-family:var(--mono);font-size:24px;font-weight:600}
+.ax .d{font-size:12.5px;color:var(--muted)}
+
+/* checklist */
+ul.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ul.check li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+ul.check li::before{content:"";width:14px;height:14px;border:1.5px solid var(--muted);border-radius:2px;margin-top:5px}
+
+/* timeline */
+.step{display:grid;grid-template-columns:96px 1fr;gap:18px;border-top:1px solid var(--line);padding-top:18px}
+.when{font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.when b{font-size:22px;color:var(--ink);font-weight:600;line-height:1.2}
+.body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.say{border-left:3px solid var(--line);padding-left:12px}
+.say p+p{margin-top:4px}
+ol.do{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+ol.do li::marker{font-family:var(--mono);color:var(--muted)}
+.btn{font-family:var(--mono);font-size:13px;border:1px solid var(--cy);color:var(--cy);border-radius:3px;padding:0 6px;white-space:nowrap}
+.pick{font-family:var(--mono);font-size:13px;background:var(--soft);border-radius:3px;padding:1px 6px}
+.care{background:var(--warn-soft);border-radius:4px;padding:10px 12px;font-size:14px}
+.care b{color:var(--warn)}
+.tag{font-size:12px;color:var(--muted)}
+
+details{border-top:1px solid var(--line);padding-block:10px}
+details summary{cursor:pointer;font-weight:600;list-style-position:outside}
+details summary:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+details .a{padding-top:8px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.src{font-size:12.5px;color:var(--muted)}
+
+@media (max-width:560px){
+  h1{font-size:26px}
+  .step{grid-template-columns:1fr;gap:6px}
+  .when{flex-direction:row;gap:10px;align-items:baseline}
+}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .wrap{padding-block:0;gap:22px}
+  .step{break-inside:avoid}
+  details{break-inside:avoid}
+  details:not([open]) .a{display:flex}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">SPILL SINK SIMULATOR · 연구자 대상 30 분 · 2026-09-17 예행연습 기준</div>
+  <h1>벌집 시연 진행표</h1>
+  <p class="sub">시뮬레이터 화면을 이 순서대로 누르면 된다. 여섯 설계 모두 목록에서 불러와 화면에서 직접 눌러 아래 숫자가 나오는 것을 확인했다 (2026-09-17). 설계는 화면 왼쪽 위 <span class="pick">Start from a measured design</span> 목록의 <b>시연 (진행표 순서)</b> 묶음에 번호대로 들어 있다.</p>
+</header>
+
+<section>
+  <h2>결론 설계</h2>
+  <div class="verdict">
+    <p><b>알루미늄 벌집 · 셀 10 mm · 깊이 20 mm · 무소 블랙 전부 칠함</b> <span class="tag">판 500 mm 로 잼 · 방 조건 빔 30~45°, 관객 0~60°</span></p>
+    <div class="axes">
+      <div class="ax"><span class="k">반사 총량 ↓</span><span class="v">0.227 %</span><span class="d">방 조건 가장 밝은 칸 (45°, 방위 45°). 무소 민판의 5 분의 1</span></div>
+      <div class="ax"><span class="k">정면 반짝임 ↓</span><span class="v">0.145</span><span class="d">빔 +40° · 관객 20°. 5 % 무광판 대비 배수</span></div>
+      <div class="ax"><span class="k">모양 뭉개기 ↑</span><span class="v">1.03~1.10</span><span class="d">관객 20·40·60°. 민판 = 1. 관객 0° 는 안 잼</span></div>
+    </div>
+    <p class="note">반짝임·뭉개기는 판 500 에서 관객 한 자리에 11~18 분 걸린다. 현장에서 누르지 않는다. <span class="mono">results/window_50x50_2026_09_17.json</span> 의 60×40 창 값 (보고서와 같은 규약). 읽는 창을 50×50 으로 바꿔도 모든 칸이 0.18 % 안에서 같다.</p>
+  </div>
+</section>
+
+<section>
+  <h2>시작 전</h2>
+  <ul class="check">
+    <li><span>서버를 켠다: <code>cd project</code> 후 <code>/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python scripts/sim_server.py</code>. 주소 <code>127.0.0.1:8777</code>.</span></li>
+    <li><span><b>다른 측정을 돌리지 않는다.</b> 서버는 한 번에 하나만 처리하고 취소가 없다. 뒤에서 뭉개기 하나만 돌아도 총량 단추가 몇 분씩 멈춘다.</span></li>
+    <li><span>브라우저에서 <b>새로고침</b>. 화면은 <b>한 창만</b> 연다.</span></li>
+    <li><span>설계는 <b>시연 (진행표 순서)</b> 묶음에서 고른다. 브라우저에 저장된 "final" 은 바닥판이 아크릴로 저장돼 있어 쓰지 않는다.</span></li>
+    <li><span>오른쪽 <b>관찰자 각도</b> 칸이 <span class="mono">0</span> 인지 본다.</span></li>
+    <li><span>최종 후보 보고서 탭을 따로 열어 둔다: <code>claude.ai/artifact/XAqBDwoMsWMsEUhRj3EMM7</code></span></li>
+  </ul>
+</section>
+
+<section>
+  <h2>진행</h2>
+
+  <div class="step">
+    <div class="when"><b>0–3</b><span>분 · 3 분</span></div>
+    <div class="body">
+      <h3>문제와 세 축</h3>
+      <div class="say">
+        <p>레이저 영상이 천장 패널에 닿으면 빛이 방으로 되돌아온다. 그걸 줄이는 패널을 시뮬레이터로 골랐다.</p>
+        <p>늘 세 값을 같이 본다. <b>반사 총량</b>은 되돌아온 빛 전체, <b>정면 반짝임</b>은 관객 자리에서 본 가장 밝은 2 mm 점, <b>모양 뭉개기</b>는 되돌아온 빛 줄이 얼마나 퍼졌나.</p>
+        <p>방은 10×10 m, 천장 6 m. 패널이 받는 빔은 30~45°, 관객은 0~60°.</p>
+      </div>
+      <p class="note">화면은 아직 누르지 않는다. 필요하면 오른쪽 세 축 칸을 가리킨다.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="when"><b>3–10</b><span>분 · 7 분</span></div>
+    <div class="body">
+      <h3>측정기부터 믿을 수 있나 — 답을 아는 판</h3>
+      <ol class="do">
+        <li>설계 목록에서 <span class="pick">1 · 5 % 민판 · 판 200</span> → <span class="btn">Render · total</span></li>
+        <li>설계 목록에서 <span class="pick">2 · 무소 민판 · 판 200</span> → <span class="btn">Render · total</span></li>
+      </ol>
+      <div class="scroll"><table>
+        <thead><tr><th>설계</th><th>큰 숫자</th><th>0° 칸</th><th>걸린 시간</th><th>말할 것</th></tr></thead>
+        <tbody>
+          <tr><td>5 % 민판</td><td class="n">5.013 %</td><td class="n">4.999 %</td><td class="n">6 초</td><td>5 % 도료판이 5 % 로 읽힌다</td></tr>
+          <tr><td>무소 민판</td><td class="n">1.219 %</td><td class="n">0.967 %</td><td class="n">6 초</td><td>칠만으로 4 분의 1</td></tr>
+        </tbody>
+      </table></div>
+      <div class="say">
+        <p>재료 식으로 계산한 무소 값과 0.04 % 안에서 같다. 광원과 눈 자리를 바꿔도 0.001 % 안에서 같다.</p>
+        <p>보고서 14 개 후보는 화면이 보내는 요청과 보고서 측정 호출이 14/14 같고, 서버로 다시 잰 7 개는 최대 0.072 % 차이였다.</p>
+      </div>
+      <div class="care"><b>조심</b> · 결과 밑 <span class="mono">재질:</span> 줄이 고른 재료를 말하는지 가리킨다. 5 % 민판은 <span class="mono">전체 5.00% wall_5pct</span>.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="when"><b>10–20</b><span>분 · 10 분</span></div>
+    <div class="body">
+      <h3>결론 설계 — 벌집이 빛을 가두는 모습</h3>
+      <ol class="do">
+        <li>설계 목록에서 <span class="pick">3 · 결론 벌집 · 셀 10 · 깊이 20 · 판 500 · 무소 전부</span></li>
+        <li><b>왼쪽 재료 카드에서 바닥판(Bottom panel)이 무소인지</b> 확인한다.</li>
+        <li><span class="mono">rays per angle</span> 칸을 <span class="mono">20</span> 으로 → <span class="btn">Trace sample rays</span> (7 초). 결과 표의 체크박스로 <b>30° 와 45° 만</b> 켠다.</li>
+        <li><span class="btn">Render · total</span> (7 초)</li>
+      </ol>
+      <div class="scroll"><table>
+        <thead><tr><th>칸</th><th>값</th><th>무소 민판 대비</th></tr></thead>
+        <tbody>
+          <tr class="hero"><td>큰 숫자 (45°, 방위 45°)</td><td class="n">0.227 %</td><td class="n">5.4 분의 1</td></tr>
+          <tr><td>30° (방위 45°)</td><td class="n">0.174 %</td><td class="n">—</td></tr>
+          <tr><td>0°</td><td class="n">0.075 %</td><td class="n">13 분의 1</td></tr>
+        </tbody>
+      </table></div>
+      <div class="say">
+        <p>5 % 민판 5 % → 무소 민판 1.2 % → 벌집 0.23 %. 칠로 4 분의 1, 모양으로 다시 5 분의 1.</p>
+        <p>광선은 셀 벽 사이에서 여러 번 튀다가 흡수된다. 그림으로만 본다.</p>
+      </div>
+      <div class="care"><b>조심</b> · 광선 추적의 <span class="mono">out</span> 숫자는 줄기가 적어 흔들린다 (30° 에서 0.257 %, 렌더는 0.162 %). 숫자는 <span class="btn">Render · total</span> 로만 말한다.<br>
+      <b>조심</b> · 큰 숫자가 0.3 % 근처로 뜨고 가장 밝은 각도가 0° 면 바닥판이 무소가 아니다. 바닥판 알루미늄이면 0° 가 0.297 %, 아크릴이면 0.356 % (방 조건 값은 그대로 0.228 %).</div>
+
+      <h3>셀 크기를 바꿔 보이기 <span class="tag">선택 · 3 분</span></h3>
+      <ol class="do">
+        <li>설계 목록에서 <span class="pick">4 · 비교 벌집 · 셀 20 · 깊이 20 · 판 500</span> → <span class="btn">Render · total</span></li>
+      </ol>
+      <div class="scroll"><table>
+        <thead><tr><th>입사각</th><th>셀 10</th><th>셀 20</th><th>이긴 쪽</th></tr></thead>
+        <tbody>
+          <tr><td>0°</td><td class="n">0.075 %</td><td class="n">0.176 %</td><td>셀 10 (2.3 배)</td></tr>
+          <tr><td>20° (방위 45°)</td><td class="n">0.147 %</td><td class="n">0.206 %</td><td>셀 10</td></tr>
+          <tr><td>30° (방위 45°)</td><td class="n">0.174 %</td><td class="n">0.204 %</td><td>셀 10</td></tr>
+          <tr class="hero"><td>45° (방위 45°) — 큰 숫자</td><td class="n">0.227 %</td><td class="n">0.219 %</td><td>셀 20</td></tr>
+        </tbody>
+      </table></div>
+      <div class="care"><b>조심</b> · <b>큰 숫자는 셀 20 이 더 작다.</b> 반드시 각도별 표를 가리킨다. 큰 셀은 바닥판이 곧게 보여서 45° 한 칸만 이기고 나머지는 진다. 바닥판 재료를 바꾸면 30° 값이 셀 10 은 +0.5 %, 셀 20 은 +135.7 % 움직인다.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="when"><b>20–25</b><span>분 · 5 분</span></div>
+    <div class="body">
+      <h3>뭉개기와 반짝임</h3>
+      <ol class="do">
+        <li>설계 목록에서 <span class="pick">5 · 뭉개기·반짝임 현장 · 표준 샘플 피라미드 4/20 · 판 60</span></li>
+        <li>관찰자 각도 <span class="mono">0</span> 확인 → <span class="btn">Render · smear + head-on</span> (48 초). 기다리는 동안 아래 표를 설명한다.</li>
+        <li><span class="tag">선택</span> 피라미드와 견주자는 질문이 나오면 <span class="pick">6 · 비교 발주 피라미드 4/22 끝 0.4 · 판 116</span> → <span class="btn">Render · total</span> (7 초) → <span class="num">0.244 %</span>. 바닥판 카드가 5 % 도료인 것이 맞다 (보고서 조건).</li>
+      </ol>
+      <div class="scroll"><table>
+        <thead><tr><th>화면 칸</th><th>나와야 할 값</th></tr></thead>
+        <tbody>
+          <tr><td>관객 각도 (observer)</td><td class="n">0°</td></tr>
+          <tr><td>smear</td><td class="n">1.85×</td></tr>
+          <tr><td>head-on brightness (빔 0° · 관객 0°)</td><td class="n">0.0775</td></tr>
+          <tr><td>빔 −40 / +30 / +40 의 box</td><td class="n">0.0720 · 0.0817 · 0.0738</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>미리 잰 세 축</b> — 보고서 규약, 현장에서 안 누른다.</p>
+      <div class="scroll"><table>
+        <thead><tr><th>설계</th><th>판 mm</th><th>반사 총량 ↓</th><th>정면 반짝임 ↓</th><th>모양 뭉개기 ↑</th></tr></thead>
+        <tbody>
+          <tr><td>5 % 민판</td><td class="n">200</td><td class="n">5.013 %</td><td class="n">4.190</td><td class="n">1.00</td></tr>
+          <tr><td>무소 민판</td><td class="n">200</td><td class="n">1.219 %</td><td class="n">0.459</td><td class="n">1.00</td></tr>
+          <tr class="hero"><td>결론 벌집 셀 10 · 깊이 20</td><td class="n">500</td><td class="n">0.227 %</td><td class="n">0.145</td><td class="n">1.03~1.10*</td></tr>
+          <tr><td>발주 피라미드 4/22 끝 0.4 (보고서 1 위)</td><td class="n">116</td><td class="n">0.244 %</td><td class="n">0.133</td><td class="n">2.14</td></tr>
+          <tr><td>표준 샘플 피라미드 4/20</td><td class="n">60</td><td class="n">0.244 %</td><td class="n">0.136</td><td class="n">1.85</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">반짝임 = 빔 −40·30·40° × 관객 20·40·60° 중 가장 밝은 값. 뭉개기 = 관객 0°, ±40° 평균. * 결론 벌집 뭉개기는 관객 20·40·60° 값 (0° 는 안 잼).</p>
+      <div class="say">
+        <p>총량은 벌집이 피라미드보다 7 % 적다. 반짝임은 피라미드가 9 % 낮다. 뭉개기는 피라미드가 크게 앞선다 — 벌집은 빛 줄 모양을 거의 그대로 둔다.</p>
+        <p>한 축만 보면 결론이 뒤집힌다. 그래서 늘 세 축을 같이 본다.</p>
+      </div>
+      <div class="care"><b>조심</b> · 화면의 반짝임 칸은 <b>빔 0° · 관객 한 자리</b> 값이다. 보고서 반짝임과 같게 보이려면 관찰자 각도를 20, 40, 60 으로 바꿔 세 번 누르고 빔 −40·30·40 칸 중 가장 큰 값을 읽는다 (표준 샘플이면 약 2.5 분).</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="when"><b>25–30</b><span>분 · 5 분</span></div>
+    <div class="body">
+      <h3>왜 벌집인가, 그리고 한계</h3>
+      <div class="say">
+        <p><b>벌집을 고른 근거 (기록된 것).</b> 판 두께 22 mm (지금 사양 42 mm). 칠할 면적이 판 면적의 5.02 배 (지금 사양 9.42 배). 셀 10 은 규격 3/8 인치(9.53)와 5 % 차이라 규격품으로 산다. 전부 칠하면 빔 각도 금지 구간이 없다.</p>
+        <p><b>불리한 점.</b> 뭉개기는 1 근처로 피라미드(2.14)보다 약하다.</p>
+      </div>
+      <p><b>한계는 먼저 꺼낸다.</b></p>
+      <ul>
+        <li>실물 측정 0 건. 모든 값이 시뮬레이터.</li>
+        <li>무소 재료는 논문 그림을 읽어 맞춘 값. 절대 크기 ±20 %, 광택 폭 0.45~0.75 가 열려 있다.</li>
+        <li>금속 재료 모델이 없다. 맨 알루미늄은 완전 확산 가정으로만 쟀다.</li>
+        <li>읽는 창(판 가운데 60×40 %)은 근거가 없다. 50×50 과 견주면 순위 값은 거의 같다.</li>
+        <li>판을 까는 방향이 총량을 8 % 움직인다 (셀 12.7 에서 잼). 발주 사양에 방향이 없다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>예상 질문</h2>
+  <div>
+    <details>
+      <summary>셀 20 이 큰 숫자가 더 작은데 왜 셀 10 인가?</summary>
+      <div class="a">
+        <p>큰 숫자는 가장 밝은 한 칸(45°)이다. 45° 에서만 셀 20 이 0.219 % 로 이기고 0°·20°·30° 는 다 진다 (0° 에서 2.3 배 밝다). 큰 셀은 바닥판이 곧게 보여서, 바닥판 재료를 바꾸면 30° 값이 셀 20 은 +135.7 %, 셀 10 은 +0.5 % 움직인다.</p>
+        <p class="src">오늘 화면에서 잼 · 바닥판 영향은 FINDINGS_comb_alu_cell_2026_09_16.md 5 절 (판 500, 방위 0°)</p>
+      </div>
+    </details>
+    <details>
+      <summary>깊이 40 이면 더 좋지 않나?</summary>
+      <div class="a">
+        <p>방 조건에서 깊이 20 과 40 은 6.7 % 차이 (0.215 대 0.208 %). 두께는 42 → 22 mm, 코어는 절반. 깊이 40 을 골랐던 이유는 정면(0°) 값이었는데 그 축은 방 조건에 없다.</p>
+        <p class="src">FINDINGS_comb_alu_cell_2026_09_16.md 4 절 · 셀 9.53 에서 잰 값이라 절대값보다 차이를 인용한다</p>
+      </div>
+    </details>
+    <details>
+      <summary>벌집 형상 코드에 결함이 있다던데?</summary>
+      <div class="a">
+        <p>셀 간격이 정확히 9.53 과 6.35 일 때 격자가 다르게 지어진다 (1e-7 mm 흔들면 총량 14 %). 어느 쪽이 맞는지는 아직 못 갈랐다. 결론 셀 10 은 같은 흔들기에 총량이 0.16 % 만 움직여 영향이 없다고 본다.</p>
+        <p class="src">2026-09-17 지어서 잼 · 보고서의 벌집 9.53 숫자는 확정이 아니다</p>
+      </div>
+    </details>
+    <details>
+      <summary>판 가운데만 읽는 이유는? 60×40 은 어디서 나왔나?</summary>
+      <div class="a">
+        <p>판 가장자리까지 읽으면 판 옆 배경이 섞인다. 0.3 % 만 섞여도 5 % 판이 5.3 % 로 읽혔다. <b>얼마나 안쪽이어야 하는지는 재지 않았다</b> — 60×40 자체에는 근거가 없다.</p>
+        <p>50×50 과 견줬다: 결론 벌집 총량 0.22745 → 0.22766 % (+0.09 %), 반짝임·뭉개기는 모든 칸이 0.18 % 안. 피라미드들도 순위 값은 1.2 % 안이지만, 작은 값 칸(0°, 빔 −40°)은 최대 30 % 움직인다.</p>
+        <p class="src">FINDINGS_rig_audit_2026_08_20.md 100 줄 · form_metrics.py 34 줄 · results/window_50x50_2026_09_17.json</p>
+      </div>
+    </details>
+    <details>
+      <summary>판 크기가 후보마다 다른데 견줘도 되나?</summary>
+      <div class="a">
+        <p>총량과 반짝임은 판 크기에 거의 안 흔들린다. 뭉개기는 작은 판에서 되돌아온 빛을 다 못 담아 하한이 된다 (화면에 "≥" 로 뜬다). 반짝임은 읽는 창이 판에 비례해 커지므로 조금 달라질 수 있다.</p>
+        <p class="src">최종 후보 보고서 "견줄 때 주의"</p>
+      </div>
+    </details>
+    <details>
+      <summary>반짝임은 관객 위치에 따라 다른가?</summary>
+      <div class="a">
+        <p>다르다. 카메라를 관객 각도에 두고 찍는다. 5 % 민판은 거울 방향(빔 −40 / 관객 40)에서만 4.19, 다른 자리는 1.0 근처. 결과 칸 맨 위에 서버가 쓴 관객 각도가 찍힌다.</p>
+        <p class="src">form_buildable.py 388 줄 · 오늘 잰 민판 기준 줄</p>
+      </div>
+    </details>
+    <details>
+      <summary>광선 추적 숫자와 총량이 다르다</summary>
+      <div class="a">
+        <p>광선 추적은 빛이 어디로 가는지 보여주는 그림이다. 각도당 줄기가 20~200 개라 숫자가 흔들린다. 측정은 Cycles 렌더로 한다.</p>
+      </div>
+    </details>
+    <details>
+      <summary>알루미늄 벌집을 칠 안 하고 쓰면?</summary>
+      <div class="a">
+        <p>위 20 mm 만 무소로 칠하면 세 축이 전부 칠한 것과 같다 (깊이 40 기준). 다만 빔이 4~23° 로 들어오면 3.5 배 밝아진다. 이 계산은 알루미늄을 완전 확산으로 가정했다 — 금속 모델이 없다.</p>
+        <p class="src">FINDINGS_comb_alu_cell_2026_09_16.md 1~3 절</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section>
+  <p class="note">설계 정의: <span class="mono">project/sim/index.html</span> 의 <span class="mono">DEMO</span> · 오늘 한 일: <span class="mono">project/CONTEXT.md</span> 2026-09-17 절 · 이 문서: <span class="mono">project/report/comb/demo_runsheet_2026-09-17.html</span></p>
+</section>
+
+</div>

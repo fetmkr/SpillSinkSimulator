@@ -2673,11 +2673,42 @@ addEventListener('resize', () => draw());
   // be saved under a name, listed beside the published presets, and one exact
   // spec can be marked as what the page boots into.
   const LS_D = 'sim_user_designs', LS_BOOT = 'sim_boot_design';
+  // THE DEMO, IN RUN-SHEET ORDER (2026-09-17). Kept here, not in localStorage,
+  // so every browser has them after a reload and nobody's saved "final" (whose
+  // bottom panel was stored as acrylic) can stand in for them. Each carries its
+  // finish: a design without `_coat` keeps whatever materials are on screen.
+  // The numbers in `note` were measured with exactly these specs on 2026-09-17
+  // (screen for 1-3 and 5, results/finalists_2026_09_15.json for 6).
+  const M2 = 'musou_fit2', P5 = 'wall_5pct', SAMEF = '__same';
+  const flatD = mat => ({top:'none', top_params:{}, depth:10, panel:200, floor:'none',
+                         margin_depths:0.2, _coat:{coat:M2, deepcoat:mat, floorcoat:SAMEF, pcov:100}});
+  const combD = pitch => ({top:'comb', top_params:{pitch, wall_top:0.08, wall_bot:0.08, comb_expand:1, jitter:0},
+                           depth:20, panel:500, floor:'none', margin_depths:0.2,
+                           _coat:{coat:M2, deepcoat:'anodised', floorcoat:SAMEF, pcov:100}});
+  const DEMO = [
+    ['1 · 5 % 민판 · 판 200', flatD(P5), '총량 5.013 % (45°)'],
+    ['2 · 무소 민판 · 판 200', flatD(M2), '총량 1.219 % (45°)'],
+    ['3 · 결론 벌집 · 셀 10 · 깊이 20 · 판 500 · 무소 전부', combD(10), '총량 0.227 % (45°, φ45) · 0° 0.075 %'],
+    ['4 · 비교 벌집 · 셀 20 · 깊이 20 · 판 500', combD(20), '총량 0.219 % (45°) · 0° 0.176 %'],
+    ['5 · 뭉개기·반짝임 현장 · 표준 샘플 피라미드 4/20 · 판 60',
+     {top:'pyramid', top_params:{pitch:4, tip_flat:0.1, apex_jitter:0, tip_drop:0, valley_round:0, row_offset:0},
+      depth:20, panel:60, floor:'none', margin_depths:0.2,
+      _coat:{coat:M2, deepcoat:'anodised', floorcoat:SAMEF, pcov:100}},
+     '관객 0: 뭉개기 1.85 · 반짝임(빔 0) 0.0775 · 48 초'],
+    ['6 · 비교 발주 피라미드 4/22 끝 0.4 · 판 116 (보고서 1 위)',
+     {top:'pyramid', top_params:{pitch:4, tip_flat:0.4, apex_jitter:0, tip_drop:0, valley_round:0, row_offset:0},
+      depth:22, panel:116, floor:'none', margin_depths:0.2,
+      _coat:{coat:M2, deepcoat:P5, floorcoat:P5, pcov:100*20/22}},
+     '총량 0.244 % · 무소 위 20 mm + 5 % 도료 · 바닥판 5 %'],
+  ];
   const userD = () => { try{ return JSON.parse(localStorage.getItem(LS_D)) || {}; }
                         catch(e){ return {}; } };
   const fillPresets = () => {
     const mine = Object.keys(userD()).sort();
     $('#preset').innerHTML = '<option value="">— pick a design —</option>'
+      + '<optgroup label="시연 (진행표 순서)">'
+      + DEMO.map((d,i)=>`<option value="d:${i}">${d[0]}</option>`).join('')
+      + '</optgroup>'
       + (mine.length ? '<optgroup label="my designs">'
           + mine.map(n=>`<option value="u:${n}">${n}</option>`).join('')
           + '</optgroup>' : '')
@@ -2687,7 +2718,10 @@ addEventListener('resize', () => draw());
   };
   fillPresets();
   let loading = false;
-  const setTop=(id,lab,v)=>{ $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
+  // fitRange FIRST (2026-09-17): a range input clamps to its max, so loading a
+  // 500 mm design onto the 20-200 panel slider silently measured 200 mm while
+  // the design said 500. The typed-box path already widened the range.
+  const setTop=(id,lab,v)=>{ fitRange($('#'+id), v); $('#'+id).value=v; const n=$('#n_'+id); if(n)n.value=v; $('#'+lab).textContent=(+v).toFixed(2); };
   const applySpec = sp => {
     loading = true;
     // OLD SPECS STILL SAY `flat`. It is the same geometry as `none` and was
@@ -2703,7 +2737,7 @@ addEventListener('resize', () => draw());
         if(!d.dataset || !(d.dataset.name in (src||{}))) continue;
         const v = src[d.dataset.name];
         const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]'), b=d.querySelector('b');
-        if(r) r.value=v; if(n) n.value=v; if(b) b.textContent=(+v).toFixed(3);
+        if(r){ fitRange(r, v); r.value=v; } if(n) n.value=v; if(b) b.textContent=(+v).toFixed(3);
         const sel=d.querySelector('select'); if(sel) sel.value=v;
         d.dataset.val = v;
       }
@@ -2717,6 +2751,13 @@ addEventListener('resize', () => draw());
   };
   $('#preset').onchange = e => {
     const val = e.target.value;
+    if(val.startsWith('d:')){
+      const d = DEMO[+val.slice(2)]; if(!d) return;
+      applySpec(JSON.parse(JSON.stringify(d[1])));
+      $('#presetnote').innerHTML =
+        `<b style="color:var(--ink)">${d[0]}</b> &middot; 시연 설계. 2026-09-17 에 잰 값: ${d[2]}`;
+      return;
+    }
     if(val.startsWith('u:')){
       const n = val.slice(2), sp = userD()[n]; if(!sp) return;
       applySpec(sp);
