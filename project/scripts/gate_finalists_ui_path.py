@@ -79,7 +79,9 @@ def ui_body(row, which, obs=0.0, proto=None):
     c = ui_controls(row)
     NOTOP = c["top"] in ("none", "flat")
     NOPAINT = c["coat"] == "none"
-    FLOORMAT = c["deepcoat"] if c["floorcoat"] == "__same" else c["floorcoat"]
+    # index.html FLOORMAT (2026-09-17): "same" follows the paint when fully painted
+    FLOORMAT = (c["floorcoat"] if c["floorcoat"] != "__same"
+                else c["coat"] if (not NOPAINT and c["pcov"] >= 100) else c["deepcoat"])
     coating = c["deepcoat"] if (NOTOP or NOPAINT or c["pcov"] <= 0) else c["coat"]
     no_deep = NOTOP or NOPAINT or c["pcov"] >= 100 or c["pcov"] <= 0
     pd = c["depth"] * c["pcov"] / 100.0

@@ -114,6 +114,16 @@ UI_CASES = [
     ("피라미드 밑변 50/높이 250 끝1", pyr(50.0, 250.0, 1.0, 500.0),
      [("무소 팁 20 + 5 %", MUSOU20)]),
 ]
+# 기준 줄 (2026-09-16, 사용자 요청 "보고서에 민판 줄 추가해"). 순위에 넣지 않는다.
+# 14 개 후보와 같은 측정 호출로 잰다. 판 200 은 벌집과 같은 크기, 깊이 10 은 화면
+# 기본값 (NORMAL["none"]). 민판은 판 크기·깊이에 값이 안 흔들린다 [추측].
+# 결과는 rows 가 아니라 reference 에 적는다. rows 를 늘리면 화면 요청 검사
+# (14/14) 와 보고서 순위가 같이 바뀐다.
+REF_CASES = [
+    ("민판", {"top": "none", "top_params": {}, "depth": 10.0, "panel": 200.0,
+             "floor": "none", "margin_depths": 0.2},
+     [("무소 전부", ALLM), ("전부 5 %", ALL5)]),   # 5 % 는 2026-09-17 추가
+]
 PUB_CASES = [
     ("날 0.05 + 피라미드 바닥 3 (★)", "FL_bl050o115_pyramid_d30"),
     ("벌집 6.5/0.08 + 피라미드 바닥 3", "FL_p650f080_pyramid_d30"),
@@ -312,6 +322,27 @@ def main():
         save()
         print("[finalist done] %s  worst total %s" % (key, row.get("worst_total")),
               flush=True)
+    ref = state.setdefault("reference", {})
+    for name, spec, combos in REF_CASES:
+        for cname, fin in combos:
+            key = "%s | %s" % (name, cname)
+            old = ref.get(key)
+            if (old and "error" not in old
+                    and old.get("spec") == spec and old.get("finish") == fin):
+                continue
+            print("\n[reference] %s" % key, flush=True)
+            row = {"case": name, "combo": cname, "spec": spec, "finish": fin,
+                   "measured_at": time.strftime("%Y-%m-%d %H:%M:%S")}
+            try:
+                row.update(ui_run(spec, fin))
+            except Exception as exc:
+                import traceback
+                traceback.print_exc()
+                row["error"] = "%s: %s" % (type(exc).__name__, str(exc)[:300])
+            ref[key] = row
+            save()
+            print("[reference done] %s  worst total %s"
+                  % (key, row.get("worst_total")), flush=True)
     state["seconds_last_run"] = round(time.time() - t_all, 1)
     save()
     print(OUT)

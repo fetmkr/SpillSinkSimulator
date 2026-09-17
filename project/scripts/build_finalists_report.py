@@ -336,6 +336,10 @@ def main():
         m["pareto"] = not dominated
     order = sorted(range(len(rows)), key=lambda i: (M[i]["r_mean"], M[i]["peak"] or 9))
     meta = data["meta"]
+    # 기준 줄 (2026-09-16). 같은 측정 호출로 잰 민판. 순위·파레토 계산에 안 들어간다.
+    refs = [dict(v, key=k) for k, v in (data.get("reference") or {}).items()
+            if not v.get("error")]
+    RM = [metrics(r) for r in refs]
 
     style = re.search(r"<style>(.*?)</style>",
                       io.open(STYLE_FROM, encoding="utf-8").read(), re.S).group(1)
@@ -425,7 +429,22 @@ def main():
                    '' if m["smear_conv"] else ' <span class="pill low">하한</span>',
                    m["r_smear"],
                    '<span class="pill par">파레토</span>' if m["pareto"] else ''))
-    o.write('</tbody></table></div></section>\n')
+    for r, m in zip(refs, RM):
+        o.write('<tr><td class="rk">—</td><td>%s</td><td>%s</td><td class="n">%.0f</td>'
+                '<td class="n">%s</td><td class="n">—</td><td class="n">%s</td>'
+                '<td class="n">—</td><td class="n">%s%s</td><td class="n">—</td>'
+                '<td><span class="pill">기준 · 순위 밖</span></td></tr>\n'
+                % (r["case"], r["combo"], panel_of(r),
+                   num(m["total"] and 100 * m["total"], 3), num(m["peak"], 3),
+                   num(m["smear"], 2),
+                   '' if m["smear_conv"] else ' <span class="pill low">하한</span>'))
+    o.write('</tbody></table></div>%s</section>\n' % (
+        '<p class="tag">기준 줄은 같은 측정 호출로 잰 민판이다. 순위와 파레토 계산에 '
+        '넣지 않았다. 뭉개기·반짝임의 1.0 은 같은 화면에 놓인 5 % 무광 검정 대조판이다. '
+        '기준 줄 둘은 무소를 칠한 민판과 5 % 도료(wall_5pct)를 칠한 민판이다. 둘 다 '
+        '뭉개기는 1.00 이다. 반짝임은 1.0 이 아니다. 대조판은 완전 확산이고 두 도료는 '
+        '광택이 조금 있어서, 빔 −40 쪽 관객 자리에서 더 밝다 (5 % 는 관객 40 도, '
+        '무소는 관객 60 도).</p>' if refs else ''))
 
     # --- per axis
     for title, keyv, keyr, fmt, note in (
@@ -448,6 +467,10 @@ def main():
                     '<td class="n">%.0f</td><td class="n">%s</td></tr>\n'
                     % (M[i][keyr], rows[i]["case"], rows[i]["combo"],
                        panel_of(rows[i]), fmt(M[i])))
+        for r, m in zip(refs, RM):
+            o.write('<tr><td class="rk">—</td><td>%s <span class="pill">기준</span></td>'
+                    '<td>%s</td><td class="n">%.0f</td><td class="n">%s</td></tr>\n'
+                    % (r["case"], r["combo"], panel_of(r), fmt(m)))
         o.write('</tbody></table></div></section>\n')
 
     # --- simulator check (2026-09-15): the screen's request, sent to the running

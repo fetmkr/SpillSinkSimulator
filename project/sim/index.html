@@ -82,6 +82,11 @@ dl.kv div{display:flex;justify-content:space-between;gap:8px;
   border-bottom:1px dotted var(--line);padding-bottom:2px}
 dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 .big{font:650 26px/1 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+/* result tables: `.scroll` was used but never defined, so the 45 deg column
+   ran off the right edge of the panel (2026-09-17) */
+.scroll{overflow-x:auto;max-width:100%}
+.scroll table{border-collapse:collapse}
+.scroll th,.scroll td{padding:1px 3px}
 .big small{font:400 11px/1 ui-monospace,Menlo,monospace;color:var(--ink3);
   display:block;margin-top:4px}
 .pill{font:600 9.5px/1.6 ui-monospace,Menlo,monospace;border-radius:2px;
@@ -489,13 +494,13 @@ details.why p{margin:.4em 0 0}
   <div id="axes">
     <div class="ax" id="ax_total"><span class="nm">반사 총량 total reflectance &darr;</span>
       <span class="val">&mdash;</span>
-      <span class="sub">target: final sample 0.177&#8202;% &middot; flat Musou 1.14&#8202;%</span></div>
+      <span class="sub">flat plates, panel 200 (2026-09-17): 5&#8202;% paint 5.01&#8202;% &middot; Musou 1.22&#8202;%</span></div>
     <div class="ax" id="ax_smear"><span class="nm">모양 뭉개기 smear &uarr; <i id="ax_beam1"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">flat plate = 1.0 by definition &middot; target: 1.42 at beam 7&#8202;mm (final sample)</span></div>
+      <span class="sub">flat plate = 1.0 by definition &middot; standard sample pyramid 4/20: 1.85 at beam 7.5&#8202;mm</span></div>
     <div class="ax" id="ax_head"><span class="nm">정면 반짝임 head-on &darr; <i id="ax_beam2"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">flat matte patch = 1.0 &middot; old target 0.040 was read as the <b>maximum</b> with the old coating &mdash; not comparable to today&rsquo;s 2&#8202;mm box peak; re-measure the reference sample</span></div>
+      <span class="sub">flat matte patch = 1.0 &middot; this tile is beam 0&deg; at the observer set above. The report ranks the brightest of beams &minus;40/30/40&deg; over observers 20/40/60&deg; &mdash; three presses</span></div>
   </div>
 
   <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
@@ -535,25 +540,28 @@ details.why p{margin:.4em 0 0}
     style="width:5.5em"></div>
   <div class="note" id="mmpxcost" style="margin:-4px 0 6px">&nbsp;</div>
   <button class="go" id="m5"><span class="lb">Render &middot; total
-    <small>5 angles &times; 3 planes (&phi; 0/45/90)</small></span>
+    <small>7 angles &times; 2 planes (&phi; 0/45)</small></span>
     <span class="t">~6 s</span></button>
-  <p class="note" style="margin:0">Reads 0&deg;/&plusmn;20&deg;/&plusmn;40&deg;
-   in <b>three planes</b> &mdash; &phi; 0 / 45 / 90, straight-on and diagonal
-   approaches. Each number is the TOTAL for light entering at that direction
+  <p class="note" style="margin:0">Reads &theta; 0&deg;/&plusmn;20&deg;/30&deg;/&plusmn;40&deg;/45&deg;
+   in <b>two planes</b> &mdash; &phi; 0 and 45 (the room protocol, read from
+   the server). Each number is the TOTAL for light entering at that direction
    and leaving anywhere; the sky-dome lighting is how that total is captured
-   in one shot. The brightest of those 15 is <b>반사 총량 total reflectance</b>. (Mitsuba runs &phi; 0
+   in one shot. The brightest of those 14 is <b>반사 총량 total reflectance</b>.
+   The report ranks on 30/40/45/&minus;40&deg; only. (Mitsuba runs &phi; 0
    only.)</p>
   <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
   <canvas id="chart"></canvas>
 
   <button id="mf" class="go"><span class="lb">Render &middot; smear + head-on
-    <small>3 planes &times; 6 stripe phases</small></span>
-    <span class="t">~90 s</span></button>
+    <small>4 beams &times; &phi; 0 &times; 16 stripe positions, one observer</small></span>
+    <span class="t">1~4 min</span></button>
   <p class="note" style="margin:0">Shines a stripe beam of the width above and
    reads how much the pattern smears sideways (<b>모양 뭉개기</b>) and how much
-   fires straight back at the source (<b>정면 반짝임</b>) &mdash; in three
-   planes (&phi; 0/45/90). The dashboard reports the BRIGHTEST plane — the angle the panel looks worst from, not a bad design. (Mitsuba runs
-   &phi; 0 only.)</p>
+   fires straight back at the source (<b>정면 반짝임</b>) &mdash; beams at
+   &minus;40/0/30/40&deg; in the &phi; 0 plane, read from the observer angle
+   above. Measured 2026-09-15/17: about 1 min for a 60 mm pyramid, 2 min at
+   116 mm, 4 min for a 200 mm honeycomb, and much longer at 500 mm.
+   (Mitsuba runs &phi; 0 only.)</p>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <details class="why"><summary>why beam width matters</summary>
   <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
@@ -561,16 +569,16 @@ details.why p{margin:.4em 0 0}
    deployment default; set 2.0 only to reproduce legacy numbers. Real beam =
    aperture + divergence &times; distance; e.g. LaserCube Ultra (4&#8202;mm,
    1&#8202;mrad) reads &asymp;9&#8202;mm at 5&#8202;m.</p>
-  <p class="note">Reduced fidelity: 6 stripe phases at 256 spp, not the
-   report's 16 at 512. An estimate of the published number, not the
-   number.</p></details>
+  <p class="note">Same protocol as the report: 16 stripe positions at 256
+   samples, read from the server (form_metrics.py). gate_finalists_ui_path
+   checks that this button sends the report's call.</p></details>
 
   <div class="tools">
   <h2>Tools</h2>
   <p class="note" style="margin:0"><b>A sample, not the measurement.</b> The
-   trace follows a few hundred rays at five angles in ONE azimuth plane at a
-   time (turn &phi; to rotate it). The Render above reads its five &theta; in
-   three planes (&phi; 0/45/90), and each render number integrates ALL the
+   trace follows a few hundred rays at the seven room-protocol angles in ONE azimuth plane at a
+   time (turn &phi; to rotate it). The Render above reads seven &theta; in
+   two planes (&phi; 0/45), and each render number integrates ALL the
    light leaving the panel with the real fitted coating, where the trace
    follows a few hundred rays with a single-&rho; material.</p>
   <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
@@ -590,13 +598,13 @@ details.why p{margin:.4em 0 0}
    Render uses, so the two can be compared directly. The other two modes are
    the pure pictures: all-diffuse, or all-mirror.</p>
   <button id="mr"><span class="lb">Trace sample rays
-    <small>5 angles &times; 1 plane</small></span>
+    <small>7 angles &times; 1 plane</small></span>
     <span class="t">~9 s</span></button>
   <dl class="kv" id="rayout"><div><dt>not traced</dt><dd>&mdash;</dd></div></dl>
   <div id="rayhist" style="display:flex;align-items:flex-end;gap:1px;height:34px"></div>
   <p class="note" id="rayhistcap" style="display:none;margin:.15rem 0 0">bounce
    histogram &mdash; &larr; fewer bounces &middot; more bounces &rarr;; bar
-   height = rays, all 5 angles together. Hover a bar for the count.</p>
+   height = rays, all angles together. Hover a bar for the count.</p>
   <details class="why"><summary>how to read the trace</summary>
   <p class="note">path color = its measurement
    angle (same colors as the arrows) &middot; <b style="color:#b34700">red</b>
@@ -1384,7 +1392,15 @@ const SAME = '__same';
 function MATNAME(m, id){ return (m && (m.label_en || m.label)) || id; }
 function FLOORMAT(){
   const f = $('#floorcoat'); if(!f) return null;
-  return f.value === SAME ? $('#deepcoat').value : f.value;
+  if(f.value !== SAME) return f.value;
+  // "SAME AS THE TOP LAYER" MEANS THE TOP LAYER YOU SEE (2026-09-17). It used
+  // to follow the bare material even under 100 % paint, where no bare surface
+  // is left: picking a bare finish then silently repainted the bottom panel,
+  // and a Musou-painted comb on a 10 mm cell read 0.356 % at 0 deg instead of
+  // 0.075 % (acrylic floor). Fully painted -> the paint; otherwise the bare
+  // material, which is what meets the bottom panel at the foot of the walls.
+  const pcov = +$('#pcov').value;
+  return (!NOPAINT() && pcov >= 100) ? $('#coat').value : $('#deepcoat').value;
 }
 // HOW GOOD EACH NUMBER IS -- and WHY. A two-word badge that names a problem
 // without saying what the problem is only tells the reader to worry. Each
@@ -1606,7 +1622,16 @@ function renderMaterials(){
       // promised a choice the measurement never received. Say what is
       // actually used instead. (The label/measurement mismatch is logged in
       // FINDINGS; fixing it changes numbers, so it is not done here.)
-      + '<div class="nm2">'+(m ? MATNAME(m, id) : 'none')+'</div>'
+      // BARE UNDER 100 % PAINT (2026-09-17). The part is still bought in the
+      // chosen material; the paint covers all of it, so the slot adds nothing
+      // to the number. Show the choice instead of "none" -- "none" read as if
+      // the pick had been lost. `slotMaterials()` still returns null here,
+      // because the request must not send a bare material that is not lit.
+      + '<div class="nm2">'+(m ? MATNAME(m, id)
+          : (k === 'base' && !NOTOP() && $('#deepcoat').value)
+            ? MATNAME(CO[$('#deepcoat').value], $('#deepcoat').value)
+              + '<div class="depth">칠이 100 % 덮어서 결과에 안 들어간다</div>'
+            : 'none')+'</div>'
       + extra
       + ((k === 'floor' && SEALED_TOP())
          ? '<div class="depth">measured: no effect on this shape &mdash; the '
@@ -1842,19 +1867,27 @@ function renderMaterials(){
 }
 
 function materialLine(){
-  const nm = v => (CO[v] ? (100*CO[v].rho0).toFixed(2)+'% '+v : v);
-  const pcov = +$('#pcov').value, base = $('#deepcoat').value,
-        top = $('#coat').value, fl = $('#floorcoat') ? $('#floorcoat').value : '';
+  // READS slotMaterials(), THE SAME ANSWER THE REQUEST IS BUILT FROM
+  // (2026-09-17). It used to read the menus itself: a flat 5 % plate was
+  // captioned "전체 musou_fit2" under a 5.013 % result, the bottom panel of a
+  // single-layer panel was never named, and diffuse / roughness came from the
+  // panel-wide sliders (0.00 / 0.60) instead of each material's own values.
+  const use = slotMaterials();
+  const nm = (k, v) => {
+    if(!v) return v;
+    const pct = CO[v] ? (100*CO[v].rho0).toFixed(2)+'% ' : '';
+    const d = slotDF(k, v), a = slotAlpha(k, v);
+    return pct + v + (d != null ? ' (확산 ' + d.toFixed(2) + ' · α ' + a.toFixed(3) + ')' : '');
+  };
+  const pcov = +$('#pcov').value;
   let m;
-  if(NOPAINT()) m = 'all ' + nm(base) + ' (not painted)';
-  else if(!base || pcov >= 100) m = '전체 ' + nm(top);
-  else if(pcov <= 0)       m = '전체 ' + nm(base);
-  else m = '위 ' + pcov + '% ' + nm(top) + ' + 나머지 ' + nm(base);
-  const hasFloor = $('#floor') && $('#floor').value !== 'none';
-  if(hasFloor && fl) m += ' · 바닥 ' + nm(fl);
-  return '재질: ' + m + ' · 확산 ' + (+$('#df').value).toFixed(2)
-       + ' · 거칠기 ' + (+$('#rg').value).toFixed(2)
-       + (dfFollows() ? ' (재료 값)' : ' (직접 정함)');
+  if(NOTOP())             m = '전체 ' + nm('base', use.base);
+  else if(!use.paint)     m = '위층 ' + nm('base', use.base) + ' (안 칠함)';
+  else if(!use.base)      m = '위층 전체 ' + nm('paint', use.paint);
+  else m = '위층 위 ' + pcov + '% ' + nm('paint', use.paint) + ' + 나머지 ' + nm('base', use.base);
+  if(!NOTOP() && use.floor) m += ' · 바닥판 ' + nm('floor', use.floor);
+  const ovr = Object.values(SLOTOVR).some(o => o && (o.df != null || o.a != null));
+  return '재질: ' + m + (ovr ? ' (직접 정한 값 있음)' : ' (재료 값)');
 }
 
 function drawAxis(g, W, H){
@@ -1879,7 +1912,11 @@ function chart(series){
   if(!series.length) return;
   const mx = Math.max(...series.flatMap(s=>s.vals.map(v=>v[1])))*1.15 || 1;
   g.strokeStyle='#1e262d'; g.beginPath(); g.moveTo(pad,H-16); g.lineTo(W-6,H-16); g.stroke();
-  const x = t => pad + (t+40)/80*(W-pad-10);
+  // X RANGE FROM THE DATA (2026-09-17): the fixed -40..40 put 45 deg off the
+  // right edge and its label on top of the 40 deg one.
+  const ts = series.flatMap(s=>s.vals.map(v=>v[0]));
+  const t0 = Math.min(-40, ...ts), t1 = Math.max(40, ...ts);
+  const x = t => pad + (t-t0)/(t1-t0)*(W-pad-24);
   const y = v => (H-16) - v/mx*(H-58);
   for(const s of series){
     const col = PHICOL[s.phi] || '#49c2ca';
@@ -1903,13 +1940,17 @@ function chart(series){
     }
     g.fillStyle = PHICOL[show.phi] || '#49c2ca';
     g.textAlign = 'center';
-    for(const [t,v] of show.vals){
+    // neighbours closer than a label width alternate above / below the point
+    let lastX = -1e9, flip = false;
+    for(const [t,v] of show.vals.slice().sort((a,b)=>a[0]-b[0])){
       const txt = (100*v).toFixed(3);
-      g.fillText(txt, Math.min(Math.max(x(t), pad+16), W-18), Math.max(y(v)-8, 22));
+      const px = Math.min(Math.max(x(t), pad+16), W-18);
+      flip = (px - lastX < 34) ? !flip : false; lastX = px;
+      g.fillText(txt, px, flip ? Math.min(y(v)+14, H-20) : Math.max(y(v)-8, 22));
     }
     g.textAlign = 'left';
     g.fillStyle = '#6b7883';
-    g.fillText('% · ' + (series.length>1 ? '\u03c6'+show.phi+' 평면 (가장 나쁜 쪽)' : ''),
+    g.fillText('% · ' + (series.length>1 ? '\u03c6'+show.phi+' 평면 (가장 밝은 쪽)' : ''),
                pad-4, 12);
   }
   if(series.length > 1){
@@ -1920,7 +1961,9 @@ function chart(series){
     }
   }
   g.fillStyle='#6b7883';
-  [-40,-20,0,20,40].forEach(t=>g.fillText(t+'°', x(t)-8, H-4));
+  { let last = -1e9;   // skip a tick label that would sit on the previous one
+    [...new Set(ts)].sort((a,b)=>a-b).forEach(t=>{
+      if(x(t) - last < 26) return; g.fillText(t+'°', x(t)-8, H-4); last = x(t); }); }
 }
 
 // ---------- does it agree with the published study?
@@ -2359,6 +2402,11 @@ const THCOL = {
   '20': ['#d8dde2',[0.85,0.87,0.89],'#70828f'],
   '-40':['#8b6fd8',[0.55,0.44,0.85],'#6b4fc4'],
   '40': ['#d977a8',[0.85,0.47,0.66],'#b5548a'],
+  // room-protocol angles (2026-09-17); they fell back to the 0 deg cyan before
+  // lime and yellow: coral read as the orange beam stripe and mint as the
+  // green sampling box
+  '30': ['#c6e86b',[0.78,0.91,0.42],'#6f8f1f'],
+  '45': ['#ffd84d',[1.00,0.85,0.30],'#a88400'],
 };
 const thc = t => THCOL[String(t)] || THCOL['0'];
 // The trace's own readout beyond reflectance, from the paths themselves.
@@ -2857,9 +2905,16 @@ addEventListener('resize', () => draw());
         // as `smear_legacy`, because re-auditing the published reports needs
         // it. It is deliberately NOT shown here: it is known wrong, and a wrong
         // number on a working instrument gets used.
+        // WHERE THE CAMERA STOOD (2026-09-17). Head-on and smear change with the
+        // observer angle, and the readout never said which one it was read
+        // from -- only the input box above did, and that box can change after
+        // the render. The server echoes the angle it used; print that.
+        const obsDeg = j.obs_elev_deg != null ? (+j.obs_elev_deg) : null;
+        const obsTxt = obsDeg == null ? '?' : (obsDeg.toFixed(0) + '&deg;');
         $('#formout').innerHTML =
-          `<div><dt>smear${P?' (밝은 쪽 '+Object.keys(P).length+' 평면 중)':''}</dt><dd>${smearTxt}</dd></div>
-           <div><dt>head-on brightness${P?' (가장 밝은 평면)':''}</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
+          `<div><dt><b>관객 각도 (observer)</b></dt><dd><b>${obsTxt}</b> &middot; 판 법선에서, 빔과 같은 평면 (&phi; 0)</dd></div>
+           <div><dt>smear${P?' (밝은 쪽 '+Object.keys(P).length+' 평면 중)':''}</dt><dd>${smearTxt}</dd></div>
+           <div><dt>head-on brightness (빔 0&deg; &middot; 관객 ${obsTxt})</dt><dd>${num(j.head_on!=null?j.head_on:j.peak)}</dd></div>`
           + densRow + convRow + grownRow + planeRows +
           `<div><dt>renderer</dt><dd>${who}</dd></div>
            <div><dt>beam</dt><dd>${j.beam_w!=null?j.beam_w.toFixed(1)+' mm':'&mdash;'}</dd></div>
@@ -3039,6 +3094,9 @@ addEventListener('resize', () => draw());
     const r=$('#'+id), n=$('#n_'+id), L=$('#'+lab);
     const sync = v => { fitRange(r, v); r.value=v; if(n) n.value=v;
                         L.textContent=(+v).toFixed(1); paintFrac(); coatNote();
+                        // the cards name what is on each surface and depend on
+                        // coverage; typing in the box skipped them (2026-09-17)
+                        try{ renderMaterials(); }catch(e){ console.error('materials legend', e); }
                         resetResults(); };
     r.oninput = e=>sync(e.target.value); if(n) n.onchange = e=>sync(e.target.value);
   }
@@ -3119,9 +3177,13 @@ addEventListener('resize', () => draw());
       // absorbed, so the old default made every deep design look better than
       // it is, and worst exactly where the cell is deepest.
       const mb = mode === 'specular' ? 60 : 200;
-      // the SAME five angles the measurement renders, one trace per angle,
-      // sequential because the server renders one request at a time anyway
-      const THS = [0,-20,-40,20,40];
+      // THE SAME ANGLES THE TOTAL RENDERS (2026-09-17), read from the server's
+      // room protocol (`form_metrics.ROOM_TOTAL_THETAS`) instead of a list of
+      // its own. The old [0,-20,-40,20,40] had no 30 or 45 deg -- the angles
+      // the ceiling panel actually receives. One trace per angle, sequential
+      // because the server renders one request at a time anyway.
+      const THS = (window.PROTO && PROTO.total_thetas) ? PROTO.total_thetas.map(Number)
+                                                      : [0,-20,-40,20,40];
       const out = [];
       for(const th of THS){
         prog.set(out.length, THS.length);
@@ -3169,8 +3231,8 @@ addEventListener('resize', () => draw());
             <span style="color:${thc(s.theta)[2]};font-weight:600">${s.theta}&deg;</span></label></dt>
             <dd>absorbed ${(100*(1-s.rho_est)).toFixed(2)} % &middot; out ${fmt(s.rho_est)} &middot; wander ${ax.wander==null?'&mdash;':(100*ax.wander).toFixed(1)+' %'} &middot; retro ${ax.retro==null?'&mdash;':(100*ax.retro).toFixed(1)+' %'}${ax.negligible?' <span class="note">(나온 빛이 무시할 수준 — 비율 생략)</span>':''}</dd></div>`;
         }).join('') +
-        `<div><dt><b>가장 밝은 각도 (5개 중)</b></dt><dd><b>${fmt(worst)}</b></dd></div>
-         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${rhoNote} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;5 &middot; &phi; ${phi}&deg;</dd></div>
+        `<div><dt><b>가장 밝은 각도 (${out.length}개 중)</b></dt><dd><b>${fmt(worst)}</b></dd></div>
+         <div><dt>mode &middot; &rho; &middot; rays</dt><dd>${s0.mode} &middot; ${rhoNote} ${(100*s0.rho).toFixed(2)}% &middot; ${nr}&times;${out.length} &middot; &phi; ${phi}&deg;</dd></div>
          <div><dt>took</dt><dd>${took.toFixed(2)} s</dd></div>`;
       // per-angle visibility: unchecking an angle removes its paths from the
       // viewport without re-tracing; the numbers in this table stay put
@@ -3348,7 +3410,7 @@ addEventListener('resize', () => draw());
             `<tr><td style="color:${(thc(parseFloat(th)) || [])[2] || '#16181a'}">${esc(th)}</td>`
             + vs.slice(0, 4).map(v => `<td>${esc(v)}</td>`).join('') + '</tr>').join('')
         + `</tbody></table>`
-        + (meta.worst ? `<div class="kv wl"><dt>가장 밝은 각도 (5개 중)</dt><dd>${esc(meta.worst)}</dd></div>` : '')
+        + (meta.worst ? `<div class="kv wl"><dt>가장 밝은 각도 (${trRows.length}개 중)</dt><dd>${esc(meta.worst)}</dd></div>` : '')
         + `<p class="cap">${esc((meta.mode || '') + (meta.took ? ' · took ' + meta.took : ''))} — a sample, not the measurement</p>`
       : '<p class="dim">not traced — a sample, not the measurement</p>';
 
@@ -3424,8 +3486,8 @@ footer img{height:5.5mm}
 <div class="cards">${axes}</div>
 <div class="cols">
   <div><h2>Design</h2>${design}
-       <h2>Trace sample · 5 angles × 1 plane</h2>${trace}</div>
-  <div><h2>Total · 5 angles</h2>${total}
+       <h2>Trace sample · ${trRows.length} angles × 1 plane</h2>${trace}</div>
+  <div><h2>Total · 7 angles × 2 planes</h2>${total}
        <h2>Smear + head-on</h2>${smear}</div>
 </div>
 <footer><span>Spill Sink Panel Simulator — uniform-hemisphere render; numbers compare designs.</span>
