@@ -1,0 +1,1132 @@
+<title>천장 패널 발주 제안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#e9ecee;
+  --surface:#ffffff;
+  --surface-2:#f3f5f6;
+  --ink:#14171a;
+  --ink-2:#39424a;
+  --muted:#626c74;
+  --line:#ccd3d8;
+  --line-strong:#9aa5ad;
+  --beam:#d23a14;
+  --beam-soft:#f0d6cd;
+  --good:#166b4a;
+  --warn:#8a6100;
+  --shadow:0 1px 2px rgba(20,23,26,.06),0 8px 24px rgba(20,23,26,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f1214;
+    --surface:#161a1d;
+    --surface-2:#1d2226;
+    --ink:#e3e8ea;
+    --ink-2:#bcc5cb;
+    --muted:#8e99a1;
+    --line:#2a3137;
+    --line-strong:#49535b;
+    --beam:#ff6d45;
+    --beam-soft:#3a2119;
+    --good:#4bbd8c;
+    --warn:#d9a441;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f1214;
+  --surface:#161a1d;
+  --surface-2:#1d2226;
+  --ink:#e3e8ea;
+  --ink-2:#bcc5cb;
+  --muted:#8e99a1;
+  --line:#2a3137;
+  --line-strong:#49535b;
+  --beam:#ff6d45;
+  --beam-soft:#3a2119;
+  --good:#4bbd8c;
+  --warn:#d9a441;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans KR","IBM Plex Sans",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-weight:400;
+  font-size:16px;
+  line-height:1.78;
+  -webkit-font-smoothing:antialiased;
+  word-break:keep-all;
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- 머리 띠 ---------- */
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{
+  max-width:1060px;margin:0 auto;padding:10px 20px;
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+}
+.topbar strong{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:700;font-size:15px;letter-spacing:.01em;
+}
+.topbar .meta{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.topbar .spacer{flex:1 1 auto;min-width:0}
+
+/* ---------- 틀 ---------- */
+.wrap{max-width:1060px;margin:0 auto;padding-inline:20px;padding-block:0 72px}
+.col{max-width:none}
+.prose{max-width:66ch}
+.prose p{margin:0 0 1.05em}
+.prose p:last-child{margin-bottom:0}
+
+/* ---------- 표제 ---------- */
+.masthead{padding-block:44px 30px;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 14px;
+}
+h1{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:700;font-size:clamp(30px,6.2vw,50px);line-height:1.12;
+  letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance;
+}
+.standfirst{font-size:clamp(16px,2.3vw,18.5px);line-height:1.7;color:var(--ink-2);max-width:60ch;margin:0}
+.byline{
+  margin-top:22px;display:flex;flex-wrap:wrap;gap:8px 22px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);
+}
+
+/* ---------- 정정 상자 ---------- */
+.amend{
+  background:var(--surface);
+  border:1px solid var(--beam);
+  border-left:4px solid var(--beam);
+  box-shadow:var(--shadow);
+  margin-block:28px 4px;
+  padding:22px 22px 18px;
+}
+.amend .amend-head{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--beam);margin:0 0 12px;
+}
+.amend h3{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:clamp(18px,3vw,22px);line-height:1.35;
+  margin:0 0 14px;text-wrap:balance;
+}
+.amend ol{margin:0;padding-left:1.3em;max-width:64ch}
+.amend li{margin-bottom:.85em;line-height:1.7;font-size:15px}
+.amend li:last-child{margin-bottom:0}
+.amend li b{font-weight:600}
+.amend .after{
+  margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);
+  font-size:14px;color:var(--ink-2);max-width:64ch;
+}
+
+/* ---------- 절 ---------- */
+section{padding-block:40px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.sec-head{display:flex;gap:16px;align-items:baseline;margin:0 0 20px}
+.sec-num{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--beam);letter-spacing:.06em;padding-top:.45em;flex:0 0 auto;
+}
+h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:clamp(21px,3.6vw,28px);line-height:1.25;
+  letter-spacing:-.01em;margin:0;text-wrap:balance;
+}
+h3{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:17px;letter-spacing:.005em;
+  margin:30px 0 12px;color:var(--ink);
+}
+
+/* ---------- 결론 판 ---------- */
+.verdict{
+  background:var(--surface);border:1px solid var(--line);
+  border-top:3px solid var(--beam);
+  box-shadow:var(--shadow);
+  padding:26px 24px;margin-block:0 26px;
+}
+.verdict .lead{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:clamp(19px,3.2vw,25px);line-height:1.42;
+  margin:0 0 6px;letter-spacing:-.008em;text-wrap:balance;
+}
+.verdict .sub{margin:0;color:var(--ink-2);font-size:15px;max-width:58ch}
+
+.axes{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);margin-block:26px;
+}
+.axis{background:var(--surface);padding:18px 16px}
+.axis .name{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 10px;
+}
+.axis .val{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;
+  font-size:clamp(26px,5.4vw,36px);line-height:1;letter-spacing:-.02em;
+  color:var(--ink);display:flex;align-items:baseline;gap:4px;
+}
+.axis .val .unit{font-size:16px;font-weight:500;color:var(--muted)}
+.axis .gloss{margin:10px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.axis .rank{
+  display:inline-block;margin-top:10px;font-family:"IBM Plex Mono",monospace;
+  font-size:11px;letter-spacing:.06em;padding:2px 7px;
+  border:1px solid var(--line-strong);color:var(--muted);
+}
+.axis .rank.first{border-color:var(--beam);color:var(--beam)}
+@media (max-width:640px){.axes{grid-template-columns:1fr}}
+
+/* ---------- 표 ---------- */
+.tablewrap{overflow-x:auto;margin-block:22px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+caption{
+  caption-side:top;text-align:left;padding:14px 16px 0;
+  font-size:13px;color:var(--muted);line-height:1.6;
+}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:12.5px;letter-spacing:.03em;
+  color:var(--muted);border-bottom:1px solid var(--line-strong);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.pick td{background:var(--surface-2)}
+tr.pick td:first-child{box-shadow:inset 3px 0 0 var(--beam)}
+.tag{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.06em;padding:1px 6px;border:1px solid var(--line-strong);
+  color:var(--muted);margin-left:6px;white-space:nowrap;
+}
+.tag.pass{border-color:var(--good);color:var(--good)}
+.tag.hold{border-color:var(--warn);color:var(--warn)}
+.tag.beam{border-color:var(--beam);color:var(--beam)}
+
+/* ---------- 그림 ---------- */
+figure{margin:26px 0;background:var(--surface);border:1px solid var(--line)}
+.figbody{overflow-x:auto;padding:18px 16px 4px;display:flex;justify-content:center}
+figure svg{max-width:100%;height:auto;display:block}
+figcaption{
+  padding:12px 16px 16px;font-size:13.5px;line-height:1.65;color:var(--ink-2);
+  border-top:1px solid var(--line);
+}
+figcaption b{font-weight:600;color:var(--ink)}
+.fignum{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--beam);display:block;margin-bottom:5px;
+}
+
+/* svg 안 글자 */
+.s-lbl{font-family:"IBM Plex Sans KR",sans-serif;font-size:12px;fill:var(--ink-2)}
+.s-sm{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--muted)}
+.s-dim{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--ink);font-weight:500}
+.s-beam{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--beam);font-weight:500}
+.s-line{stroke:var(--line-strong);fill:none}
+.s-solid{stroke:var(--ink);fill:none}
+
+/* ---------- 딸린 것 ---------- */
+.note{
+  border-left:3px solid var(--line-strong);padding:2px 0 2px 16px;
+  margin-block:20px;color:var(--ink-2);font-size:14.5px;max-width:62ch;
+}
+.note.warn{border-left-color:var(--warn)}
+.note.beam{border-left-color:var(--beam)}
+.note strong{color:var(--ink);font-weight:600}
+
+ul,ol{padding-left:1.25em;margin:0 0 1.05em;max-width:64ch}
+li{margin-bottom:.5em}
+li::marker{color:var(--muted)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+
+.spec-list{border-top:1px solid var(--line-strong);margin:18px 0 0}
+.spec-row{
+  display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(90px,.7fr) 1.4fr;
+  gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline;
+}
+.spec-row .k{color:var(--ink-2)}
+.spec-row .v{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--ink)}
+.spec-row .n{color:var(--muted);font-size:13px;line-height:1.5}
+@media (max-width:640px){
+  .spec-row{grid-template-columns:1fr auto;gap:4px 12px}
+  .spec-row .n{grid-column:1/-1}
+}
+
+/* ---------- 승인 ---------- */
+.ask{background:var(--surface);border:1px solid var(--line-strong);padding:0;margin-top:8px}
+.ask-item{display:grid;grid-template-columns:44px 1fr;border-bottom:1px solid var(--line)}
+.ask-item:last-child{border-bottom:0}
+.ask-n{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;
+  color:var(--beam);display:flex;align-items:flex-start;justify-content:center;
+  padding-top:19px;border-right:1px solid var(--line);
+}
+.ask-b{padding:16px 18px}
+.ask-b h4{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans KR",sans-serif;
+  font-weight:600;font-size:16px;margin:0 0 6px;
+}
+.ask-b p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.65;max-width:56ch}
+
+footer{
+  padding-block:32px 8px;font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;line-height:1.9;color:var(--muted);
+}
+footer a{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <strong>천장 패널 발주 제안</strong>
+    <span class="spacer"></span>
+    <span class="meta mono">SPILL SINK · 2026-09-16 · 정정 09-18</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">발주 승인 요청 · 천장 100 m²</p>
+    <h1>레이저가 천장에 그리는 복제본을 지웁니다</h1>
+    <p class="standfirst">
+      다섯 주 동안 1,600 가지 넘는 모양을 시뮬레이터로 재고 후보 14 개까지 좁혔습니다.
+      세 축을 모두 놓고 보면 답은 하나입니다. 밑변 4 mm, 깊이 22 mm 의 피라미드 판입니다.
+    </p>
+    <div class="byline">
+      <span>측정 2026-08-11 ~ 09-15</span>
+      <span>정본 finalists_2026-09-15</span>
+      <span>실물 측정 0 건</span>
+    </div>
+  </header>
+
+  <!-- ============================================ 정정 -->
+  <div class="amend">
+    <p class="amend-head">정정 · 2026-09-18</p>
+    <h3>아래 본문은 2026-09-16 판입니다. 그 뒤로 네 가지가 바뀌었습니다.</h3>
+    <ol>
+      <li>
+        <b>고른 설계가 바뀌었습니다.</b> 지금 결론은 피라미드가 아니라
+        <b>벌집 셀 10 mm · 깊이 20 mm</b> 입니다 (2026-09-17 결정).
+        광학 점수가 아니라 만들 수 있느냐로 정했습니다.
+        피라미드는 끝 0.4 mm 와 날카로운 골짜기를 실리콘 몰드로 지켜야 하고, 벌집은 이미 나와 있는 알루미늄 벌집을 씁니다.
+      </li>
+      <li>
+        <b>천장 높이가 3.5 m 입니다.</b> 아래 3 절은 6 m 로 그려져 있습니다.
+        3.5 m 에서는 빔이 천장에 닿는 각이 45 도를 넘어 <b>최대 78 도</b>까지 갑니다.
+        빔이 45 도 안으로 닿는 곳은 프로젝터 바로 위 반지름 1.5 m 뿐입니다.
+        <b>아래 숫자는 전부 0 ~ 45 도에서 잰 값입니다.</b>
+      </li>
+      <li>
+        <b>스치는 각에서는 피라미드가 벌집보다 밝습니다.</b> 75 도로 다시 재니
+        피라미드 4/22 는 <b>0.690 %</b>, 벌집 셀 10 은 <b>0.422 %</b> 였습니다 (무소 민판 2.455 %).
+        천장 대부분이 이 각도로 맞습니다. 다 밝아지는 이유는 도료 표면의 프레넬 반사입니다.
+      </li>
+      <li>
+        <b>칠할 면적 배수는 설계마다 다릅니다.</b> 아래 7 절의 12.15 배와 1,215 m² 는
+        피라미드 4/22 기준이고, 그 계산은 그대로 맞습니다.
+        벌집 셀 10 · 깊이 20 은 식으로는 <b>9.0 배</b>, 실제로 지은 메시로 재면 <b>15.7 배</b> 입니다.
+        <b>어느 설계로 견적을 받느냐에 따라 12 절 04 번 숫자가 달라집니다.</b>
+      </li>
+    </ol>
+    <p class="after">
+      본문은 고치지 않고 그대로 둡니다. 2026-09-16 에 무엇을 근거로 피라미드를 골랐는지가 남아 있어야 하기 때문입니다.
+      벌집 기준으로 본문을 다시 쓸지는 아직 정하지 않았습니다.
+    </p>
+  </div>
+
+  <!-- ============================================ 1 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>무엇을 승인받으려 하는가</h2></div>
+
+    <div class="verdict">
+      <p class="lead">천장 100 m² 에 피라미드 흡수 판 약 100 장을 붙입니다.</p>
+      <p class="sub">
+        밑변 4 mm · 깊이 22 mm · 끝 평평 0.4 mm · 등판 2 mm.
+        발포 우레탄으로 뜨고, 끝에서 20 mm 만 무소 블랙을 칠합니다.
+      </p>
+    </div>
+
+    <div class="axes">
+      <div class="axis">
+        <p class="name">반사 총량</p>
+        <p class="val">0.244<span class="unit">%</span></p>
+        <p class="gloss">천장에 닿은 빛의 1,000 분의 2.4 만 방으로 돌아옵니다. 낮을수록 좋습니다.</p>
+        <span class="rank">14 개 중 8 위</span>
+      </div>
+      <div class="axis">
+        <p class="name">정면 반짝임</p>
+        <p class="val">0.133</p>
+        <p class="gloss">평평한 검정 천장을 1 로 놓은 값입니다. 관객 눈에 들어오는 빛이 <b>7.5 배 어둡습니다.</b></p>
+        <span class="rank first">14 개 중 1 위</span>
+      </div>
+      <div class="axis">
+        <p class="name">모양 뭉개기</p>
+        <p class="val">2.14<span class="unit">배</span></p>
+        <p class="gloss">돌아온 빛이 평평한 천장보다 2.14 배 넓게 번집니다. 글자와 선이 읽히지 않습니다.</p>
+        <span class="rank">14 개 중 3 위</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>
+        세 축을 따로 순위 매기고 평균을 냈을 때 이 설계가 전체 1 위입니다.
+        총량만 보면 8 위지만, 1 위(0.197 %)와의 차이가 0.05 %포인트도 안 됩니다.
+        반면 모양 뭉개기는 1 위 후보의 1.8 배이고 반짝임도 가장 낮습니다.
+      </p>
+      <p>
+        <strong>총량 한 축만 보고 골랐다면 벌집을 골랐을 것입니다.</strong>
+        벌집은 돌아온 빛을 전혀 못 뭉갭니다. 어둡지만 천장에 그림이 그대로 남습니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ 2 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>막으려는 것</h2></div>
+    <div class="prose">
+      <p>
+        레이저 프로젝터 여러 대가 허공에서 만나 공중에 그림을 만듭니다.
+        빔은 그 그림을 지나 천장까지 갑니다. 그러면 천장에 <strong>그림의 또렷한 복제본</strong>이 그려집니다.
+      </p>
+      <p>
+        관객은 공중의 그림 대신 천장의 복제본을 봅니다. 작품이 망가집니다.
+        그래서 천장을 다시 만듭니다. 빔이 닿으면 사라지도록.
+      </p>
+      <p>
+        어둡게만 만들면 안 됩니다. 검정 페인트를 칠한 평평한 천장도 1 % 남짓만 돌려보내지만,
+        그 1 % 가 <strong>원래 그림 모양 그대로</strong> 돌아옵니다. 어두운 글씨는 여전히 글씨입니다.
+        그래서 세 가지를 같이 재야 합니다.
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>재는 축 세 개. 하나만 재고 고르면 틀립니다.</caption>
+        <thead>
+          <tr><th>축</th><th>무엇을 재나</th><th>왜 필요한가</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>반사 총량</b></td>
+            <td>돌아온 빛을 전부 합친 비율</td>
+            <td>천장 전체가 얼마나 밝아지는지</td>
+          </tr>
+          <tr>
+            <td><b>모양 뭉개기</b></td>
+            <td>돌아온 빛이 원래 선 모양을 얼마나 잃었나</td>
+            <td>글자가 읽히면 실패입니다</td>
+          </tr>
+          <tr>
+            <td><b>정면 반짝임</b></td>
+            <td>그 빛이 관객 눈으로 얼마나 들어오나</td>
+            <td>총량이 같아도 좁게 몰리면 눈이 부십니다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================ 3 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>어디에 다는가</h2></div>
+
+    <div class="note beam">
+      <strong>2026-09-18 정정 — 이 절의 천장 6 m 는 틀렸습니다.</strong>
+      실제 천장은 <strong>3.5 m</strong> 입니다. 아래 그림과 "30 ~ 45 도" 는 6 m 를 전제로 그린 것입니다.
+      3.5 m 에서는 빔이 천장에 닿는 각이 45 도를 넘어 최대 78 도까지 갑니다.
+    </div>
+
+    <div class="prose">
+      <p>
+        방은 가로세로 10 m, 천장 6 m 입니다. 프로젝터는 높이 2 m 에서 수평보다 45 ~ 60 도 위로 쏩니다.
+        그러면 빔이 천장을 만나는 각도가 <strong>천장에 수직인 선에서 30 ~ 45 도</strong> 입니다.
+        모든 측정을 이 범위에서 했습니다.
+      </p>
+    </div>
+
+    <figure>
+      <div class="figbody">
+        <svg viewBox="0 0 820 560" width="820" role="img" aria-label="방 단면도. 천장 6 m, 프로젝터 높이 2 m 에서 45 도와 60 도로 쏜 빔이 천장에 닿는 자리와 각도.">
+          <!-- 방 윤곽 -->
+          <rect x="70" y="60" width="680" height="408" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1"/>
+          <!-- 천장 패널 띠 -->
+          <rect x="70" y="60" width="680" height="13" fill="var(--ink)" opacity=".86"/>
+          <text class="s-sm" x="76" y="88">천장 패널 · 실제 두께 24 mm</text>
+
+          <!-- 바닥 -->
+          <line x1="70" y1="468" x2="750" y2="468" class="s-solid" stroke-width="1.5"/>
+
+          <!-- 치수: 천장 높이 -->
+          <line x1="44" y1="60" x2="44" y2="468" class="s-line" stroke-width="1"/>
+          <line x1="38" y1="60" x2="50" y2="60" class="s-line" stroke-width="1"/>
+          <line x1="38" y1="468" x2="50" y2="468" class="s-line" stroke-width="1"/>
+          <text class="s-dim" x="40" y="258" transform="rotate(-90 40 258)" text-anchor="middle">6 m</text>
+
+          <!-- 치수: 방 너비 -->
+          <line x1="70" y1="500" x2="750" y2="500" class="s-line" stroke-width="1"/>
+          <line x1="70" y1="494" x2="70" y2="506" class="s-line" stroke-width="1"/>
+          <line x1="750" y1="494" x2="750" y2="506" class="s-line" stroke-width="1"/>
+          <text class="s-dim" x="410" y="518" text-anchor="middle">10 m</text>
+
+          <!-- 천장 법선 (수직 점선) -->
+          <line x1="410" y1="60" x2="410" y2="190" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="295" y1="60" x2="295" y2="190" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 4"/>
+
+          <!-- 빔 60도 -->
+          <line x1="138" y1="332" x2="295" y2="60" stroke="var(--beam)" stroke-width="2" opacity=".55"/>
+          <text class="s-beam" x="258" y="128" text-anchor="end">30°</text>
+          <!-- 빔 45도 -->
+          <line x1="138" y1="332" x2="410" y2="60" stroke="var(--beam)" stroke-width="2.4"/>
+          <text class="s-beam" x="382" y="128" text-anchor="end">45°</text>
+
+          <!-- 닿는 자리 표시 -->
+          <circle cx="410" cy="60" r="4" fill="var(--beam)"/>
+          <circle cx="295" cy="60" r="4" fill="var(--beam)" opacity=".55"/>
+
+          <!-- 프로젝터 -->
+          <rect x="120" y="322" width="34" height="20" fill="var(--ink)"/>
+          <line x1="138" y1="342" x2="138" y2="468" class="s-line" stroke-width="1.5"/>
+          <text class="s-lbl" x="120" y="368">프로젝터</text>
+          <text class="s-sm" x="120" y="386">높이 2 m</text>
+          <text class="s-sm" x="120" y="402">45 ~ 60° 위로</text>
+
+          <!-- 관객 -->
+          <g fill="var(--ink-2)" opacity=".75">
+            <circle cx="520" cy="410" r="7"/><rect x="514" y="420" width="12" height="48" rx="3"/>
+            <circle cx="600" cy="410" r="7"/><rect x="594" y="420" width="12" height="48" rx="3"/>
+            <circle cx="676" cy="410" r="7"/><rect x="670" y="420" width="12" height="48" rx="3"/>
+          </g>
+          <text class="s-lbl" x="520" y="392">관객</text>
+
+          <!-- 공중 영상 -->
+          <g opacity=".9">
+            <ellipse cx="300" cy="240" rx="30" ry="15" fill="none" stroke="var(--beam)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text class="s-sm" x="300" y="222" text-anchor="middle" fill="var(--beam)">공중 영상</text>
+          </g>
+
+          <!-- 설명 -->
+          <text class="s-lbl" x="430" y="96">빔이 천장에 닿는 각</text>
+          <text class="s-sm" x="430" y="114">천장에 수직인 선에서 30 ~ 45°</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">그림 1 · 방 단면 (천장 6 m 전제 · 정정됨)</span>
+        프로젝터가 위로 쏘므로 <b>빔이 천장에 정면으로 꽂히는 자리는 이 방에 생기지 않습니다.</b>
+        정면으로 꽂히려면 프로젝터가 천장 바로 밑에 있어야 하는데, 그러면 공중 영상 자체가 안 만들어집니다.
+        벽 설치 때 필요했던 유리 창 장치는 그래서 이번 발주에서 뺐습니다.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================================ 4 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>무엇을 만드는가</h2></div>
+
+    <figure>
+      <div class="figbody">
+        <svg viewBox="0 0 470 530" width="470" role="img" aria-label="피라미드 판 단면 도면. 밑변 4 mm, 깊이 22 mm, 끝 평평 0.4 mm, 등판 2 mm, 팁에서 20 mm 까지 무소 블랙.">
+          <!-- 등판 -->
+          <rect x="30" y="22" width="340" height="34" fill="var(--ink)" opacity=".2" stroke="var(--ink)" stroke-width="1.2"/>
+          <!-- 피라미드 다섯 -->
+          <g fill="var(--ink)" opacity=".86">
+            <polygon points="30,56 60.6,430 67.4,430 98,56"/>
+            <polygon points="98,56 128.6,430 135.4,430 166,56"/>
+            <polygon points="166,56 196.6,430 203.4,430 234,56"/>
+            <polygon points="234,56 264.6,430 271.4,430 302,56"/>
+            <polygon points="302,56 332.6,430 339.4,430 370,56"/>
+          </g>
+
+          <!-- 도장 경계선 (팁에서 20 mm) -->
+          <line x1="24" y1="90" x2="392" y2="90" stroke="var(--beam)" stroke-width="1.4" stroke-dasharray="6 4"/>
+          <text class="s-beam" x="396" y="86">도장 경계</text>
+          <text class="s-sm" x="396" y="102">팁에서 20 mm</text>
+
+          <!-- 치수: 깊이 22 -->
+          <line x1="404" y1="56" x2="404" y2="430" class="s-line" stroke-width="1"/>
+          <line x1="398" y1="56" x2="410" y2="56" class="s-line" stroke-width="1"/>
+          <line x1="398" y1="430" x2="410" y2="430" class="s-line" stroke-width="1"/>
+          <text class="s-dim" x="420" y="247">22.0</text>
+          <text class="s-sm" x="420" y="263">깊이</text>
+
+          <!-- 치수: 등판 2 -->
+          <line x1="404" y1="22" x2="404" y2="56" class="s-line" stroke-width="1"/>
+          <line x1="398" y1="22" x2="410" y2="22" class="s-line" stroke-width="1"/>
+          <text class="s-dim" x="420" y="43">2.0</text>
+          <text class="s-sm" x="420" y="16">등판</text>
+
+          <!-- 치수: 간격 4 -->
+          <line x1="166" y1="460" x2="234" y2="460" class="s-line" stroke-width="1"/>
+          <line x1="166" y1="454" x2="166" y2="466" class="s-line" stroke-width="1"/>
+          <line x1="234" y1="454" x2="234" y2="466" class="s-line" stroke-width="1"/>
+          <text class="s-dim" x="200" y="480" text-anchor="middle">4.0</text>
+          <text class="s-sm" x="200" y="496" text-anchor="middle">간격</text>
+
+          <!-- 끝 평평 0.4 확대 -->
+          <circle cx="200" cy="430" r="26" fill="none" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="222" y1="444" x2="286" y2="486" class="s-line" stroke-width="1"/>
+          <g transform="translate(286,470)">
+            <rect x="0" y="-4" width="64" height="44" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1"/>
+            <polygon points="6,36 26,-2 38,-2 58,36" fill="var(--ink)" opacity=".86"/>
+            <line x1="26" y1="-8" x2="38" y2="-8" stroke="var(--beam)" stroke-width="2"/>
+            <text class="s-dim" x="32" y="-16" text-anchor="middle" fill="var(--beam)">0.4</text>
+          </g>
+          <text class="s-sm" x="318" y="524" text-anchor="middle">끝 평평</text>
+
+          <!-- 골짜기 주의 -->
+          <text class="s-lbl" x="34" y="14">골짜기는 날카롭게 (R 0.1 미만)</text>
+
+          <!-- 아래 = 방 쪽 -->
+          <text class="s-sm" x="30" y="447">↓ 방 쪽 · 빛이 오는 방향</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">그림 2 · 판 단면 도면 (실제 비율)</span>
+        축척 그대로 그렸습니다. 벽이 수직에서 <b>5.2 도</b>밖에 안 기울어진, 아주 뾰족한 피라미드입니다.
+        천장에 다는 것이므로 <b>뾰족한 끝이 아래(방 쪽)를 향합니다.</b>
+      </figcaption>
+    </figure>
+
+    <div class="spec-list">
+      <div class="spec-row"><span class="k">피라미드 간격</span><span class="v">4.0 mm</span><span class="n">정사각 격자. 판 한 장에 62,500 개</span></div>
+      <div class="spec-row"><span class="k">깊이</span><span class="v">22.0 mm</span><span class="n">연구 최적은 20.0. 22 는 몰드에서 빼기 쉬우라고 키운 값</span></div>
+      <div class="spec-row"><span class="k">끝 평평부</span><span class="v">0.4 mm</span><span class="n">금형 여유. 0.1 이 광학으로는 최적</span></div>
+      <div class="spec-row"><span class="k">골짜기</span><span class="v">날카롭게</span><span class="n">둥근 살이 R 0.1 을 넘으면 안 됩니다. 아래 5 절 참고</span></div>
+      <div class="spec-row"><span class="k">등판</span><span class="v">2.0 mm</span><span class="n">총 두께 24.0 mm</span></div>
+      <div class="spec-row"><span class="k">판 크기</span><span class="v">1000 × 1000</span><span class="n">약 100 장. 판당 무게 0.6 ~ 1 kg</span></div>
+      <div class="spec-row"><span class="k">가장자리</span><span class="v">골에서 종단</span><span class="n">테두리 없음. 아무 골에서나 잘라도 됩니다</span></div>
+      <div class="spec-row"><span class="k">판끼리 이음</span><span class="v">골끼리 맞댐</span><span class="n">어긋남 ±0.2 mm 까지 성능이 안 떨어집니다</span></div>
+      <div class="spec-row"><span class="k">모서리 시공</span><span class="v">90° 맞댐</span><span class="n">몰딩이나 채움이 필요 없습니다</span></div>
+    </div>
+
+    <div class="note">
+      측정은 계산 영역 <strong>116 mm</strong> 짜리 조각으로 했습니다.
+      실제 판 1000 mm 는 같은 무늬가 이어진 것이라 값이 바뀌지 않습니다.
+      판 크기를 키워야 값이 정해지는 설계(원뿔, 밑변 50 짜리 큰 피라미드)는 후보에서 <span class="tag hold">하한</span> 으로 따로 표시해 두었습니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 5 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><h2>왜 이 설계인가</h2></div>
+
+    <div class="note beam">
+      <strong>2026-09-18 정정 — 이 절의 결론은 뒤집혔습니다.</strong>
+      아래에 적힌 "벌집을 안 고른 이유" 는 0 ~ 45 도에서만 잰 값으로 쓴 것입니다.
+      천장이 3.5 m 라 실제로는 스치는 각이 대부분이고, 75 도에서는 피라미드 0.690 % 대 벌집 0.422 % 로 순서가 반대입니다.
+      만들기까지 같이 놓고 <strong>벌집 셀 10 · 깊이 20</strong> 으로 정했습니다.
+    </div>
+
+    <div class="prose">
+      <p>
+        마지막까지 남은 후보 14 개를 같은 규약으로 다시 쟀습니다. 위쪽 셋만 옮깁니다.
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>
+          총량은 방 조건 입사각(30·40·45·−40도) × 방위(0·45도) 중 가장 밝은 값.
+          반짝임은 빔(−40·30·40도) × 관객(20·40·60도) 중 가장 밝은 값, 평평한 검정 천장 = 1.
+          뭉개기는 ±40도 평균, 높을수록 좋습니다.
+        </caption>
+        <thead>
+          <tr>
+            <th>순위</th><th>구조</th><th>도장</th>
+            <th class="num">총량</th><th class="num">반짝임</th><th class="num">뭉개기</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="pick">
+            <td><b>1</b></td>
+            <td><b>피라미드 4 / 22 끝 0.4</b><span class="tag beam">2026-09-16 제안</span></td>
+            <td>무소 팁 20 + 5 %</td>
+            <td class="num">0.244 %</td><td class="num"><b>0.133</b></td><td class="num">2.14</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>벌집 9.53 / 40 + 피라미드 바닥</td>
+            <td>무소 팁 20 + 바닥 무소</td>
+            <td class="num"><b>0.197 %</b></td><td class="num">0.145</td><td class="num">1.19</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>피라미드 4 / 20 끝 0.1</td>
+            <td>무소 전부</td>
+            <td class="num">0.244 %</td><td class="num">0.136</td><td class="num">1.85</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>
+          2026-09-18 에 더 잰 것 — 스치는 각까지 넣은 반사 총량.
+          방 조건 최대는 입사각 0 ~ 45 도 안에서, 스치는 각 최대는 55 · 65 · 75 도까지 넣어서 가장 밝은 값입니다.
+        </caption>
+        <thead>
+          <tr><th>구조</th><th class="num">방 조건 최대 (~45°)</th><th class="num">스치는 각 최대 (75°)</th></tr>
+        </thead>
+        <tbody>
+          <tr class="pick">
+            <td><b>벌집 셀 10 / 깊이 20</b><span class="tag beam">지금 결론</span></td>
+            <td class="num">0.228 %</td><td class="num"><b>0.422 %</b></td>
+          </tr>
+          <tr>
+            <td>벌집 셀 20 / 깊이 20</td>
+            <td class="num">0.219 %</td><td class="num">0.399 %</td>
+          </tr>
+          <tr>
+            <td>피라미드 4 / 22 끝 0.4</td>
+            <td class="num">0.244 %</td><td class="num">0.690 %</td>
+          </tr>
+          <tr>
+            <td>무소 민판 (평평한 판)</td>
+            <td class="num">1.219 %</td><td class="num">2.455 %</td>
+          </tr>
+          <tr>
+            <td>5 % 무광 검정 민판</td>
+            <td class="num">5.013 %</td><td class="num">5.252 %</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <h3>2 위 벌집을 안 고른 이유</h3>
+      <p>
+        벌집이 총량에서 이깁니다. 0.197 % 대 0.244 %, 19 % 어둡습니다.
+        그런데 <strong>모양 뭉개기가 1.19 밖에 안 됩니다.</strong> 1.00 이 "전혀 안 뭉개진다" 입니다.
+        벌집은 빛을 어둡게 만들지만 모양은 그대로 돌려보냅니다. 천장에 희미한 그림이 남습니다.
+      </p>
+      <p>
+        게다가 벌집은 관 안쪽 깊은 곳까지 칠할 수가 없습니다.
+        업체에서 이미 "안쪽까지 도장이 안 되고 아노다이징도 안 된다"고 답한 구조입니다.
+      </p>
+
+      <h3>3 위를 안 고른 이유</h3>
+      <p>
+        3 위는 사실상 같은 피라미드인데 깊이가 20, 끝이 0.1 mm 입니다. 광학으로는 이쪽이 조금 낫습니다.
+        <strong>끝 0.1 mm 를 몰드에서 뽑아내기가 어렵습니다.</strong>
+        깊이를 22 로 키우고 끝을 0.4 로 푼 것은 만들기 위해 치른 값입니다.
+        그 대가가 반짝임 0.136 에서 0.133 으로, 거의 없습니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ 6 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><h2>왜 이기는가</h2></div>
+    <div class="prose">
+      <p>
+        평평한 천장은 빛을 한 번 맞고 거의 다 돌려보냅니다.
+        피라미드 사이 골짜기에 들어간 빛은 빠져나오기 전에 벽을 여러 번 칩니다.
+        한 번 칠 때마다 1 % 만 살아남습니다.
+      </p>
+      <p>
+        아래 그림은 40 도로 들어온 빛 한 줄기를 실제로 따라간 것입니다.
+      </p>
+    </div>
+
+    <figure>
+      <div class="figbody">
+        <svg viewBox="0 0 440 626" width="440" role="img" aria-label="피라미드 골짜기 안에서 빛이 열 번 튕기는 경로. 8.8 mm 깊이까지만 들어간 뒤 돌아 나옵니다.">
+          <!-- 등판 -->
+          <rect x="56" y="20" width="308" height="44" fill="var(--ink)" opacity=".2" stroke="var(--ink)" stroke-width="1.2"/>
+          <!-- 피라미드 -->
+          <g fill="var(--ink)" opacity=".86">
+            <polygon points="34,64 73.6,548 82.4,548 122,64"/>
+            <polygon points="122,64 161.6,548 170.4,548 210,64"/>
+            <polygon points="210,64 249.6,548 258.4,548 298,64"/>
+            <polygon points="298,64 337.6,548 346.4,548 386,64"/>
+          </g>
+
+          <!-- 도장 경계 20 mm -->
+          <line x1="28" y1="108" x2="392" y2="108" stroke="var(--beam)" stroke-width="1.2" stroke-dasharray="6 4" opacity=".5"/>
+          <text class="s-sm" x="28" y="102" fill="var(--beam)">도장 경계 20 mm</text>
+
+          <!-- 빛이 닿은 가장 깊은 자리 -->
+          <line x1="28" y1="354" x2="392" y2="354" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="2 4"/>
+          <text class="s-sm" x="392" y="348" text-anchor="end">빛이 닿은 가장 깊은 곳 · 8.8 mm</text>
+
+          <!-- 광선 -->
+          <polyline points="154.06,583.2 247.12,472.3 178.08,415.16 238.83,381.17 182.9,362.1 236.38,354.16 183.46,355.95 237.62,367.8 180.2,391.84 243.56,433.17 170.1,502.87 235.12,592"
+                    fill="none" stroke="var(--beam)" stroke-width="2" stroke-linejoin="round" opacity=".92"/>
+          <!-- 튕긴 자리 -->
+          <g fill="var(--beam)">
+            <circle cx="247.12" cy="472.3" r="3.2"/>
+            <circle cx="178.08" cy="415.16" r="3.2"/>
+            <circle cx="238.83" cy="381.17" r="3.2"/>
+            <circle cx="182.9" cy="362.1" r="3.2"/>
+            <circle cx="236.38" cy="354.16" r="3.2"/>
+            <circle cx="183.46" cy="355.95" r="3.2"/>
+            <circle cx="237.62" cy="367.8" r="3.2"/>
+            <circle cx="180.2" cy="391.84" r="3.2"/>
+            <circle cx="243.56" cy="433.17" r="3.2"/>
+            <circle cx="170.1" cy="502.87" r="3.2"/>
+          </g>
+          <!-- 들어오는 화살 -->
+          <text class="s-beam" x="108" y="600">빔 40°  들어옴</text>
+          <text class="s-beam" x="250" y="608">나감</text>
+          <text class="s-sm" x="250" y="622">에너지 10²⁰ 분의 1</text>
+
+          <!-- 첫 튕김 에너지 표시 -->
+          <text class="s-sm" x="256" y="470">1 회 · 1 %</text>
+          <text class="s-sm" x="168" y="412" text-anchor="end">2 회 · 0.01 %</text>
+          <text class="s-sm" x="248" y="352">5 회</text>
+          <text class="s-sm" x="160" y="506" text-anchor="end">10 회</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="fignum">그림 3 · 골짜기에서 빛이 지나간 길</span>
+        같은 도면 위에서 직접 따라간 경로입니다. 방 조건 30 ~ 45 도에서 <b>8 ~ 12 번</b> 튕깁니다. 40 도는 10 번입니다.
+        한 번에 1 % 씩 남으니 나갈 때는 <b>10<sup>20</sup> 분의 1</b> 입니다. 사실상 아무것도 안 나갑니다.
+      </figcaption>
+    </figure>
+
+    <div class="note beam">
+      이 그림이 도장 계획도 정합니다. 빛은 골 안으로 <strong>8.8 mm</strong> 까지만 들어갑니다.
+      그보다 깊은 곳은 비싼 도료를 칠해도 하는 일이 없습니다.
+      끝에서 20 mm 라는 경계는 여유를 두고 잡은 것입니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 7 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><h2>도장</h2></div>
+    <div class="prose">
+      <p>
+        도장이 구조만큼 중요합니다. 같은 피라미드를 싼 검정 페인트로만 칠하면 이렇게 됩니다.
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>같은 구조, 도장만 바꿨을 때. 무소 블랙은 빛을 1 % 만 돌려보내는 특수 도료입니다.</caption>
+        <thead>
+          <tr><th>도장</th><th class="num">총량</th><th class="num">반짝임</th><th class="num">뭉개기</th></tr>
+        </thead>
+        <tbody>
+          <tr class="pick">
+            <td><b>끝 20 mm 무소 + 나머지 5 % 검정</b><span class="tag beam">제안</span></td>
+            <td class="num">0.244 %</td><td class="num">0.133</td><td class="num">2.14</td>
+          </tr>
+          <tr>
+            <td>전부 5 % 검정</td>
+            <td class="num">1.276 %</td><td class="num">0.733</td><td class="num">2.29</td>
+          </tr>
+          <tr>
+            <td colspan="1"><i>차이</i></td>
+            <td class="num"><b>5.2 배</b></td><td class="num"><b>5.5 배</b></td><td class="num">거의 같음</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p>
+        <strong>구조가 모양을 뭉개고, 도료가 밝기를 죽입니다.</strong> 둘 다 있어야 합니다.
+        싼 페인트만 칠하면 뭉개기는 그대로인데 밝기가 5 배 넘게 올라갑니다.
+      </p>
+
+      <h3>도장 면적을 반드시 견적서에 적어야 합니다</h3>
+      <p>
+        경사면 때문에 실제 칠하는 면적이 판 면적보다 훨씬 큽니다.
+        이번 사양(간격 4, 깊이 22, 끝 0.4)의 겉넓이는 판 면적의 <strong>12.15 배</strong> 입니다.
+      </p>
+    </div>
+
+    <div class="spec-list">
+      <div class="spec-row"><span class="k">천장 면적</span><span class="v">100 m²</span><span class="n">10 × 10 m</span></div>
+      <div class="spec-row"><span class="k">실제 도장 면적</span><span class="v">1,215 m²</span><span class="n">12.15 배 · 피라미드 4/22 기준</span></div>
+      <div class="spec-row"><span class="k">무소 칠하는 몫</span><span class="v">84 %</span><span class="n">끝에서 20 mm</span></div>
+      <div class="spec-row"><span class="k">5 % 검정으로 두는 몫</span><span class="v">16 %</span><span class="n">깊은 골과 등판</span></div>
+    </div>
+
+    <div class="note beam">
+      <strong>2026-09-18 덧붙임 — 벌집으로 바꾸면 이 숫자가 달라집니다.</strong>
+      벌집 셀 10 · 깊이 20 의 칠할 면적은 식으로는 판 면적의 <strong>9.0 배</strong>(벽 4d/p 에 바닥판 1 을 더한 값),
+      실제로 지은 메시로 재면 <strong>15.7 배</strong> 입니다. 식보다 큰 것은 벽이 기울고 겹쳐서 늘어난 만큼입니다.
+      천장 100 m² 면 900 m² 와 1,570 m² 사이입니다.
+      깊이 20 중 위 20 mm 만 무소를 쓰면 벽 전부가 대상이라, 무소 몫은 9.0 배 기준으로 89 % 입니다.
+    </div>
+
+    <div class="note warn">
+      <strong>발주 사양서의 "10 배"는 이번 사양 값이 아닙니다.</strong>
+      그 값은 깊이 20 · 끝 0.1 짜리 연구용 형상에서 나온 것입니다(10.30 배).
+      깊이 22 · 끝 0.4 로 바꾸면 12.15 배가 되어, <strong>도료가 약 18 % 더 듭니다.</strong>
+      견적서를 1,000 m² 가 아니라 1,215 m² 로 다시 받아야 합니다.
+    </div>
+
+    <div class="note warn">
+      <strong>천장 전체를 무소로 칠할지는 아직 못 정했습니다.</strong>
+      빔이 실제로 어느 자리를 때리는지 찍은 사진(스필 지도)이 없습니다.
+      전면 무소는 도료값만 5 천만 ~ 1 억 원입니다. 맞는 구역만 칠하면 5 백만 ~ 2 천만 원으로 내려옵니다.
+      <strong>사진 한 번이 이 차이를 가릅니다.</strong> 12 절 1 번 항목입니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 8 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">08</span><h2>만드는 법</h2></div>
+    <div class="prose">
+      <p>
+        3D 프린트로 원본을 한 번 뜨고, 그걸로 실리콘 몰드를 떠서, 우레탄을 부어 찍어냅니다.
+      </p>
+    </div>
+
+    <div class="spec-list">
+      <div class="spec-row"><span class="k">1. 원본 마스터</span><span class="v">SLA 출력</span><span class="n">이미 있습니다. STL 파일 지급 가능</span></div>
+      <div class="spec-row"><span class="k">2. 몰드</span><span class="v">백금 실리콘</span><span class="n">1000 × 1000. 하나로 30 ~ 50 벌. 3 ~ 4 개 필요</span></div>
+      <div class="spec-row"><span class="k">3. 주조</span><span class="v">발포 우레탄</span><span class="n">연질 ~ 반경질. 카본블랙 원착</span></div>
+      <div class="spec-row"><span class="k">4. 도장</span><span class="v">프라이머 + 무소</span><span class="n">실리콘 소재에는 도료가 안 올라갑니다</span></div>
+    </div>
+
+    <div class="note beam">
+      <strong>2026-09-18 정정 — 이 공정이 벌집을 고르게 만든 이유입니다.</strong>
+      위 네 단계는 몰드를 새로 떠야 하고, 끝 0.4 mm 와 날카로운 골짜기를 첫 판에서 지켜야 합니다.
+      벌집은 알루미늄 벌집이 이미 만들어져 팔리는 물건이라 이 단계가 통째로 빠집니다.
+      "그게 가장 현실적" 이라는 것이 2026-09-17 결정의 근거입니다.
+    </div>
+
+    <h3>쓸 수 없는 공정 둘</h3>
+    <div class="split">
+      <div class="prose">
+        <p>
+          <strong>사출은 안 됩니다.</strong> 날카로운 골짜기를 못 지킵니다.
+          골에 반지름 0.1 mm 의 둥근 살만 남아도 정면 반짝임이 허용치의 2 배를 넘습니다.
+          오목한 홈통이 빛을 온 길로 되쏘기 때문입니다.
+        </p>
+      </div>
+      <div class="prose">
+        <p>
+          <strong>압출도 안 됩니다.</strong> 압출은 피라미드가 아니라 긴 홈을 뽑습니다.
+          피라미드의 끝은 <i>점</i>이라 면적의 0.06 % 지만, 홈의 끝은 <i>선</i>이라 2.5 % 입니다.
+          같은 끝 폭에서 홈이 훨씬 많이 반짝입니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="note">
+      이 둘은 짐작이 아니라 실제로 지어서 재고 떨어뜨린 것입니다.
+      오목 상자, 벌집, 식모지, 거울 깔때기, 수직 프레넬, 걷는 그레이팅도 같은 방식으로 탈락했습니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 9 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">09</span><h2>첫 판 한 장으로 하는 합격 판정</h2></div>
+    <div class="prose">
+      <p>
+        업체에 광학 측정을 요구하지 않습니다. 첫 판 한 장을 받아 <strong>저희가 직접 잽니다.</strong>
+        통과해야 나머지를 찍습니다.
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>양산 전 관문. 세 항목 모두 통과해야 합니다.</caption>
+        <thead>
+          <tr><th>항목</th><th>기준</th><th>못 넘으면</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>꼭지와 골 확대 촬영</td>
+            <td>끝 평평 0.4 mm, 골 둥근 살 R 0.1 미만</td>
+            <td>몰드 수정</td>
+          </tr>
+          <tr>
+            <td>도장 전 반사 총량</td>
+            <td>재료 반사율의 0.18 배 ± 25 %</td>
+            <td>형상 확인</td>
+          </tr>
+          <tr>
+            <td>무소 도장 후 반사 총량</td>
+            <td>0.198 % ± 25 % <span class="tag">입사 40°</span></td>
+            <td>± 40 % 밖이면 <b>원인 규명 전 양산 중단</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <strong>이 합격 기준값은 새로 쓴 것입니다.</strong>
+      발주 사양서에 적힌 0.177 % 는 9 월 감사 전에 잰 값입니다.
+      감사에서 재료 모델을 고치면서 같은 설계의 예측값이 0.198 % 로 바뀌었습니다.
+      기준을 이 값으로 바꾸는 데 승인이 필요합니다.
+    </div>
+
+    <div class="note beam">
+      <strong>2026-09-18 정정 — 벌집으로 가면 기준값도 바뀝니다.</strong>
+      벌집 셀 10 · 깊이 20 은 입사 45 도에서 0.228 %, 75 도에서 0.422 % 입니다.
+      어느 각도로 첫 판을 받아 잴지부터 정해야 합니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 10 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">10</span><h2>9 월에 측정 장비를 고쳤습니다</h2></div>
+    <div class="prose">
+      <p>
+        외부 감사가 시뮬레이터 결함 다섯 개를 짚었습니다. 새 모양을 찾기 전에 재는 도구부터 고쳤습니다.
+        고친 뒤 같은 설계를 다시 쟀더니 <strong>세 축이 모두 조금씩 나빠졌습니다.</strong>
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>같은 시료, 같은 조건. 측정 도구만 고쳤을 때의 변화.</caption>
+        <thead>
+          <tr><th>축</th><th class="num">감사 전</th><th class="num">감사 후</th><th>어느 쪽</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>반사 총량 (입사 40°)</td><td class="num">0.169 %</td><td class="num">0.198 %</td><td>나빠짐</td></tr>
+          <tr><td>모양 뭉개기</td><td class="num">2.48</td><td class="num">2.14</td><td>나빠짐</td></tr>
+          <tr><td>정면 반짝임</td><td class="num">0.039</td><td class="num">0.081</td><td>나빠짐</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p>
+        가장 큰 원인은 무소 블랙의 재료값입니다. 논문 그림을 잘못 읽고 있었습니다.
+        다시 읽어 맞춘 값으로 바꾸니 모든 설계가 같이 나빠졌고, <strong>설계들 사이의 순위는 안 뒤집혔습니다.</strong>
+      </p>
+      <p>
+        이 보고서의 숫자는 전부 고친 뒤의 값입니다.
+        8 월에 나간 자료(발주 사양서의 0.185 % / 1.53 / 0.189)는 더 쓰지 않습니다.
+      </p>
+    </div>
+
+    <div class="note">
+      같이 고친 것: 요청이 두 갈래로 갈려 열 개 설정이 측정에 안 닿던 것,
+      빛의 방향을 바꾸면 238 % 다른 값이 나오던 것, 반짝임을 화소 하나로 재던 것,
+      번진 폭이 수렴 안 했는데 수렴했다고 하던 것, 대조판을 형상이 덮던 것.
+      <br>
+      고친 뒤 보고서 값을 화면에서 다시 재 대조했습니다. 14 개 요청이 모두 같았고, 실제로 다시 렌더한 7 개는 최대 차 <strong>0.072 %</strong> 였습니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 11 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">11</span><h2>아직 실물로 재본 적이 없습니다</h2></div>
+    <div class="prose">
+      <p>
+        <strong>이 보고서의 모든 숫자는 계산값입니다. 실물 측정은 0 건입니다.</strong>
+        계산 자체는 독립된 다른 렌더러와 손으로 푼 답으로 맞춰 봤습니다.
+        하지만 계산에 넣은 재료값 일부는 논문에서 읽은 것이지 저희가 잰 것이 아닙니다.
+      </p>
+      <p>
+        무소 블랙의 표면 거칠기가 특히 그렇습니다. 이 값 하나가 반짝임을 크게 흔듭니다.
+        <strong>설계들 사이의 우열은 안 흔들립니다.</strong> 흔들리는 것은 "평평한 천장보다 몇 배 어둡다"의 절대 숫자입니다.
+      </p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <caption>발주 전이나 발주와 함께 재야 하는 것. 1 번이 예산을 가릅니다.</caption>
+        <thead>
+          <tr><th>#</th><th>잴 것</th><th>왜 필요한가</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>스필 지도 사진<br><span class="tag hold">예산에 직결</span></td><td>천장 어디를 무소로 칠할지 정합니다. 5 백만 원과 1 억 원을 가릅니다</td></tr>
+          <tr><td>2</td><td>검정 우레탄 조각의 반사율</td><td>도장 전 합격 기준에 넣을 재료값</td></tr>
+          <tr><td>3</td><td>무소 블랙 리터당 도포 면적</td><td>도료 예산이 백만 원대인지 천만 원대인지</td></tr>
+          <tr><td>4</td><td>출력 시험 조각 합격 시험</td><td>계산 예측과 실물을 처음으로 맞춰 봅니다</td></tr>
+          <tr><td>5</td><td>무소 도료의 표면 거칠기</td><td>"몇 배 어둡다"의 숫자를 확정합니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <strong>특허 검토가 필요합니다.</strong>
+      미국 특허 US 11,209,577 B2 (Ocean Insight, 2021) 가 mm 급 흑색 표면 구조를 폭넓게 청구하고 있습니다.
+      발주 전에 권리 검토를 받는 것이 안전합니다.
+    </div>
+
+    <div class="note">
+      거칠기 값이 확정되기 전까지, 대외 문구는 정직하게 <strong>"평평한 검정 천장보다 3 ~ 5 배 어둡다"</strong> 까지만 말할 수 있습니다.
+      더 큰 숫자는 아직 근거가 없습니다.
+    </div>
+  </section>
+
+  <!-- ============================================ 12 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">12</span><h2>오늘 정해 주실 것</h2></div>
+
+    <div class="note beam">
+      <strong>2026-09-18 정정 — 아래 다섯 항목은 2026-09-16 에 쓴 것입니다.</strong>
+      01 번(설계 확정)과 04 번(견적 면적)은 벌집으로 바뀐 결론에 맞춰 다시 써야 합니다.
+      02 · 03 · 05 번은 설계와 상관없이 그대로 필요합니다.
+    </div>
+
+    <div class="ask">
+      <div class="ask-item">
+        <div class="ask-n">01</div>
+        <div class="ask-b">
+          <h4>설계 확정 — 피라미드 4 / 22 / 끝 0.4 <span class="tag beam">다시 씀</span></h4>
+          <p>이 사양으로 마스터와 몰드 제작에 들어갑니다. 몰드를 뜨고 나면 치수를 바꿀 수 없습니다.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">02</div>
+        <div class="ask-b">
+          <h4>스필 지도 촬영 일정</h4>
+          <p>천장 어디를 무소로 칠할지 정하는 사진입니다. 도료 예산이 5 백만 원대인지 1 억 원대인지가 여기서 갈립니다. 발주와 함께 잡아 주십시오.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">03</div>
+        <div class="ask-b">
+          <h4>합격 기준값을 0.198 % 로 고치는 것</h4>
+          <p>9 월 감사로 예측값이 바뀌었습니다. 발주 사양서의 0.177 % 를 대체합니다. ± 25 % 안이면 합격, ± 40 % 밖이면 양산을 멈춥니다.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">04</div>
+        <div class="ask-b">
+          <h4>도장 면적 1,215 m² 로 견적 재요청 <span class="tag beam">다시 씀</span></h4>
+          <p>기존 견적은 1,000 m² 기준입니다. 이번 사양에서는 약 18 % 더 듭니다. 벌집 셀 10 · 깊이 20 으로 가면 900 m² 와 1,570 m² 사이가 됩니다.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">05</div>
+        <div class="ask-b">
+          <h4>특허 권리 검토 착수</h4>
+          <p>US 11,209,577 B2. 몰드 비용이 들어가기 전에 확인하는 것이 안전합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    측정 조건 · 재료 musou_fit2 + 5 % 무광 검정 · 코팅 reciprocal · 빛줄기 256 · 빔 7.5 mm · 0.215 mm/px · 봉우리 2 mm 상자 · 계산 영역 116 mm<br>
+    정본 report/comb/finalists_2026-09-15.html · 감사 results/FINDINGS_simulator_audit_2026_09_14.md · 사양 SPEC_SUMMARY.md (8 월판, 10 절 참고)<br>
+    2026-09-18 정정분 근거 · 스치는 각 results/grazing_2026_09_18.json · 칠할 면적 results/FINDINGS_comb_alu_cell_2026_09_16.md<br>
+    재료 근거 J. Filip &amp; R. Vávra, JOSA A 43(7) 1037–1045 (2026)
+  </footer>
+
+</div>

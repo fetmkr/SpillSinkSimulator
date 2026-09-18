@@ -356,6 +356,44 @@ OPEN = [
 style = re.search(r"<style>(.*?)</style>",
                   io.open(STYLE_FROM, encoding="utf-8").read(), re.S).group(1)
 
+# 계산기를 무엇으로 검증했나. 전부 "답이 이미 식으로 나와 있는 문제" 다.
+# 숫자는 bench 스크립트와 FINDINGS 에서 가져온 것이고, 여기서 새로 계산하지 않는다.
+VALIDATION = [
+    ("적분구 공식<br>integrating sphere",
+     "&rho;<sub>eff</sub> = &rho;f / (1 &minus; &rho;(1&minus;f))",
+     "램버시안 구에 면적비 f 인 구멍. 미광(stray light) 분야의 표준식이고, "
+     "&rho; 를 올리면 평균 튕김이 25 회를 넘어 <b>일찍 끊는 계산기는 반드시 낮게 읽는다</b>",
+     "Cycles 오차 <b>0.06 %</b> · Mitsuba 0.22 %",
+     "scripts/bench_sphere.py"),
+    ("골짜기 공식<br>infinite canyon",
+     "바닥 한 점에서 하늘이 보이는 몫을 코사인으로 가중한 값",
+     "두께 t 인 벽 둘과 그 사이 바닥. <b>얇은 벽에서 한 번 튕김</b>을 가른다 -- "
+     "적분구에는 얇은 벽이 없어서 이 결함을 못 본다",
+     "Cycles 와 맞음 · Mitsuba 만 어긋남",
+     "scripts/bench_canyon.py"),
+    ("평평한 판<br>flat Lambertian",
+     "&rho;<sub>dh</sub>(&theta;) = &rho; (각도와 무관)",
+     "반사율 0.05 판이 모든 각도에서 같은 값을 읽나. 측정 사슬 전체를 한 번에 본다",
+     "<b>0.0500</b> (0.050001)",
+     "gate_coating_reciprocity.py 검사 C"),
+    ("에너지 보존<br>energy conservation",
+     "빛을 안 먹는 공간에서는 튕김 수와 무관하게 1",
+     "2048 번 튕겨도 에너지가 남아 있나",
+     "<b>0.99974</b>",
+     "results/FINDINGS_renderer_disagreement.md"),
+    ("상반성<br>Helmholtz reciprocity",
+     "f<sub>r</sub>(&omega;<sub>i</sub>,&omega;<sub>o</sub>) = f<sub>r</sub>(&omega;<sub>o</sub>,&omega;<sub>i</sub>)",
+     "광원과 눈을 맞바꾸면 같은 값이 나오나. <b>hemi_view 로 총량을 읽는 근거가 이 대칭이다</b>",
+     "새 코팅 <b>0.001 %</b> 차 · 옛 코팅은 238 % 어긋남",
+     "gate_coating_reciprocity.py 검사 A"),
+    ("독립 렌더러<br>second renderer",
+     "닫힌 식이 아니라 다른 구현",
+     "Mitsuba 3.9.1 로 같은 형상을 다시 계산. <b>둘만 견줘서는 누가 맞는지 모른다</b> -- "
+     "그래서 위 기준들에 둘 다 걸어 봤다",
+     "얇은 벽에서 27 % 갈렸고 <b>Cycles 가 기준과 맞았다</b>",
+     "results/FINDINGS_renderer_disagreement.md"),
+]
+
 o = io.StringIO()
 o.write('<!doctype html><html lang="ko"><head><meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
@@ -438,6 +476,22 @@ for t, w, m, r in FINDINGS:
     o.write('<tr><td><b>%s</b></td><td>%s</td><td>%s</td>'
             '<td class="tag">%s</td></tr>\n' % (t, w, m, r))
 o.write('</tbody></table></div></section>\n')
+
+# ---- 계산기를 어떻게 검증했나
+o.write('<section><h2>계산기를 어떻게 검증했나 -- validation against closed forms</h2>\n'
+        '<p>두 계산기를 서로 견주면 누가 맞는지 알 수 없다. 그래서 <b>답이 이미 식으로 나와 있는 '
+        '문제</b>에 걸어 봤다. 아래 여섯 줄이 그것이다.</p>\n')
+o.write('<div class="scroll"><table><thead><tr><th>기준</th><th>식</th>'
+        '<th>무엇을 가르나</th><th>결과</th><th>어디서 돌리나</th>'
+        '</tr></thead><tbody>\n')
+for name, formula, what, res, where in VALIDATION:
+    o.write('<tr><td><b>%s</b></td><td class="tag">%s</td><td>%s</td>'
+            '<td class="n">%s</td><td class="tag">%s</td></tr>\n'
+            % (name, formula, what, res, where))
+o.write('</tbody></table></div>\n')
+o.write('<p class="tag">아직 안 한 것: <b>우리 벌집 격자 자체를 공동 이론(Gouffe) 값과 통째로 '
+        '대조한 그림</b>이 없다. 한 점만 확인했고 0.83 배로 나왔다 '
+        '(results/PEER_REVIEW.md). 그리고 <b>실물 측정은 0 건</b>이다.</p></section>\n')
 
 # ---- 아직 근거 없는 것
 o.write('<section><div class="card verdict"><h2 style="margin:0">'

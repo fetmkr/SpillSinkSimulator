@@ -140,7 +140,7 @@ li::marker{color:var(--muted)}
 .ctl input[type=range]{width:100%;accent-color:var(--hot);margin:0}
 .sim-view{padding:14px;display:flex;align-items:center;justify-content:center;overflow-x:auto;background:var(--surface2)}
 .sim-view svg{max-width:100%;height:auto;min-width:300px}
-.sim-out{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.sim-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line)}
 .sim-cell{background:var(--surface);padding:16px}
 .sim-cell .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
 .sim-cell .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(21px,4vw,29px);line-height:1;color:var(--ink)}
@@ -198,6 +198,10 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
     <div class="ctl"><label for="r_t">빔이 겨누는 천장 자리<output id="ro_t">±1.5 m</output></label>
       <input type="range" id="r_t" min="-5" max="5" step="0.1" value="1.5">
       <p style="margin:5px 0 0;font-size:11.5px;color:var(--muted)">왼쪽 프로젝터는 +쪽을, 오른쪽은 −쪽을 겨눕니다. 값이 크면 서로 건너질러 크게 겹칩니다</p></div>
+    <div class="ctl"><label for="r_ax">관객 자리<output id="ro_ax">1.5 m</output></label>
+      <input type="range" id="r_ax" min="-5" max="5" step="0.1" value="1.5"></div>
+    <div class="ctl"><label for="r_eye">관객 눈높이<output id="ro_eye">1.60 m</output></label>
+      <input type="range" id="r_eye" min="1" max="1.9" step="0.05" value="1.6"></div>
     <div class="ctl"><label for="r_two" style="cursor:pointer"><input type="checkbox" id="r_two" checked> 오른쪽 프로젝터 켜기</label></div>
     <div style="margin-top:14px">
       <button class="preset" type="button" data-h="3.5" data-y="1.2" data-f="30" data-d="3" data-t="1.5">이 방 · 천장 3.5 m</button>
@@ -215,6 +219,8 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
     <p class="s" id="rv_subR">빔 가운데가 겨누는 천장 자리로 겨냥 각도가 정해집니다</p></div>
   <div class="sim-cell"><p class="k">겹치는 구간 cross</p><p class="v" id="rv_ov">—</p>
     <p class="s" id="rv_subO">두 빔이 같이 닿는 천장 구간. 여기가 가장 밝습니다</p></div>
+  <div class="sim-cell"><p class="k">관객이 보는 각도</p><p class="v" id="rv_view">—</p>
+    <p class="s" id="rv_subV">관객 눈에서 천장의 밝은 구간을 올려다보는 각. 우리가 잰 관객 각도는 0·20·40·60°</p></div>
 </div>
 <p class="sim-foot" id="rv_note"></p>
 </div>
@@ -513,7 +519,238 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 </div>
 <div class="note hot" style="font-size:16px"><strong>여기서 규칙이 하나 보입니다.</strong><br><br><b>“무엇을 재느냐” 나 “어떤 조건에서 재느냐” 를 바꾸면 순위가 뒤집혔습니다.</b><br><b>계산의 정확도만 올리면 값은 움직여도 순위는 안 움직였습니다.</b><br><br>마지막 세 번이 전부 정확도 쪽이었고, 세 번 다 순위가 안 움직였습니다. <strong>지금 순위를 믿어도 되는 이유가 이것입니다.</strong></div>
 <div class="note">그리고 남는 것 하나. <strong>아직 실물로 재본 적이 한 번도 없습니다.</strong> 위 열세 번은 전부 계산 안에서 일어난 일입니다. 평평한 판 한 장만 제대로 재면 가장 크게 흔들리던 값(도료가 빛을 퍼뜨리는 비율)이 풀립니다.</div>
-</section><section><div class="sechead"><span class="secnum">05</span><h2>직접 해보기</h2></div>
+</section><section><div class="sechead"><span class="secnum">05</span><h2>깊이를 정하는 것은 각도다</h2></div>
+
+<div class="prose">
+<p class="lead">이 기록을 쓴 다음 날 벌집을 다시 봤고(9월 16일), 이틀 뒤에 천장이 6 m 가 아니라
+<b>3.5 m</b> 라는 것을 알았습니다(9월 18일). 따로 나온 것 같던 것들이 한 줄로 이어집니다.
+<b>빔이 비스듬히 들어올수록 관이 얕아도 됩니다.</b> 깊이도, 칠하는 깊이도, 같은 셈이 정합니다.</p>
+</div>
+
+<h3>하나 — 깊이 40 은 필요 없었습니다</h3>
+<div class="tw"><table>
+<caption>벌집 셀 9.53, 전부 무소. 깊이만 바꿨습니다. 방 조건은 그때 알던 30~45 도입니다.</caption>
+<thead><tr><th>깊이</th><th class="num">방 조건 최대</th><th class="num">정면</th></tr></thead>
+<tbody>
+<tr><td>40 mm (지금 사양)</td><td class="num">0.208 %</td><td class="num">0.035 %</td></tr>
+<tr><td>30 mm</td><td class="num">0.210 %</td><td class="num">0.044 %</td></tr>
+<tr class="hi"><td><b>20 mm</b></td><td class="num"><b>0.215 %</b></td><td class="num">0.071 %</td></tr>
+<tr><td>10 mm</td><td class="num">0.222 %</td><td class="num">0.172 %</td></tr>
+</tbody></table></div>
+<div class="note hot"><strong>깊이를 4 분의 1 로 줄여도 방 조건에서 6.7 % 나빠질 뿐입니다.</strong>
+정면은 4.9 배 나빠지는데, <strong>정면은 이 방에서 안 일어납니다</strong> (위 11 번).<br><br>
+깊이 40 은 8월 25일에 골랐습니다. 그때 본 것이 정면 0.039 대 0.080 이었습니다.
+<strong>이틀 뒤에 정면 축을 버렸는데, 깊이 결정은 다시 안 봤습니다.</strong>
+이 기록의 11 번에서 배운 것을 여기서 한 번 더 놓치고 있었습니다.</div>
+
+<h3>둘 — 얼마나 얕아도 되는지는 각도가 정합니다</h3>
+<div class="prose">
+<p>왜 깊이를 줄여도 되는지는 셈이 답합니다. 비스듬히 들어온 빛이 <b>바닥판을 직접 못 보려면</b>
+깊이가 <b>셀 ÷ tan(들어오는 각)</b> 보다 커야 합니다. 셀 10 mm 면 이렇습니다.</p>
+<p>30 도에서 17.3 mm · 45 도에서 10.0 mm · 55 도에서 7.0 mm · 65 도에서 4.7 mm · 75 도에서 2.7 mm.
+<b>비스듬할수록 얕아도 됩니다.</b> 셈이 맞는지 재봤습니다.</p>
+</div>
+
+<div class="tw"><table>
+<caption>셀 10 mm, 전부 무소, 판 500. 깊이와 들어오는 각도만 바꿨습니다.
+굵은 칸은 <b>깊이 20 mm 와 2 % 안에서 같아진 곳</b>입니다 (2026-09-18 측정).</caption>
+<thead><tr><th>깊이</th><th class="num">30 도</th><th class="num">45 도</th><th class="num">55 도</th>
+<th class="num">65 도</th><th class="num">75 도</th></tr></thead>
+<tbody>
+<tr class="hi"><td><b>20 mm</b> (지금 결론)</td><td class="num"><b>0.174 %</b></td><td class="num"><b>0.228 %</b></td>
+<td class="num"><b>0.273 %</b></td><td class="num"><b>0.335 %</b></td><td class="num"><b>0.421 %</b></td></tr>
+<tr><td>10 mm</td><td class="num">0.212 %</td><td class="num"><b>0.229 %</b></td>
+<td class="num"><b>0.274 %</b></td><td class="num"><b>0.335 %</b></td><td class="num"><b>0.420 %</b></td></tr>
+<tr><td>6 mm</td><td class="num">0.315 %</td><td class="num">0.289 %</td>
+<td class="num">0.287 %</td><td class="num"><b>0.336 %</b></td><td class="num"><b>0.422 %</b></td></tr>
+<tr><td>4 mm</td><td class="num">0.439 %</td><td class="num">0.410 %</td>
+<td class="num">0.379 %</td><td class="num">0.353 %</td><td class="num"><b>0.422 %</b></td></tr>
+<tr><td>3 mm</td><td class="num">0.534 %</td><td class="num">0.519 %</td>
+<td class="num">0.495 %</td><td class="num">0.439 %</td><td class="num"><b>0.423 %</b></td></tr>
+<tr><td>2 mm</td><td class="num">0.661 %</td><td class="num">0.680 %</td>
+<td class="num">0.691 %</td><td class="num">0.666 %</td><td class="num">0.514 %</td></tr>
+</tbody></table></div>
+
+<div class="note hot"><strong>문턱이 셈이 말한 자리에 그대로 있습니다.</strong>
+45 도에서는 10 mm, 65 도에서는 6 mm, 75 도에서는 3 mm 부터 깊이 20 과 같아집니다.
+셈이 말한 값은 각각 10.0 · 4.7 · 2.7 mm 입니다.<br><br>
+<strong>천장이 3.5 m 라 빔이 맞는 자리가 대부분 45~78 도입니다.</strong>
+거기서는 <strong>깊이 10 mm 가 깊이 20 mm 와 같습니다</strong> (45 도에서 0.229 대 0.228).
+판 두께가 22 에서 12 mm 로, 칠할 면적이 판 면적의 9.0 배에서 <strong>5.0 배</strong>로 내려갑니다.<br><br>
+<strong>조건이 하나 붙습니다.</strong> 45 도보다 곧게 맞는 자리가 천장에 있으면 안 됩니다.
+30 도에서는 깊이 10 이 깊이 20 보다 22 % 밝습니다. 그 자리는 프로젝터 바로 위
+반지름 1.5 m 안입니다 (00 절 도구에서 직접 움직여 볼 수 있습니다).</div>
+
+<h3>셋 — 셀 안쪽을 안 칠해도 됩니다. 조건이 둘 붙습니다</h3>
+<div class="prose">
+<p>“알루미늄 벌집을 은색 그대로 두고 위와 아래만 칠하면 되지 않느냐” 를 재봤습니다.
+맨 알루미늄 (bare aluminium) 재료를 새로 넣었습니다. 가시광 총반사 (total hemispherical reflectance) <b>86 %</b>, 밝은 면과 무광 면이 같습니다
+[적분구 실측, Pozzobon &amp; Levasseur 2019].</p>
+</div>
+
+<figure><div class="figb"><svg viewBox="0 0 620 430" width="620" role="img" aria-label="셀 벽 아래쪽을 맨 알루미늄으로 두었을 때, 위에서 칠하는 깊이에 따른 반사 총량. 테두리만 칠하면 26 퍼센트, 20 mm 를 칠하면 전부 칠한 것과 같아진다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs>
+<line x1="96" y1="286" x2="556" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="96" y1="44" x2="96" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="96" y1="286" x2="96" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="96" y="306" text-anchor="middle">0</text>
+<line x1="172.67" y1="286" x2="172.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="172.67" y="306" text-anchor="middle">5</text>
+<line x1="249.33" y1="286" x2="249.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="249.33" y="306" text-anchor="middle">10</text>
+<line x1="326" y1="286" x2="326" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="326" y="306" text-anchor="middle">15</text>
+<line x1="402.67" y1="286" x2="402.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="402.67" y="306" text-anchor="middle">20</text>
+<line x1="479.33" y1="286" x2="479.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="479.33" y="306" text-anchor="middle">25</text>
+<line x1="556" y1="286" x2="556" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="556" y="306" text-anchor="middle">30</text>
+<line x1="96" y1="286" x2="556" y2="286" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="290" text-anchor="end">0.1 %</text>
+<line x1="96" y1="241.63" x2="556" y2="241.63" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="245.63" text-anchor="end">0.3 %</text>
+<line x1="96" y1="193" x2="556" y2="193" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="197" text-anchor="end">1 %</text>
+<line x1="96" y1="148.62" x2="556" y2="148.62" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="152.62" text-anchor="end">3 %</text>
+<line x1="96" y1="99.99" x2="556" y2="99.99" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="103.99" text-anchor="end">10 %</text>
+<line x1="96" y1="55.62" x2="556" y2="55.62" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="59.62" text-anchor="end">30 %</text>
+<text class="c-ax" x="326" y="330" text-anchor="middle">위에서 무소로 칠하는 깊이 (mm) · 관 전체 깊이는 40 mm</text>
+<text class="c-ax" x="38" y="165" text-anchor="middle" transform="rotate(-90 38 165)">반사 총량</text>
+<line x1="96" y1="272.7" x2="556" y2="272.7" stroke="var(--good)" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text class="c-note" x="102.0" y="265.7" fill="var(--good)">전부 칠했을 때 · 30 도</text>
+<polyline points="103.67,61.22 111.33,66.24 126.67,76.24 142,86.33 157.33,96.61 188,118.01 218.67,141.21 249.33,167.52 280,196.01 310.67,225.25 341.33,253.43 372,270.17 402.67,271.84 556,272.7" fill="none" stroke="var(--hot)" stroke-width="2.6"/>
+<circle cx="103.67" cy="61.22" r="3.2" fill="var(--hot)"/>
+<circle cx="111.33" cy="66.24" r="3.2" fill="var(--hot)"/>
+<circle cx="126.67" cy="76.24" r="3.2" fill="var(--hot)"/>
+<circle cx="142" cy="86.33" r="3.2" fill="var(--hot)"/>
+<circle cx="157.33" cy="96.61" r="3.2" fill="var(--hot)"/>
+<circle cx="188" cy="118.01" r="3.2" fill="var(--hot)"/>
+<circle cx="218.67" cy="141.21" r="3.2" fill="var(--hot)"/>
+<circle cx="249.33" cy="167.52" r="3.2" fill="var(--hot)"/>
+<circle cx="280" cy="196.01" r="3.2" fill="var(--hot)"/>
+<circle cx="310.67" cy="225.25" r="3.2" fill="var(--hot)"/>
+<circle cx="341.33" cy="253.43" r="3.2" fill="var(--hot)"/>
+<circle cx="372" cy="270.17" r="3.2" fill="var(--hot)"/>
+<circle cx="402.67" cy="271.84" r="3.2" fill="var(--hot)"/>
+<circle cx="556" cy="272.7" r="3.2" fill="var(--hot)"/>
+<text class="c-lbl" x="259.3" y="171.5" fill="var(--hot)">입사 30 도</text>
+<polyline points="103.67,55.24 111.33,60.95 126.67,72.47 142,84.47 157.33,97.29 188,127.2 218.67,165.39 249.33,211.15 280,255.65 310.67,264.1 341.33,264.81 372,265.29 402.67,265.53 556,265.77" fill="none" stroke="var(--cool)" stroke-width="2.6"/>
+<circle cx="103.67" cy="55.24" r="3.2" fill="var(--cool)"/>
+<circle cx="111.33" cy="60.95" r="3.2" fill="var(--cool)"/>
+<circle cx="126.67" cy="72.47" r="3.2" fill="var(--cool)"/>
+<circle cx="142" cy="84.47" r="3.2" fill="var(--cool)"/>
+<circle cx="157.33" cy="97.29" r="3.2" fill="var(--cool)"/>
+<circle cx="188" cy="127.2" r="3.2" fill="var(--cool)"/>
+<circle cx="218.67" cy="165.39" r="3.2" fill="var(--cool)"/>
+<circle cx="249.33" cy="211.15" r="3.2" fill="var(--cool)"/>
+<circle cx="280" cy="255.65" r="3.2" fill="var(--cool)"/>
+<circle cx="310.67" cy="264.1" r="3.2" fill="var(--cool)"/>
+<circle cx="341.33" cy="264.81" r="3.2" fill="var(--cool)"/>
+<circle cx="372" cy="265.29" r="3.2" fill="var(--cool)"/>
+<circle cx="402.67" cy="265.53" r="3.2" fill="var(--cool)"/>
+<circle cx="556" cy="265.77" r="3.2" fill="var(--cool)"/>
+<text class="c-lbl" x="259.3" y="227.1" fill="var(--cool)">입사 40 도</text>
+<rect x="96" y="44" width="276" height="242" fill="var(--hot)" opacity=".07"/>
+<text class="c-note" x="234.0" y="276.0" text-anchor="middle">여기서 멈추면 못 쓴다</text>
+<text class="c-note" x="24" y="356">아래쪽 20 mm 는 맨 알루미늄(총반사 86 %)이다. 위에서 몇 mm 를 무소로 칠하느냐만 바꿨다.</text>
+<text class="c-note" x="24" y="378">테두리만 칠하면(0.5 mm) 30 도에서 26 %. 전부 칠한 것보다 180 배 밝다.</text>
+<text class="c-note" x="24" y="400">20 mm 에서 전부 칠한 것과 만난다. 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문이다.</text>
+<text class="c-note" x="24" y="422">다만 얕게 들어오는 빔(4~23 도)은 20 mm 를 지나쳐 은색에 떨어진다. 그때는 30 mm 가 필요하다.</text></svg></div><figcaption>
+<span class="fignum">그림 11 · 위에서 몇 mm 를 칠해야 하나</span>
+아래쪽은 맨 알루미늄입니다. <b>테두리만 칠하면 30 도에서 26 %.</b> 전부 칠한 것보다 180 배 밝습니다.
+<b>20 mm 에서 전부 칠한 것과 만납니다.</b> 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문입니다.
+</figcaption></figure>
+
+<div class="tw"><table>
+<caption>관찰자 40 도, 방 조건. 세 축을 모두 잰 값입니다.</caption>
+<thead><tr><th>셀 벽 아래쪽</th><th class="num">반사 총량</th><th class="num">번지는 정도</th><th class="num">관객 눈 밝기</th></tr></thead>
+<tbody>
+<tr><td>5 % 검정으로 칠함 (지금 사양)</td><td class="num">0.166 %</td><td class="num">1.013</td><td class="num">0.1214</td></tr>
+<tr class="hi"><td><b>맨 알루미늄 (위 20 mm 만 무소)</b></td><td class="num"><b>0.166 %</b></td><td class="num"><b>1.014</b></td><td class="num"><b>0.1215</b></td></tr>
+<tr><td>맨 알루미늄 (테두리만 무소)</td><td class="num">30.3 %</td><td class="num">1.564</td><td class="num"><b>18.41</b></td></tr>
+</tbody></table></div>
+
+<div class="note hot"><strong>조건 하나. 빔이 4~23 도로 들어오면 안 됩니다.</strong>
+그 각도에서는 빛이 칠한 20 mm 를 지나쳐 은색 벽에 처음 닿습니다. 값이 3.5 배 오릅니다.
+이 방은 30~45 도라 안전하지만 여유가 <b>7 도</b>뿐입니다. 프로젝터를 위로 67 도 넘게 쏘면 들어갑니다.<br><br>
+<strong>조건 둘. 30 mm 를 칠하면 그 구간이 사라집니다.</strong> 대신 아끼는 몫이 줄어듭니다.</div>
+
+<h3>넷 — 셀은 작은 쪽이 안전합니다</h3>
+<div class="tw"><table>
+<caption>깊이 20, 전부 무소, 판 500. 빔이 들어오는 각도별입니다.</caption>
+<thead><tr><th>셀</th><th class="num">10 도</th><th class="num">30 도</th><th class="num">45 도</th>
+<th class="num">바닥판을 싼 검정으로 바꾸면 (30 도)</th></tr></thead>
+<tbody>
+<tr><td>6.5 mm</td><td class="num"><b>0.115 %</b></td><td class="num">0.172 %</td><td class="num">0.226 %</td><td class="num">+0.1 %</td></tr>
+<tr class="hi"><td><b>10 mm</b></td><td class="num">0.115 %</td><td class="num">0.162 %</td><td class="num">0.214 %</td><td class="num">+0.5 %</td></tr>
+<tr><td>12.7 mm</td><td class="num">0.132 %</td><td class="num">0.159 %</td><td class="num">0.208 %</td><td class="num">+13.9 %</td></tr>
+<tr><td>20 mm</td><td class="num">0.197 %</td><td class="num">0.189 %</td><td class="num"><b>0.204 %</b></td><td class="num"><b>+135.7 %</b></td></tr>
+</tbody></table></div>
+<div class="note"><strong>45 도 한 칸만 큰 셀이 이깁니다.</strong> 나머지 각도는 전부 작은 셀이 이기고, 10 도에서는 1.9 배 차이입니다.<br><br>
+맨 오른쪽 칸이 이유입니다. <strong>셀이 크면 바닥판이 그대로 보입니다.</strong>
+셀 20 에서는 바닥 재료가 값의 절반을 넘게 정합니다. 셀 6.5 에서는 아무 상관이 없습니다.
+바닥에서 곧장 빠져나가는 몫이 2.6 % 에서 20 % 로 커지기 때문입니다.<br><br>
+<strong>셀 10 mm · 깊이 20 mm 로 정했습니다.</strong> 칠할 면적이 판 면적의 <b>9.0 배</b> (식 4×깊이÷셀 + 1), 판 두께 22 mm 입니다.
+지금 사양(17.8 배, 42 mm)의 절반입니다.
+<b>실제로 지어 보면 15.7 배</b> 입니다 — 펼친 포일이라 벽이 비스듬하고 한쪽이 두 겹이라서,
+식보다 1.4~1.8 배 많습니다. 견적은 큰 쪽으로 받습니다.
+<span class="c-note">(2026-09-18 정정. 처음에는 5.02 배라고 적었는데 근거가 없었습니다.)</span></div>
+
+<h3>다섯 — 형상 짓는 코드에 결함이 있습니다</h3>
+<div class="prose"><p>셀 크기를 훑다가 하나가 줄에서 벗어났습니다. 쫓아갔습니다.</p></div>
+<div class="tw"><table>
+<caption>같은 요청에서 셀 크기만 1천만분의 1 mm 바꿨습니다.</caption>
+<thead><tr><th>셀</th><th class="num">꼭짓점</th><th class="num">벽 겉넓이</th><th class="num">40 도 총량</th></tr></thead>
+<tbody>
+<tr><td>9.529999</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
+<tr class="hi"><td><b>9.53</b></td><td class="num"><b>32,792</b></td><td class="num"><b>1,099,534</b></td><td class="num"><b>0.1689 %</b></td></tr>
+<tr><td>9.5300001</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
+</tbody></table></div>
+<div class="note hot"><strong>정확히 9.53 일 때만 같은 자리에 벽을 12 % 더 짓습니다.</strong>
+6.35 도 그렇고, 6.5 와 12.7 은 멀쩡합니다. 바깥 크기는 같습니다.<br><br>
+<strong>그리고 이 프로젝트의 벌집 숫자는 전부 9.53 으로 냈습니다.</strong></div>
+
+<div class="tw"><table>
+<caption>발표된 최종 후보에 셀 크기만 1천만분의 1 mm 흔들어 다시 잰 값입니다.</caption>
+<thead><tr><th>후보</th><th class="num">보고서</th><th class="num">흔들어 재면</th><th class="num">차이</th></tr></thead>
+<tbody>
+<tr><td>벌집 9.53 / 40</td><td class="num">0.208 %</td><td class="num">0.2285 %</td><td class="num"><b>+9.6 %</b></td></tr>
+<tr class="hi"><td><b>벌집 + 피라미드 바닥 (전체 2 위)</b></td><td class="num">0.197 %</td><td class="num">0.2149 %</td><td class="num"><b>+8.9 %</b></td></tr>
+</tbody></table></div>
+
+<div class="note"><strong>어느 쪽이 맞는지 아직 모릅니다.</strong>
+9.53 이 벽을 잘못 더 짓는 것일 수도 있고, 9.53 만 제대로 짓고 나머지가 빠뜨리는 것일 수도 있습니다.
+실제 알루미늄 벌집은 포일을 붙인 자리가 두 겹이고 코드가 그것을 모델링한다고 적혀 있습니다.<br><br>
+지금 증거는 앞쪽을 가리킵니다. 멀쩡한 셀 크기 다섯이 매끄러운 줄을 이루는데
+<strong>의심스러운 두 값만 그 줄 아래로 벗어나 있습니다.</strong> 그래도 단정하지 않습니다.
+<strong>이것이 풀리기 전에는 벌집 숫자를 확정으로 쓰면 안 됩니다.</strong></div>
+
+<h3>그리고 못 한 것</h3>
+<div class="note warn" style="border-left-color:var(--muted)">
+<strong>시뮬레이터에 금속 모델이 없습니다.</strong> 알루미늄 재료를 세 개 만들었는데 둘이 거부당했습니다.
+이 도료 모델은 유전체 프레넬이라 정면 정반사가 최대 4 % 입니다. 총반사 86 % 인 금속을 넣으려면
+덩어리가 10.75 개 필요한데 그런 표면은 없습니다. <code>blender_render.py</code> 에 <code>Metallic</code> 이 0.0 으로 박혀 있습니다.<br><br>
+그래서 <strong>맨 알루미늄을 완전 확산으로 놓고 쟀습니다.</strong> 그쪽이 우리에게 불리한 끝이라
+“20 mm 면 된다” 는 결론은 그대로 섭니다. 다만 “10~16 mm 로 줄일 수 있나” 는 금속 모델이 있어야 답합니다.
+</div>
+
+<div class="note hot" style="font-size:16px">
+<strong>같은 규칙이 사흘 사이에 세 번 나왔습니다.</strong><br><br>
+깊이 40 은 <b>버려진 축</b>으로 내린 결정이었고, 축을 버릴 때 같이 안 봤습니다.<br>
+셀 크기는 <b>한 각도만</b> 보고 “큰 쪽이 낫다” 고 할 뻔했습니다. 다른 각도를 보니 반대였습니다.<br>
+깊이 20 은 <b>천장 6 m</b> 로 알고 정한 값이었습니다. 3.5 m 로 바뀌니 각도가 바뀌고, 깊이 10 으로 내려갑니다.<br><br>
+<strong>조건을 바꾸면, 그 조건으로 내렸던 결정을 전부 다시 봐야 합니다.</strong>
+</div>
+</section>
+<section><div class="sechead"><span class="secnum">06</span><h2>직접 해보기</h2></div>
 <div class="prose">
 <p>아래는 <strong>골짜기 안에서 빛이 지나가는 길을 그 자리에서 계산하는</strong> 그림입니다.
 간격과 깊이와 빔 각도를 바꾸면 빛이 몇 번 튕기는지, 얼마나 남아서 나가는지가 바로 바뀝니다.</p>
@@ -562,7 +799,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 <b>“8월 11일에 쓰던 값”</b> — 퍼뜨림 76 %. 잰 값이 아니라 고른 값이었습니다 (위 8 번).<br><br>
 <b>“거의 평평하게”</b> — 깊이 4 mm. 한두 번 튕기고 그대로 나갑니다. 평평한 천장과 다를 바 없습니다.</div>
 </section>
-<section><div class="sechead"><span class="secnum">06</span><h2>돈은 어디서 갈리나</h2></div>
+<section><div class="sechead"><span class="secnum">07</span><h2>돈은 어디서 갈리나</h2></div>
 
 <div class="prose">
 <p class="lead">값을 내려면 둘이 있어야 합니다. <strong>얼마나 쓰는지</strong>, 그리고 <strong>하나에 얼마인지</strong>.</p>
@@ -680,17 +917,17 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 
 <h3>견적을 넣어보는 칸</h3>
 <div class="prose"><p>도료값은 실제로 계산됩니다. 나머지 넷은 단가가 없어서 칸만 있습니다.
-설계를 바꾸면 칠할 면적이 따라 바뀌는 것도 같이 보입니다.</p></div>
+설계를 바꾸면 칠할 면적이 따라 바뀌는 것도 같이 보입니다.</p>
+<p><b>깊이 칸을 20 에서 10 으로 내려 보십시오.</b> 05 절에서 본 대로, 빔이 45 도보다 비스듬히 맞는
+자리에서는 깊이 10 mm 가 20 mm 와 같은 값을 냅니다. 칠할 면적이 판 면적의 9.0 배에서 5.0 배로 내려갑니다.</p></div>
 
 <div class="sim">
 <div class="sim-top">
   <div class="sim-ctl">
-    <div class="ctl"><label for="c_pitch">간격 (pitch)<output id="co_pitch">4.0 mm</output></label>
-      <input type="range" id="c_pitch" min="2" max="14" step="0.5" value="4"></div>
-    <div class="ctl"><label for="c_depth">깊이 (depth)<output id="co_depth">22 mm</output></label>
-      <input type="range" id="c_depth" min="4" max="60" step="1" value="22"></div>
-    <div class="ctl"><label for="c_tip">끝 평평부<output id="co_tip">0.4 mm</output></label>
-      <input type="range" id="c_tip" min="0.1" max="1.2" step="0.1" value="0.4"></div>
+    <div class="ctl"><label for="c_pitch">셀 크기 (cell)<output id="co_pitch">10.0 mm</output></label>
+      <input type="range" id="c_pitch" min="4" max="20" step="0.5" value="10"></div>
+    <div class="ctl"><label for="c_depth">깊이 (depth)<output id="co_depth">20 mm</output></label>
+      <input type="range" id="c_depth" min="5" max="50" step="1" value="20"></div>
     <div class="ctl"><label for="c_zone">무소 칠하는 구역<output id="co_zone">15 %</output></label>
       <input type="range" id="c_zone" min="0" max="100" step="1" value="15"></div>
     <div class="ctl"><label for="c_cov">1 리터로 칠하는 면적<output id="co_cov">5.0 m²/L</output></label>
@@ -698,14 +935,15 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
     <div class="ctl"><label for="c_price">무소 1 리터 값<output id="co_price">35 만원</output></label>
       <input type="range" id="c_price" min="150000" max="600000" step="10000" value="350000"><p style="margin:5px 0 0;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace">소매 32~54 만원 · 대량은 더 쌀 것</p></div>
     <div style="margin-top:18px">
-      <button class="preset" type="button" data-p="4" data-d="22" data-t="0.4" data-z="15" data-c="5" data-u="350000">제안한 판</button>
-      <button class="preset" type="button" data-p="4" data-d="20" data-t="0.1" data-z="15" data-c="5" data-u="350000">연구 최적 형상</button>
-      <button class="preset" type="button" data-p="4" data-d="22" data-t="0.4" data-z="100" data-c="5" data-u="350000">천장 전체를 무소로</button>
+      <button class="preset" type="button" data-p="10" data-d="20" data-z="15" data-c="5" data-u="350000">결론 설계 · 셀 10 / 깊이 20</button>
+      <button class="preset" type="button" data-p="9.53" data-d="40" data-z="15" data-c="5" data-u="350000">옛 사양 · 셀 9.53 / 깊이 40</button>
+      <button class="preset" type="button" data-p="10" data-d="20" data-z="100" data-c="5" data-u="350000">천장 전체를 무소로</button>
     </div>
   </div>
   <div class="sim-view" style="display:block;padding:20px 22px">
     <table style="min-width:0;width:100%;font-size:14px"><tbody>
-      <tr><td>겉넓이 배수</td><td class="num" id="c_mult">12.15 배</td></tr>
+      <tr><td>겉넓이 배수 (이상 육각)</td><td class="num" id="c_mult">8.00 배</td></tr>
+      <tr><td>지어 보면 (펼친 포일)</td><td class="num" id="c_mesh">13.2 배</td></tr>
       <tr><td>칠하는 면적</td><td class="num" id="c_area">1,215 m²</td></tr>
       <tr><td>무소 칠하는 면적</td><td class="num" id="c_marea">153 m²</td></tr>
       <tr><td>필요한 무소</td><td class="num" id="c_liter">30.7 L</td></tr>
@@ -717,7 +955,10 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
     </tbody></table>
   </div>
 </div>
-<p class="sim-foot"><b>칠하는 면적 = 천장 100 m² × 겉넓이 배수</b> (간격·깊이·끝에서 나옵니다).<br>
+<p class="sim-foot"><b>모델은 벌집입니다 (셀 10 mm · 깊이 20 mm 가 결론 설계).</b>
+칠하는 면적 = 천장 100 m² × 겉넓이 배수. 벌집의 겉넓이 배수는 <b>4 × 깊이 ÷ 셀 + 1</b> 입니다
+(벽 양면 + 받침판). <b>실제로 지어 보면 1.4~1.8 배 더 많습니다</b> — 펼친 포일이라 벽이 비스듬하고
+한쪽은 두 겹이기 때문입니다. 견적은 큰 쪽으로 받는 것이 안전합니다.<br>
 <b>무소 면적 = 칠하는 면적 × 구역 비율 × 0.84</b> (끝에서 20 mm 만 칠할 때의 몫).<br>
 <b>도료값 = 무소 면적 ÷ 리터당 면적 × 1 리터 값.</b><br><br>
 도료값 한 줄은 실제로 계산됩니다. 나머지 넷은 <b>수량은 나와 있고 단가만 비어 있습니다.</b>
@@ -753,7 +994,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 <strong>이 보고서의 어떤 숫자도 견적서가 아닙니다.</strong></div>
 </section>
 
-<section><div class="sechead"><span class="secnum">07</span><h2>다섯 주 끝에 남은 것</h2></div>
+<section><div class="sechead"><span class="secnum">08</span><h2>다섯 주 끝에 남은 것</h2></div>
 <div class="tw"><table>
 <caption>최종 후보 14 개 중 위쪽 셋. 세 항목의 순위를 각각 매기고 평균을 낸 결과입니다.
 총량은 방 조건 입사각에서 가장 밝은 값, 밝기는 관객 자리에서 가장 밝은 값입니다.</caption>
@@ -779,194 +1020,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 계산에 넣은 재료값 일부는 논문 그림에서 읽은 것이지 우리가 잰 것이 아닙니다.
 <strong>설계들 사이의 우열은 흔들리지 않습니다.</strong> 흔들리는 것은 “평평한 천장보다 몇 배 어둡다” 는 절대 숫자입니다.</div>
 </section>
-<section><div class="sechead"><span class="secnum">08</span><h2>덧붙임 · 9월 16일</h2></div>
 
-<div class="prose">
-<p class="lead">이 기록을 쓴 다음 날, 벌집을 다시 보다가 네 가지가 더 나왔습니다.
-셋은 설계를 바꾸고, 하나는 앞에 실린 숫자를 흔듭니다.</p>
-</div>
-
-<h3>하나 — 셀 안쪽을 안 칠해도 됩니다. 조건이 둘 붙습니다</h3>
-<div class="prose">
-<p>“알루미늄 벌집을 은색 그대로 두고 위와 아래만 칠하면 되지 않느냐” 를 재봤습니다.
-맨 알루미늄 (bare aluminium) 재료를 새로 넣었습니다. 가시광 총반사 (total hemispherical reflectance) <b>86 %</b>, 밝은 면과 무광 면이 같습니다
-[적분구 실측, Pozzobon &amp; Levasseur 2019].</p>
-</div>
-
-<figure><div class="figb"><svg viewBox="0 0 620 430" width="620" role="img" aria-label="셀 벽 아래쪽을 맨 알루미늄으로 두었을 때, 위에서 칠하는 깊이에 따른 반사 총량. 테두리만 칠하면 26 퍼센트, 20 mm 를 칠하면 전부 칠한 것과 같아진다."><defs>
-<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
-<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
-</defs>
-<line x1="96" y1="286" x2="556" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
-<line x1="96" y1="44" x2="96" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
-<line x1="96" y1="286" x2="96" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="96" y="306" text-anchor="middle">0</text>
-<line x1="172.67" y1="286" x2="172.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="172.67" y="306" text-anchor="middle">5</text>
-<line x1="249.33" y1="286" x2="249.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="249.33" y="306" text-anchor="middle">10</text>
-<line x1="326" y1="286" x2="326" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="326" y="306" text-anchor="middle">15</text>
-<line x1="402.67" y1="286" x2="402.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="402.67" y="306" text-anchor="middle">20</text>
-<line x1="479.33" y1="286" x2="479.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="479.33" y="306" text-anchor="middle">25</text>
-<line x1="556" y1="286" x2="556" y2="291" stroke="var(--axis)" stroke-width="1"/>
-<text class="c-tick" x="556" y="306" text-anchor="middle">30</text>
-<line x1="96" y1="286" x2="556" y2="286" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="290" text-anchor="end">0.1 %</text>
-<line x1="96" y1="241.63" x2="556" y2="241.63" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="245.63" text-anchor="end">0.3 %</text>
-<line x1="96" y1="193" x2="556" y2="193" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="197" text-anchor="end">1 %</text>
-<line x1="96" y1="148.62" x2="556" y2="148.62" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="152.62" text-anchor="end">3 %</text>
-<line x1="96" y1="99.99" x2="556" y2="99.99" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="103.99" text-anchor="end">10 %</text>
-<line x1="96" y1="55.62" x2="556" y2="55.62" stroke="var(--grid)" stroke-width="1"/>
-<text class="c-tick" x="87" y="59.62" text-anchor="end">30 %</text>
-<text class="c-ax" x="326" y="330" text-anchor="middle">위에서 무소로 칠하는 깊이 (mm) · 관 전체 깊이는 40 mm</text>
-<text class="c-ax" x="38" y="165" text-anchor="middle" transform="rotate(-90 38 165)">반사 총량</text>
-<line x1="96" y1="272.7" x2="556" y2="272.7" stroke="var(--good)" stroke-width="1.4" stroke-dasharray="6 4"/>
-<text class="c-note" x="102.0" y="265.7" fill="var(--good)">전부 칠했을 때 · 30 도</text>
-<polyline points="103.67,61.22 111.33,66.24 126.67,76.24 142,86.33 157.33,96.61 188,118.01 218.67,141.21 249.33,167.52 280,196.01 310.67,225.25 341.33,253.43 372,270.17 402.67,271.84 556,272.7" fill="none" stroke="var(--hot)" stroke-width="2.6"/>
-<circle cx="103.67" cy="61.22" r="3.2" fill="var(--hot)"/>
-<circle cx="111.33" cy="66.24" r="3.2" fill="var(--hot)"/>
-<circle cx="126.67" cy="76.24" r="3.2" fill="var(--hot)"/>
-<circle cx="142" cy="86.33" r="3.2" fill="var(--hot)"/>
-<circle cx="157.33" cy="96.61" r="3.2" fill="var(--hot)"/>
-<circle cx="188" cy="118.01" r="3.2" fill="var(--hot)"/>
-<circle cx="218.67" cy="141.21" r="3.2" fill="var(--hot)"/>
-<circle cx="249.33" cy="167.52" r="3.2" fill="var(--hot)"/>
-<circle cx="280" cy="196.01" r="3.2" fill="var(--hot)"/>
-<circle cx="310.67" cy="225.25" r="3.2" fill="var(--hot)"/>
-<circle cx="341.33" cy="253.43" r="3.2" fill="var(--hot)"/>
-<circle cx="372" cy="270.17" r="3.2" fill="var(--hot)"/>
-<circle cx="402.67" cy="271.84" r="3.2" fill="var(--hot)"/>
-<circle cx="556" cy="272.7" r="3.2" fill="var(--hot)"/>
-<text class="c-lbl" x="259.3" y="171.5" fill="var(--hot)">입사 30 도</text>
-<polyline points="103.67,55.24 111.33,60.95 126.67,72.47 142,84.47 157.33,97.29 188,127.2 218.67,165.39 249.33,211.15 280,255.65 310.67,264.1 341.33,264.81 372,265.29 402.67,265.53 556,265.77" fill="none" stroke="var(--cool)" stroke-width="2.6"/>
-<circle cx="103.67" cy="55.24" r="3.2" fill="var(--cool)"/>
-<circle cx="111.33" cy="60.95" r="3.2" fill="var(--cool)"/>
-<circle cx="126.67" cy="72.47" r="3.2" fill="var(--cool)"/>
-<circle cx="142" cy="84.47" r="3.2" fill="var(--cool)"/>
-<circle cx="157.33" cy="97.29" r="3.2" fill="var(--cool)"/>
-<circle cx="188" cy="127.2" r="3.2" fill="var(--cool)"/>
-<circle cx="218.67" cy="165.39" r="3.2" fill="var(--cool)"/>
-<circle cx="249.33" cy="211.15" r="3.2" fill="var(--cool)"/>
-<circle cx="280" cy="255.65" r="3.2" fill="var(--cool)"/>
-<circle cx="310.67" cy="264.1" r="3.2" fill="var(--cool)"/>
-<circle cx="341.33" cy="264.81" r="3.2" fill="var(--cool)"/>
-<circle cx="372" cy="265.29" r="3.2" fill="var(--cool)"/>
-<circle cx="402.67" cy="265.53" r="3.2" fill="var(--cool)"/>
-<circle cx="556" cy="265.77" r="3.2" fill="var(--cool)"/>
-<text class="c-lbl" x="259.3" y="227.1" fill="var(--cool)">입사 40 도</text>
-<rect x="96" y="44" width="276" height="242" fill="var(--hot)" opacity=".07"/>
-<text class="c-note" x="234.0" y="276.0" text-anchor="middle">여기서 멈추면 못 쓴다</text>
-<text class="c-note" x="24" y="356">아래쪽 20 mm 는 맨 알루미늄(총반사 86 %)이다. 위에서 몇 mm 를 무소로 칠하느냐만 바꿨다.</text>
-<text class="c-note" x="24" y="378">테두리만 칠하면(0.5 mm) 30 도에서 26 %. 전부 칠한 것보다 180 배 밝다.</text>
-<text class="c-note" x="24" y="400">20 mm 에서 전부 칠한 것과 만난다. 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문이다.</text>
-<text class="c-note" x="24" y="422">다만 얕게 들어오는 빔(4~23 도)은 20 mm 를 지나쳐 은색에 떨어진다. 그때는 30 mm 가 필요하다.</text></svg></div><figcaption>
-<span class="fignum">그림 11 · 위에서 몇 mm 를 칠해야 하나</span>
-아래쪽은 맨 알루미늄입니다. <b>테두리만 칠하면 30 도에서 26 %.</b> 전부 칠한 것보다 180 배 밝습니다.
-<b>20 mm 에서 전부 칠한 것과 만납니다.</b> 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문입니다.
-</figcaption></figure>
-
-<div class="tw"><table>
-<caption>관찰자 40 도, 방 조건. 세 축을 모두 잰 값입니다.</caption>
-<thead><tr><th>셀 벽 아래쪽</th><th class="num">반사 총량</th><th class="num">번지는 정도</th><th class="num">관객 눈 밝기</th></tr></thead>
-<tbody>
-<tr><td>5 % 검정으로 칠함 (지금 사양)</td><td class="num">0.166 %</td><td class="num">1.013</td><td class="num">0.1214</td></tr>
-<tr class="hi"><td><b>맨 알루미늄 (위 20 mm 만 무소)</b></td><td class="num"><b>0.166 %</b></td><td class="num"><b>1.014</b></td><td class="num"><b>0.1215</b></td></tr>
-<tr><td>맨 알루미늄 (테두리만 무소)</td><td class="num">30.3 %</td><td class="num">1.564</td><td class="num"><b>18.41</b></td></tr>
-</tbody></table></div>
-
-<div class="note hot"><strong>조건 하나. 빔이 4~23 도로 들어오면 안 됩니다.</strong>
-그 각도에서는 빛이 칠한 20 mm 를 지나쳐 은색 벽에 처음 닿습니다. 값이 3.5 배 오릅니다.
-이 방은 30~45 도라 안전하지만 여유가 <b>7 도</b>뿐입니다. 프로젝터를 위로 67 도 넘게 쏘면 들어갑니다.<br><br>
-<strong>조건 둘. 30 mm 를 칠하면 그 구간이 사라집니다.</strong> 대신 아끼는 몫이 줄어듭니다.</div>
-
-<h3>둘 — 깊이 40 은 필요 없었습니다</h3>
-<div class="tw"><table>
-<caption>벌집 셀 9.53, 전부 무소. 깊이만 바꿨습니다.</caption>
-<thead><tr><th>깊이</th><th class="num">방 조건 최대</th><th class="num">정면</th></tr></thead>
-<tbody>
-<tr><td>40 mm (지금 사양)</td><td class="num">0.208 %</td><td class="num">0.035 %</td></tr>
-<tr><td>30 mm</td><td class="num">0.210 %</td><td class="num">0.044 %</td></tr>
-<tr class="hi"><td><b>20 mm</b></td><td class="num"><b>0.215 %</b></td><td class="num">0.071 %</td></tr>
-<tr><td>10 mm</td><td class="num">0.222 %</td><td class="num">0.172 %</td></tr>
-</tbody></table></div>
-<div class="note hot"><strong>깊이를 4 분의 1 로 줄여도 방 조건에서 6.7 % 나빠질 뿐입니다.</strong>
-정면은 4.9 배 나빠지는데, <strong>정면은 이 방에서 안 일어납니다</strong> (위 11 번).<br><br>
-깊이 40 은 8월 25일에 골랐습니다. 그때 본 것이 정면 0.039 대 0.080 이었습니다.
-<strong>이틀 뒤에 정면 축을 버렸는데, 깊이 결정은 다시 안 봤습니다.</strong>
-이 기록의 11 번에서 배운 것을 여기서 한 번 더 놓치고 있었습니다.</div>
-
-<h3>셋 — 셀은 작은 쪽이 안전합니다</h3>
-<div class="tw"><table>
-<caption>깊이 20, 전부 무소, 판 500. 빔이 들어오는 각도별입니다.</caption>
-<thead><tr><th>셀</th><th class="num">10 도</th><th class="num">30 도</th><th class="num">45 도</th>
-<th class="num">바닥판을 싼 검정으로 바꾸면 (30 도)</th></tr></thead>
-<tbody>
-<tr><td>6.5 mm</td><td class="num"><b>0.115 %</b></td><td class="num">0.172 %</td><td class="num">0.226 %</td><td class="num">+0.1 %</td></tr>
-<tr class="hi"><td><b>10 mm</b></td><td class="num">0.115 %</td><td class="num">0.162 %</td><td class="num">0.214 %</td><td class="num">+0.5 %</td></tr>
-<tr><td>12.7 mm</td><td class="num">0.132 %</td><td class="num">0.159 %</td><td class="num">0.208 %</td><td class="num">+13.9 %</td></tr>
-<tr><td>20 mm</td><td class="num">0.197 %</td><td class="num">0.189 %</td><td class="num"><b>0.204 %</b></td><td class="num"><b>+135.7 %</b></td></tr>
-</tbody></table></div>
-<div class="note"><strong>45 도 한 칸만 큰 셀이 이깁니다.</strong> 나머지 각도는 전부 작은 셀이 이기고, 10 도에서는 1.9 배 차이입니다.<br><br>
-맨 오른쪽 칸이 이유입니다. <strong>셀이 크면 바닥판이 그대로 보입니다.</strong>
-셀 20 에서는 바닥 재료가 값의 절반을 넘게 정합니다. 셀 6.5 에서는 아무 상관이 없습니다.
-바닥에서 곧장 빠져나가는 몫이 2.6 % 에서 20 % 로 커지기 때문입니다.<br><br>
-<strong>셀 10 mm · 깊이 20 mm 로 정했습니다.</strong> 칠할 면적이 판 면적의 5.02 배, 판 두께 22 mm 입니다.
-지금 사양(9.42 배, 42 mm)의 절반입니다.</div>
-
-<h3>넷 — 형상 짓는 코드에 결함이 있습니다</h3>
-<div class="prose"><p>셀 크기를 훑다가 하나가 줄에서 벗어났습니다. 쫓아갔습니다.</p></div>
-<div class="tw"><table>
-<caption>같은 요청에서 셀 크기만 1천만분의 1 mm 바꿨습니다.</caption>
-<thead><tr><th>셀</th><th class="num">꼭짓점</th><th class="num">벽 겉넓이</th><th class="num">40 도 총량</th></tr></thead>
-<tbody>
-<tr><td>9.529999</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
-<tr class="hi"><td><b>9.53</b></td><td class="num"><b>32,792</b></td><td class="num"><b>1,099,534</b></td><td class="num"><b>0.1689 %</b></td></tr>
-<tr><td>9.5300001</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
-</tbody></table></div>
-<div class="note hot"><strong>정확히 9.53 일 때만 같은 자리에 벽을 12 % 더 짓습니다.</strong>
-6.35 도 그렇고, 6.5 와 12.7 은 멀쩡합니다. 바깥 크기는 같습니다.<br><br>
-<strong>그리고 이 프로젝트의 벌집 숫자는 전부 9.53 으로 냈습니다.</strong></div>
-
-<div class="tw"><table>
-<caption>발표된 최종 후보에 셀 크기만 1천만분의 1 mm 흔들어 다시 잰 값입니다.</caption>
-<thead><tr><th>후보</th><th class="num">보고서</th><th class="num">흔들어 재면</th><th class="num">차이</th></tr></thead>
-<tbody>
-<tr><td>벌집 9.53 / 40</td><td class="num">0.208 %</td><td class="num">0.2285 %</td><td class="num"><b>+9.6 %</b></td></tr>
-<tr class="hi"><td><b>벌집 + 피라미드 바닥 (전체 2 위)</b></td><td class="num">0.197 %</td><td class="num">0.2149 %</td><td class="num"><b>+8.9 %</b></td></tr>
-</tbody></table></div>
-
-<div class="note"><strong>어느 쪽이 맞는지 아직 모릅니다.</strong>
-9.53 이 벽을 잘못 더 짓는 것일 수도 있고, 9.53 만 제대로 짓고 나머지가 빠뜨리는 것일 수도 있습니다.
-실제 알루미늄 벌집은 포일을 붙인 자리가 두 겹이고 코드가 그것을 모델링한다고 적혀 있습니다.<br><br>
-지금 증거는 앞쪽을 가리킵니다. 멀쩡한 셀 크기 다섯이 매끄러운 줄을 이루는데
-<strong>의심스러운 두 값만 그 줄 아래로 벗어나 있습니다.</strong> 그래도 단정하지 않습니다.
-<strong>이것이 풀리기 전에는 벌집 숫자를 확정으로 쓰면 안 됩니다.</strong></div>
-
-<h3>그리고 못 한 것</h3>
-<div class="note warn" style="border-left-color:var(--muted)">
-<strong>시뮬레이터에 금속 모델이 없습니다.</strong> 알루미늄 재료를 세 개 만들었는데 둘이 거부당했습니다.
-이 도료 모델은 유전체 프레넬이라 정면 정반사가 최대 4 % 입니다. 총반사 86 % 인 금속을 넣으려면
-덩어리가 10.75 개 필요한데 그런 표면은 없습니다. <code>blender_render.py</code> 에 <code>Metallic</code> 이 0.0 으로 박혀 있습니다.<br><br>
-그래서 <strong>맨 알루미늄을 완전 확산으로 놓고 쟀습니다.</strong> 그쪽이 우리에게 불리한 끝이라
-“20 mm 면 된다” 는 결론은 그대로 섭니다. 다만 “10~16 mm 로 줄일 수 있나” 는 금속 모델이 있어야 답합니다.
-</div>
-
-<div class="note hot" style="font-size:16px">
-<strong>오늘 하루에 같은 규칙이 두 번 더 나왔습니다.</strong><br><br>
-깊이 40 은 <b>버려진 축</b>으로 내린 결정이었고, 축을 버릴 때 같이 안 봤습니다.<br>
-셀 크기는 <b>한 각도만</b> 보고 “큰 쪽이 낫다” 고 할 뻔했습니다. 다른 각도를 보니 반대였습니다.<br><br>
-<strong>축을 바꾸면, 그 축으로 내렸던 결정을 전부 다시 봐야 합니다.</strong>
-</div>
-</section>
 
 <footer>
 기간 2026-08-11 ~ 09-15 · 커밋 54 개 · 발표 설계 1,643 개 · 측정 행 66,426 · 조사 기록 50 건<br>
@@ -979,7 +1033,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
   if (!S) return;
   var HALF = 5, NEAR = 45;   // 방 가운데가 0, 좌우 ±5 m
   var g = function (id) { return document.getElementById(id); };
-  var keys = ['H','ph','fan','d','t'], el = {}, ou = {};
+  var keys = ['H','ph','fan','d','t','ax','eye'], el = {}, ou = {};
   keys.forEach(function (k) { el[k] = g('r_' + k); ou[k] = g('ro_' + k); });
   var f1 = function (v) { return v.toFixed(1); }, f2 = function (v) { return v.toFixed(2); };
   var deg = function (r) { return r * 180 / Math.PI; };
@@ -1009,10 +1063,12 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 
   function draw() {
     var H = +el.H.value, ph = +el.ph.value, fan = +el.fan.value,
-        d = +el.d.value, t = +el.t.value, two = g('r_two').checked;
+        d = +el.d.value, t = +el.t.value, two = g('r_two').checked,
+        ax = +el.ax.value, eye = +el.eye.value;
     ou.H.textContent = f1(H) + ' m'; ou.ph.textContent = f2(ph) + ' m';
     ou.fan.textContent = fan + '°';
     ou.d.textContent = '±' + f1(d) + ' m'; ou.t.textContent = '±' + f1(Math.abs(t)) + ' m';
+    ou.ax.textContent = f1(ax) + ' m'; ou.eye.textContent = f2(eye) + ' m';
 
     // 좌우 대칭: 왼쪽은 -d 에서 +t 를, 오른쪽은 +d 에서 -t 를 겨눈다
     var A = beam(-d, ph, t, H, fan), B = two ? beam(d, ph, -t, H, fan) : null;
@@ -1064,6 +1120,39 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
     }
     drawBeam(A, 'var(--cool)', '왼쪽');
     drawBeam(B, '#7a5cc4', '오른쪽');
+
+    // 거울 방향: 천장에서 같은 각으로 반대편으로 나간다. 바닥에 닿는 자리를 표시한다.
+    // 벌집은 거울이 아니라 셀 축으로 모아 보내므로 이 선은 '위험한 자리' 표시일 뿐이다.
+    var mirror = [];
+    [[A, 'var(--cool)'], [B, '#7a5cc4']].forEach(function (pair) {
+      var P = pair[0], col = pair[1];
+      if (!P || !P.onC.length) return;
+      var c = P.onC[Math.floor(P.onC.length / 2)];          // 부채꼴 한가운데 줄기
+      var fx = c.x + P.dir * H * Math.tan((90 - c.inc) > 0 ? (c.inc * Math.PI / 180) : 0);
+      var hitFloor = Math.abs(fx) <= HALF;
+      var endX = hitFloor ? fx : (fx > 0 ? HALF : -HALF);
+      var endY = hitFloor ? 0 : H - Math.abs(endX - c.x) / Math.tan(c.inc * Math.PI / 180);
+      o.push('<line x1="' + X(c.x) + '" y1="' + Y(H) + '" x2="' + X(endX) + '" y2="' + Y(Math.max(0, endY)) + '" stroke="' + col + '" stroke-width="1.2" stroke-dasharray="6 4" opacity=".75"/>');
+      if (hitFloor) {
+        o.push('<circle cx="' + X(fx) + '" cy="' + Y(0) + '" r="4" fill="none" stroke="' + col + '" stroke-width="1.6"/>');
+        mirror.push({ x: fx, col: col });
+      }
+    });
+    if (mirror.length) o.push('<text class="c-note" x="' + X(mirror[0].x) + '" y="' + (Y(0) - 10) + '" text-anchor="middle">거울 방향</text>');
+
+    // 관객
+    var ex = ax, ey = eye;
+    o.push('<line x1="' + X(ex) + '" y1="' + Y(0) + '" x2="' + X(ex) + '" y2="' + Y(ey) + '" stroke="var(--ink2)" stroke-width="3"/>');
+    o.push('<circle cx="' + X(ex) + '" cy="' + Y(ey + 0.12) + '" r="5" fill="var(--ink2)"/>');
+    o.push('<text class="c-note" x="' + X(ex) + '" y="' + (Y(0) + 34) + '" text-anchor="middle">관객 ' + f1(ax) + ' m</text>');
+    var look = ov ? [ov[0], ov[1]] : (A.span || null);
+    var vang = null;
+    if (look) {
+      vang = look.map(function (x) { return deg(Math.atan2(Math.abs(x - ex), H - ey)); });
+      look.forEach(function (x) {
+        o.push('<line x1="' + X(ex) + '" y1="' + Y(ey) + '" x2="' + X(x) + '" y2="' + Y(H) + '" stroke="var(--ink2)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>');
+      });
+    }
     for (i = -HALF; i <= HALF; i += 1) o.push('<text class="c-note" x="' + X(i) + '" y="' + (Y(0) + 20) + '" text-anchor="middle">' + (i % 5 === 0 ? i + ' m' : (i % 1 === 0 ? i : '')) + '</text>');
     S.innerHTML = o.join('');
 
@@ -1088,6 +1177,18 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
       g('rv_subO').textContent = two ? '두 빔이 천장에서 만나지 않습니다' : '오른쪽 프로젝터가 꺼져 있습니다';
     }
 
+    if (vang) {
+      var v0 = Math.min(vang[0], vang[1]), v1 = Math.max(vang[0], vang[1]);
+      g('rv_view').innerHTML = f1(v0) + '~' + f1(v1) + '<span style="font-size:.5em">°</span>';
+      var near = [0, 20, 40, 60].reduce(function (a, b) { return Math.abs(b - v1) < Math.abs(a - v1) ? b : a; });
+      var msg = '관객 눈에서 밝은 구간을 보는 각. 가장 가까운 잰 값은 <b>관객 ' + near + '°</b>' + (v1 > 60 ? ' — 60° 너머는 안 쟀다' : '');
+      if (mirror.length) {
+        var dmin = Math.min.apply(null, mirror.map(function (m) { return Math.abs(m.x - ax); }));
+        msg += ' · 거울 방향 자리와 ' + f1(dmin) + ' m 떨어져 있다' + (dmin < 0.6 ? ' <b>(거울 방향 위)</b>' : '');
+      }
+      g('rv_subV').innerHTML = msg;
+    } else { g('rv_view').innerHTML = '—'; g('rv_subV').textContent = '천장에 닿는 빛이 없습니다'; }
+
     var allInc = [];
     [A, B].forEach(function (P) { if (P && P.inc) allInc.push(P.inc[0], P.inc[1]); });
     var note;
@@ -1110,6 +1211,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
       var b = ev.currentTarget;
       el.H.value = b.dataset.h; el.ph.value = b.dataset.y; el.fan.value = b.dataset.f;
       el.d.value = b.dataset.d; el.t.value = b.dataset.t;
+      if (b.dataset.ax) el.ax.value = b.dataset.ax;
       draw();
     });
   }
@@ -1313,25 +1415,25 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
 (function () {
   var g = function (id) { return document.getElementById(id); };
   if (!g('c_pitch')) return;
-  var keys = ['pitch','depth','tip','zone','cov','price'];
+  var keys = ['pitch','depth','zone','cov','price'];
   var el = {}, ou = {};
   keys.forEach(function (k) { el[k] = g('c_' + k); ou[k] = g('co_' + k); });
 
   var CEIL = 100.0;      // 천장 m²
-  var MUSOU_MM = 20.0;   // 끝에서 몇 mm 를 무소로
+  var MUSOU_MM = 20.0;   // 위에서 몇 mm 를 무소로
 
-  // 사각뿔대 하나의 겉넓이 ÷ 그 밑면적
-  function mult(p, d, t) {
-    var run = (p - t) / 2, s = Math.sqrt(run * run + d * d);
-    return (4 * ((p + t) / 2 * s) + t * t) / (p * p);
-  }
-  // 끝에서 h mm 가 겉넓이에서 차지하는 몫
-  function share(p, d, t, h) {
-    if (h >= d) return 1;
-    var run = (p - t) / 2, s = Math.sqrt(run * run + d * d);
-    var lat = 4 * ((p + t) / 2 * s) + t * t;
-    var w = t + (p - t) * (h / d), sh = s * (h / d);
-    return (4 * ((w + t) / 2 * sh) + t * t) / lat;
+  // 벌집 (2026-09-18). 셀 크기 p 는 마주보는 면 사이 거리.
+  // 정육각형 넓이 (√3/2)p², 둘레 2√3 p. 벽은 두 칸이 나눠 쓰고 양쪽 면을 다 칠해야 하므로
+  //   벽 넓이 ÷ 판 넓이 = 2√3 p · d ÷ (√3/2)p² = 4 d / p.
+  // 여기에 바닥 받침판 1 배를 더한다. 테두리(포일 끝면)는 0.04 배라 무시한다.
+  function mult(p, d) { return 4 * d / p + 1; }
+  // 실제로 지어 보면 이보다 많다 (펼친 포일이라 벽이 비스듬하고 한쪽은 두 겹).
+  // 셋을 재 봤다: 셀 10/깊이 20 → 식의 1.66 배, 9.53/40 → 1.81 배, 6.5/40 → 1.40 배.
+  function meshMult(p, d) { return (4 * d / p) * 1.66 + 1; }
+  // 위에서 h mm 만 칠할 때의 몫 (벽은 깊이에 비례, 받침판은 안 칠함)
+  function share(p, d, h) {
+    var wall = 4 * d / p;
+    return (wall * Math.min(1, h / d)) / (wall + 1);
   }
   function won(v) {
     if (v >= 100000000) return (v / 100000000).toFixed(2) + ' 억원';
@@ -1340,22 +1442,21 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
   }
 
   function calc() {
-    var p = +el.pitch.value, d = +el.depth.value, t = +el.tip.value,
+    var p = +el.pitch.value, d = +el.depth.value,
         z = +el.zone.value / 100, cv = +el.cov.value, pr = +el.price.value;
-    if (t > p * 0.6) t = p * 0.6;
     ou.pitch.textContent = p.toFixed(1) + ' mm';
     ou.depth.textContent = d + ' mm';
-    ou.tip.textContent = t.toFixed(1) + ' mm';
     ou.zone.textContent = Math.round(z * 100) + ' %';
     ou.cov.textContent = cv.toFixed(1) + ' m²/L';
     ou.price.textContent = Math.round(pr / 10000) + ' 만원';
 
-    var m = mult(p, d, t), area = CEIL * m;
-    var sh = share(p, d, t, MUSOU_MM);
+    var m = mult(p, d), area = CEIL * m;
+    var sh = share(p, d, MUSOU_MM);
     var marea = area * z * sh, carea = area - marea;
     var liter = cv > 0 ? marea / cv : 0;
 
     g('c_mult').textContent = m.toFixed(2) + ' 배';
+    g('c_mesh').textContent = meshMult(p, d).toFixed(1) + ' 배';
     g('c_area').textContent = Math.round(area).toLocaleString('ko-KR') + ' m²';
     g('c_marea').textContent = Math.round(marea).toLocaleString('ko-KR') + ' m²';
     g('c_carea').textContent = Math.round(carea).toLocaleString('ko-KR') + ' m²';
@@ -1368,7 +1469,7 @@ footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11
   for (var i = 0; i < bs.length; i++) {
     bs[i].addEventListener('click', function (ev) {
       var b = ev.currentTarget;
-      el.pitch.value = b.dataset.p; el.depth.value = b.dataset.d; el.tip.value = b.dataset.t;
+      el.pitch.value = b.dataset.p; el.depth.value = b.dataset.d;
       el.zone.value = b.dataset.z; el.cov.value = b.dataset.c; el.price.value = b.dataset.u;
       calc();
     });
