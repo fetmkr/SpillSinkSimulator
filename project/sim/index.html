@@ -176,6 +176,12 @@ dl.kv dt{color:var(--ink3)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums}
 #pdwrap .nm{grid-column:1 / -1;font-size:11.5px;line-height:1.5;
   display:block!important}
 #pdwrap .nm .note{display:block;margin-top:1px}
+.brand{display:flex;align-items:center;justify-content:center;gap:18px;
+  margin:14px 0 4px;padding-top:12px;border-top:1px solid var(--line)}
+.brand img{height:34px;width:auto}
+.brand #brandlogo{height:38px;opacity:1}
+.brand #kclogo{height:34px;opacity:.82}
+.bsep{width:1px;height:22px;background:var(--line2)}
 .err{color:var(--no);font:400 11px/1.5 ui-monospace,Menlo,monospace;
   white-space:pre-wrap;max-height:120px;overflow:auto}
 #illum{position:absolute;left:12px;top:10px;max-width:330px;
@@ -500,7 +506,7 @@ details.why p{margin:.4em 0 0}
       <span class="sub">flat plate = 1.0 by definition &middot; standard sample pyramid 4/20: 1.85 at beam 7.5&#8202;mm</span></div>
     <div class="ax" id="ax_head"><span class="nm">정면 반짝임 head-on &darr; <i id="ax_beam2"></i></span>
       <span class="val">&mdash;</span>
-      <span class="sub">flat matte patch = 1.0 &middot; this tile is beam 0&deg; at the observer set above. The report ranks the brightest of beams &minus;40/30/40&deg; over observers 20/40/60&deg; &mdash; three presses</span></div>
+      <span class="sub">5 % 무광판 = 1.0 · 이 칸은 빔 0°, 위에서 고른 관객 각도 하나의 값입니다. 보고서 순위는 빔 −40/30/40° × 관객 20/40/60° 중 가장 밝은 값이라 세 번 눌러야 합니다</span></div>
   </div>
 
   <h2>Instant <span style="color:var(--ink3)">&lt;100 ms</span></h2>
@@ -522,7 +528,7 @@ details.why p{margin:.4em 0 0}
        return down its own axis, so moving the reader off the normal changed
        the peak by 74x in the 40-degree case. 0 is the panel normal, which is
        what every published figure was measured at. -->
-  <div class="row"><label for="obs">관찰자 각도 (판 법선에서, 도)</label>
+  <div class="row"><label for="obs">관객 각도 observer (판 법선에서, 도)</label>
    <input type="number" id="obs" value="0" min="0" max="80" step="5"
     style="width:5.5em"></div>
   <div class="row"><label for="beamw">beam width at wall, mm</label>
@@ -540,28 +546,25 @@ details.why p{margin:.4em 0 0}
     style="width:5.5em"></div>
   <div class="note" id="mmpxcost" style="margin:-4px 0 6px">&nbsp;</div>
   <button class="go" id="m5"><span class="lb">Render &middot; total
-    <small>7 angles &times; 2 planes (&phi; 0/45)</small></span>
+    <small>입사 7 각도 × 방위 2 면</small></span>
     <span class="t">~6 s</span></button>
-  <p class="note" style="margin:0">Reads &theta; 0&deg;/&plusmn;20&deg;/30&deg;/&plusmn;40&deg;/45&deg;
-   in <b>two planes</b> &mdash; &phi; 0 and 45 (the room protocol, read from
-   the server). Each number is the TOTAL for light entering at that direction
-   and leaving anywhere; the sky-dome lighting is how that total is captured
-   in one shot. The brightest of those 14 is <b>반사 총량 total reflectance</b>.
-   The report ranks on 30/40/45/&minus;40&deg; only. (Mitsuba runs &phi; 0
-   only.)</p>
+  <p class="note" style="margin:0">가장 밝은 칸이 <b>반사 총량</b>입니다. 각도 목록은 왼쪽 method 칸에 있습니다.</p>
+  <details class="why"><summary>어떻게 한 번에 재나</summary>
+  <p class="note">하늘 전체에서 고르게 비추고 카메라를 그 각도에 둡니다. 상반성(reciprocity)에 따라
+   이 사진의 밝기가 “그 각도로 들어간 빛 중 어느 방향으로든 되돌아 나온 비율” 과 같습니다.
+   그래서 각도마다 램프를 옮기지 않고 한 번에 잽니다. Mitsuba 는 방위 0 만 돕니다.</p></details>
   <div class="big" id="rho">&mdash;<small id="rhosub">not measured</small></div>
   <canvas id="chart"></canvas>
 
   <button id="mf" class="go"><span class="lb">Render &middot; smear + head-on
-    <small>4 beams &times; &phi; 0 &times; 16 stripe positions, one observer</small></span>
+    <small>빔 4 각도 × 방위 0 × 띠 16 자리 · 관객 한 자리</small></span>
     <span class="t">1~4 min</span></button>
-  <p class="note" style="margin:0">Shines a stripe beam of the width above and
-   reads how much the pattern smears sideways (<b>모양 뭉개기</b>) and how much
-   fires straight back at the source (<b>정면 반짝임</b>) &mdash; beams at
-   &minus;40/0/30/40&deg; in the &phi; 0 plane, read from the observer angle
-   above. Measured 2026-09-15/17: about 1 min for a 60 mm pyramid, 2 min at
-   116 mm, 4 min for a 200 mm honeycomb, and much longer at 500 mm.
-   (Mitsuba runs &phi; 0 only.)</p>
+  <p class="note" style="margin:0">줄 빔을 쏴서 <b>모양 뭉개기</b>와 <b>정면 반짝임</b>을 잽니다. 위에 적은 관객 각도 한 자리에서 읽습니다.</p>
+  <details class="why"><summary>얼마나 걸리나 · 무엇을 읽나</summary>
+  <p class="note">빔을 한 간격만큼 옮겨 가며 여러 자리에서 쏘고 평균을 냅니다. 뭉개기는 되돌아온 빛 줄의 폭을
+   같은 사진 안 민판과 견준 배수이고, 반짝임은 가장 밝은 2 mm 칸을 5 % 무광판과 견준 배수입니다.
+   잰 시간: 판 60 mm 피라미드 약 1 분, 116 mm 2 분, 200 mm 벌집 4 분, 500 mm 는 훨씬 더 걸립니다
+   (2026-09-15·17). Mitsuba 는 방위 0 만 돕니다.</p></details>
   <dl class="kv" id="formout"><div><dt>not measured</dt><dd>&mdash;</dd></div></dl>
   <details class="why"><summary>why beam width matters</summary>
   <p class="note" id="beamnote">Smear and span depend on beam&divide;pitch
@@ -569,9 +572,8 @@ details.why p{margin:.4em 0 0}
    deployment default; set 2.0 only to reproduce legacy numbers. Real beam =
    aperture + divergence &times; distance; e.g. LaserCube Ultra (4&#8202;mm,
    1&#8202;mrad) reads &asymp;9&#8202;mm at 5&#8202;m.</p>
-  <p class="note">Same protocol as the report: 16 stripe positions at 256
-   samples, read from the server (form_metrics.py). gate_finalists_ui_path
-   checks that this button sends the report's call.</p></details>
+  <p class="note">보고서와 같은 규약으로 잽니다. 값은 서버(form_metrics.py)에서 읽고,
+   gate_finalists_ui_path 가 이 단추의 요청이 보고서와 같은지 검사합니다.</p></details>
 
   <div class="tools">
   <h2>Tools</h2>
@@ -642,10 +644,7 @@ details.why p{margin:.4em 0 0}
     <button id="step">Download STEP <span class="t" id="stepsize">CAD · faceted</span></button>
     <button id="report" title="one A4 page: current view, parameters, and every measured number">Download report <span class="t">A4 PDF</span></button>
   </div>
-  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px">
-    <img id="brandlogo" alt="FETM" style="height:49px" src="data:image/png;base64,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">
-    <span class="note" style="margin:0">fetm.kr</span>
-  </div>
+  <div class="brand"><img id="brandlogo" alt="FETM" title="FETM" src="data:image/png;base64,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"><span class="bsep" aria-hidden="true"></span><img id="kclogo" alt="Kimchi and Chips" title="Kimchi and Chips" src="data:image/png;base64,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"></div>
   <div class="err" id="err"></div>
   </div>
 </div>
@@ -989,6 +988,15 @@ function showMethod(m){
     ['sampling area', `${Math.round((1-2*m.inset_x)*100)} % × `
        + `${Math.round((1-2*m.inset_z)*100)} % of the face`],
   ];
+  // 각도 목록도 여기 한 곳에만 적는다 (2026-09-18). 단추 밑에 또 적으면 두 곳이 된다.
+  if(window.PROTO){
+    rows.push(['총량 각도 θ', PROTO.total_thetas.map(t=>`${t}°`).join(' ')]);
+    rows.push(['총량 방위 φ', PROTO.total_phis.map(t=>`${t}°`).join(' ')]);
+    rows.push(['뭉개기 빔 θ', PROTO.form_thetas.map(t=>`${t}°`).join(' ')
+      + ` · 방위 ${PROTO.form_phis.map(t=>`${t}°`).join(' ')}`]);
+    rows.push(['순위에 쓰는 각도', PROTO.rank_total_thetas.map(t=>`${t}°`).join(' ')
+      + ` · 관객 ${PROTO.rank_observers.map(t=>`${t}°`).join(' ')}`]);
+  }
   el.innerHTML = '<div class="mhd">method &mdash; how this is measured</div>'
     + rows.map(([k,v])=>`<div class="mrow"><span>${k}</span><b>${v}</b></div>`).join('')
     + `<div class="mrow" style="margin-top:5px"><span>formulas, why, papers</span>`

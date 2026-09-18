@@ -1,0 +1,1380 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>천장 패널 연구 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:light !important}
+/* 한글 본문은 Pretendard. 구글 폰트에 없어서 문서와 같이 올린다 (SIL OFL). */
+@font-face{font-family:Pretendard;font-style:normal;font-weight:400;font-display:swap;
+  src:url(Pretendard-Regular.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:600;font-display:swap;
+  src:url(Pretendard-SemiBold.woff2) format('woff2')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:700;font-display:swap;
+  src:url(Pretendard-Bold.woff2) format('woff2')}
+:root{
+  --paper:#dedbd4; --surface:#e9e7e1; --surface2:#f5f4f0;
+  --ink:#16181a; --ink2:#55585c; --muted:#84878b;
+  --line:#c8c4bb; --axis:#b3aea3; --grid:#d5d1c8;
+  --hot:#ff4d00; --cool:#1d7fd4; --good:#1f7a44;
+  --mat:#101215; --matedge:#55585c; --room:#f5f4f0; --figbg:#e9e7e1; --figfg:#55585c;
+  --shadow:0 1px 2px rgba(22,24,26,.07),0 10px 28px rgba(22,24,26,.06);
+  color-scheme:light;
+}
+/* 시뮬레이터는 밝은 화면 하나만 씁니다. 이 문서도 같게 고정합니다 (2026-09-18). */}
+
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-size:16.5px;line-height:1.82;word-break:keep-all;-webkit-font-smoothing:antialiased}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
+  background:color-mix(in srgb,var(--surface) 90%,transparent);
+  backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1080px;margin:0 auto;padding:9px 20px;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.topbar strong{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:700;font-size:15px}
+.topbar .sp{flex:1 1 auto}
+.topbar .meta{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+
+.lang{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px}
+.lang a{padding:3px 9px;color:var(--muted);text-decoration:none}
+.lang a.on{background:var(--hot);color:#fff}
+.lang a:not(.on):hover{background:var(--surface2);color:var(--ink)}
+.lang a:focus-visible{outline:2px solid var(--hot);outline-offset:-2px}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:0 80px}
+.prose{max-width:64ch}
+.prose p{margin:0 0 1.05em}
+.prose p:last-child{margin-bottom:0}
+
+.mast{padding-block:52px 34px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+h1{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:700;
+  font-size:clamp(32px,6.4vw,54px);line-height:1.1;letter-spacing:-.018em;margin:0 0 18px;text-wrap:balance}
+.stand{font-size:clamp(16px,2.3vw,19px);line-height:1.72;color:var(--ink2);max-width:58ch;margin:0}
+.byline{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px 24px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+
+h2{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;
+  font-size:clamp(23px,4vw,32px);line-height:1.22;letter-spacing:-.012em;margin:0;text-wrap:balance}
+h3{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;font-size:18px;margin:32px 0 12px}
+
+section{padding-block:46px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.sechead{display:flex;gap:16px;align-items:baseline;margin:0 0 22px}
+.secnum{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--hot);letter-spacing:.06em;padding-top:.5em;flex:0 0 auto}
+
+/* 변경 항목 카드 */
+.chg{border-left:3px solid var(--line);padding-left:22px;margin-block:26px}
+.chg.flip{border-left-color:var(--hot)}
+.chg-h{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.chg-n{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;color:var(--hot)}
+.chg-t{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;font-size:clamp(19px,3vw,25px);letter-spacing:-.008em}
+.chg-d{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.qa{margin:16px 0}
+.qa dt{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;font-size:13.5px;
+  color:var(--muted);letter-spacing:.02em;margin-top:15px}
+.qa dd{margin:3px 0 0;max-width:62ch}
+.qa dd:first-of-type{margin-top:3px}
+.verdict{margin-top:16px;padding:13px 16px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--hot)}
+.verdict.same{border-left-color:var(--good)}
+.verdict b{font-weight:600}
+.verdict .k{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+
+figure{margin:26px 0;background:var(--surface);border:1px solid var(--line)}
+.figb{overflow-x:auto;padding:16px 14px 6px;display:flex;justify-content:center}
+.figb svg{max-width:100%;height:auto;display:block;min-width:560px}
+figcaption{padding:11px 16px 15px;font-size:13.5px;line-height:1.62;color:var(--ink2);border-top:1px solid var(--line)}
+figcaption b{color:var(--ink);font-weight:600}
+.fignum{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--hot);display:block;margin-bottom:4px}
+.c-tick{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--muted)}
+.c-ax{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-size:12.5px;fill:var(--ink2)}
+.c-lbl{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-size:13px;fill:var(--ink2);font-weight:500}
+.c-val{font-family:"IBM Plex Mono",monospace;font-size:12.5px;fill:var(--ink);font-weight:600}
+.c-note{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-size:12px;fill:var(--muted)}
+
+/* 렌더 격자 */
+.shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-block:26px}
+.shape{background:var(--surface);padding:0 0 14px}
+.shape img{width:100%;display:block;aspect-ratio:1/1;object-fit:cover}
+.shape h4{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;font-size:15px;margin:12px 14px 4px}
+.shape p{margin:0 14px;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.shape .pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+@media (max-width:820px){.shapes{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:460px){.shapes{grid-template-columns:1fr}}
+
+.tw{overflow-x:auto;margin-block:20px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:14px}
+caption{caption-side:top;text-align:left;padding:13px 16px 0;font-size:12.5px;color:var(--muted);line-height:1.55}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;font-size:12.5px;
+  color:var(--muted);border-bottom:1px solid var(--axis);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hi td{background:var(--surface2)}
+tr.hi td:first-child{box-shadow:inset 3px 0 0 var(--hot)}
+
+.note{border-left:3px solid var(--axis);padding:2px 0 2px 16px;margin-block:20px;color:var(--ink2);font-size:14.5px;max-width:62ch}
+.note.hot{border-left-color:var(--hot)}
+.note strong{color:var(--ink);font-weight:600}
+ul,ol{padding-left:1.2em;margin:0 0 1.05em;max-width:62ch}
+li{margin-bottom:.45em}
+li::marker{color:var(--muted)}
+.lead{font-size:18px;line-height:1.7;color:var(--ink);max-width:56ch;
+  font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;font-weight:600;letter-spacing:-.005em}
+
+/* 정리 */
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-block:26px}
+@media (max-width:760px){.tally{grid-template-columns:1fr}}
+.tally h3{margin-top:0}
+
+/* 시뮬레이터 */
+.sim{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);margin-block:26px}
+.sim-top{display:grid;grid-template-columns:280px 1fr;gap:0}
+@media (max-width:780px){.sim-top{grid-template-columns:1fr}}
+.sim-ctl{padding:20px;border-right:1px solid var(--line)}
+@media (max-width:780px){.sim-ctl{border-right:0;border-bottom:1px solid var(--line)}}
+.ctl{margin-bottom:18px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink2);margin-bottom:5px}
+.ctl output{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;color:var(--hot)}
+.ctl input[type=range]{width:100%;accent-color:var(--hot);margin:0}
+.sim-view{padding:14px;display:flex;align-items:center;justify-content:center;overflow-x:auto;background:var(--surface2)}
+.sim-view svg{max-width:100%;height:auto;min-width:300px}
+.sim-out{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.sim-cell{background:var(--surface);padding:16px}
+.sim-cell .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+.sim-cell .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(21px,4vw,29px);line-height:1;color:var(--ink)}
+.sim-cell .s{margin:8px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+@media (max-width:560px){.sim-out{grid-template-columns:1fr}}
+.sim-foot{padding:13px 16px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);line-height:1.6}
+button.preset{font:inherit;font-size:12.5px;padding:5px 11px;margin:0 6px 6px 0;background:var(--surface2);
+  color:var(--ink2);border:1px solid var(--line);cursor:pointer;font-family:"IBM Plex Mono",monospace}
+button.preset:hover{border-color:var(--hot);color:var(--hot)}
+button.preset:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+
+footer{padding-block:34px 8px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.9;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="topbar"><div class="topbar-in">
+<strong>천장 패널 연구 기록</strong>
+<span class="lang"><a class="on" href="./" aria-current="page">한국어</a><a href="en.html">English</a></span>
+<span class="sp"></span>
+<span class="meta">SPILL SINK · 2026-08-11 → 09-15</span></div></div>
+<div class="wrap">
+
+<header class="mast">
+<p class="eyebrow">2026년 8월 11일 → 9월 15일 · 설계 1,643 개</p>
+<h1>재는 방법을 열세 번 고쳤고<br>순위는 여섯 번 뒤집혔다</h1>
+<p class="stand">레이저가 천장에 그리는 복제본을 지우는 판 (panel) 을 설계했습니다.
+이 기록은 최종 답이 아닙니다. <b>재는 방법이 어떻게 바뀌었고, 그때마다 순위가 어떻게 뒤집혔는지</b>를 적었습니다.</p>
+<div class="byline"><span>커밋 54 개</span><span>조사 기록 50 건</span><span>최종 후보 14 개</span><span>실물 측정 0 건</span></div>
+</header>
+<section><div class="sechead"><span class="secnum">00</span><h2>무엇을 만드는가</h2></div>
+<div class="prose">
+<p class="lead">레이저가 공중에 그림을 만듭니다. 그 빔은 그림을 지나 천장까지 갑니다.
+그러면 천장에 그림의 또렷한 복제본이 그려집니다.</p>
+<p>관객은 공중의 그림이 아니라 천장의 복제본을 봅니다. 작품이 망가집니다.
+빔을 끌 수는 없습니다. <strong>날아가는 빔 자체가 작품이기 때문입니다.</strong></p>
+<p>그래서 천장에 붙일 판을 만듭니다. <strong>빔이 닿으면 사라지도록.</strong></p>
+</div>
+<figure style="border:0;background:none;margin:26px 0 30px">
+<img src="fig_room_laser.jpg" alt="레이저가 공중에 그린 그림과, 천장과 벽에 그대로 비친 복제본" style="width:100%;display:block;border:1px solid var(--line)">
+<figcaption style="border:0;padding:11px 2px 0">
+<span class="fignum">사진 · 지우려는 것</span>
+가운데가 공중에 맺힌 그림 (공중 영상, aerial image) 이고, <b>천장과 벽에 퍼진 것이 지우려는 복제본</b>입니다.
+빔은 그림을 지나 계속 날아가 천장에 닿습니다. 이 방의 천장은 3.5 m 입니다.
+</figcaption></figure>
+<div class="sim" id="roomsim">
+<div class="sim-top">
+  <div class="sim-ctl">
+    <div class="ctl"><label for="r_H">천장 높이<output id="ro_H">3.5 m</output></label>
+      <input type="range" id="r_H" min="2.2" max="6" step="0.1" value="3.5"></div>
+    <div class="ctl"><label for="r_ph">프로젝터 높이 (둘 다)<output id="ro_ph">1.20 m</output></label>
+      <input type="range" id="r_ph" min="0" max="3" step="0.05" value="1.2"></div>
+    <div class="ctl"><label for="r_fan">부채꼴 퍼짐 fan<output id="ro_fan">30°</output></label>
+      <input type="range" id="r_fan" min="2" max="70" step="1" value="30"></div>
+    <div class="ctl"><label for="r_d">프로젝터 자리 (가운데에서)<output id="ro_d">±3.0 m</output></label>
+      <input type="range" id="r_d" min="0" max="5" step="0.1" value="3"></div>
+    <div class="ctl"><label for="r_t">빔이 겨누는 천장 자리<output id="ro_t">±1.5 m</output></label>
+      <input type="range" id="r_t" min="-5" max="5" step="0.1" value="1.5">
+      <p style="margin:5px 0 0;font-size:11.5px;color:var(--muted)">왼쪽 프로젝터는 +쪽을, 오른쪽은 −쪽을 겨눕니다. 값이 크면 서로 건너질러 크게 겹칩니다</p></div>
+    <div class="ctl"><label for="r_two" style="cursor:pointer"><input type="checkbox" id="r_two" checked> 오른쪽 프로젝터 켜기</label></div>
+    <div style="margin-top:14px">
+      <button class="preset" type="button" data-h="3.5" data-y="1.2" data-f="30" data-d="3" data-t="1.5">이 방 · 천장 3.5 m</button>
+      <button class="preset" type="button" data-h="6" data-y="2" data-f="15" data-d="3" data-t="0.8">예전 가정 · 천장 6 m</button>
+      <button class="preset" type="button" data-h="3.5" data-y="1.2" data-f="25" data-d="2" data-t="0">바깥으로 벌려 쏘기</button>
+    </div>
+  </div>
+  <div class="sim-view"><svg id="roomsvg" viewBox="0 0 900 400" width="900"
+     role="img" aria-label="방 단면. 좌우 두 프로젝터의 빔이 천장에 닿는 각도와 겹치는 구간"></svg></div>
+</div>
+<div class="sim-out">
+  <div class="sim-cell"><p class="k">왼쪽 빔 · 입사각 incidence</p><p class="v" id="rv_incL">—</p>
+    <p class="s" id="rv_subL">천장에 수직인 선 (법선, normal) 에서 잰 각</p></div>
+  <div class="sim-cell"><p class="k">오른쪽 빔 · 입사각</p><p class="v" id="rv_incR">—</p>
+    <p class="s" id="rv_subR">빔 가운데가 겨누는 천장 자리로 겨냥 각도가 정해집니다</p></div>
+  <div class="sim-cell"><p class="k">겹치는 구간 cross</p><p class="v" id="rv_ov">—</p>
+    <p class="s" id="rv_subO">두 빔이 같이 닿는 천장 구간. 여기가 가장 밝습니다</p></div>
+</div>
+<p class="sim-foot" id="rv_note"></p>
+</div>
+<div class="note hot"><strong>이 방의 천장은 3.5 m 입니다.</strong>
+이 기록의 앞부분은 천장을 <b>6 m</b> 로 놓고 쟀습니다. 그때는 빔이 천장을 30~45 도로 때렸습니다.<br><br>
+<strong>천장이 낮아지면 같은 거리에서 각도가 눕습니다.</strong> 프로젝터를 2 m 높이에 두면, 천장 6 m 에서는
+4 m 떨어져야 45 도인데 <b>천장 3.5 m 에서는 1.5 m 만 떨어져도 45 도</b>입니다. 그보다 먼 천장은 전부 45 도를 넘습니다.<br><br>
+<strong>그래서 이 기록의 숫자는 각도 조건이 다릅니다.</strong> 순위를 매긴 각도(30·40·45 도)를 다시 정하고
+45 도 너머를 새로 재야 합니다. 아직 안 했습니다.</div>
+</section>
+<section><div class="sechead"><span class="secnum">01</span><h2>재는 것 세 가지</h2></div>
+<div class="prose"><p>
+<strong>비교 기준은 “무늬 없이 검정 페인트만 칠한 평평한 천장” 입니다. 이것을 1 로 놓습니다.</strong>
+</p></div>
+<div class="tw"><table>
+<thead><tr><th>이름</th><th>무슨 뜻인가</th><th>어느 쪽이 좋은가</th></tr></thead>
+<tbody>
+<tr class="hi"><td><b>번지는 정도</b><br><span style="font-size:12px;color:var(--muted)">모양 뭉개기 · form smear</span></td><td>돌아온 빛이 원래 그림 모양을 얼마나 잃었나</td>
+<td><b>높을수록</b> 좋다. 1 이면 모양이 그대로 남는다</td></tr>
+<tr><td><b>돌려보내는 빛의 양</b><br><span style="font-size:12px;color:var(--muted)">반사 총량 · total reflectance</span></td><td>천장에 닿은 빛 중 방으로 되돌아오는 비율</td><td><b>낮을수록</b> 좋다</td></tr>
+<tr><td><b>관객 눈에 들어오는 밝기</b><br><span style="font-size:12px;color:var(--muted)">정면 반짝임 · head-on peak</span></td><td>그 빛이 사람 눈으로 얼마나 오나</td><td><b>낮을수록</b> 좋다</td></tr>
+</tbody></table></div>
+<div class="note"><span style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px">자주 나오는 말 — <b>판 (panel)</b> 천장에 붙이는 한 장. <b>칸 (unit cell)</b> 그 판에 되풀이되는 한 단위. <b>화소 (pixel)</b> 계산 화면을 이루는 점. <b>깊이 (depth)</b> 칸이 파인 깊이. <b>도료 (coating)</b> 칠하는 재료. <b>입사각 (incidence angle)</b> 빛이 천장에 닿는 각. <b>간격 (pitch)</b> 칸과 칸 사이 거리.</span><strong>번지는 정도가 1 순위입니다.</strong>
+이 일의 목적이 “천장에 글자가 안 읽히게” 이기 때문입니다. 어둡게 만드는 것은 그다음입니다.
+처음에는 이 셋 중 하나만 재고 있었습니다 (아래 3 번).</div>
+</section>
+<section><div class="sechead"><span class="secnum">02</span><h2>겨룬 모양들</h2></div>
+<div class="prose"><p>아래는 실제로 계산에 쓴 형상을 그대로 렌더한 것입니다. 위는 비스듬히 본 모습, 아래는 <strong>측정 카메라가 똑바로 내려다볼 때 보이는 모습</strong>입니다.</p></div>
+<div class="shapes">
+<div class="shape"><div class="pair"><img src="fig_pyramid_threequarter.jpg" alt="피라미드 비스듬히 본 모습" loading="lazy"><img src="fig_pyramid_topdown.jpg" alt="피라미드 똑바로 내려다본 모습" loading="lazy"></div><h4>피라미드 pyramid</h4><p>간격 4 · 깊이 22 mm. 몰드로 찍어냄. <b>최종 후보 1 등</b></p></div>
+<div class="shape"><div class="pair"><img src="fig_comb_threequarter.jpg" alt="벌집 비스듬히 본 모습" loading="lazy"><img src="fig_comb_topdown.jpg" alt="벌집 똑바로 내려다본 모습" loading="lazy"></div><h4>벌집 honeycomb</h4><p>칸 9.53 · 깊이 40 mm. 알루미늄, <b>사 오는 물건</b></p></div>
+<div class="shape"><div class="pair"><img src="fig_cone_threequarter.jpg" alt="원뿔 비스듬히 본 모습" loading="lazy"><img src="fig_cone_topdown.jpg" alt="원뿔 똑바로 내려다본 모습" loading="lazy"></div><h4>원뿔 cone</h4><p>간격 5.5 · 깊이 30 mm. 한때 1 등이었다가 꼴찌가 됨</p></div>
+<div class="shape"><div class="pair"><img src="fig_pyrinv_threequarter.jpg" alt="뒤집힌 피라미드 비스듬히 본 모습" loading="lazy"><img src="fig_pyrinv_topdown.jpg" alt="뒤집힌 피라미드 똑바로 내려다본 모습" loading="lazy"></div><h4>뒤집힌 피라미드 inverted pyramid</h4><p>파인 홈. 태양전지에서는 이기지만 여기서는 짐</p></div>
+</div>
+<div class="note">벌집을 똑바로 내려다본 사진이 <strong>가장 새카맣습니다.</strong>
+돌려보내는 빛의 양으로는 실제로 벌집이 제일 좋습니다. 그런데 그것만 보고 고르면 틀립니다.
+왜 틀리는지가 이 기록의 3 번입니다.</div>
+</section><section><div class="sechead"><span class="secnum">03</span><h2>측정 방법이 바뀐 열세 번</h2></div>
+<div class="prose"><p>아래 열세 번 중 <strong>여섯 번은 순위가 뒤집혔고, 세 번은 값만 움직이고 순위는 그대로였습니다.</strong> 그 차이가 어디서 오는지가 맨 끝에 정리돼 있습니다.</p></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">1</span><span class="chg-t">도료를 각도에 따라 다르게</span><span class="chg-d">8월 11일 밤</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>빛이 어느 각도로 와도 도료가 똑같은 비율로 되튕긴다고 놓고 계산했습니다.</dd><dt>뭐가 틀렸나</dt><dd>논문에서 무소 블랙 (Musou Black) 을 실제 장비로 잰 값을 찾았습니다. <strong>비스듬할수록 밝아집니다.</strong> 우리 계산은 각도가 변해도 값이 안 변했습니다. 정면에서 2 배, 비스듬한 각에서 7 배 낙관적이었습니다.</dd></dl><figure><div class="figb"><svg viewBox="0 0 620 400" width="620" role="img" aria-label="도료가 각도에 따라 돌려보내는 빛. 실측은 80도에서 3.18 퍼센트인데 우리 값은 1.00 퍼센트로 평평했다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><line x1="92" y1="300" x2="560" y2="300" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="92" y1="40" x2="92" y2="300" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="92" y1="300" x2="92" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="92" y="320" text-anchor="middle">0°</text>
+<line x1="179.75" y1="300" x2="179.75" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="179.75" y="320" text-anchor="middle">15°</text>
+<line x1="267.5" y1="300" x2="267.5" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="267.5" y="320" text-anchor="middle">30°</text>
+<line x1="355.25" y1="300" x2="355.25" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="355.25" y="320" text-anchor="middle">45°</text>
+<line x1="443" y1="300" x2="443" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="443" y="320" text-anchor="middle">60°</text>
+<line x1="530.75" y1="300" x2="530.75" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="530.75" y="320" text-anchor="middle">75°</text>
+<line x1="92" y1="280" x2="560" y2="280" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="284" text-anchor="end">1 %</text>
+<line x1="92" y1="230" x2="560" y2="230" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="234" text-anchor="end">1.5 %</text>
+<line x1="92" y1="180" x2="560" y2="180" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="184" text-anchor="end">2 %</text>
+<line x1="92" y1="130" x2="560" y2="130" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="134" text-anchor="end">2.5 %</text>
+<line x1="92" y1="80" x2="560" y2="80" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="84" text-anchor="end">3 %</text>
+<text class="c-ax" x="326" y="342" text-anchor="middle">빛이 들어오는 각도 (0° = 똑바로)</text>
+<text class="c-ax" x="40" y="170" text-anchor="middle" transform="rotate(-90 40 170)">돌아오는 빛</text>
+<polyline points="92,280 179.75,280 267.5,280 355.25,280 443,280 530.75,280 560,280" fill="none" stroke="var(--cool)" stroke-width="2.6" stroke-dasharray="7 5"/>
+<polyline points="92,280 179.75,280 267.5,277 355.25,267 443,237 530.75,147 560,62" fill="none" stroke="var(--hot)" stroke-width="2.8"/>
+<circle cx="92" cy="280" r="4" fill="var(--hot)"/>
+<circle cx="179.75" cy="280" r="4" fill="var(--hot)"/>
+<circle cx="267.5" cy="277" r="4" fill="var(--hot)"/>
+<circle cx="355.25" cy="267" r="4" fill="var(--hot)"/>
+<circle cx="443" cy="237" r="4" fill="var(--hot)"/>
+<circle cx="530.75" cy="147" r="4" fill="var(--hot)"/>
+<circle cx="560" cy="62" r="4" fill="var(--hot)"/>
+<text class="c-lbl" x="554" y="48" fill="var(--hot)">논문 실측 · 3.18 %</text>
+<text class="c-lbl" x="232.4" y="266" fill="var(--cool)">우리가 쓰던 값 · 각도와 무관</text>
+<line x1="560" y1="280" x2="560" y2="62" stroke="var(--hot)" stroke-width="1.2" marker-start="url(#a2)" marker-end="url(#a2)" opacity=".8"/>
+<text class="c-lbl" x="550" y="175" text-anchor="end" fill="var(--hot)">7 배</text></svg></div><figcaption><span class="fignum">그림 2 · 도료가 각도에 따라 돌려보내는 빛</span>점선이 우리가 쓰던 값, 실선이 논문 실측입니다. 실제 도료는 비스듬히 맞을수록 밝아지는데 우리 값은 평평했습니다. <b>방향 자체가 반대였습니다.</b></figcaption></figure><figure><div class="figb"><svg viewBox="0 0 620 250" width="620" role="img" aria-label="도료 수정 뒤 평평한 판 2 배, 홈 8.8 배, 원뿔 41 배 나빠졌다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><text class="c-ax" x="24" y="26">도료를 고친 뒤 돌려보내는 빛이 나빠진 배수</text>
+<text class="c-lbl" x="136" y="82" text-anchor="end">평평한 판</text>
+<rect x="150" y="66" width="20" height="26" fill="var(--cool)"/>
+<text class="c-val" x="180" y="84" fill="var(--ink)">2 배</text>
+<text class="c-lbl" x="136" y="134" text-anchor="end">홈</text>
+<rect x="150" y="118" width="88" height="26" fill="var(--cool)"/>
+<text class="c-val" x="248" y="136" fill="var(--ink)">8.8 배</text>
+<text class="c-lbl" x="136" y="186" text-anchor="end">원뿔</text>
+<rect x="150" y="170" width="410" height="26" fill="var(--hot)"/>
+<text class="c-val" x="570" y="188" fill="var(--hot)">41 배</text>
+<text class="c-note" x="24" y="234">골이 깊은 모양일수록 크게 손해 봤다. 추천하던 원뿔이 1 등에서 꼴찌가 됐다.</text></svg></div><figcaption><span class="fignum">그림 3 · 고친 뒤 나빠진 정도</span>골이 깊은 모양일수록 크게 손해 봤습니다. 거울처럼 튕기면 옆면에 맞은 빛이 골 안쪽으로 더 들어갑니다. 퍼뜨리며 튕기면 골 벽 어느 자리에서나 바깥이 바로 보여서 그냥 새어 나갑니다.</figcaption></figure><div class="verdict"><span class="k">순위가 어떻게 됐나</span>고치니 <b>돌려보내는 빛의 양</b>이 모든 모양에서 나빠졌습니다. 그런데 나빠진 정도가 달랐습니다. 평평한 판 2 배, 홈 8.8 배, <b>원뿔 41 배.</b><br><b>추천하던 원뿔이 1 등에서 꼴찌가 됐습니다.</b> 그때까지 한 계산을 전부 다시 돌렸습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">2</span><span class="chg-t">“끝을 뾰족하게” 를 버림</span><span class="chg-d">8월 11일 밤</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>규칙이 하나 있었습니다. <strong>“빛에 드러나는 면이 좁을수록 어둡다.”</strong> 뿔의 끝은 점이고 홈 (groove) 의 끝은 선입니다. 점이 훨씬 좁으니 뿔이 이긴다고 봤습니다.</dd><dt>뭐가 틀렸나</dt><dd>확인하려고 <strong>일부러 질 모양</strong>을 넣었습니다. 벌집입니다. 벌집은 빛에 드러나는 면이 뿔보다 41 배 넓으니, 규칙대로면 41 배 나빠야 합니다.<br><br><strong>재보니 1.5 배였습니다. 예상이 27 배 빗나갔습니다.</strong></dd></dl><div class="verdict"><span class="k">순위가 어떻게 됐나</span>규칙을 버렸습니다. 뾰족한 끝이 설계 1 순위에서 내려왔습니다. 다시 찾아보니 실제로 성능을 정하는 것은 <b>골이 얼마나 깊고 좁은가</b> 였습니다. 설계 192 개에서 이 설명이 맞았습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">3</span><span class="chg-t">재는 항목을 하나에서 셋으로</span><span class="chg-d">8월 12~15일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd><b>돌려보내는 빛의 양</b> 하나로만 줄을 세웠습니다.</dd><dt>뭐가 틀렸나</dt><dd>이 하나로는 <strong>두 가지 실패를 못 잡습니다.</strong></dd></dl><h3>실패 하나 — 어둡게 만들었는데 글자가 읽힌다</h3><figure><div class="figb"><svg viewBox="0 0 620 290" width="620" role="img" aria-label="벌집은 돌려보내는 빛이 42 배 적지만 번지는 정도가 1.0 이라 모양이 그대로 남는다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><text class="c-ax" x="24" y="26">벌집을 두 가지로 재면</text>
+<text class="c-lbl" x="196" y="73" text-anchor="end">돌려보내는 빛의 양</text>
+<rect x="210" y="56" width="330" height="26" fill="var(--good)"/>
+<text class="c-val" x="550" y="74">평평한 천장보다 42 배 어둡다</text>
+<text class="c-note" x="550" y="90">이것만 보면 1 등이다</text>
+<text class="c-lbl" x="196" y="153" text-anchor="end">번지는 정도</text>
+<rect x="210" y="136" width="26" height="26" fill="var(--hot)"/>
+<text class="c-val" x="246" y="154">1.0</text>
+<text class="c-note" x="246" y="170">모양이 하나도 안 뭉개진다</text>
+<line x1="24" y1="200" x2="596" y2="200" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-note" x="24" y="226">어둡게 만들었는데 천장에 그림이 그대로 남는다.</text>
+<text class="c-note" x="24" y="248">어두운 글씨도 글씨다. 그래서 번지는 정도를 따로 잰다.</text></svg></div><figcaption><span class="fignum">그림 4 · 벌집의 함정</span>벌집은 돌려보내는 빛이 <b>평평한 천장보다 42 배 적습니다.</b> 이것만 보면 1 등입니다. 그런데 번지는 정도가 1.0 입니다. <b>모양이 하나도 안 뭉개집니다.</b> 어두운 글씨도 글씨입니다.</figcaption></figure><h3>실패 둘 — 어둡고 번지는데 한 방향으로 몰린다</h3><figure><div class="figb"><svg viewBox="0 0 620 270" width="620" role="img" aria-label="끝을 자르면 돌려보내는 빛은 1.28 배 나빠지는데 관객 눈에 들어오는 밝기는 7.4 배 나빠진다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><text class="c-ax" x="24" y="26">피라미드 끝을 1.1 mm 잘랐을 때</text>
+<text class="c-lbl" x="216" y="77" text-anchor="end">돌려보내는 빛의 양</text>
+<rect x="230" y="60" width="40.54" height="24" fill="var(--grid)"/>
+<rect x="230" y="90" width="51.89" height="24" fill="var(--cool)" opacity=".92"/>
+<text class="c-note" x="280.54" y="77">자르기 전</text>
+<text class="c-val" x="291.89" y="108" fill="var(--cool)">1.28 배 나빠짐</text>
+<text class="c-lbl" x="216" y="169" text-anchor="end">관객 눈에 들어오는 밝기</text>
+<rect x="230" y="152" width="40.54" height="24" fill="var(--grid)"/>
+<rect x="230" y="182" width="301.8" height="24" fill="var(--hot)" opacity=".92"/>
+<text class="c-note" x="280.54" y="169">자르기 전</text>
+<text class="c-val" x="541.8" y="200" fill="var(--hot)">7.4 배 나빠짐</text>
+<text class="c-note" x="24" y="246">빛의 양만 봤으면 “만들기 쉬워지니 남는 장사” 라고 판단했다. 실제로는 눈이 7.4 배 부시다.</text></svg></div><figcaption><span class="fignum">그림 5 · 피라미드 끝을 1.1 mm 잘랐을 때</span>만들기 훨씬 쉬워지는 변경입니다. 빛의 양은 1.28 배 나빠지는 데 그칩니다. <b>그런데 관객 눈에 들어오는 밝기는 7.4 배 나빠집니다.</b> 빛의 양만 봤으면 “남는 장사” 라고 판단했을 변경입니다.</figcaption></figure><div class="verdict"><span class="k">순위가 어떻게 됐나</span>한 항목짜리 순위표를 없앴습니다. 지금도 세 항목을 같이 안 적은 표는 만들지 않습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">4</span><span class="chg-t">모양마다 자기 공정이 주는 치수로</span><span class="chg-d">8월 13~16일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>끝 굵기를 섞어서 비교했습니다. 판금은 0.05 mm, 몰드로 찍는 원뿔은 0.4 mm.</dd><dt>뭐가 틀렸나</dt><dd>끝이 가늘수록 유리합니다. 조건이 다른데 나란히 놓으면 비교가 아닙니다.<br><br>그렇다고 전부 0.4 mm 로 통일하는 것도 틀렸습니다. <strong>벌집은 사 오는 물건이라 0.03 mm 가 그냥 됩니다.</strong> 0.4 로 맞추는 것은 벌집한테만 벌을 주는 것입니다.<br><br>그리고 1 등이 <strong>벽 두께 0.1 mm 에 깊이 50 mm</strong> 짜리였습니다. 종이보다 얇은 벽이 5 cm 서 있어야 합니다. 3D 프린터 노즐이 0.4 mm 라 <strong>애초에 못 뽑습니다.</strong> 숫자로는 안 보였고, 그려서 눈으로 보고 알았습니다.</dd></dl><div class="note">여기서 배운 것. <strong>컴퓨터는 내가 정해준 범위 안에서만 답을 찾습니다.</strong> 범위 끝에 가장 좋은 값이 있으면 거기로 갑니다. 그러니 범위를 대충 정하면, 순위표에 남는 것은 설계의 우열이 아니라 내가 고른 범위입니다.<br><br>이 과정에서 두 공정을 떨어뜨렸습니다. <b>사출 (injection moulding)</b> 은 골짜기 바닥이 아주 살짝만 둥글어져도 반짝임이 허용치의 2 배를 넘습니다. <b>압출 (extrusion)</b> 은 피라미드의 끝이 <i>점</i>인데 뽑아낸 홈의 끝은 <i>선</i>이라, 같은 굵기라도 훨씬 밝습니다.</div><div class="verdict"><span class="k">순위가 어떻게 됐나</span>끝 굵기를 맞추자 <b>판금이 1 등에서 내려오고 원뿔이 올라왔습니다.</b> 못 만드는 설계는 목록에서 뺐습니다. 이후로는 <b>모양마다 그 공정이 실제로 내주는 치수</b>로 잽니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">5</span><span class="chg-t">답이 알려진 문제로 계산기를 검증</span><span class="chg-d">8월 15~17일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>계산 프로그램 하나만 썼습니다. 맞는지 확인할 방법이 없었습니다.</dd><dt>뭐가 틀렸나</dt><dd>만든 팀이 다른 두 번째 계산기로 같은 것을 다시 계산했습니다. 쓰던 것은 <b>Cycles</b>, 대조한 것은 <b>Mitsuba</b> 입니다. 둘 다 회사 제품이 아니라 공개된 프로그램입니다.<br><br>먼저 <strong>비교 자체가 틀려 있었습니다. 두 프로그램이 튕김 횟수를 세는 방식이 달랐습니다.</strong> Cycles 의 “N 번” 이 Mitsuba 에서는 “N+2” 입니다. 처음에는 한쪽에 한 번 적게 주고 비교했습니다. 이것을 고치고 다시 쟀습니다.<br><br>두 모양은 잘 맞았고, 세 번째 모양에서 <strong>27 % 갈렸습니다.</strong> 그런데 <strong>두 프로그램끼리 봐서는 누가 맞는지 알 수 없습니다.</strong> 그래서 답이 이미 알려진 문제에 둘 다 풀려봤습니다.</dd></dl><div class="tw"><table><caption>기준으로 삼은 문제. 답이 논문과 기술 자료에 식으로 나와 있는 것들입니다.</caption><thead><tr><th>기준 문제</th><th>답의 출처</th><th class="num">Cycles</th><th class="num">Mitsuba</th></tr></thead><tbody><tr class="hi"><td>빛을 가두는 구슬 안에서 평균 40 번 튕길 때의 밝기</td><td>적분구 (integrating sphere) 기술 자료의 식</td><td class="num">오차 0.06 %</td><td class="num">오차 0.22 %</td></tr><tr><td>빛을 하나도 안 먹는 공간에서 2048 번 튕겨도 에너지가 보존되나</td><td>물리 법칙</td><td class="num">0.99974</td><td class="num">—</td></tr><tr><td>평평한 판이 제 반사율을 그대로 읽나</td><td>정의 그대로</td><td class="num">맞음</td><td class="num">맞음</td></tr></tbody></table></div><div class="note">여기에 <strong>따로 짠 세 번째 계산기</strong>를 하나 더 만들어 대조했습니다. <strong>Cycles 는 셋 다 맞았고, Mitsuba 만 얇은 벽에서 셋 다와 어긋났습니다.</strong></div><div class="verdict same"><span class="k">순위가 어떻게 됐나</span><b>안 바뀌었습니다.</b> 우리 숫자가 맞다는 것이 확인됐습니다.</div></div><div class="chg"><div class="chg-h"><span class="chg-n">6</span><span class="chg-t">시료 크기가 바뀌어도 같은 답이 나오게</span><span class="chg-d">8월 20일 → 8월 28일 → 9월 15일</span></div>
+<dl class="qa"><dt>어떻게 쟀었나</dt><dd>재는 범위를 <strong>“몇 칸을 본다”</strong> 로 적어놨습니다. 판이 커지면 한 칸의 실제 길이가 같이 커집니다. <strong>판 크기가 바뀔 때마다 재는 범위가 저절로 변했습니다.</strong></dd><dt>왜 이것이 큰 문제인가</dt><dd>제대로 된 측정 장비는 <strong>같은 물건을 크게 잘라 재든 작게 잘라 재든 같은 답을 줍니다.</strong> 우리 장비는 그것이 안 됐습니다. 그러면 두 설계를 비교한 결과를 믿을 수 없습니다.</dd></dl>
+<h3>첫 번째 — 8월 20일 · 결함 9 개</h3><div class="prose"><p>사용자가 돌린 계산에서 <b>번지는 정도</b>가 15.46 이 나왔습니다. 좋은 설계가 보통 1.5~4 인데 열 배 넘게 큰 값이라 의심스러웠습니다. 쫓아가 보니 설계가 아니라 재는 장비 (measurement rig) 가 고장 나 있었습니다.</p><p><strong>결함 9 개 중 6 개가 같은 실수였습니다. 길이를 적어야 할 자리에 개수를 적은 것.</strong></p></div><div class="verdict"><span class="k">순위가 어떻게 됐나</span><b>간격이 굵은 설계의 판정이 뒤집혔습니다.</b> 번지는 정도가 1.272 라 “쓸모없다” 였는데, 제대로 재니 <b>24.77</b> 이었습니다.<br>그리고 관객 눈에 들어오는 밝기가 0.173 에서 0.189 로 바뀌었습니다. 덕분에 <b>끝을 0.1 에서 0.4 mm 로 뭉툭하게 만드는 대가가 4.3 배인 줄 알았는데 2.8 배</b>였습니다. 만들기 쉬운 쪽에 유리한 정정이었습니다.</div><div class="note">다 못 고쳤습니다. 칸 (unit cell) 50 개를 봐도 값이 안 멈췄습니다. “미해결” 로 남겨뒀습니다.</div>
+<h3>두 번째 — 8월 28일 · 몇 칸이 보여야 답이 멈추나</h3><div class="prose"><p>사용자가 물었습니다. <strong>“판 500 이면 화소도 많고 시간도 더 걸리는데 답이 같아도 되느냐, 무슨 기준이 있을 것 아니냐.”</strong></p><p>쫓아가 보니 <strong>화소는 문제가 아니었습니다.</strong> 화소 (pixel) 크기는 판마다 0.215 mm 로 고정이고, 판이 커지면 화소 수가 그만큼 늘어납니다. <strong>답을 바꾸는 것은 “몇 칸이 보이느냐” 였습니다. 다른 축이었습니다.</strong></p></div>
+<figure><div class="figb"><svg viewBox="0 0 620 360" width="620" role="img" aria-label="판에 칸이 4 개만 들어가면 값이 14.5 퍼센트까지 흔들린다. 칸이 늘어야 값이 멈춘다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><line x1="92" y1="264" x2="550" y2="264" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="92" y1="46" x2="92" y2="264" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="130.17" y1="264" x2="130.17" y2="269" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="130.17" y="284" text-anchor="middle">4 칸</text>
+<line x1="206.5" y1="264" x2="206.5" y2="269" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="206.5" y="284" text-anchor="middle">6 칸</text>
+<line x1="359.17" y1="264" x2="359.17" y2="269" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="359.17" y="284" text-anchor="middle">10 칸</text>
+<line x1="511.83" y1="264" x2="511.83" y2="269" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="511.83" y="284" text-anchor="middle">14 칸</text>
+<line x1="92" y1="245.83" x2="550" y2="245.83" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="249.83" text-anchor="end">0.45</text>
+<line x1="92" y1="191.33" x2="550" y2="191.33" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="195.33" text-anchor="end">0.48</text>
+<line x1="92" y1="136.83" x2="550" y2="136.83" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="140.83" text-anchor="end">0.51</text>
+<line x1="92" y1="82.33" x2="550" y2="82.33" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="86.33" text-anchor="end">0.54</text>
+<text class="c-ax" x="321" y="306" text-anchor="middle">판 안에 들어간 칸의 수</text>
+<text class="c-ax" x="40" y="155" text-anchor="middle" transform="rotate(-90 40 155)">잰 값</text>
+<polyline points="130.17,214.11 206.5,91 359.17,140.98 511.83,162.36" fill="none" stroke="var(--hot)" stroke-width="2.6"/>
+<circle cx="130.17" cy="214.11" r="4.5" fill="var(--hot)"/>
+<circle cx="206.5" cy="91" r="4.5" fill="var(--hot)"/>
+<circle cx="359.17" cy="140.98" r="4.5" fill="var(--hot)"/>
+<circle cx="511.83" cy="162.36" r="4.5" fill="var(--hot)"/>
+<text class="c-val" x="206.5" y="77" text-anchor="middle">+14.5 %</text>
+<text class="c-val" x="359.17" y="126.98" text-anchor="middle">−5.1 %</text>
+<text class="c-val" x="511.83" y="148.36" text-anchor="middle">−2.3 %</text>
+<rect x="92" y="46" width="152.67" height="218" fill="var(--hot)" opacity=".07"/>
+<text class="c-note" x="100" y="64">여기서 잰 값은 못 쓴다</text>
+<text class="c-note" x="24" y="330">같은 설계인데 판을 작게 자르면 답이 달라진다. 칸이 적을수록 심하다.</text></svg></div><figcaption><span class="fignum">그림 6 · 판에 칸이 몇 개 들어가야 답이 멈추나</span>같은 설계인데 판을 작게 자르면 답이 달라집니다. <b>4 칸짜리로 잰 값은 못 씁니다.</b> 칸이 늘어야 값이 가라앉습니다.</figcaption></figure>
+<h3>세 번째 — 9월 15일 · 감사에서 또 걸림</h3><div class="prose"><p>외부 감사가 짚었습니다. <strong>“값이 아직 안 멈췄는데 멈췄다고 판정한다.”</strong></p><p>판정 방식을 다시 고쳤습니다. 지금은 <strong>가장 넓게 본 값</strong>을 쓰고, <strong>판 가장자리로 빛이 새는지까지</strong> 확인합니다. 아직 남은 한계도 적어뒀습니다. <strong>판 밖으로 나간 빛은 어떤 방법으로도 못 봅니다.</strong></p></div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">7</span><span class="chg-t">항목마다 다른 조건에서 재기</span><span class="chg-d">8월 20일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>한 번 계산한 결과로 세 항목을 다 발표했습니다.</dd><dt>뭐가 틀렸나</dt><dd>세 항목은 봐야 할 것이 서로 다릅니다. 하나로 셋을 내면 <strong>최소 하나는 틀린 조건에서 잰 값</strong>입니다.</dd></dl><div class="tw"><table><thead><tr><th>재는 항목</th><th>어느 각도로</th><th>얼마나 잘게</th><th>얼마나 넓게</th></tr></thead><tbody><tr><td>돌려보내는 빛의 양</td><td>정면과 ±40 도</td><td>화소 0.215 mm</td><td>판 전체, 칸 25 개 이상</td></tr><tr><td>번지는 정도</td><td>±40 도</td><td>화소 0.215 mm</td><td><b>값이 멈출 때까지 넓힘</b></td></tr><tr class="hi"><td>관객 눈에 들어오는 밝기</td><td><b>정면</b></td><td><b>화소를 끝 굵기의 4 분의 1 로</b></td><td><b>칸 10 개짜리 조각</b></td></tr></tbody></table></div><div class="note hot">특히 세 번째가 문제였습니다. <strong>화소가 피라미드 끝보다 굵으면 뾰족한 봉우리 (peak) 가 뭉개져서 실제보다 어둡게 나옵니다.</strong> 끝이 가는 설계일수록 더 많이 봐줬습니다.</div><div class="verdict"><span class="k">순위가 어떻게 됐나</span>한 번에 셋을 내던 것을 그만뒀습니다. 이후 모든 표에 <b>어떤 조건으로 쟀는지를 같이 적습니다.</b></div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">8</span><span class="chg-t">도료가 빛을 퍼뜨리는 비율을 실측값으로</span><span class="chg-d">8월 21일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>도료가 빛을 <strong>퍼뜨리는지 거울처럼 되쏘는지</strong>를 0.76 대 0.24 로 놨습니다. 이 값을 확산 비율 (diffuse fraction) 이라고 부릅니다. <strong>이것은 잰 값이 아니라 그냥 고른 값이었습니다.</strong></dd><dt>뭐가 틀렸나</dt><dd>평평한 판의 총량만 재서는 이 값을 알 수 없습니다. <strong>퍼뜨리든 거울처럼 되쏘든 총량은 똑같이 나오기 때문입니다.</strong> 논문에서 실제 측정값을 찾았습니다. 무광 검정 스프레이 0.999, 검정 아노다이징 0.994~0.999. <strong>실제 도료는 거의 전부 퍼뜨립니다. 우리는 4 분의 1 을 거울로 놓고 있었습니다.</strong></dd></dl><div class="note hot">이 값을 바꾸면 <strong>두 항목이 반대로 움직입니다.</strong><br>퍼뜨릴수록 골 안에 빛이 덜 갇히니 <b>돌려보내는 빛의 양은 나빠집니다</b> (1 번의 원뿔 41 배).<br>퍼뜨릴수록 빛이 좁게 안 몰리니 <b>관객 눈에 들어오는 밝기는 좋아집니다</b> (4 분의 1).<br><br>이 값은 다섯 주 동안 <strong>네 번 바뀌었고</strong>, 바뀔 때마다 순위나 숫자가 흔들렸습니다. 그리고 <strong>아직 실물로 재지 않았습니다.</strong> 전부 논문 그림에서 읽은 값입니다.</div><div class="verdict"><span class="k">순위가 어떻게 됐나</span><b>순위가 뒤집혔습니다.</b> 그리고 <b>관객 눈에 들어오는 밝기가 4 분의 1</b> 로 떨어졌습니다. 거울처럼 되쏘는 몫이 줄어드니 좁게 몰리던 빛이 넓게 퍼졌습니다. 돌려보내는 빛의 양은 거의 안 움직였습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">9</span><span class="chg-t">거칠기 단위 바로잡기</span><span class="chg-d">8월 22일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>논문에 적힌 거칠기 값을 프로그램에 그대로 넣었습니다.</dd><dt>뭐가 틀렸나</dt><dd>그 프로그램은 거칠기 (roughness) 입력값을 <strong>제곱해서</strong> 씁니다. 0.012 를 넣으려다 <strong>0.000144 를 넣었습니다. 83 배 차이입니다.</strong> 훨씬 매끈한 재질을 계산하고 있었습니다.</dd></dl><div class="note">여기서 <strong>예측이 틀렸습니다.</strong> 밝기가 내려간다고 적었습니다. 두 가지가 반대로 움직이고 있었습니다. 퍼뜨리는 비율이 올라 3 배 내려갔는데, 반사가 좁아져 5.3 배 올라갔습니다. <strong>좁아진 쪽이 이겼습니다.</strong></div><div class="verdict same"><span class="k">순위가 어떻게 됐나</span><b>돌려보내는 빛의 양은 순위가 그대로였습니다.</b> 값도 최대 1.7 % 밖에 안 움직였습니다. 관객 눈에 들어오는 밝기만 여섯 설계 전부 1.38 배 올랐습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">10</span><span class="chg-t">얼마나 깊이 칠해야 하는지 재기</span><span class="chg-d">8월 25일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>관 안쪽 끝까지 칠해야 한다고 전제했습니다. 업체가 “벌집은 안쪽까지 못 칠한다” 고 해서 칠하는 방법을 찾고 있었습니다.</dd><dt>뭐가 틀렸나</dt><dd><strong>얼마나 깊이 칠해야 하는지를 한 번도 안 재봤습니다.</strong> 재보니 되돌아오는 빛이 나오는 곳이 이랬습니다.</dd></dl><div class="tw"><table><thead><tr><th>되돌아오는 빛이 어디서 나오나</th><th class="num">몫</th></tr></thead><tbody><tr><td>판 겉면 테두리</td><td class="num">51 %</td></tr><tr><td>맨 아래 받침판</td><td class="num">48 %</td></tr><tr class="hi"><td><b>관 안쪽 깊은 벽</b></td><td class="num"><b>0.4 %</b></td></tr></tbody></table></div><div class="note hot"><strong>업체가 못 한다던 그 부분이 필요 없는 부분이었습니다.</strong> 테두리는 겉면이라 칠하기 쉽고, 받침판은 벌집을 붙이기 전에 칠하면 됩니다.<br><br>같은 날 하나 더. 태양전지 논문은 <b>피라미드를 뒤집어 파는 쪽이 낫다</b>고 합니다. 믿지 않고 직접 쟀습니다. <strong>번지는 정도가 1.46 에서 1.07 로 무너졌습니다.</strong> 뒤집으면 빛이 온 길로 되돌아갑니다. 태양전지에서는 그것이 이득이고 우리에게는 손해입니다.</div><div class="verdict"><span class="k">순위가 어떻게 됐나</span><b>받침판을 칠하니 칸 크기 순위가 뒤집혔습니다.</b> 칸 9.53 mm 가 6.35 mm 를 세 각도에서 모두 이겼습니다. 그 전까지는 칸이 작을수록 좋다고 알고 있었습니다.</div></div><div class="chg"><div class="chg-h"><span class="chg-n">11</span><span class="chg-t">보는 각도를 정면에서 실제 방 각도로</span><span class="chg-d">8월 27일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>관객이 천장을 <strong>똑바로 올려다본다</strong>고 놓고 계산했습니다. 코드는 각도를 받게 돼 있었는데, 부르는 쪽에서 계속 0 을 넣고 있었습니다. 아무도 몰랐습니다.</dd><dt>뭐가 틀렸나</dt><dd>설치 조건을 알게 됐습니다 (위 00 절). 천장을 6 m 로 놓았을 때 빔이 천장을 <strong>30~45 도로 비스듬히</strong> 때립니다. (2026-09-18 정정: 실제 방은 천장 3.5 m 라 각도가 더 눕습니다. 00 절에서 직접 움직여 볼 수 있습니다.) <strong>똑바로 때리는 일은 이 방에서 안 일어납니다.</strong> 똑바로 때리려면 프로젝터가 천장 바로 밑에 있어야 하는데, 그러면 공중에 영상이 안 생깁니다.<br><br><strong>두 주 동안 이 방에서 절대 안 일어나는 상황을 재고 있었습니다.</strong></dd></dl><figure><div class="figb"><svg viewBox="0 0 620 420" width="620" role="img" aria-label="관객이 보는 각도에 따라 벌집과 피라미드의 우열이 뒤바뀐다. 피라미드는 40 도에서 0.4675 로 치솟는다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><line x1="92" y1="300" x2="556" y2="300" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="92" y1="40" x2="92" y2="300" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="92" y1="300" x2="92" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="92" y="320" text-anchor="middle">0°</text>
+<line x1="246.67" y1="300" x2="246.67" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="246.67" y="320" text-anchor="middle">20°</text>
+<line x1="324" y1="300" x2="324" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="324" y="320" text-anchor="middle">30°</text>
+<line x1="401.33" y1="300" x2="401.33" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="401.33" y="320" text-anchor="middle">40°</text>
+<line x1="478.67" y1="300" x2="478.67" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="478.67" y="320" text-anchor="middle">50°</text>
+<line x1="556" y1="300" x2="556" y2="305" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="556" y="320" text-anchor="middle">60°</text>
+<line x1="92" y1="300" x2="556" y2="300" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="304" text-anchor="end">0.0</text>
+<line x1="92" y1="248" x2="556" y2="248" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="252" text-anchor="end">0.1</text>
+<line x1="92" y1="196" x2="556" y2="196" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="200" text-anchor="end">0.2</text>
+<line x1="92" y1="144" x2="556" y2="144" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="148" text-anchor="end">0.3</text>
+<line x1="92" y1="92" x2="556" y2="92" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="96" text-anchor="end">0.4</text>
+<line x1="92" y1="40" x2="556" y2="40" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="83" y="44" text-anchor="end">0.5</text>
+<text class="c-ax" x="324" y="342" text-anchor="middle">관객이 천장을 보는 각도 (0° = 똑바로 위)</text>
+<text class="c-ax" x="40" y="170" text-anchor="middle" transform="rotate(-90 40 170)">관객 눈에 들어오는 밝기</text>
+<rect x="246.67" y="40" width="309.33" height="260" fill="var(--good)" opacity=".10"/>
+<text class="c-note" x="401.33" y="58" text-anchor="middle">이 방에서 관객이 실제로 서는 구간</text>
+<rect x="92" y="40" width="139.2" height="260" fill="var(--grid)" opacity=".5"/>
+<text class="c-note" x="161.6" y="290" text-anchor="middle">안 일어남</text>
+<polyline points="92,296.36 246.67,230.89 324,229.96 401.33,228.92 478.67,229.02 556,230.11" fill="none" stroke="var(--cool)" stroke-width="2.8"/>
+<circle cx="92" cy="296.36" r="4" fill="var(--cool)"/>
+<circle cx="246.67" cy="230.89" r="4" fill="var(--cool)"/>
+<circle cx="324" cy="229.96" r="4" fill="var(--cool)"/>
+<circle cx="401.33" cy="228.92" r="4" fill="var(--cool)"/>
+<circle cx="478.67" cy="229.02" r="4" fill="var(--cool)"/>
+<circle cx="556" cy="230.11" r="4" fill="var(--cool)"/>
+<polyline points="92,259.8 246.67,247.95 324,217.58 401.33,56.9 478.67,241.55 556,265.16" fill="none" stroke="var(--hot)" stroke-width="2.8"/>
+<circle cx="92" cy="259.8" r="4" fill="var(--hot)"/>
+<circle cx="246.67" cy="247.95" r="4" fill="var(--hot)"/>
+<circle cx="324" cy="217.58" r="4" fill="var(--hot)"/>
+<circle cx="401.33" cy="56.9" r="4" fill="var(--hot)"/>
+<circle cx="478.67" cy="241.55" r="4" fill="var(--hot)"/>
+<circle cx="556" cy="265.16" r="4" fill="var(--hot)"/>
+<text class="c-lbl" x="411.33" y="60.9" fill="var(--hot)">피라미드</text>
+<text class="c-lbl" x="488.67" y="233.02" fill="var(--cool)">벌집</text>
+<text class="c-note" x="24" y="380">한 모양이 다 이기지 않는다. 20°·50°·60° 는 피라미드가, 30~40° 는 벌집이 어둡다.</text>
+<text class="c-note" x="24" y="402">피라미드가 40° 에서 치솟는 것은 마주 보는 두 면이 좁은 골을 이뤄 빛을 온 길로 되쏘기 때문이다.</text></svg></div><figcaption><span class="fignum">그림 7 · 관객이 보는 각도에 따라 우열이 뒤바뀐다</span>20°·50°·60° 는 피라미드가, 30~40° 는 벌집이 어둡습니다. 피라미드가 40° 에서 <b>0.4675</b> 로 치솟는 것은, 마주 보는 두 면이 좁은 골을 이뤄 두 번 튕긴 빛을 온 길로 되쏘기 때문입니다.</figcaption></figure><div class="note">벌집이 비스듬히 보면 밝은 이유도 알아냈습니다. <strong>관 속이 아니라 벽입니다.</strong> 빔이 40 도로 들어오면 칸 한쪽 벽이 11.4 mm 높이까지 밝아집니다. 그 밝아진 벽은 <strong>빛이 온 쪽에서만 보입니다.</strong> 손으로 계산해보니 딱 맞았습니다.</div><div class="note hot"><strong>모양을 바꿔도 빛이 없어지지는 않습니다. 가는 방향만 달라집니다.</strong> 벌집은 돌려보내는 빛의 양으로 보면 평평한 천장보다 42 배 어둡습니다. 그런데 빛이 온 쪽에 서서 보면 0.137 입니다.</div><div class="verdict"><span class="k">순위가 어떻게 됐나</span><b>한 모양이 다 이기지 않게 됐습니다.</b> 관객이 어디 서느냐로 답이 갈립니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">12</span><span class="chg-t">빔이 떨어지는 자리를 여러 곳에서</span><span class="chg-d">8월 28일</span></div><dl class="qa"><dt>어떻게 쟀었나</dt><dd>빔을 칸의 한 자리에만 쏘고 쟀습니다.</dd><dt>뭐가 틀렸나</dt><dd>빔은 굵기가 7.5 mm 인데 칸은 50 mm 입니다. <strong>칸의 15 % 만 덮습니다.</strong> 어디에 떨어지느냐가 답을 정합니다.</dd></dl><figure><div class="figb"><svg viewBox="0 0 620 300" width="620" role="img" aria-label="빔이 골짜기에 떨어지면 0.00116, 꼭짓점 너머면 0.02658. 23 배 차이다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><text class="c-ax" x="24" y="26">빔이 칸의 어디에 떨어지느냐</text>
+<rect x="126" y="212.41" width="57" height="7.59" fill="var(--cool)"/>
+<text class="c-tick" x="154.5" y="238" text-anchor="middle">골짜기</text>
+<text class="c-val" x="154.5" y="204.41" text-anchor="middle">0.0012</text>
+<rect x="199" y="205.01" width="57" height="14.99" fill="var(--cool)"/>
+<text class="c-tick" x="227.5" y="238" text-anchor="middle">경사면</text>
+<text class="c-val" x="227.5" y="197.01" text-anchor="middle">0.0023</text>
+<rect x="272" y="186.74" width="57" height="33.26" fill="var(--cool)"/>
+<text class="c-tick" x="300.5" y="238" text-anchor="middle">경사면</text>
+<text class="c-val" x="300.5" y="178.74" text-anchor="middle">0.0051</text>
+<rect x="345" y="154.41" width="57" height="65.59" fill="var(--cool)"/>
+<text class="c-tick" x="373.5" y="238" text-anchor="middle">꼭짓점</text>
+<text class="c-val" x="373.5" y="146.41" text-anchor="middle">0.0100</text>
+<rect x="418" y="73.82" width="57" height="146.18" fill="var(--hot)"/>
+<text class="c-tick" x="446.5" y="238" text-anchor="middle">경사면</text>
+<text class="c-val" x="446.5" y="65.82" text-anchor="middle">0.0223</text>
+<rect x="491" y="46" width="57" height="174" fill="var(--hot)"/>
+<text class="c-tick" x="519.5" y="238" text-anchor="middle">꼭짓점 너머</text>
+<text class="c-val" x="519.5" y="38" text-anchor="middle">0.0266</text>
+<line x1="118" y1="220" x2="556" y2="220" stroke="var(--axis)" stroke-width="1.2"/>
+<text class="c-ax" x="337" y="262" text-anchor="middle">빔이 떨어진 자리</text>
+<text class="c-note" x="24" y="272">같은 설계인데 23 배 갈린다. 빔은 7.5 mm 인데 칸은 50 mm 라 칸의 15 % 만 덮는다.</text>
+<text class="c-note" x="24" y="292">실제 레이저는 우리 격자에 맞춰 떨어지지 않는다. 그래서 열여섯 자리에 쏴서 가장 밝은 값을 쓴다.</text></svg></div><figcaption><span class="fignum">그림 8 · 빔이 칸의 어디에 떨어지느냐</span>같은 설계인데 <b>23 배 갈립니다.</b> 그리고 실제 레이저는 우리 격자에 맞춰 떨어지지 않습니다.</figcaption></figure><div class="verdict"><span class="k">순위가 어떻게 됐나</span>한 자리가 아니라 <b>열여섯 자리에 쏴서 가장 밝은 값</b>을 쓰기로 바꿨습니다. 좋게 나오는 자리만 골라 쓰던 것을 막았습니다.</div></div>
+<div class="chg"><div class="chg-h"><span class="chg-n">13</span><span class="chg-t">외부 감사가 짚은 다섯 가지</span><span class="chg-d">9월 14~15일</span></div>
+<div class="prose"><p>외부 감사가 들어왔습니다. 판정이 매서웠습니다.</p></div>
+<div class="note hot">“후보를 <strong>고르는</strong> 도구로는 쓸 수 있다. 하지만 지금 계산으로 <strong>실제 반사율이 얼마다, 모든 방향에서 좋다, 레이저에 안 상한다</strong> 는 주장은 할 수 없다.”</div>
+<div class="tw"><table><thead><tr><th>무엇이</th><th>무엇이 문제였나</th></tr></thead><tbody><tr><td><b>명령 전달</b></td><td>화면에서 설정을 바꿔도 <b>열 개가 계산에 전달되지 않았다.</b> 도료 종류, 칠 깊이, 보는 각도 같은 것들</td></tr><tr class="hi"><td><b>도료 계산식</b></td><td>램프와 눈의 자리를 맞바꾸면 <b>238 % 다른 값</b>이 나왔다. 물리적으로 있을 수 없다</td></tr><tr><td><b>무소 재료값</b></td><td>논문 그림을 잘못 읽었다</td></tr><tr><td><b>밝기 재는 법</b></td><td><b>화면의 점 하나</b>로 쟀다. 화면을 잘게 쪼개면 같은 판인데 값이 1.0 에서 0.1 로 떨어졌다</td></tr><tr><td><b>수렴 판정</b></td><td>값이 아직 안 멈췄는데 멈췄다고 판정했다 (위 6 번의 세 번째 수정)</td></tr></tbody></table></div>
+<div class="prose"><p><strong>다섯 다 그동안 발표한 숫자를 흔들 수 있었습니다. 그래서 새 모양을 찾기 전에 재는 도구부터 고쳤습니다.</strong></p></div>
+<figure><div class="figb"><svg viewBox="0 0 620 300" width="620" role="img" aria-label="감사 뒤 세 항목이 모두 나빠졌지만 설계 간 순위는 그대로였다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs><text class="c-ax" x="24" y="26">감사 전후 · 같은 설계, 같은 조건</text>
+<text class="c-lbl" x="196" y="72" text-anchor="end">돌려보내는 빛의 양</text>
+<rect x="210" y="56" width="169" height="20" fill="var(--grid)"/>
+<text class="c-note" x="387" y="71">0.169%  전</text>
+<rect x="210" y="80" width="198" height="20" fill="var(--hot)" opacity=".9"/>
+<text class="c-val" x="416" y="95" fill="var(--hot)">0.198%  후</text>
+<text class="c-lbl" x="196" y="146" text-anchor="end">번지는 정도</text>
+<rect x="210" y="130" width="206.67" height="20" fill="var(--grid)"/>
+<text class="c-note" x="424.67" y="145">2.48  전</text>
+<rect x="210" y="154" width="178.33" height="20" fill="var(--hot)" opacity=".9"/>
+<text class="c-val" x="396.33" y="169" fill="var(--hot)">2.14  후</text>
+<text class="c-lbl" x="196" y="220" text-anchor="end">관객 눈에 들어오는 밝기</text>
+<rect x="210" y="204" width="97.5" height="20" fill="var(--grid)"/>
+<text class="c-note" x="315.5" y="219">0.039  전</text>
+<rect x="210" y="228" width="202.5" height="20" fill="var(--hot)" opacity=".9"/>
+<text class="c-val" x="420.5" y="243" fill="var(--hot)">0.081  후</text>
+<line x1="24" y1="274" x2="596" y2="274" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-note" x="24" y="298">세 항목이 다 나빠졌다. 그런데 설계들 사이의 순위는 안 바뀌었다. 1 등은 그대로 1 등이었다.</text></svg></div><figcaption><span class="fignum">그림 9 · 감사 전후</span>세 항목이 다 나빠졌습니다. <b>그런데 설계들 사이의 순위는 안 바뀌었습니다.</b> 모두 똑같이 나빠졌고, 1 등은 그대로 1 등이었습니다.</figcaption></figure>
+<div class="note">밝기는 점 하나가 아니라 <strong>2 mm 상자의 평균</strong>으로 재게 바꿨습니다. 이제 화면을 잘게 쪼개도 값이 안 변합니다.<br><br>그리고 비용을 아끼려고 미뤘던 검사에서 <strong>진짜 결함이 나왔습니다.</strong> 계산에 쓰는 빛줄기 (표본 수, samples) 가 모자랐습니다. 늘리니 값이 4.55 % 움직였습니다. 16 에서 256 으로 올렸습니다.</div>
+<div class="verdict same"><span class="k">순위가 어떻게 됐나</span>세 항목이 다 나빠졌는데 <b>설계 사이의 순위는 그대로였습니다.</b><br>마지막으로 사용자가 화면에서 직접 다시 계산해 보고서 숫자와 맞춰봤습니다. <b>14 개 요청이 전부 같았고, 실제로 다시 계산한 7 개가 최대 0.072 % 차이</b>로 맞았습니다.</div></div>
+</section>
+<section><div class="sechead"><span class="secnum">04</span><h2>전체를 놓고 보면</h2></div>
+<div class="tally">
+<div><h3>순위가 뒤집힌 여섯 번</h3><div class="tw"><table><thead><tr><th>언제</th><th>무엇을 바꿔서</th></tr></thead><tbody><tr><td class="num">8/11</td><td>도료를 각도에 따라 다르게 &rarr; <b>원뿔이 1 등에서 꼴찌로</b></td></tr><tr><td class="num">8/16</td><td>모양마다 자기 공정 치수로 &rarr; 판금이 내려오고 원뿔이 올라옴</td></tr><tr><td class="num">8/20</td><td>재는 범위를 길이로 &rarr; 굵은 간격 설계가 되살아남</td></tr><tr><td class="num">8/21</td><td>퍼뜨리는 비율을 실측값으로 &rarr; 밝기 4 분의 1</td></tr><tr><td class="num">8/25</td><td>받침판을 칠함 &rarr; 칸 9.53 이 6.35 를 이김</td></tr><tr class="hi"><td class="num">8/27</td><td>보는 각도를 실제 방 각도로 &rarr; <b>한 모양이 다 이기지 않게 됨</b></td></tr></tbody></table></div></div>
+<div><h3>안 뒤집힌 세 번</h3><div class="tw"><table><thead><tr><th>언제</th><th>무엇을 했나 · 결과</th></tr></thead><tbody><tr><td class="num">8/17</td><td>답이 알려진 문제로 계산기 검증 &rarr; 27 % 갈렸는데 <b>우리 쪽이 맞았다</b></td></tr><tr><td class="num">8/22</td><td>거칠기 단위 83 배 정정 &rarr; 빛의 양 순위 <b>그대로</b></td></tr><tr><td class="num">9/15</td><td>외부 감사 다섯 항목 수정 &rarr; 세 값이 다 나빠졌는데 순위 <b>그대로</b></td></tr></tbody></table></div><p style="font-size:14px;color:var(--muted);margin-top:14px">이 세 번이 더 중요합니다. 셋 다 계산을 더 정확하게 만든 것인데, 셋 다 순위가 안 움직였습니다.</p></div>
+</div>
+<div class="note hot" style="font-size:16px"><strong>여기서 규칙이 하나 보입니다.</strong><br><br><b>“무엇을 재느냐” 나 “어떤 조건에서 재느냐” 를 바꾸면 순위가 뒤집혔습니다.</b><br><b>계산의 정확도만 올리면 값은 움직여도 순위는 안 움직였습니다.</b><br><br>마지막 세 번이 전부 정확도 쪽이었고, 세 번 다 순위가 안 움직였습니다. <strong>지금 순위를 믿어도 되는 이유가 이것입니다.</strong></div>
+<div class="note">그리고 남는 것 하나. <strong>아직 실물로 재본 적이 한 번도 없습니다.</strong> 위 열세 번은 전부 계산 안에서 일어난 일입니다. 평평한 판 한 장만 제대로 재면 가장 크게 흔들리던 값(도료가 빛을 퍼뜨리는 비율)이 풀립니다.</div>
+</section><section><div class="sechead"><span class="secnum">05</span><h2>직접 해보기</h2></div>
+<div class="prose">
+<p>아래는 <strong>골짜기 안에서 빛이 지나가는 길을 그 자리에서 계산하는</strong> 그림입니다.
+간격과 깊이와 빔 각도를 바꾸면 빛이 몇 번 튕기는지, 얼마나 남아서 나가는지가 바로 바뀝니다.</p>
+<p>한 번 튕길 때마다 도료가 대부분을 먹습니다. 남은 것만 다음으로 갑니다. 그래서 <strong>골이 깊고 좁아 여러 번 튕길수록 거의 아무것도 안 나옵니다.</strong></p><p><strong>그런데 도료가 빛을 어떻게 튕기느냐가 그보다 먼저입니다.</strong> 거울처럼 튕기면 골 안쪽으로 밀려 들어가고, 퍼뜨리며 튕기면 골 벽 어느 자리에서나 바깥이 보여 그냥 새어 나갑니다. 아래에서 그 손잡이를 직접 움직여 볼 수 있습니다.</p>
+</div>
+<div class="sim">
+<div class="sim-top">
+  <div class="sim-ctl">
+    <div class="ctl"><label for="s_pitch">간격 (pitch)<output id="o_pitch">4.0 mm</output></label>
+      <input type="range" id="s_pitch" min="2" max="14" step="0.5" value="4"></div>
+    <div class="ctl"><label for="s_depth">깊이 (depth)<output id="o_depth">22 mm</output></label>
+      <input type="range" id="s_depth" min="4" max="60" step="1" value="22"></div>
+    <div class="ctl"><label for="s_ang">빔이 들어오는 각도<output id="o_ang">40°</output></label>
+      <input type="range" id="s_ang" min="0" max="60" step="1" value="40"></div>
+    <div class="ctl"><label for="s_rho">도료 반사율 (reflectance)<output id="o_rho">1.0 %</output></label>
+      <input type="range" id="s_rho" min="0.5" max="6" step="0.1" value="1"></div>
+    <div class="ctl"><label for="s_df">도료가 빛을 퍼뜨리는 비율<output id="o_df">97 %</output></label>
+      <input type="range" id="s_df" min="0" max="100" step="1" value="97"></div>
+    <div style="margin-top:20px">
+      <button class="preset" type="button" data-p="4" data-d="22" data-a="40" data-r="1" data-f="97">제안한 판</button>
+      <button class="preset" type="button" data-p="4" data-d="22" data-a="40" data-r="1" data-f="0">거울이라고 놓으면</button>
+      <button class="preset" type="button" data-p="4" data-d="22" data-a="40" data-r="1" data-f="76">8월 11일에 쓰던 값</button>
+      <button class="preset" type="button" data-p="4" data-d="4" data-a="40" data-r="1" data-f="97">거의 평평하게</button>
+    </div>
+  </div>
+  <div class="sim-view"><svg id="simsvg" viewBox="0 0 400 450" width="400"
+     role="img" aria-label="피라미드 골 단면에서 빛이 여러 갈래로 흩어지며 튕기는 길"></svg></div>
+</div>
+<div class="sim-out">
+  <div class="sim-cell"><p class="k">되돌아 나온 빛</p><p class="v" id="v_back">0.306 %</p>
+    <p class="s">들어간 빛 가운데 입구로 다시 나온 몫. 이 단면 기준입니다</p></div>
+  <div class="sim-cell"><p class="k">평균 튕긴 횟수</p><p class="v" id="v_b">3.9 회</p>
+    <p class="s">한 번 튕길 때마다 도료가 대부분을 먹습니다</p></div>
+  <div class="sim-cell"><p class="k">같은 골을 거울로 놓으면</p><p class="v" id="v_cmp">약 1 × 10⁻³ %</p>
+    <p class="s">거울이면 골이 덫이 됩니다. 실제 도료는 그렇지 않습니다</p></div>
+</div>
+<p class="sim-foot"><b>도료는 거울이 아닙니다.</b> 실제 무광 검정은 빛의 97 % 이상을 사방으로 퍼뜨립니다.
+그래서 이 계산도 벽에 맞을 때마다 방향을 다시 뽑습니다. 손잡이를 0 % 로 내리면 거울이 되는데,
+그것이 <b>8월 11일에 우리가 잘못 쓰고 있던 설정</b>입니다 (위 1 번).<br><br>
+<b>이 그림은 골 하나를 세로로 자른 단면입니다.</b> 실제 판은 3차원이라 빛이 옆으로도 갇혀서 이 단면보다 덜 나옵니다.
+그래서 위 숫자는 서로 견주는 데만 쓰고, 보고서의 절대값은 Blender Cycles 렌더에서 가져옵니다.<br><br><b>이 계산은 따로 짠 파이썬 판과 대조했습니다.</b> 퍼뜨림 76·97·100 % 에서 1 % 안쪽으로 같고, 평균 튕긴 횟수는 0.01 회 차이입니다. 거울일 때만 드물게 빠져나오는 광선이 값을 좌우해서 ±25 % 흔들리므로, 그 칸은 한 자리만 적었습니다.</p>
+</div>
+<div class="note hot">눌러볼 것 셋.<br><br>
+<b>“거울이라고 놓으면”</b> — 되돌아 나온 빛이 몇백 배로 줄어듭니다. 골이 덫처럼 작동합니다.
+다섯 주 전 우리 계산이 이 상태였습니다. <strong>그래서 골이 깊은 설계를 실제보다 훨씬 좋게 보고 있었습니다.</strong><br><br>
+<b>“8월 11일에 쓰던 값”</b> — 퍼뜨림 76 %. 잰 값이 아니라 고른 값이었습니다 (위 8 번).<br><br>
+<b>“거의 평평하게”</b> — 깊이 4 mm. 한두 번 튕기고 그대로 나갑니다. 평평한 천장과 다를 바 없습니다.</div>
+</section>
+<section><div class="sechead"><span class="secnum">06</span><h2>돈은 어디서 갈리나</h2></div>
+
+<div class="prose">
+<p class="lead">값을 내려면 둘이 있어야 합니다. <strong>얼마나 쓰는지</strong>, 그리고 <strong>하나에 얼마인지</strong>.</p>
+<p>앞의 것은 전부 계산됩니다. 뒤의 것은 도료 값만 확인했고, 나머지는 견적을 안 받았습니다.
+그런데 따져 보니 <strong>정말로 모르는 값은 하나</strong>였습니다.</p>
+</div>
+
+<h3>얼마나 쓰나</h3>
+<div class="tw"><table>
+<caption>천장 10 × 10 m, 판 1,000 × 1,000 mm, 간격 4 · 깊이 22 · 끝 0.4 기준. 전부 형상에서 계산한 값입니다.</caption>
+<thead><tr><th>항목</th><th class="num">수량</th><th>어떻게 나왔나</th></tr></thead>
+<tbody>
+<tr><td>천장 면적</td><td class="num">100 m²</td><td>10 × 10</td></tr>
+<tr><td>판</td><td class="num">100 장</td><td>한 장이 1 m²</td></tr>
+<tr><td>피라미드</td><td class="num">6,250,000 개</td><td>판 한 장에 62,500 개</td></tr>
+<tr class="hi"><td><b>칠하는 면적</b></td><td class="num"><b>1,215 m²</b></td>
+<td>판 면적의 <b>12.15 배</b>. 경사면 겉넓이를 계산한 값</td></tr>
+<tr><td>그중 무소 (구역 15 % 기준)</td><td class="num">153 m²</td><td>1,215 × 15 % × 0.84 (끝에서 20 mm 몫)</td></tr>
+<tr><td>싼 검정 우레탄</td><td class="num">1,062 m²</td><td>나머지 전부</td></tr>
+<tr><td>발포 우레탄</td><td class="num">60 ~ 100 kg</td><td>판 한 장이 0.6~1 kg</td></tr>
+<tr><td>실리콘 몰드 (silicone mould)</td><td class="num">2 ~ 4 개</td><td>하나로 30~50 장을 뜹니다</td></tr>
+</tbody></table></div>
+
+<h3>하나에 얼마인가</h3>
+<div class="tw"><table>
+<thead><tr><th>항목</th><th class="num">값</th><th>어디서 나왔나</th></tr></thead>
+<tbody>
+<tr class="hi"><td><b>무소 블랙 1 리터</b></td><td class="num"><b>32 ~ 54 만원</b></td>
+<td>파는 곳마다 다릅니다. 롯데ON 320,000 원, 유럽 공식 판매처 €235(약 35 만원), 11번가 539,000 원.
+<b>전부 소매가입니다</b></td></tr>
+<tr><td><b>1 리터로 칠하는 면적</b></td><td class="num"><b>평평한 면 9 ~ 12 m²</b></td>
+<td>판매처 표기. <b>우리 면은 뾰족한 골이라 그대로 못 씁니다</b></td></tr>
+<tr><td>싼 검정 우레탄 도료</td><td class="num">견적 없음</td><td>필요한 양은 1,062 m²</td></tr>
+<tr><td>판 주조 (casting)</td><td class="num">견적 없음</td><td>필요한 양은 100 장 · 우레탄 60~100 kg</td></tr>
+<tr><td>실리콘 몰드</td><td class="num">견적 없음</td><td>필요한 수는 2~4 개</td></tr>
+<tr><td>천장 설치</td><td class="num">견적 없음</td><td>판 100 장</td></tr>
+</tbody></table></div>
+
+<div class="note hot"><strong>소매가는 천장이지 견적이 아닙니다.</strong>
+우리가 필요한 양은 <b>30 ~ 300 리터</b> 입니다. 소매로 살 양이 아닙니다.
+같은 1 리터가 파는 곳에 따라 32 만원과 54 만원으로 <b>1.7 배</b> 갈리는 것도 소매라서 그렇습니다.
+<strong>제조사(일본 KoPro)에 대량 견적을 받으면 이보다 내려갑니다.</strong> 아직 안 받았습니다.</div>
+
+<div class="note hot"><strong>그리고 정말로 모르는 것이 하나 더 있습니다. 1 리터로 몇 m² 를 칠하느냐.</strong>
+판매처는 평평한 면에 한 겹 바르면 9~12 m² 라고 적어 두었습니다.
+우리 면은 겉넓이가 12 배인 뾰족한 골이고, 여러 겹 발라야 합니다.
+사양서가 이 값을 실측 대기 3 번으로 적어 둔 이유입니다.</div>
+
+<h3>사양서 견적과 맞춰 봤습니다</h3>
+<div class="prose"><p>사양서에는 “전면 무소 도장은 도료값만 5천만~1억 원” 이라고만 적혀 있고
+어떻게 나온 값인지는 없었습니다. 실제 도료 값으로 역산해 봤습니다.</p></div>
+<div class="tw"><table>
+<caption>1 리터를 35 만원으로 놓고 역산한 값입니다. 리터값이 32 만원이면 6.4~3.2, 54 만원이면 10.8~5.4 가 됩니다.</caption><thead><tr><th>사양서 값</th><th class="num">면적당</th><th class="num">이 값이 되려면</th></tr></thead>
+<tbody>
+<tr><td>5천만 원 / 1,000 m²</td><td class="num">50,000 원/m²</td><td class="num">리터당 <b>7.0 m²</b></td></tr>
+<tr><td>1억 원 / 1,000 m²</td><td class="num">100,000 원/m²</td><td class="num">리터당 <b>3.5 m²</b></td></tr>
+</tbody></table></div>
+<div class="note"><strong>앞뒤가 맞습니다.</strong> 사양서의 범위는 “리터당 3.5~7 m² 를 칠한다” 를 가정한 값이었습니다.
+평평한 면의 9~12 보다 낮은데, 뾰족한 골이라 그럴 만합니다.
+<strong>숨어 있던 가정이 드러났으니, 이제 그 하나만 재면 됩니다.</strong></div>
+
+<figure><div class="figb"><svg viewBox="0 0 620 400" width="620" role="img" aria-label="무소 블랙 도료값은 1 리터로 몇 제곱미터를 칠하느냐에 따라 달라진다. 천장 전체를 칠하면 3천만에서 1억 3백만원, 구역 15 퍼센트만 칠하면 450만에서 1545만원이다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs>
+<line x1="96" y1="276" x2="556" y2="276" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="96" y1="46" x2="96" y2="276" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="120.21" y1="276" x2="120.21" y2="281" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="120.21" y="296" text-anchor="middle">3.5</text>
+<line x1="192.84" y1="276" x2="192.84" y2="281" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="192.84" y="296" text-anchor="middle">5</text>
+<line x1="289.68" y1="276" x2="289.68" y2="281" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="289.68" y="296" text-anchor="middle">7</text>
+<line x1="386.53" y1="276" x2="386.53" y2="281" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="386.53" y="296" text-anchor="middle">9</text>
+<line x1="531.79" y1="276" x2="531.79" y2="281" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="531.79" y="296" text-anchor="middle">12</text>
+<line x1="96" y1="244.15" x2="556" y2="244.15" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="248.15" text-anchor="end">5 백만</text>
+<line x1="96" y1="200.93" x2="556" y2="200.93" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="204.93" text-anchor="end">1 천만</text>
+<line x1="96" y1="132.43" x2="556" y2="132.43" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="136.43" text-anchor="end">3 천만</text>
+<line x1="96" y1="57.37" x2="556" y2="57.37" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="61.37" text-anchor="end">1 억</text>
+<text class="c-ax" x="326" y="320" text-anchor="middle">무소 블랙 1 리터로 칠하는 면적 (m² / L)</text>
+<text class="c-ax" x="40" y="161" text-anchor="middle" transform="rotate(-90 40 161)">무소 도료값</text>
+<rect x="120.21" y="46" width="169.47" height="230" fill="var(--hot)" opacity=".07"/>
+<text class="c-note" x="204.95" y="62" text-anchor="middle">사양서가 가정하던 구간</text>
+<polyline points="120.21,55.5 192.84,77.74 289.68,98.72 386.53,114.39 531.79,132.33" fill="none" stroke="var(--hot)" stroke-width="2.6"/>
+<circle cx="120.21" cy="55.5" r="4" fill="var(--hot)"/>
+<circle cx="192.84" cy="77.74" r="4" fill="var(--hot)"/>
+<circle cx="289.68" cy="98.72" r="4" fill="var(--hot)"/>
+<circle cx="386.53" cy="114.39" r="4" fill="var(--hot)"/>
+<circle cx="531.79" cy="132.33" r="4" fill="var(--hot)"/>
+<text class="c-lbl" x="128.21" y="43.5" fill="var(--hot)">천장 전체를 무소로</text>
+<text class="c-val" x="539.79" y="136.33" text-anchor="start" fill="var(--hot)">3 천만</text>
+<polyline points="120.21,173.79 192.84,196.03 289.68,217.01 386.53,232.68 531.79,250.61" fill="none" stroke="var(--good)" stroke-width="2.6"/>
+<circle cx="120.21" cy="173.79" r="4" fill="var(--good)"/>
+<circle cx="192.84" cy="196.03" r="4" fill="var(--good)"/>
+<circle cx="289.68" cy="217.01" r="4" fill="var(--good)"/>
+<circle cx="386.53" cy="232.68" r="4" fill="var(--good)"/>
+<circle cx="531.79" cy="250.61" r="4" fill="var(--good)"/>
+<text class="c-lbl" x="128.21" y="161.79" fill="var(--good)">구역 15 % 만 무소</text>
+<text class="c-val" x="539.79" y="254.61" text-anchor="start" fill="var(--good)">5 백만</text>
+<text class="c-note" x="24" y="340">무소 1 리터 35 만원 기준 (소매 32~54 만원). 판매처는 평평한 면에 한 겹이면 리터당 9~12 m² 라고 적어 두었다.</text>
+<text class="c-note" x="24" y="362">우리 면은 뾰족한 골이라 그대로 못 쓴다. 이 값을 재는 것이 이 표에서 가장 큰 일이다.</text>
+<text class="c-note" x="24" y="384">구역 비율은 빔이 천장 어디를 때리는지 찍어야 정해진다. 위아래 두 선 사이가 그 차이다.</text></svg></div><figcaption>
+<span class="fignum">그림 10 · 도료값은 리터당 면적 하나로 정해진다</span>
+가로가 모르는 값, 세로가 도료값입니다. <b>천장 전체를 칠하면 3천만 ~ 1억, 구역 15 % 만 칠하면 450만 ~ 1,545만.</b>
+위아래 두 선 사이는 빔이 천장 어디를 때리는지 찍어야 정해지고, 선 위의 자리는 시험 조각 하나를 칠해 보면 정해집니다.
+</figcaption></figure>
+
+<h3>견적을 넣어보는 칸</h3>
+<div class="prose"><p>도료값은 실제로 계산됩니다. 나머지 넷은 단가가 없어서 칸만 있습니다.
+설계를 바꾸면 칠할 면적이 따라 바뀌는 것도 같이 보입니다.</p></div>
+
+<div class="sim">
+<div class="sim-top">
+  <div class="sim-ctl">
+    <div class="ctl"><label for="c_pitch">간격 (pitch)<output id="co_pitch">4.0 mm</output></label>
+      <input type="range" id="c_pitch" min="2" max="14" step="0.5" value="4"></div>
+    <div class="ctl"><label for="c_depth">깊이 (depth)<output id="co_depth">22 mm</output></label>
+      <input type="range" id="c_depth" min="4" max="60" step="1" value="22"></div>
+    <div class="ctl"><label for="c_tip">끝 평평부<output id="co_tip">0.4 mm</output></label>
+      <input type="range" id="c_tip" min="0.1" max="1.2" step="0.1" value="0.4"></div>
+    <div class="ctl"><label for="c_zone">무소 칠하는 구역<output id="co_zone">15 %</output></label>
+      <input type="range" id="c_zone" min="0" max="100" step="1" value="15"></div>
+    <div class="ctl"><label for="c_cov">1 리터로 칠하는 면적<output id="co_cov">5.0 m²/L</output></label>
+      <input type="range" id="c_cov" min="2" max="12" step="0.5" value="5"></div>
+    <div class="ctl"><label for="c_price">무소 1 리터 값<output id="co_price">35 만원</output></label>
+      <input type="range" id="c_price" min="150000" max="600000" step="10000" value="350000"><p style="margin:5px 0 0;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace">소매 32~54 만원 · 대량은 더 쌀 것</p></div>
+    <div style="margin-top:18px">
+      <button class="preset" type="button" data-p="4" data-d="22" data-t="0.4" data-z="15" data-c="5" data-u="350000">제안한 판</button>
+      <button class="preset" type="button" data-p="4" data-d="20" data-t="0.1" data-z="15" data-c="5" data-u="350000">연구 최적 형상</button>
+      <button class="preset" type="button" data-p="4" data-d="22" data-t="0.4" data-z="100" data-c="5" data-u="350000">천장 전체를 무소로</button>
+    </div>
+  </div>
+  <div class="sim-view" style="display:block;padding:20px 22px">
+    <table style="min-width:0;width:100%;font-size:14px"><tbody>
+      <tr><td>겉넓이 배수</td><td class="num" id="c_mult">12.15 배</td></tr>
+      <tr><td>칠하는 면적</td><td class="num" id="c_area">1,215 m²</td></tr>
+      <tr><td>무소 칠하는 면적</td><td class="num" id="c_marea">153 m²</td></tr>
+      <tr><td>필요한 무소</td><td class="num" id="c_liter">30.7 L</td></tr>
+      <tr class="hi"><td><b>무소 도료값</b></td><td class="num" id="c_paint"><b>1,081 만원</b></td></tr>
+      <tr><td style="color:var(--muted)">싼 검정 도료 <span id="c_carea">1,062 m²</span></td><td class="num" style="color:var(--muted)">견적 없음</td></tr>
+      <tr><td style="color:var(--muted)">판 주조 100 장</td><td class="num" style="color:var(--muted)">견적 없음</td></tr>
+      <tr><td style="color:var(--muted)">실리콘 몰드 2~4 개</td><td class="num" style="color:var(--muted)">견적 없음</td></tr>
+      <tr><td style="color:var(--muted)">천장 설치</td><td class="num" style="color:var(--muted)">견적 없음</td></tr>
+    </tbody></table>
+  </div>
+</div>
+<p class="sim-foot"><b>칠하는 면적 = 천장 100 m² × 겉넓이 배수</b> (간격·깊이·끝에서 나옵니다).<br>
+<b>무소 면적 = 칠하는 면적 × 구역 비율 × 0.84</b> (끝에서 20 mm 만 칠할 때의 몫).<br>
+<b>도료값 = 무소 면적 ÷ 리터당 면적 × 1 리터 값.</b><br><br>
+도료값 한 줄은 실제로 계산됩니다. 나머지 넷은 <b>수량은 나와 있고 단가만 비어 있습니다.</b>
+이 네 줄은 업체 한 곳에서 한 번에 받을 수 있는 값입니다.</p>
+</div>
+
+<div class="note">“연구 최적 형상” 을 눌러 보면 칠할 면적이 <strong>1,215 에서 1,030 m² 로</strong> 줄어듭니다.
+깊이를 22 로 키우고 끝을 0.4 로 뭉툭하게 만든 대가가 <strong>도료 18 %</strong> 입니다.
+그 대신 몰드에서 빼기가 쉬워집니다. <strong>어느 쪽이 싼지는 주조 단가를 받아야 압니다.</strong></div>
+
+<h3>측정이 값을 낮춘 세 번</h3>
+<div class="tw"><table>
+<thead><tr><th>언제</th><th>무엇을 재서</th><th>값에 무슨 일이</th></tr></thead>
+<tbody>
+<tr><td class="num">8/25</td><td>관 안쪽을 얼마나 깊이 칠해야 하나 (위 10 번)</td>
+<td>깊은 벽은 되돌아오는 빛의 <b>0.4 %</b> 만 맡고 있었습니다.
+업체가 “못 칠한다” 던 그 부분이 <b>안 칠해도 되는 부분</b>이었습니다. 견적을 다시 받았습니다</td></tr>
+<tr><td class="num">8/25</td><td>받침판을 따로 칠하면 어떻게 되나</td>
+<td>받침판은 벌집을 붙이기 전에 평평한 상태로 칠하면 됩니다. <b>어려운 공정 하나가 사라졌습니다</b></td></tr>
+<tr><td class="num">8/20</td><td>끝을 0.1 에서 0.4 mm 로 뭉툭하게 하는 대가 (위 6 번)</td>
+<td>4.3 배인 줄 알았는데 다시 재니 <b>2.8 배</b>였습니다. 몰드에서 빼기 쉬운 쪽으로 가도 되는 근거가 됐습니다</td></tr>
+</tbody></table></div>
+
+<h3>측정이 값을 올린 한 번</h3>
+<div class="note hot"><strong>깊이를 20 에서 22 로, 끝을 0.1 에서 0.4 로 바꾸니 칠할 면적이 10.30 배에서 12.15 배가 됐습니다.</strong>
+도료가 약 <b>18 % 더 듭니다.</b> 사양서에 적힌 “판 면적의 10 배” 는 바꾸기 전 형상의 값이라,
+<strong>견적을 1,000 m² 가 아니라 1,215 m² 로 다시 받아야 합니다.</strong></div>
+
+<div class="note"><strong>정리하면 이렇습니다.</strong>
+수량과 면적은 다 나와 있습니다. 도료값은 <strong>시험 조각 하나를 칠해 보면</strong> 확정됩니다.
+그 도료를 천장 어디까지 칠할지는 <strong>사진 한 번</strong>이 정합니다.
+도료 자체도 <strong>제조사에 대량 견적을 받아야</strong> 소매가에서 내려옵니다. 몰드·주조·설치는 <strong>업체 한 곳에서 한 번에 받으면 됩니다.</strong>
+<strong>이 보고서의 어떤 숫자도 견적서가 아닙니다.</strong></div>
+</section>
+
+<section><div class="sechead"><span class="secnum">07</span><h2>다섯 주 끝에 남은 것</h2></div>
+<div class="tw"><table>
+<caption>최종 후보 14 개 중 위쪽 셋. 세 항목의 순위를 각각 매기고 평균을 낸 결과입니다.
+총량은 방 조건 입사각에서 가장 밝은 값, 밝기는 관객 자리에서 가장 밝은 값입니다.</caption>
+<thead><tr><th>순위</th><th>구조</th><th>도장</th>
+<th class="num">빛의 양</th><th class="num">밝기</th><th class="num">번짐</th></tr></thead>
+<tbody>
+<tr class="hi"><td><b>1</b></td><td><b>피라미드 4 / 22 끝 0.4</b></td><td>무소 팁 20 + 5 %</td>
+<td class="num">0.244 %</td><td class="num"><b>0.133</b></td><td class="num">2.14</td></tr>
+<tr><td>2</td><td>벌집 9.53 / 40 + 피라미드 바닥</td><td>무소 팁 20 + 바닥 무소</td>
+<td class="num"><b>0.197 %</b></td><td class="num">0.145</td><td class="num">1.19</td></tr>
+<tr><td>3</td><td>피라미드 4 / 20 끝 0.1</td><td>무소 전부</td>
+<td class="num">0.244 %</td><td class="num">0.136</td><td class="num">1.85</td></tr>
+</tbody></table></div>
+<div class="prose">
+<p><strong>2 등 벌집이 빛의 양에서는 이깁니다.</strong> 0.197 대 0.244 로 19 % 어둡습니다.
+그런데 번지는 정도가 1.19 입니다. 1 이면 모양이 그대로 남는다는 뜻입니다.
+<strong>다섯 주 전이었으면 이것을 골랐을 것입니다.</strong></p>
+<p>피라미드는 번지는 정도가 2.14 이고 관객 눈에 들어오는 밝기도 가장 낮습니다.
+빛의 양에서 0.047 %포인트를 손해 보고 나머지 두 항목을 얻습니다.</p>
+</div>
+<div class="note hot"><strong>아직 실물 측정은 0 건입니다.</strong>
+위 숫자는 전부 계산값입니다. 계산기 자체는 답이 알려진 문제와 두 번째 계산기로 대조했지만,
+계산에 넣은 재료값 일부는 논문 그림에서 읽은 것이지 우리가 잰 것이 아닙니다.
+<strong>설계들 사이의 우열은 흔들리지 않습니다.</strong> 흔들리는 것은 “평평한 천장보다 몇 배 어둡다” 는 절대 숫자입니다.</div>
+</section>
+<section><div class="sechead"><span class="secnum">08</span><h2>덧붙임 · 9월 16일</h2></div>
+
+<div class="prose">
+<p class="lead">이 기록을 쓴 다음 날, 벌집을 다시 보다가 네 가지가 더 나왔습니다.
+셋은 설계를 바꾸고, 하나는 앞에 실린 숫자를 흔듭니다.</p>
+</div>
+
+<h3>하나 — 셀 안쪽을 안 칠해도 됩니다. 조건이 둘 붙습니다</h3>
+<div class="prose">
+<p>“알루미늄 벌집을 은색 그대로 두고 위와 아래만 칠하면 되지 않느냐” 를 재봤습니다.
+맨 알루미늄 (bare aluminium) 재료를 새로 넣었습니다. 가시광 총반사 (total hemispherical reflectance) <b>86 %</b>, 밝은 면과 무광 면이 같습니다
+[적분구 실측, Pozzobon &amp; Levasseur 2019].</p>
+</div>
+
+<figure><div class="figb"><svg viewBox="0 0 620 430" width="620" role="img" aria-label="셀 벽 아래쪽을 맨 알루미늄으로 두었을 때, 위에서 칠하는 깊이에 따른 반사 총량. 테두리만 칠하면 26 퍼센트, 20 mm 를 칠하면 전부 칠한 것과 같아진다."><defs>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--axis)"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M0,1 L10,5 L0,9 z" fill="var(--hot)"/></marker>
+</defs>
+<line x1="96" y1="286" x2="556" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="96" y1="44" x2="96" y2="286" stroke="var(--axis)" stroke-width="1.2"/>
+<line x1="96" y1="286" x2="96" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="96" y="306" text-anchor="middle">0</text>
+<line x1="172.67" y1="286" x2="172.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="172.67" y="306" text-anchor="middle">5</text>
+<line x1="249.33" y1="286" x2="249.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="249.33" y="306" text-anchor="middle">10</text>
+<line x1="326" y1="286" x2="326" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="326" y="306" text-anchor="middle">15</text>
+<line x1="402.67" y1="286" x2="402.67" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="402.67" y="306" text-anchor="middle">20</text>
+<line x1="479.33" y1="286" x2="479.33" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="479.33" y="306" text-anchor="middle">25</text>
+<line x1="556" y1="286" x2="556" y2="291" stroke="var(--axis)" stroke-width="1"/>
+<text class="c-tick" x="556" y="306" text-anchor="middle">30</text>
+<line x1="96" y1="286" x2="556" y2="286" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="290" text-anchor="end">0.1 %</text>
+<line x1="96" y1="241.63" x2="556" y2="241.63" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="245.63" text-anchor="end">0.3 %</text>
+<line x1="96" y1="193" x2="556" y2="193" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="197" text-anchor="end">1 %</text>
+<line x1="96" y1="148.62" x2="556" y2="148.62" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="152.62" text-anchor="end">3 %</text>
+<line x1="96" y1="99.99" x2="556" y2="99.99" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="103.99" text-anchor="end">10 %</text>
+<line x1="96" y1="55.62" x2="556" y2="55.62" stroke="var(--grid)" stroke-width="1"/>
+<text class="c-tick" x="87" y="59.62" text-anchor="end">30 %</text>
+<text class="c-ax" x="326" y="330" text-anchor="middle">위에서 무소로 칠하는 깊이 (mm) · 관 전체 깊이는 40 mm</text>
+<text class="c-ax" x="38" y="165" text-anchor="middle" transform="rotate(-90 38 165)">반사 총량</text>
+<line x1="96" y1="272.7" x2="556" y2="272.7" stroke="var(--good)" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text class="c-note" x="102.0" y="265.7" fill="var(--good)">전부 칠했을 때 · 30 도</text>
+<polyline points="103.67,61.22 111.33,66.24 126.67,76.24 142,86.33 157.33,96.61 188,118.01 218.67,141.21 249.33,167.52 280,196.01 310.67,225.25 341.33,253.43 372,270.17 402.67,271.84 556,272.7" fill="none" stroke="var(--hot)" stroke-width="2.6"/>
+<circle cx="103.67" cy="61.22" r="3.2" fill="var(--hot)"/>
+<circle cx="111.33" cy="66.24" r="3.2" fill="var(--hot)"/>
+<circle cx="126.67" cy="76.24" r="3.2" fill="var(--hot)"/>
+<circle cx="142" cy="86.33" r="3.2" fill="var(--hot)"/>
+<circle cx="157.33" cy="96.61" r="3.2" fill="var(--hot)"/>
+<circle cx="188" cy="118.01" r="3.2" fill="var(--hot)"/>
+<circle cx="218.67" cy="141.21" r="3.2" fill="var(--hot)"/>
+<circle cx="249.33" cy="167.52" r="3.2" fill="var(--hot)"/>
+<circle cx="280" cy="196.01" r="3.2" fill="var(--hot)"/>
+<circle cx="310.67" cy="225.25" r="3.2" fill="var(--hot)"/>
+<circle cx="341.33" cy="253.43" r="3.2" fill="var(--hot)"/>
+<circle cx="372" cy="270.17" r="3.2" fill="var(--hot)"/>
+<circle cx="402.67" cy="271.84" r="3.2" fill="var(--hot)"/>
+<circle cx="556" cy="272.7" r="3.2" fill="var(--hot)"/>
+<text class="c-lbl" x="259.3" y="171.5" fill="var(--hot)">입사 30 도</text>
+<polyline points="103.67,55.24 111.33,60.95 126.67,72.47 142,84.47 157.33,97.29 188,127.2 218.67,165.39 249.33,211.15 280,255.65 310.67,264.1 341.33,264.81 372,265.29 402.67,265.53 556,265.77" fill="none" stroke="var(--cool)" stroke-width="2.6"/>
+<circle cx="103.67" cy="55.24" r="3.2" fill="var(--cool)"/>
+<circle cx="111.33" cy="60.95" r="3.2" fill="var(--cool)"/>
+<circle cx="126.67" cy="72.47" r="3.2" fill="var(--cool)"/>
+<circle cx="142" cy="84.47" r="3.2" fill="var(--cool)"/>
+<circle cx="157.33" cy="97.29" r="3.2" fill="var(--cool)"/>
+<circle cx="188" cy="127.2" r="3.2" fill="var(--cool)"/>
+<circle cx="218.67" cy="165.39" r="3.2" fill="var(--cool)"/>
+<circle cx="249.33" cy="211.15" r="3.2" fill="var(--cool)"/>
+<circle cx="280" cy="255.65" r="3.2" fill="var(--cool)"/>
+<circle cx="310.67" cy="264.1" r="3.2" fill="var(--cool)"/>
+<circle cx="341.33" cy="264.81" r="3.2" fill="var(--cool)"/>
+<circle cx="372" cy="265.29" r="3.2" fill="var(--cool)"/>
+<circle cx="402.67" cy="265.53" r="3.2" fill="var(--cool)"/>
+<circle cx="556" cy="265.77" r="3.2" fill="var(--cool)"/>
+<text class="c-lbl" x="259.3" y="227.1" fill="var(--cool)">입사 40 도</text>
+<rect x="96" y="44" width="276" height="242" fill="var(--hot)" opacity=".07"/>
+<text class="c-note" x="234.0" y="276.0" text-anchor="middle">여기서 멈추면 못 쓴다</text>
+<text class="c-note" x="24" y="356">아래쪽 20 mm 는 맨 알루미늄(총반사 86 %)이다. 위에서 몇 mm 를 무소로 칠하느냐만 바꿨다.</text>
+<text class="c-note" x="24" y="378">테두리만 칠하면(0.5 mm) 30 도에서 26 %. 전부 칠한 것보다 180 배 밝다.</text>
+<text class="c-note" x="24" y="400">20 mm 에서 전부 칠한 것과 만난다. 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문이다.</text>
+<text class="c-note" x="24" y="422">다만 얕게 들어오는 빔(4~23 도)은 20 mm 를 지나쳐 은색에 떨어진다. 그때는 30 mm 가 필요하다.</text></svg></div><figcaption>
+<span class="fignum">그림 11 · 위에서 몇 mm 를 칠해야 하나</span>
+아래쪽은 맨 알루미늄입니다. <b>테두리만 칠하면 30 도에서 26 %.</b> 전부 칠한 것보다 180 배 밝습니다.
+<b>20 mm 에서 전부 칠한 것과 만납니다.</b> 빛이 벽에 처음 닿는 자리가 깊이 4.8~8.3 mm 이기 때문입니다.
+</figcaption></figure>
+
+<div class="tw"><table>
+<caption>관찰자 40 도, 방 조건. 세 축을 모두 잰 값입니다.</caption>
+<thead><tr><th>셀 벽 아래쪽</th><th class="num">반사 총량</th><th class="num">번지는 정도</th><th class="num">관객 눈 밝기</th></tr></thead>
+<tbody>
+<tr><td>5 % 검정으로 칠함 (지금 사양)</td><td class="num">0.166 %</td><td class="num">1.013</td><td class="num">0.1214</td></tr>
+<tr class="hi"><td><b>맨 알루미늄 (위 20 mm 만 무소)</b></td><td class="num"><b>0.166 %</b></td><td class="num"><b>1.014</b></td><td class="num"><b>0.1215</b></td></tr>
+<tr><td>맨 알루미늄 (테두리만 무소)</td><td class="num">30.3 %</td><td class="num">1.564</td><td class="num"><b>18.41</b></td></tr>
+</tbody></table></div>
+
+<div class="note hot"><strong>조건 하나. 빔이 4~23 도로 들어오면 안 됩니다.</strong>
+그 각도에서는 빛이 칠한 20 mm 를 지나쳐 은색 벽에 처음 닿습니다. 값이 3.5 배 오릅니다.
+이 방은 30~45 도라 안전하지만 여유가 <b>7 도</b>뿐입니다. 프로젝터를 위로 67 도 넘게 쏘면 들어갑니다.<br><br>
+<strong>조건 둘. 30 mm 를 칠하면 그 구간이 사라집니다.</strong> 대신 아끼는 몫이 줄어듭니다.</div>
+
+<h3>둘 — 깊이 40 은 필요 없었습니다</h3>
+<div class="tw"><table>
+<caption>벌집 셀 9.53, 전부 무소. 깊이만 바꿨습니다.</caption>
+<thead><tr><th>깊이</th><th class="num">방 조건 최대</th><th class="num">정면</th></tr></thead>
+<tbody>
+<tr><td>40 mm (지금 사양)</td><td class="num">0.208 %</td><td class="num">0.035 %</td></tr>
+<tr><td>30 mm</td><td class="num">0.210 %</td><td class="num">0.044 %</td></tr>
+<tr class="hi"><td><b>20 mm</b></td><td class="num"><b>0.215 %</b></td><td class="num">0.071 %</td></tr>
+<tr><td>10 mm</td><td class="num">0.222 %</td><td class="num">0.172 %</td></tr>
+</tbody></table></div>
+<div class="note hot"><strong>깊이를 4 분의 1 로 줄여도 방 조건에서 6.7 % 나빠질 뿐입니다.</strong>
+정면은 4.9 배 나빠지는데, <strong>정면은 이 방에서 안 일어납니다</strong> (위 11 번).<br><br>
+깊이 40 은 8월 25일에 골랐습니다. 그때 본 것이 정면 0.039 대 0.080 이었습니다.
+<strong>이틀 뒤에 정면 축을 버렸는데, 깊이 결정은 다시 안 봤습니다.</strong>
+이 기록의 11 번에서 배운 것을 여기서 한 번 더 놓치고 있었습니다.</div>
+
+<h3>셋 — 셀은 작은 쪽이 안전합니다</h3>
+<div class="tw"><table>
+<caption>깊이 20, 전부 무소, 판 500. 빔이 들어오는 각도별입니다.</caption>
+<thead><tr><th>셀</th><th class="num">10 도</th><th class="num">30 도</th><th class="num">45 도</th>
+<th class="num">바닥판을 싼 검정으로 바꾸면 (30 도)</th></tr></thead>
+<tbody>
+<tr><td>6.5 mm</td><td class="num"><b>0.115 %</b></td><td class="num">0.172 %</td><td class="num">0.226 %</td><td class="num">+0.1 %</td></tr>
+<tr class="hi"><td><b>10 mm</b></td><td class="num">0.115 %</td><td class="num">0.162 %</td><td class="num">0.214 %</td><td class="num">+0.5 %</td></tr>
+<tr><td>12.7 mm</td><td class="num">0.132 %</td><td class="num">0.159 %</td><td class="num">0.208 %</td><td class="num">+13.9 %</td></tr>
+<tr><td>20 mm</td><td class="num">0.197 %</td><td class="num">0.189 %</td><td class="num"><b>0.204 %</b></td><td class="num"><b>+135.7 %</b></td></tr>
+</tbody></table></div>
+<div class="note"><strong>45 도 한 칸만 큰 셀이 이깁니다.</strong> 나머지 각도는 전부 작은 셀이 이기고, 10 도에서는 1.9 배 차이입니다.<br><br>
+맨 오른쪽 칸이 이유입니다. <strong>셀이 크면 바닥판이 그대로 보입니다.</strong>
+셀 20 에서는 바닥 재료가 값의 절반을 넘게 정합니다. 셀 6.5 에서는 아무 상관이 없습니다.
+바닥에서 곧장 빠져나가는 몫이 2.6 % 에서 20 % 로 커지기 때문입니다.<br><br>
+<strong>셀 10 mm · 깊이 20 mm 로 정했습니다.</strong> 칠할 면적이 판 면적의 5.02 배, 판 두께 22 mm 입니다.
+지금 사양(9.42 배, 42 mm)의 절반입니다.</div>
+
+<h3>넷 — 형상 짓는 코드에 결함이 있습니다</h3>
+<div class="prose"><p>셀 크기를 훑다가 하나가 줄에서 벗어났습니다. 쫓아갔습니다.</p></div>
+<div class="tw"><table>
+<caption>같은 요청에서 셀 크기만 1천만분의 1 mm 바꿨습니다.</caption>
+<thead><tr><th>셀</th><th class="num">꼭짓점</th><th class="num">벽 겉넓이</th><th class="num">40 도 총량</th></tr></thead>
+<tbody>
+<tr><td>9.529999</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
+<tr class="hi"><td><b>9.53</b></td><td class="num"><b>32,792</b></td><td class="num"><b>1,099,534</b></td><td class="num"><b>0.1689 %</b></td></tr>
+<tr><td>9.5300001</td><td class="num">28,736</td><td class="num">984,253</td><td class="num">0.1963 %</td></tr>
+</tbody></table></div>
+<div class="note hot"><strong>정확히 9.53 일 때만 같은 자리에 벽을 12 % 더 짓습니다.</strong>
+6.35 도 그렇고, 6.5 와 12.7 은 멀쩡합니다. 바깥 크기는 같습니다.<br><br>
+<strong>그리고 이 프로젝트의 벌집 숫자는 전부 9.53 으로 냈습니다.</strong></div>
+
+<div class="tw"><table>
+<caption>발표된 최종 후보에 셀 크기만 1천만분의 1 mm 흔들어 다시 잰 값입니다.</caption>
+<thead><tr><th>후보</th><th class="num">보고서</th><th class="num">흔들어 재면</th><th class="num">차이</th></tr></thead>
+<tbody>
+<tr><td>벌집 9.53 / 40</td><td class="num">0.208 %</td><td class="num">0.2285 %</td><td class="num"><b>+9.6 %</b></td></tr>
+<tr class="hi"><td><b>벌집 + 피라미드 바닥 (전체 2 위)</b></td><td class="num">0.197 %</td><td class="num">0.2149 %</td><td class="num"><b>+8.9 %</b></td></tr>
+</tbody></table></div>
+
+<div class="note"><strong>어느 쪽이 맞는지 아직 모릅니다.</strong>
+9.53 이 벽을 잘못 더 짓는 것일 수도 있고, 9.53 만 제대로 짓고 나머지가 빠뜨리는 것일 수도 있습니다.
+실제 알루미늄 벌집은 포일을 붙인 자리가 두 겹이고 코드가 그것을 모델링한다고 적혀 있습니다.<br><br>
+지금 증거는 앞쪽을 가리킵니다. 멀쩡한 셀 크기 다섯이 매끄러운 줄을 이루는데
+<strong>의심스러운 두 값만 그 줄 아래로 벗어나 있습니다.</strong> 그래도 단정하지 않습니다.
+<strong>이것이 풀리기 전에는 벌집 숫자를 확정으로 쓰면 안 됩니다.</strong></div>
+
+<h3>그리고 못 한 것</h3>
+<div class="note warn" style="border-left-color:var(--muted)">
+<strong>시뮬레이터에 금속 모델이 없습니다.</strong> 알루미늄 재료를 세 개 만들었는데 둘이 거부당했습니다.
+이 도료 모델은 유전체 프레넬이라 정면 정반사가 최대 4 % 입니다. 총반사 86 % 인 금속을 넣으려면
+덩어리가 10.75 개 필요한데 그런 표면은 없습니다. <code>blender_render.py</code> 에 <code>Metallic</code> 이 0.0 으로 박혀 있습니다.<br><br>
+그래서 <strong>맨 알루미늄을 완전 확산으로 놓고 쟀습니다.</strong> 그쪽이 우리에게 불리한 끝이라
+“20 mm 면 된다” 는 결론은 그대로 섭니다. 다만 “10~16 mm 로 줄일 수 있나” 는 금속 모델이 있어야 답합니다.
+</div>
+
+<div class="note hot" style="font-size:16px">
+<strong>오늘 하루에 같은 규칙이 두 번 더 나왔습니다.</strong><br><br>
+깊이 40 은 <b>버려진 축</b>으로 내린 결정이었고, 축을 버릴 때 같이 안 봤습니다.<br>
+셀 크기는 <b>한 각도만</b> 보고 “큰 쪽이 낫다” 고 할 뻔했습니다. 다른 각도를 보니 반대였습니다.<br><br>
+<strong>축을 바꾸면, 그 축으로 내렸던 결정을 전부 다시 봐야 합니다.</strong>
+</div>
+</section>
+
+<footer>
+기간 2026-08-11 ~ 09-15 · 커밋 54 개 · 발표 설계 1,643 개 · 측정 행 66,426 · 조사 기록 50 건<br>
+측정 조건 · 재료 musou_fit2 + 5 % 무광 검정 · 빛줄기 256 · 빔 7.5 mm · 0.215 mm/px · 봉우리 2 mm 상자<br>
+계산 Blender Cycles · 대조 Mitsuba 3.9.1 · 재료 근거 J. Filip &amp; R. Vávra, JOSA A 43(7) 1037–1045 (2026)
+</footer>
+</div><script>
+(function () {
+  var S = document.getElementById('roomsvg');
+  if (!S) return;
+  var HALF = 5, NEAR = 45;   // 방 가운데가 0, 좌우 ±5 m
+  var g = function (id) { return document.getElementById(id); };
+  var keys = ['H','ph','fan','d','t'], el = {}, ou = {};
+  keys.forEach(function (k) { el[k] = g('r_' + k); ou[k] = g('ro_' + k); });
+  var f1 = function (v) { return v.toFixed(1); }, f2 = function (v) { return v.toFixed(2); };
+  var deg = function (r) { return r * 180 / Math.PI; };
+
+  // 빔 가운데가 천장의 tx 를 겨눈다 -> 겨냥 각도가 저절로 정해진다
+  function beam(px, ph, tx, H, fan) {
+    var dx = tx - px, gap = H - ph;
+    var dir = dx === 0 ? 1 : (dx > 0 ? 1 : -1);
+    var aim = gap <= 0 ? 0 : deg(Math.atan2(gap, Math.abs(dx)));
+    var N = 13, rays = [], i, a, t, xh;
+    for (i = 0; i < N; i++) {
+      a = aim - fan / 2 + fan * i / (N - 1);
+      if (a > 90) { rays.push({ kind: 'over' }); continue; }
+      if (a <= 0.01) { rays.push({ kind: 'none' }); continue; }
+      t = Math.tan(a * Math.PI / 180);
+      xh = px + dir * gap / t;
+      if (xh >= -HALF && xh <= HALF) rays.push({ kind: 'ceil', a: a, x: xh, inc: 90 - a });
+      else rays.push({ kind: 'wall', a: a, x: dir > 0 ? HALF : -HALF, y: ph + Math.abs((dir > 0 ? HALF : -HALF) - px) * t });
+    }
+    var onC = rays.filter(function (r) { return r.kind === 'ceil'; });
+    var xs = onC.map(function (r) { return r.x; }), incs = onC.map(function (r) { return r.inc; });
+    return { px: px, ph: ph, aim: aim, dir: dir, rays: rays, onC: onC,
+             span: xs.length ? [Math.min.apply(null, xs), Math.max.apply(null, xs)] : null,
+             inc: incs.length ? [Math.min.apply(null, incs), Math.max.apply(null, incs)] : null,
+             beyond: incs.filter(function (v) { return v > NEAR; }).length, n: incs.length };
+  }
+
+  function draw() {
+    var H = +el.H.value, ph = +el.ph.value, fan = +el.fan.value,
+        d = +el.d.value, t = +el.t.value, two = g('r_two').checked;
+    ou.H.textContent = f1(H) + ' m'; ou.ph.textContent = f2(ph) + ' m';
+    ou.fan.textContent = fan + '°';
+    ou.d.textContent = '±' + f1(d) + ' m'; ou.t.textContent = '±' + f1(Math.abs(t)) + ' m';
+
+    // 좌우 대칭: 왼쪽은 -d 에서 +t 를, 오른쪽은 +d 에서 -t 를 겨눈다
+    var A = beam(-d, ph, t, H, fan), B = two ? beam(d, ph, -t, H, fan) : null;
+    var ov = null;
+    if (A.span && B && B.span) {
+      var o0 = Math.max(A.span[0], B.span[0]), o1 = Math.min(A.span[1], B.span[1]);
+      if (o1 > o0) ov = [o0, o1];
+    }
+
+    // ---- 그림
+    var VW = 900, VH = 400, m = { l: 56, r: 26, t: 26, b: 40 };
+    var roomH = Math.max(H, 3.2);
+    var sc = Math.min((VW - m.l - m.r) / (2 * HALF), (VH - m.t - m.b) / roomH);
+    var X = function (x) { return m.l + (x + HALF) * sc; }, Y = function (y) { return VH - m.b - y * sc; };
+    var o = [], i;
+    o.push('<rect x="' + X(-HALF) + '" y="' + Y(H) + '" width="' + (2 * HALF * sc) + '" height="' + (H * sc) + '" fill="var(--room)"/>');
+    o.push('<line x1="' + X(-HALF) + '" y1="' + Y(0) + '" x2="' + X(HALF) + '" y2="' + Y(0) + '" stroke="var(--axis)" stroke-width="1.6"/>');
+    o.push('<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(0) + '" y2="' + Y(H) + '" stroke="var(--axis)" stroke-width=".8" stroke-dasharray="3 5" opacity=".6"/>');
+    // 겹치는 구간을 천장에 띠로
+    if (ov) {
+      o.push('<rect x="' + X(ov[0]) + '" y="' + (Y(H) - 9) + '" width="' + ((ov[1] - ov[0]) * sc) + '" height="9" fill="var(--hot)" opacity=".85"/>');
+      o.push('<text class="c-val" x="' + X((ov[0] + ov[1]) / 2) + '" y="' + (Y(H) - 16) + '" text-anchor="middle" fill="var(--hot)">겹치는 구간 ' + f1(ov[1] - ov[0]) + ' m</text>');
+    }
+    o.push('<line x1="' + X(-HALF) + '" y1="' + Y(H) + '" x2="' + X(HALF) + '" y2="' + Y(H) + '" stroke="var(--mat)" stroke-width="6"/>');
+    o.push('<text class="c-note" x="' + (X(-HALF) - 8) + '" y="' + (Y(H) + 4) + '" text-anchor="end">천장 ' + f1(H) + ' m</text>');
+    o.push('<text class="c-note" x="' + (X(-HALF) - 8) + '" y="' + (Y(0) + 4) + '" text-anchor="end">바닥</text>');
+
+    function drawBeam(P, col, label) {
+      if (!P) return;
+      if (P.onC.length > 1) {
+        var pts = [[X(P.px), Y(P.ph)]];
+        P.onC.forEach(function (r) { pts.push([X(r.x), Y(H)]); });
+        o.push('<polygon points="' + pts.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ') + '" fill="' + col + '" opacity=".13"/>');
+      }
+      P.rays.forEach(function (r, k) {
+        var edge = (k === 0 || k === P.rays.length - 1);
+        if (r.kind === 'ceil') {
+          o.push('<line x1="' + X(P.px) + '" y1="' + Y(P.ph) + '" x2="' + X(r.x) + '" y2="' + Y(H) + '" stroke="' + col + '" stroke-width="' + (edge ? 2 : .9) + '" opacity="' + (edge ? 1 : .45) + '"/>');
+          if (edge) {
+            o.push('<circle cx="' + X(r.x) + '" cy="' + Y(H) + '" r="3.4" fill="' + col + '"/>');
+            o.push('<text class="c-val" x="' + X(r.x) + '" y="' + (Y(H) + 20) + '" text-anchor="middle" fill="' + col + '">' + f1(r.inc) + '°</text>');
+          }
+        } else if (r.kind === 'wall') {
+          o.push('<line x1="' + X(P.px) + '" y1="' + Y(P.ph) + '" x2="' + X(r.x) + '" y2="' + Y(Math.max(0, Math.min(H, r.y))) + '" stroke="var(--axis)" stroke-width="1" stroke-dasharray="5 4" opacity=".6"/>');
+        }
+      });
+      o.push('<rect x="' + (X(P.px) - 12) + '" y="' + (Y(P.ph) - 7) + '" width="24" height="14" rx="2" fill="var(--mat)" stroke="' + col + '" stroke-width="1.4"/>');
+      o.push('<text class="c-note" x="' + X(P.px) + '" y="' + (Y(P.ph) + 26) + '" text-anchor="middle" fill="' + col + '">' + label + ' ' + f1(P.px) + ' m · 겨냥 ' + f1(P.aim) + '°</text>');
+    }
+    drawBeam(A, 'var(--cool)', '왼쪽');
+    drawBeam(B, '#7a5cc4', '오른쪽');
+    for (i = -HALF; i <= HALF; i += 1) o.push('<text class="c-note" x="' + X(i) + '" y="' + (Y(0) + 20) + '" text-anchor="middle">' + (i % 5 === 0 ? i + ' m' : (i % 1 === 0 ? i : '')) + '</text>');
+    S.innerHTML = o.join('');
+
+    // ---- 읽는 값
+    function put(P, vId, sId, name) {
+      if (!P) { g(vId).innerHTML = '꺼짐'; g(sId).textContent = '오른쪽 프로젝터를 켜면 겹치는 구간이 나옵니다'; return; }
+      if (!P.inc) { g(vId).innerHTML = '천장 안 닿음'; g(sId).textContent = '빔이 벽으로 갑니다. 겨누는 천장 자리를 프로젝터 쪽으로 당겨 보세요'; return; }
+      g(vId).innerHTML = f1(P.inc[0]) + '~' + f1(P.inc[1]) + '<span style="font-size:.5em">°</span>';
+      g(sId).textContent = name + ' 겨냥 ' + f1(P.aim) + '° · 천장 ' + f1(P.span[0]) + '~' + f1(P.span[1]) + ' m 에 닿음 · 45° 넘는 줄기 ' + P.beyond + '/' + P.n;
+    }
+    put(A, 'rv_incL', 'rv_subL', '왼쪽');
+    put(B, 'rv_incR', 'rv_subR', '오른쪽');
+
+    if (ov) {
+      g('rv_ov').innerHTML = f1(ov[1] - ov[0]) + '<span style="font-size:.5em"> m</span>';
+      var incAt = function (P, x) { return deg(Math.atan2(Math.abs(x - P.px), H - P.ph)); };
+      g('rv_subO').textContent = f1(ov[0]) + '~' + f1(ov[1]) + ' m · 이 구간에서 왼쪽 빔은 '
+        + f1(incAt(A, ov[0])) + '~' + f1(incAt(A, ov[1])) + '°, 오른쪽 빔은 '
+        + f1(incAt(B, ov[1])) + '~' + f1(incAt(B, ov[0])) + '° 로 닿습니다';
+    } else {
+      g('rv_ov').innerHTML = two ? '없음' : '—';
+      g('rv_subO').textContent = two ? '두 빔이 천장에서 만나지 않습니다' : '오른쪽 프로젝터가 꺼져 있습니다';
+    }
+
+    var allInc = [];
+    [A, B].forEach(function (P) { if (P && P.inc) allInc.push(P.inc[0], P.inc[1]); });
+    var note;
+    if (!allInc.length) note = '<b>천장에 닿는 빛이 없습니다.</b>';
+    else {
+      var lo = Math.min.apply(null, allInc), hi = Math.max.apply(null, allInc);
+      note = hi <= NEAR ? '<b>전부 우리가 잰 범위 안입니다.</b> 가장 눕힌 각이 ' + f1(hi) + '° 입니다.'
+        : (lo > NEAR ? '<b>전부 잰 범위 밖입니다.</b> ' + f1(lo) + '~' + f1(hi) + '° 는 이 연구에서 한 번도 재지 않은 각도입니다.'
+          : '<b>절반은 잰 범위 밖입니다.</b> ' + f1(lo) + '~' + f1(hi) + '° 인데 45° 를 넘는 쪽은 안 쟀습니다.');
+      if (ov) note += ' 겹치는 구간은 두 빔이 같이 닿아 <b>가장 밝은 자리</b>입니다. 판을 여기에 먼저 붙입니다.';
+    }
+    g('rv_note').innerHTML = note;
+  }
+
+  keys.forEach(function (k) { el[k].addEventListener('input', draw); });
+  g('r_two').addEventListener('change', draw);
+  var bs = document.querySelectorAll('#roomsim button.preset');
+  for (var bi = 0; bi < bs.length; bi++) {
+    bs[bi].addEventListener('click', function (ev) {
+      var b = ev.currentTarget;
+      el.H.value = b.dataset.h; el.ph.value = b.dataset.y; el.fan.value = b.dataset.f;
+      el.d.value = b.dataset.d; el.t.value = b.dataset.t;
+      draw();
+    });
+  }
+  draw();
+})();
+</script>
+<script>
+(function () {
+  var S = document.getElementById('simsvg');
+  if (!S) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  var el = {}, out = {};
+  ['pitch','depth','ang','rho','df'].forEach(function (k) {
+    el[k] = document.getElementById('s_' + k);
+    out[k] = document.getElementById('o_' + k);
+  });
+  var vBack = document.getElementById('v_back'),
+      vB = document.getElementById('v_b'),
+      vCmp = document.getElementById('v_cmp');
+
+  // 되풀이되는 난수. 손잡이를 움직여도 그림이 덜덜 떨지 않게 한다.
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0;
+      return s / 4294967296;
+    };
+  }
+
+  // 골 하나의 단면. 이웃한 두 팁 (-h,0),(h,0) 에서 골 바닥 (0,D) 로.
+  function walls(P, D) {
+    var h = P / 2, L = Math.hypot(D, h);
+    return [{ t: [-h, 0], n: [D / L, -h / L] }, { t: [h, 0], n: [-D / L, -h / L] }];
+  }
+
+  function shoot(W, D, th, rho, df, rnd, keepPath) {
+    var d = [Math.sin(th), Math.cos(th)];
+    var h = -W[0].t[0];
+    var x0 = (rnd() * 1.92 - 0.96) * h;
+    var p = [x0, 0], e = 1, nb = 0, path = keepPath ? [[x0, 0]] : null;
+    for (var i = 0; i < 120; i++) {
+      var best = null;
+      for (var w = 0; w < 2; w++) {
+        var n = W[w].n, t0 = W[w].t;
+        var den = d[0] * n[0] + d[1] * n[1];
+        if (Math.abs(den) < 1e-12) continue;
+        var t = ((t0[0] - p[0]) * n[0] + (t0[1] - p[1]) * n[1]) / den;
+        if (t < 1e-7) continue;
+        var q = [p[0] + t * d[0], p[1] + t * d[1]];
+        if (q[1] < -1e-7 || q[1] > D + 1e-7) continue;
+        if (!best || t < best.t) best = { t: t, q: q, n: n };
+      }
+      if (!best) {                       // 입구로 빠져나감
+        if (keepPath) {
+          var te = d[1] < -1e-9 ? (-0.18 * D - p[1]) / d[1] : 1;
+          path.push([p[0] + d[0] * te, p[1] + d[1] * te]);
+        }
+        return { e: e, nb: nb, path: path };
+      }
+      p = best.q; e *= rho; nb++;
+      if (keepPath) path.push([p[0], p[1]]);
+      if (e < 1e-15) return { e: 0, nb: nb, path: path };
+      var N = best.n;
+      if (rnd() < df) {                  // 퍼뜨림 — 2차원 램버시안
+        var phi = Math.asin(2 * rnd() - 1);
+        var tg = [-N[1], N[0]];
+        d = [N[0] * Math.cos(phi) + tg[0] * Math.sin(phi),
+             N[1] * Math.cos(phi) + tg[1] * Math.sin(phi)];
+      } else {                           // 거울에 거칠기를 조금 얹은 것
+        var dn = d[0] * N[0] + d[1] * N[1];
+        var m = [d[0] - 2 * dn * N[0], d[1] - 2 * dn * N[1]];
+        var u1 = Math.max(1e-12, rnd()), u2 = rnd();
+        var a = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * 0.30;
+        var c = Math.cos(a), s2 = Math.sin(a);
+        var r2 = [m[0] * c - m[1] * s2, m[0] * s2 + m[1] * c];
+        d = (r2[0] * N[0] + r2[1] * N[1] < 0) ? m : r2;
+      }
+    }
+    return { e: e, nb: nb, path: path };
+  }
+
+  function mk(tag, at) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in at) n.setAttribute(k, at[k]);
+    return n;
+  }
+  function pyrPts(cx, h, D, tipw, X, Y) {
+    return [[X(cx - h), Y(D)], [X(cx - tipw / 2), Y(0)], [X(cx + tipw / 2), Y(0)], [X(cx + h), Y(D)]]
+      .map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+  }
+  function pct(v) {
+    if (v <= 0) return '0';
+    if (v >= 0.01) return v.toFixed(3);
+    if (v >= 0.0001) return v.toFixed(5);
+    return v.toExponential(1);
+  }
+
+  var NSTAT = 3000, NMIRROR = 24000, NDRAW = 18;
+
+  function draw() {
+    var P = +el.pitch.value, D = +el.depth.value, ang = +el.ang.value,
+        rhoP = +el.rho.value, dfP = +el.df.value;
+    var rho = rhoP / 100, df = dfP / 100, th = ang * Math.PI / 180;
+    out.pitch.textContent = P.toFixed(1) + ' mm';
+    out.depth.textContent = D + ' mm';
+    out.ang.textContent = ang + '°';
+    out.rho.textContent = rhoP.toFixed(1) + ' %';
+    out.df.textContent = dfP + ' %' + (dfP === 0 ? ' (거울)' : '');
+
+    var W = walls(P, D);
+    function stats(dfv, n) {
+      var r = rng(20260915), sum = 0, nbs = 0;
+      for (var i = 0; i < n; i++) {
+        var s = shoot(W, D, th, rho, dfv, r, false);
+        sum += s.e; nbs += s.nb;
+      }
+      return { back: sum / n, nb: nbs / n };
+    }
+    var now = stats(df, NSTAT), mir = stats(0, NMIRROR);
+    vBack.innerHTML = pct(now.back * 100) + '<span style="font-size:.5em"> %</span>';
+    vB.innerHTML = now.nb.toFixed(1) + '<span style="font-size:.5em"> 회</span>';
+    // 거울 쪽은 드물게 빠져나온 광선이 값을 좌우해 잘 안 가라앉는다. 한 자리만 보인다.
+    var mv = mir.back * 100;
+    var mtxt = mv <= 0 ? '0'
+      : (mv >= 0.01 ? mv.toPrecision(1) : mv.toExponential(0).replace('e-', ' × 10⁻'));
+    vCmp.innerHTML = '약 ' + mtxt + '<span style="font-size:.5em"> %</span>';
+
+    // ---- 그림
+    var VW = 400, VH = 450, PADX = 24, PADT = 34, PADB = 76;
+    var spanX = P * 3.2, spanY = D * 1.42;
+    var sc = Math.min((VW - 2 * PADX) / spanX, (VH - PADT - PADB) / spanY);
+    var cx0 = VW / 2, tipY = VH - PADB;
+    var X = function (mm) { return cx0 + mm * sc; };
+    var Y = function (mm) { return tipY - mm * sc; };
+    while (S.firstChild) S.removeChild(S.firstChild);
+    var tipw = Math.min(0.4, P * 0.1);
+
+    S.appendChild(mk('polygon', {
+      points: [[X(-P / 2), Y(0)], [X(0), Y(D)], [X(P / 2), Y(0)]]
+        .map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '),
+      fill: 'var(--hot)', opacity: '.07' }));
+    S.appendChild(mk('rect', { x: X(-spanX / 2), y: Y(D + 2), width: spanX * sc,
+      height: 2 * sc, fill: 'var(--mat)', opacity: '.25',
+      stroke: 'var(--matedge)', 'stroke-width': '.8' }));
+    for (var c = -2; c <= 1; c++) {
+      S.appendChild(mk('polygon', { points: pyrPts((c + 0.5) * P, P / 2, D, tipw, X, Y),
+        fill: 'var(--mat)', stroke: 'var(--matedge)', 'stroke-width': '.9' }));
+    }
+    S.appendChild(mk('line', { x1: X(-spanX / 2), y1: Y(0), x2: X(spanX / 2), y2: Y(0),
+      stroke: 'var(--axis)', 'stroke-width': '.8', 'stroke-dasharray': '2 5', opacity: '.65' }));
+
+    var rd = rng(777), deep = 0, headline = null;
+    for (var k = 0; k < NDRAW; k++) {
+      s = shoot(W, D, th, rho, df, rd, true);
+      var pathPts = s.path, dd = '';
+      for (var j = 0; j < pathPts.length; j++) {
+        if (pathPts[j][1] > deep) deep = pathPts[j][1];
+        dd += (j ? ' L ' : 'M ') + X(pathPts[j][0]).toFixed(1) + ',' + Y(pathPts[j][1]).toFixed(1);
+      }
+      var node = mk('path', { d: dd, fill: 'none', stroke: 'var(--hot)',
+        'stroke-width': k === 0 ? '2.2' : '.9', opacity: k === 0 ? '.95' : '.20',
+        'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+      if (k === 0) headline = node; else S.appendChild(node);
+    }
+    // 들어오는 화살
+    var ex = -0.34 * P, ey = 0;
+    var back = Math.min(0.40 * D, 1.5 * P);
+    S.appendChild(mk('line', {
+      x1: X(ex - Math.sin(th) * back / Math.cos(th)), y1: Y(-back),
+      x2: X(ex), y2: Y(ey), stroke: 'var(--hot)', 'stroke-width': '2.6', opacity: '.9' }));
+    S.appendChild(mk('circle', { cx: X(ex), cy: Y(0), r: '4.5', fill: 'none',
+      stroke: 'var(--hot)', 'stroke-width': '1.6' }));
+    if (headline) S.appendChild(headline);
+    var lab = mk('text', { x: 8, y: Math.min(Y(-back) + 6, VH - 34), class: 'c-lbl',
+      'text-anchor': 'start', fill: 'var(--hot)' });
+    lab.textContent = '빔 ' + ang + '° 들어옴';
+    S.appendChild(lab);
+    var t4 = mk('text', { x: 8, y: Y(0) - 8, class: 'c-note' });
+    t4.textContent = '판 겉면'; S.appendChild(t4);
+    var t5 = mk('text', { x: 8, y: VH - 12, class: 'c-note' });
+    t5.textContent = '↓ 방 쪽 · 간격 ' + P.toFixed(1) + ' mm, 깊이 ' + D + ' mm · 광선 ' + NDRAW + ' 줄';
+    S.appendChild(t5);
+  }
+
+  ['pitch','depth','ang','rho','df'].forEach(function (k) {
+    el[k].addEventListener('input', draw);
+  });
+  var btns = document.querySelectorAll('button.preset');
+  for (var bi = 0; bi < btns.length; bi++) {
+    btns[bi].addEventListener('click', function (ev) {
+      var b = ev.currentTarget;
+      el.pitch.value = b.dataset.p; el.depth.value = b.dataset.d;
+      el.ang.value = b.dataset.a; el.rho.value = b.dataset.r; el.df.value = b.dataset.f;
+      draw();
+    });
+  }
+  draw();
+})();
+</script>
+<script>
+(function () {
+  var g = function (id) { return document.getElementById(id); };
+  if (!g('c_pitch')) return;
+  var keys = ['pitch','depth','tip','zone','cov','price'];
+  var el = {}, ou = {};
+  keys.forEach(function (k) { el[k] = g('c_' + k); ou[k] = g('co_' + k); });
+
+  var CEIL = 100.0;      // 천장 m²
+  var MUSOU_MM = 20.0;   // 끝에서 몇 mm 를 무소로
+
+  // 사각뿔대 하나의 겉넓이 ÷ 그 밑면적
+  function mult(p, d, t) {
+    var run = (p - t) / 2, s = Math.sqrt(run * run + d * d);
+    return (4 * ((p + t) / 2 * s) + t * t) / (p * p);
+  }
+  // 끝에서 h mm 가 겉넓이에서 차지하는 몫
+  function share(p, d, t, h) {
+    if (h >= d) return 1;
+    var run = (p - t) / 2, s = Math.sqrt(run * run + d * d);
+    var lat = 4 * ((p + t) / 2 * s) + t * t;
+    var w = t + (p - t) * (h / d), sh = s * (h / d);
+    return (4 * ((w + t) / 2 * sh) + t * t) / lat;
+  }
+  function won(v) {
+    if (v >= 100000000) return (v / 100000000).toFixed(2) + ' 억원';
+    if (v >= 10000) return Math.round(v / 10000).toLocaleString('ko-KR') + ' 만원';
+    return Math.round(v).toLocaleString('ko-KR') + ' 원';
+  }
+
+  function calc() {
+    var p = +el.pitch.value, d = +el.depth.value, t = +el.tip.value,
+        z = +el.zone.value / 100, cv = +el.cov.value, pr = +el.price.value;
+    if (t > p * 0.6) t = p * 0.6;
+    ou.pitch.textContent = p.toFixed(1) + ' mm';
+    ou.depth.textContent = d + ' mm';
+    ou.tip.textContent = t.toFixed(1) + ' mm';
+    ou.zone.textContent = Math.round(z * 100) + ' %';
+    ou.cov.textContent = cv.toFixed(1) + ' m²/L';
+    ou.price.textContent = Math.round(pr / 10000) + ' 만원';
+
+    var m = mult(p, d, t), area = CEIL * m;
+    var sh = share(p, d, t, MUSOU_MM);
+    var marea = area * z * sh, carea = area - marea;
+    var liter = cv > 0 ? marea / cv : 0;
+
+    g('c_mult').textContent = m.toFixed(2) + ' 배';
+    g('c_area').textContent = Math.round(area).toLocaleString('ko-KR') + ' m²';
+    g('c_marea').textContent = Math.round(marea).toLocaleString('ko-KR') + ' m²';
+    g('c_carea').textContent = Math.round(carea).toLocaleString('ko-KR') + ' m²';
+    g('c_liter').textContent = liter.toFixed(1) + ' L';
+    g('c_paint').innerHTML = '<b>' + won(liter * pr) + '</b>';
+  }
+
+  keys.forEach(function (k) { el[k].addEventListener('input', calc); });
+  var bs = document.querySelectorAll('.sim button.preset[data-c]');
+  for (var i = 0; i < bs.length; i++) {
+    bs[i].addEventListener('click', function (ev) {
+      var b = ev.currentTarget;
+      el.pitch.value = b.dataset.p; el.depth.value = b.dataset.d; el.tip.value = b.dataset.t;
+      el.zone.value = b.dataset.z; el.cov.value = b.dataset.c; el.price.value = b.dataset.u;
+      calc();
+    });
+  }
+  calc();
+})();
+</script>
+
+</body></html>

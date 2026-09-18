@@ -20,6 +20,13 @@
 
 ## 지금 흔들리고 있는 것 (2026-09-16, 09-17 더함)
 
+- **방 조건이 바뀌었다 (2026-09-18).** 천장 6 m 가 아니라 **3.5 m**. 프로젝터 2 m 기준 45 도가 되는
+  거리가 4.0 m 에서 1.5 m 로 줄어, **천장 대부분이 45~78 도로 맞는다. 우리는 0~45 도만 쟀다.**
+  각도 도구: 연구 기록 00 절, 그리고 `project/report/comb/beam_angle_2026-09-18.html`.
+  **45 도 너머 측정이 지금 제일 중요하다** (NEXT 의 Z 절).
+- **연구 기록이 저장소에 있다** `project/report/journey/record_ko_2026-09-18.html`
+  (아티팩트 https://claude.ai/artifact/3gPYCx3j6N2CANw7BRB8Bm). 영어판 `record_en_2026-09-18.html` 은
+  **머리말·00 절까지만 번역됨** (NEXT 의 Y 절).
 - **시연 준비 중 (2026-09-17).** 연구자 30 분, 결론은 벌집 셀 10 / 깊이 20 (사용자 결정).
   화면을 순서대로 눌러 틀린 곳을 고쳤다 — CONTEXT 맨 위 절.
   **진행표** `project/report/comb/demo_runsheet_2026-09-17.html` (https://claude.ai/artifact/H6ywiNQ91g7MhCd337zhNR).

@@ -1,0 +1,351 @@
+<meta charset="utf-8">
+<title>천장에 닿는 각도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#646b77; --line:#dfdcd6; --soft:#efede8;
+  --cy:#2a8f88; --pk:#b8577a; --warn:#a86c12; --warn-soft:#f7ecd9; --bad:#b63f36; --good:#3a8452;
+  --room:#e7e4dd; --beam:#e08a2e; --beam-soft:rgba(224,138,46,.18);
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --kr:"IBM Plex Sans KR","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#9aa2ae; --line:#2d323c; --soft:#20242c;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --warn-soft:#2e2517; --bad:#e0655c; --good:#7fc98a;
+  --room:#232833; --beam:#f0a355; --beam-soft:rgba(240,163,85,.20);
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#9aa2ae; --line:#2d323c; --soft:#20242c;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --warn-soft:#2e2517; --bad:#e0655c; --good:#7fc98a;
+  --room:#232833; --beam:#f0a355; --beam-soft:rgba(240,163,85,.20);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:18px;padding-block:40px 80px;display:flex;flex-direction:column;gap:32px}
+header{display:flex;flex-direction:column;gap:8px;border-bottom:2px solid var(--ink);padding-bottom:18px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h1{margin:0;font-size:30px;line-height:1.25;font-weight:700;text-wrap:balance}
+h2{margin:0;font-size:20px;font-weight:700}
+p{margin:0;max-width:66ch}
+.sub{color:var(--muted);font-size:15px}
+section{display:flex;flex-direction:column;gap:14px}
+.mono,td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto}
+.note{font-size:13px;color:var(--muted)}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:10px}
+svg.scene{display:block;width:100%;height:auto}
+svg.scene text{font-family:var(--mono)}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 20px}
+.ctl{display:flex;flex-direction:column;gap:3px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ctl label{font-size:14px}
+.ctl output{font-family:var(--mono);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--cy)}
+.ctl .hint{font-size:12px;color:var(--muted)}
+button.reset{font-family:var(--mono);font-size:12px;background:var(--soft);color:var(--ink);border:1px solid var(--line);
+  border-radius:3px;padding:4px 10px;cursor:pointer;align-self:flex-start}
+button.reset:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.box{border-top:3px solid var(--cy);padding-top:7px;display:flex;flex-direction:column;gap:1px}
+.box.warnb{border-top-color:var(--warn)}
+.box.badb{border-top-color:var(--bad)}
+.box .k{font-size:12.5px;color:var(--muted)}
+.box .v{font-family:var(--mono);font-size:23px;font-weight:600;line-height:1.25}
+.box .d{font-size:12px;color:var(--muted)}
+.verdict{border-radius:4px;padding:11px 13px;font-size:14.5px;background:var(--warn-soft)}
+.verdict b{color:var(--warn)}
+.verdict.ok{background:color-mix(in srgb,var(--good) 14%,transparent)}
+.verdict.ok b{color:var(--good)}
+ul{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:6px}
+@media (max-width:560px){h1{font-size:25px}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">SPILL SINK SIMULATOR · 2026-09-18</div>
+  <h1>천장에 닿는 각도</h1>
+  <p class="sub">프로젝터와 화면(공중 영상)을 옮기고 천장 높이를 바꿔 보면, 빔이 천장에 <b>몇 도로</b> 닿는지 바로 보인다. 빔 가운데는 늘 화면 가운데를 겨누므로 <b>겨냥 각도는 저절로 정해진다.</b> 각도는 판의 법선(천장에서 수직으로 내린 선)에서 잰다. 0 도는 정면으로 맞는 것, 90 도는 스치는 것이다.</p>
+</header>
+
+<section>
+  <h2>직접 해 보세요</h2>
+  <div class="stage">
+    <svg class="scene" id="scene" viewBox="0 0 900 380" role="img" aria-label="방 단면과 레이저 빔"></svg>
+    <div class="controls">
+      <div class="ctl">
+        <div class="row"><label for="H">천장 높이</label><output id="Hv">3.5 m</output></div>
+        <input type="range" id="H" min="2.2" max="6" step="0.1" value="3.5">
+        <span class="hint">지금 방 3.5 m · 연구에서 쓰던 가정 6 m</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="px">프로젝터 좌우</label><output id="pxv">2.0 m</output></div>
+        <input type="range" id="px" min="0" max="10" step="0.1" value="2">
+        <span class="hint">방 길이 10 m, 왼쪽 벽이 0 m</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="ph">프로젝터 높이</label><output id="phv">1.20 m</output></div>
+        <input type="range" id="ph" min="0" max="3" step="0.05" value="1.2">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sx">화면 가운데 좌우</label><output id="sxv">6.0 m</output></div>
+        <input type="range" id="sx" min="0" max="10" step="0.1" value="6">
+        <span class="hint">공중에 맺히는 영상의 자리</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sy">화면 가운데 높이</label><output id="syv">2.20 m</output></div>
+        <input type="range" id="sy" min="0" max="5" step="0.05" value="2.2">
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="sh">화면 세로 크기</label><output id="shv">1.5 m</output></div>
+        <input type="range" id="sh" min="0.2" max="4" step="0.1" value="1.5">
+        <span class="hint">이 크기를 채우는 만큼 빔이 퍼진다</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><label for="manual"><input type="checkbox" id="manual"> 부채꼴 직접 정하기</label><output id="fanv">40°</output></div>
+        <input type="range" id="fan" min="0" max="80" step="1" value="40" disabled>
+        <span class="hint">꺼 두면 화면 크기와 거리에서 저절로 나온다</span>
+      </div>
+      <div class="ctl">
+        <div class="row"><label>되돌리기</label></div>
+        <button class="reset" id="reset" type="button">기본값으로</button>
+        <span class="hint">천장 3.5 · 프로젝터 2.0 m · 1.20 m · 화면 6.0 m · 2.20 m · 세로 1.5 m</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="readout" id="readout"></div>
+  <div class="verdict" id="verdict"></div>
+
+  <div class="scroll"><table id="rays">
+    <thead><tr><th>부채꼴 어디</th><th>수평에서 올린 각</th><th>닿는 자리</th><th>입사각 (법선에서)</th><th>잰 범위</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <p class="note">우리가 시뮬레이터로 잰 입사각은 0 · 20 · 30 · 40 · 45 도다. 이 표에서 45 도를 넘는 줄은 <b>아직 재지 않은 각도</b>다.</p>
+</section>
+
+<section>
+  <h2>천장이 낮아지면 무엇이 달라지나</h2>
+  <p>프로젝터를 2 m 높이에 둘 때, 천장까지 남은 높이가 6 m 에서는 4 m 이고 3.5 m 에서는 1.5 m 다. 같은 수평 거리에서 각도가 훨씬 눕는다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>프로젝터에서 수평 거리</th><th>천장 6 m</th><th>천장 3.5 m</th></tr></thead>
+    <tbody>
+      <tr><td>1 m</td><td class="n">14.0°</td><td class="n">33.7°</td></tr>
+      <tr><td>1.5 m</td><td class="n">20.6°</td><td class="n">45.0°</td></tr>
+      <tr><td>2 m</td><td class="n">26.6°</td><td class="n">53.1°</td></tr>
+      <tr><td>3 m</td><td class="n">36.9°</td><td class="n">63.4°</td></tr>
+      <tr><td>5 m</td><td class="n">51.3°</td><td class="n">73.3°</td></tr>
+      <tr><td>7 m</td><td class="n">60.3°</td><td class="n">77.9°</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>45 도가 되는 거리</b>가 천장 6 m 에서는 4.0 m, 천장 3.5 m 에서는 <b>1.5 m</b> 다. 3.5 m 천장에서는 프로젝터 바로 위 1.5 m 안쪽만 우리가 잰 범위에 들어온다.</p>
+</section>
+
+<section>
+  <h2>정면이 없어지면 더 좋은가 — 아니다</h2>
+  <p>천장이 낮아지면 정면(0 도 근처)으로 맞는 자리가 프로젝터 바로 위 좁은 곳만 남는다. 그런데 <b>우리 설계에서 정면은 가장 어두운 각도였다.</b> 눕힐수록 밝아진다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>입사각</th><th>결론 벌집 (셀 10 · 깊이 20)</th><th>무소 민판</th></tr></thead>
+    <tbody>
+      <tr><td>0°</td><td class="n">0.075 %</td><td class="n">0.967 %</td></tr>
+      <tr><td>20°</td><td class="n">0.147 %</td><td class="n">1.002 %</td></tr>
+      <tr><td>30°</td><td class="n">0.174 %</td><td class="n">1.055 %</td></tr>
+      <tr><td>40°</td><td class="n">0.209 %</td><td class="n">1.149 %</td></tr>
+      <tr><td>45°</td><td class="n">0.227 %</td><td class="n">1.219 %</td></tr>
+      <tr><td>60°</td><td class="n">안 쟀다</td><td class="n">1.586 %</td></tr>
+      <tr><td>75°</td><td class="n">안 쟀다</td><td class="n">2.455 %</td></tr>
+    </tbody>
+  </table></div>
+  <p>벌집은 0 도에서 0.075 %, 45 도에서 0.227 % 로 <b>3 배</b> 차이다. 민판도 45 도에서 75 도로 가면 2 배가 된다. 즉 낮은 천장은 <b>어두운 각도를 없애고 밝은 각도만 남긴다.</b></p>
+  <p>다만 두 가지는 아직 모른다. 첫째, <b>45 도 너머에서 벌집이 어떻게 되는지 재지 않았다.</b> 스치는 각에서는 셀 벽이 더 잘 보여서 민판보다 덜 오를 수도 있다 [추측]. 둘째, <b>관객이 보는 밝기(정면 반짝임)는 입사각이 아니라 관객 자리로 정해진다.</b> 천장이 낮으면 관객이 천장을 더 눕혀 보게 되므로 그 축도 다시 봐야 한다.</p>
+  <p class="note">벌집 값은 판 500 · 무소 전부 · 방위 45° 면. 민판 값은 판 200 · 무소. 둘 다 2026-09-17·09-14 측정.</p>
+</section>
+
+<section>
+  <h2>이 값이 연구에 미치는 영향</h2>
+  <ul>
+    <li><b>측정 각도를 다시 정해야 한다.</b> 지금 순위는 입사 30 · 40 · 45 · −40 도에서 가장 밝은 값으로 매겼다. 3.5 m 천장에서는 대부분의 천장이 45~78 도로 맞는다. 규약 각도를 늘리면 후보 14 개를 다시 재야 하고, 순위가 바뀔 수 있다.</li>
+    <li><b>이미 아는 경향.</b> 스치는 각도로 갈수록 총량은 커진다. 민판은 45 도에서 1.219 %, 60 도에서 1.586 %, 75 도에서 2.455 % 였다 (무소 칠한 판, 2026-09-14 측정).</li>
+    <li><b>안 잰 것.</b> 벌집과 피라미드를 45 도 너머에서 잰 적이 없다. 셀이 깊은 구조는 스치는 각도에서 벽이 더 잘 보이므로 순위가 바뀔 수 있다. [추측]</li>
+    <li><b>천장 면적도 달라진다.</b> 같은 부채꼴이라도 천장이 낮으면 빛이 닿는 자리가 좁고, 그만큼 한 자리에 세게 맞는다.</li>
+  </ul>
+  <p class="note">계산은 단순한 직선 기하다. 프로젝터 한 점에서 부채꼴로 나간 빛이 평평한 천장에 닿는 각을 구한다. 방 길이는 10 m 로 두고, 부채꼴이 천장에 닿기 전에 맞은편 벽에 먼저 닿으면 그렇게 표시한다.</p>
+</section>
+
+<section>
+  <p class="note">이 문서: <span class="mono">project/report/comb/beam_angle_2026-09-18.html</span> · 관련: 최종 후보 보고서, 연구 기록, 시연 진행표</p>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const L = 10;                      // 방 길이 m
+  const NEAR = 45;                   // 우리가 잰 가장 눕힌 각
+  const ids = ['H','px','ph','sx','sy','sh','fan'];
+  const DEF = {H:3.5, px:2, ph:1.2, sx:6, sy:2.2, sh:1.5, fan:40};
+  const fmt = (v,n=1) => v.toFixed(n);
+  const deg = r => r * 180 / Math.PI;
+
+  // 한 줄기: 수평에서 올린 각 a(도)와 가는 쪽 dir(+1 오른쪽) -> 어디에 닿나.
+  // a 가 90 을 넘으면 수직을 지나 반대쪽으로 넘어간 것이므로 되접는다.
+  function shoot(a, dir, H, ph, px){
+    if(a > 90){ a = 180 - a; dir = -dir; }
+    if(a <= 0.01) return {kind:'없음', a};
+    const t = Math.tan(a * Math.PI/180);
+    const dx = (H - ph) / t;                                    // 천장까지 수평 거리
+    const xh = px + dir * dx;
+    if(xh >= 0 && xh <= L) return {kind:'천장', a, dir, x: xh, inc: 90 - a};
+    const wall = dir > 0 ? L : 0;
+    return {kind:'벽', a, dir, x: wall, y: ph + Math.abs(wall - px) * t};
+  }
+
+  function draw(){
+    const H = +$('#H').value, px = +$('#px').value, ph = +$('#ph').value,
+          sx = +$('#sx').value, sy = +$('#sy').value, sh = +$('#sh').value,
+          manual = $('#manual').checked;
+    $('#Hv').textContent = fmt(H) + ' m';
+    $('#pxv').textContent = fmt(px) + ' m';
+    $('#phv').textContent = fmt(ph,2) + ' m';
+    $('#sxv').textContent = fmt(sx) + ' m';
+    $('#syv').textContent = fmt(sy,2) + ' m';
+    $('#shv').textContent = fmt(sh) + ' m';
+    $('#fan').disabled = !manual;
+
+    // 겨냥 각도: 프로젝터에서 화면 가운데를 잇는 선. 저절로 나온다.
+    const dxs = sx - px, dys = sy - ph;
+    const dist = Math.hypot(dxs, dys);
+    const dir = dxs === 0 ? 1 : Math.sign(dxs);
+    const aim = dist < 1e-6 ? 90 : deg(Math.atan2(dys, Math.abs(dxs)));
+    // 부채꼴: 화면 세로를 채우는 각. 직접 정하기를 켜면 슬라이더 값.
+    const fanAuto = dist < 1e-6 ? 0 : 2 * deg(Math.atan((sh/2) / dist));
+    const fan = manual ? +$('#fan').value : fanAuto;
+    if(!manual) $('#fan').value = Math.min(80, Math.round(fan));
+    $('#fanv').textContent = fmt(fan) + '°';
+
+    const a1 = aim - fan/2, a2 = aim + fan/2;
+    const N = 13, rays = [];
+    for(let i=0;i<N;i++){
+      const a = a1 + (a2-a1) * (N===1 ? 0.5 : i/(N-1));
+      rays.push(shoot(a, dir, H, ph, px));
+    }
+    const onCeil = rays.filter(r => r.kind === '천장');
+    const incs = onCeil.map(r => r.inc);
+    const incMin = incs.length ? Math.min(...incs) : null;
+    const incMax = incs.length ? Math.max(...incs) : null;
+    const xs = onCeil.map(r => r.x);
+    const span = xs.length ? [Math.min(...xs), Math.max(...xs)] : null;
+    const beyond = incs.filter(v => v > NEAR).length;
+    const aimUp = aim > 0;
+
+    // ---- 그림
+    const W = 900, Hh = 380, m = {l:54, r:24, t:26, b:34};
+    const roomH = Math.max(H, 3.2);
+    const s2 = Math.min((W - m.l - m.r) / L, (Hh - m.t - m.b) / roomH);
+    const X = x => m.l + x * s2, Y = y => Hh - m.b - y * s2;
+    const o = [];
+    o.push(`<rect x="${X(0)}" y="${Y(H)}" width="${L*s2}" height="${H*s2}" fill="var(--room)"/>`);
+    o.push(`<line x1="${X(0)}" y1="${Y(H)}" x2="${X(L)}" y2="${Y(H)}" stroke="var(--ink)" stroke-width="3"/>`);
+    o.push(`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(L)}" y2="${Y(0)}" stroke="var(--ink)" stroke-width="2"/>`);
+    o.push(`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(H)}" stroke="var(--line)" stroke-width="2"/>`);
+    o.push(`<line x1="${X(L)}" y1="${Y(0)}" x2="${X(L)}" y2="${Y(H)}" stroke="var(--line)" stroke-width="2"/>`);
+    o.push(`<text x="${X(0)-8}" y="${Y(H)+4}" text-anchor="end" font-size="11" fill="var(--muted)">천장 ${fmt(H)} m</text>`);
+    o.push(`<text x="${X(0)-8}" y="${Y(0)+4}" text-anchor="end" font-size="11" fill="var(--muted)">바닥</text>`);
+    // 부채꼴 채우기
+    if(onCeil.length > 1){
+      const pts = [[X(px), Y(ph)]].concat(onCeil.map(r => [X(r.x), Y(H)]));
+      o.push(`<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="var(--beam-soft)"/>`);
+    }
+    // 줄기
+    rays.forEach((r,i) => {
+      const edge = (i === 0 || i === rays.length-1);
+      if(r.kind === '천장'){
+        const hot = r.inc > NEAR;
+        o.push(`<line x1="${X(px)}" y1="${Y(ph)}" x2="${X(r.x)}" y2="${Y(H)}" stroke="${hot ? 'var(--bad)' : 'var(--beam)'}" stroke-width="${edge?2.2:1.1}" opacity="${edge?1:.75}"/>`);
+        if(edge){
+          o.push(`<circle cx="${X(r.x)}" cy="${Y(H)}" r="3.5" fill="${hot?'var(--bad)':'var(--beam)'}"/>`);
+          o.push(`<text x="${X(r.x)}" y="${Y(H)-9}" text-anchor="middle" font-size="12" font-weight="600" fill="${hot?'var(--bad)':'var(--ink)'}">${fmt(r.inc)}°</text>`);
+          o.push(`<text x="${X(r.x)}" y="${Y(H)-24}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${fmt(r.x)} m</text>`);
+        }
+      } else if(r.kind === '벽'){
+        o.push(`<line x1="${X(px)}" y1="${Y(ph)}" x2="${X(r.x)}" y2="${Y(Math.max(0, Math.min(H, r.y)))}" stroke="var(--muted)" stroke-width="${edge?2:1}" stroke-dasharray="5 4" opacity=".8"/>`);
+      } else {
+        const far = dir > 0 ? L : 0;
+        o.push(`<line x1="${X(px)}" y1="${Y(ph)}" x2="${X(far)}" y2="${Y(Math.max(0, ph + (far-px)*Math.tan(r.a*Math.PI/180)))}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 5" opacity=".6"/>`);
+      }
+    });
+    // 화면 (공중 영상)
+    o.push(`<line x1="${X(sx)}" y1="${Y(sy - sh/2)}" x2="${X(sx)}" y2="${Y(sy + sh/2)}" stroke="var(--cy)" stroke-width="5" stroke-linecap="round" opacity=".85"/>`);
+    o.push(`<text x="${X(sx)}" y="${Y(sy + sh/2)-8}" text-anchor="middle" font-size="11" fill="var(--cy)">화면 ${fmt(sh)} m</text>`);
+    // 겨냥 선
+    o.push(`<line x1="${X(px)}" y1="${Y(ph)}" x2="${X(sx)}" y2="${Y(sy)}" stroke="var(--cy)" stroke-width="1" stroke-dasharray="2 4" opacity=".9"/>`);
+    // 프로젝터
+    o.push(`<rect x="${X(px)-11}" y="${Y(ph)-7}" width="22" height="14" rx="2" fill="var(--pk)"/>`);
+    o.push(`<text x="${X(px)}" y="${Y(ph)+26}" text-anchor="middle" font-size="11" fill="var(--pk)">프로젝터 ${fmt(px)} m · ${fmt(ph,2)} m</text>`);
+    for(let x=0;x<=L;x++){
+      o.push(`<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(0)+5}" stroke="var(--line)" stroke-width="1"/>`);
+      if(x%2===0) o.push(`<text x="${X(x)}" y="${Y(0)+18}" text-anchor="middle" font-size="10" fill="var(--muted)">${x} m</text>`);
+    }
+    $('#scene').innerHTML = o.join('');
+
+    // ---- 읽는 값
+    const boxes = [];
+    boxes.push(`<div class="box"><span class="k">겨냥 각도 (저절로)</span><span class="v">${fmt(aim)}°</span><span class="d">프로젝터에서 화면 가운데까지, 수평에서 올린 각</span></div>`);
+    boxes.push(`<div class="box"><span class="k">부채꼴 퍼짐</span><span class="v">${fmt(fan)}°</span><span class="d">${manual ? '직접 정함' : '화면 세로 ' + fmt(sh) + ' m 를 ' + fmt(dist,2) + ' m 앞에서 채움'}</span></div>`);
+    if(incs.length){
+      const cls = incMax > NEAR ? (incMin > NEAR ? 'badb' : 'warnb') : '';
+      boxes.push(`<div class="box ${cls}"><span class="k">천장 입사각</span><span class="v">${fmt(incMin)}~${fmt(incMax)}°</span><span class="d">법선에서 잰 각</span></div>`);
+      boxes.push(`<div class="box"><span class="k">천장에 닿는 구간</span><span class="v">${fmt(span[0])}~${fmt(span[1])} m</span><span class="d">길이 ${fmt(span[1]-span[0])} m</span></div>`);
+      boxes.push(`<div class="box ${beyond?'warnb':''}"><span class="k">45° 넘는 줄기</span><span class="v">${beyond} / ${incs.length}</span><span class="d">넘으면 아직 안 잰 각도</span></div>`);
+    } else {
+      boxes.push(`<div class="box badb"><span class="k">천장에 닿는 빛</span><span class="v">없음</span><span class="d">${aimUp ? '부채꼴이 전부 벽으로 간다' : '화면이 프로젝터보다 낮아 빔이 아래로 간다'}</span></div>`);
+    }
+    $('#readout').innerHTML = boxes.join('');
+
+    const v = $('#verdict');
+    if(!incs.length){
+      v.className = 'verdict';
+      v.innerHTML = aimUp
+        ? '<b>천장에 안 닿는다.</b> 빔이 맞은편 벽에 먼저 닿는다. 화면을 프로젝터 쪽으로 당기거나 높이면 천장에 닿는다.'
+        : '<b>빔이 아래로 간다.</b> 화면 가운데가 프로젝터보다 낮다. 화면을 올리거나 프로젝터를 낮춘다.';
+    } else if(incMax <= NEAR){
+      v.className = 'verdict ok';
+      v.innerHTML = `<b>전부 잰 범위 안이다.</b> 가장 눕힌 각이 ${fmt(incMax)}° 로 45° 안쪽이다. 지금 순위표를 그대로 쓸 수 있다.`;
+    } else if(incMin > NEAR){
+      v.className = 'verdict';
+      v.innerHTML = `<b>전부 잰 범위 밖이다.</b> ${fmt(incMin)}~${fmt(incMax)}° 는 한 번도 재지 않은 각도다. 이 조건으로 가려면 45° 너머를 다시 재야 한다.`;
+    } else {
+      v.className = 'verdict';
+      v.innerHTML = `<b>절반은 잰 범위 밖이다.</b> ${fmt(incMin)}° 부터 ${fmt(incMax)}° 까지인데, 45° 를 넘는 줄기가 ${beyond} 개다.`;
+    }
+
+    const tb = $('#rays tbody');
+    tb.innerHTML = rays.map((r,i) => {
+      const where = i===0 ? '부채꼴 아래 끝' : (i===rays.length-1 ? '부채꼴 위 끝' : (i===((rays.length-1)/2|0) ? '한가운데 (화면 가운데)' : ''));
+      if(!where) return '';
+      if(r.kind !== '천장')
+        return `<tr><td>${where}</td><td class="n">${fmt(r.a)}°</td><td>${r.kind==='벽'?'맞은편 벽에 먼저 닿음':'천장에 안 닿음'}</td><td class="n">—</td><td>—</td></tr>`;
+      const out = r.inc > NEAR;
+      return `<tr><td>${where}</td><td class="n">${fmt(r.a)}°</td><td class="n">${fmt(r.x)} m</td><td class="n" style="${out?'color:var(--bad);font-weight:600':''}">${fmt(r.inc)}°</td><td>${out?'안 잰 각도':'잰 범위'}</td></tr>`;
+    }).join('');
+  }
+
+  ids.forEach(id => $('#'+id).addEventListener('input', draw));
+  $('#manual').addEventListener('change', draw);
+  $('#reset').addEventListener('click', () => {
+    ids.forEach(id => { $('#'+id).value = DEF[id]; });
+    $('#manual').checked = false;
+    draw();
+  });
+  draw();
+})();
+</script>
