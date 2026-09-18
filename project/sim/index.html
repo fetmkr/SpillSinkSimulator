@@ -545,6 +545,14 @@ details.why p{margin:.4em 0 0}
    <input type="number" id="mmpx" value="0.215" min="0.02" max="4" step="0.005"
     style="width:5.5em"></div>
   <div class="note" id="mmpxcost" style="margin:-4px 0 6px">&nbsp;</div>
+  <!-- 스치는 각도 (2026-09-18). 천장 3.5 m 에서는 천장 대부분이 45 도를 넘는데 규약 각도는 45 도까지다.
+       규약(form_metrics)은 건드리지 않고, 켜면 요청에 각도만 더 붙인다. 꺼 두면 옛 요청 그대로다. -->
+  <div class="row" style="margin:2px 0 6px">
+    <label for="graze" style="display:flex;gap:7px;align-items:center;font-size:12.5px;cursor:pointer">
+      <input type="checkbox" id="graze"> 스치는 각도까지 재기
+      <span class="note" style="margin:0">±55 · ±65 · ±75°</span></label></div>
+  <p class="note" id="grazenote" style="margin:-2px 0 6px">천장 3.5 m 에서는 천장 대부분이 45° 를 넘습니다.
+   <b>보고서 순위는 30·40·45·−40° 로만 매깁니다.</b> 켜면 그 밖의 각도까지 같이 잽니다.</p>
   <button class="go" id="m5"><span class="lb">Render &middot; total
     <small>입사 7 각도 × 방위 2 면</small></span>
     <span class="t">~6 s</span></button>
@@ -1170,6 +1178,7 @@ async function measure(thetas){
       + (nPl>1 ? ` (at &theta; ${wTh}&deg;, &phi; ${wPhi}&deg;)` : '')
       + ` · ${j.seconds}s`
       + ` · &theta;=0 &phi;=0 is ${(100*((planes['0']||{})['0'] ?? worst)).toFixed(5)} %${extra}`
+      + ((Math.abs(wTh) > 45) ? ` · <b style="color:var(--a)">가장 밝은 각도가 45° 밖입니다 — 보고서 순위에 없는 각도</b>` : '')
       // WHICH MATERIAL THIS NUMBER IS FOR. A reflectance with no finish named
       // beside it is not a result -- the same panel reads 0.10 % or 0.47 %
       // depending only on what it is painted with, and the reader cannot tell
@@ -3231,8 +3240,8 @@ addEventListener('resize', () => draw());
       // its own. The old [0,-20,-40,20,40] had no 30 or 45 deg -- the angles
       // the ceiling panel actually receives. One trace per angle, sequential
       // because the server renders one request at a time anyway.
-      const THS = (window.PROTO && PROTO.total_thetas) ? PROTO.total_thetas.map(Number)
-                                                      : [0,-20,-40,20,40];
+      const THS = (typeof thetaList === 'function') ? thetaList()
+                : ((window.PROTO && PROTO.total_thetas) ? PROTO.total_thetas.map(Number) : [0,-20,-40,20,40]);
       const out = [];
       for(const th of THS){
         prog.set(out.length, THS.length);
@@ -3312,7 +3321,15 @@ addEventListener('resize', () => draw());
   // THE ROOM'S ANGLES, not a list written here (2026-09-15). The totals button
   // used to measure [0, -20, -40, 20, 40]; the finalist report ranks on 30 and
   // 45 degrees too. Both now read form_metrics.ROOM_TOTAL_THETAS.
-  $('#m5').onclick = () => measure(PROTO.total_thetas);
+  // 켜면 규약 각도에 스치는 각도를 더한다. 끄면 규약 그대로 (화면 요청 검사 14/14 유지).
+  window.GRAZE = [55, 65, 75, -55, -65, -75];
+  window.thetaList = () => {
+    const base = PROTO.total_thetas.map(Number);
+    return ($('#graze') && $('#graze').checked) ? base.concat(GRAZE) : base;
+  };
+  $('#m5').onclick = () => measure(thetaList());
+  $('#graze').addEventListener('change', () => { resetResults();
+    $('#m5').querySelector('.t').textContent = $('#graze').checked ? '~12 s' : '~6 s'; });
   $('#step').onclick = async () => {
     const b = $('#step'), tag = $('#stepsize'), was = tag.textContent;
     b.disabled = true; tag.textContent = 'building…';
