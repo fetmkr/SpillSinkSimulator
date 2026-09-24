@@ -22,12 +22,30 @@
 import os
 import re
 import io
+import sys
 import json
+import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 STYLE_FROM = os.path.join(ROOT, "report/comb/comb_musou_2026-08-22.html")
 OUT = os.path.join(ROOT, "report/METHOD.html")
+PAPERS = os.path.join(ROOT, "reference/papers_method")
+PAPER_HREF = "../reference/papers_method/"
+# 남에게 넘길 묶음: python3 scripts/build_method_report.py --bundle <폴더>
+# <폴더>/index.html 과 <폴더>/papers/ 에 인용한 파일만 담는다.
+# 영어판: --lang en. 글은 scripts/method_en.py, 숫자는 여기처럼 코드에서 읽는다.
+LANG = "en" if "--lang" in sys.argv and \
+    sys.argv[sys.argv.index("--lang") + 1] == "en" else "ko"
+if LANG == "en":
+    OUT = os.path.join(ROOT, "report/METHOD_en.html")
+BUNDLE = None
+if "--bundle" in sys.argv:
+    BUNDLE = os.path.abspath(sys.argv[sys.argv.index("--bundle") + 1])
+    OUT = os.path.join(BUNDLE, "index.html")
+    PAPER_HREF = "papers/"
+# 아티팩트는 파일 하나 15 MB 까지다. 넘는 것은 묶음에 안 넣고 원문 주소로 건다.
+BUNDLE_MAX = 15 * 1000 * 1000
 
 
 def const(path, name):
@@ -228,6 +246,14 @@ FINDINGS = [
      "옮기며 재니 정면에서 <b>23 배</b> 갈렸다 (골 0.00116, 꼭짓점 너머 "
      "0.02658). 그래서 소볼로 바꿨다.",
      "Cook 1986 · Owen 2023"),
+    ("대표값은 빔 자리 평균이다 (2026-08-28)",
+     "빔 자리마다 값이 다르다. 그 중 무엇을 대표로 적을지 정해야 했다. "
+     "최대를 적으면 자리를 늘릴수록 값이 커진다.",
+     "측정 규격을 읽었다. 광택 규격 셋이 전부 여러 자리를 재서 평균을 적고 "
+     "퍼짐 폭을 같이 적는다. 최대값은 시편 방향을 잡을 때만 쓴다. 레이저는 "
+     "판을 훑으니 눈에 보이는 것은 시간 평균이다. 그래서 평균을 대표로 쓰고 "
+     "p99 와 최대값은 따로 적는다.",
+     "ASTM D523 · ASTM E430 · ISO 2813 · NPL 안내서 37 · Talbot&ndash;Plateau"),
     ("설정이 두 군데 살면 한 군데만 고치게 된다",
      "파일에 적힌 값과 화면이 실제로 쓰는 값이 갈라진다. 그런데 결과에는 "
      "아무 표시가 안 난다. 그냥 다른 숫자가 나올 뿐이다.",
@@ -249,89 +275,173 @@ FINDINGS = [
      "genBSDF.pl · RayFlare 소스"),
 ]
 
+# (저자, 제목, 어디, 무엇을 말하나, 원문 주소, papers_method 안의 받아 둔 파일)
+# 파일이 None 이면 받아 두지 못한 것이다 -- 왜인지 "무엇을 말하나" 끝에 적는다.
 REFS = [
     ("Efron, B. (2011)",
      "Tweedie's Formula and Selection Bias", "JASA 106(496)",
      "가장 큰 몇 개는 참값을 상당히 과대추정한다. 선택 편향, 평균 회귀.",
-     "https://pmc.ncbi.nlm.nih.gov/articles/PMC3325056/"),
+     "https://pmc.ncbi.nlm.nih.gov/articles/PMC3325056/",
+     "efron2011.pdf"),
     ("Forde, Hemani, Ferguson (2023)",
      "Review of Battling the Winner's Curse", "PLoS Genetics 19(9):e1010546",
      "순위 편향. 표본을 늘리면 편향이 상당히 준다.",
-     "https://doi.org/10.1371/journal.pgen.1010546"),
+     "https://doi.org/10.1371/journal.pgen.1010546",
+     "forde2023.pdf"),
     ("Kriegeskorte 외 (2009)",
      "Circular analysis in systems neuroscience", "Nature Neuroscience 12",
      "고르는 자료와 재는 자료를 나누면 편향이 사라진다. 표본 분할.",
-     "https://pmc.ncbi.nlm.nih.gov/articles/PMC2841687/"),
+     "https://pmc.ncbi.nlm.nih.gov/articles/PMC2841687/",
+     "kriegeskorte2009.pdf"),
     ("Pawlus, Reizer, &#379;elasko (2023)",
      "Characterization of the Maximum Height of a Surface Texture",
      "Materials 16(22):7109",
      "최대 높이는 안정된 값이 아니다. 백분위수와 '여러 최대값의 평균' 이 "
      "같은 값이고 더 안정적이다. 면 측정이 선 측정보다 큰 이유는 점 수.",
-     "https://doi.org/10.3390/ma16227109"),
+     "https://doi.org/10.3390/ma16227109",
+     "pawlus2023.pdf"),
     ("Wienold, J.", "evalglare v2.10 매뉴얼", "Radiance",
      "눈부심원을 문턱값으로 고르고 묶어서 <b>평균</b>을 낸다. 중앙값과 "
      "75 / 95 백분위수를 같이 낸다. 점 최대값을 안 쓴다.",
      "https://www.radiance-online.org/learning/documentation/manual-pages/"
-     "pdfs/evalglare.pdf"),
+     "pdfs/evalglare.pdf",
+     "evalglare_man.pdf"),
     ("Nicodemus 외 (1977)",
      "Geometrical Considerations and Nomenclature for Reflectance",
      "NBS Monograph 160",
      "유한한 판은 옆으로 빛을 흘리기만 한다. 무한한 판이면 옆에서 되돌아 "
      "들어오는 몫이 그걸 메운다. 그 차이를 edge losses 라 부른다. 빛이 옆으로 "
      "걷는 거리 r<sub>m</sub> 을 재는 절차가 우리 수렴 시험과 같다.",
-     "https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nbsmonograph160.pdf"),
+     "https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nbsmonograph160.pdf",
+     "nbs_mono160.pdf"),
+    ("Hsia, J. J. (1976)",
+     "The Translucent Blurring Effect -- Method of Evaluation and Estimation",
+     "NBS Technical Note 594-12",
+     "실제 측정 절차에서 판 크기를 절대 길이로 정한다. 시료 구멍 반지름 "
+     "19 mm 면 무한히 큰 판으로 봐도 된다. 더 키워도 반사량 차이를 못 잰다. "
+     "판 크기를 되풀이 주기가 아니라 <b>빛이 옆으로 걷는 거리</b>로 정하는 근거.",
+     "https://nvlpubs.nist.gov/nistpubs/Legacy/TN/nbstechnicalnote594-12.pdf",
+     "hsia_tn594-12.pdf"),
     ("IEA SHC Task 61 (2021)",
      "BSDF generation procedures for daylighting systems", "T61.C.2.1",
      "빛 비추는 자리가 되풀이 주기보다 최소 5 배, 되도록 10 배 커야 한다. "
      "<b>우리는 0.15 배다.</b> 그래서 BSDF 로 형상을 대체할 수 없다.",
      "https://www.iea-shc.org/Data/Sites/1/publications/"
-     "IEA-SHC-Task61--Technical-Report-C2.1-Whitepaper-BSDF.pdf"),
+     "IEA-SHC-Task61--Technical-Report-C2.1-Whitepaper-BSDF.pdf",
+     "iea_task61_C21.pdf"),
     ("McNeil, A. (2015)", "genBSDF Tutorial v1.0.1", "LBNL",
      "가장자리에서 출발한 광선은 원래 만났을 형상을 안 만나고 빠져나간다. "
      "해법은 크게 짓고 가운데만 쏘는 것. 원뿔 예제는 21 주기를 깔고 가운데 "
      "1 주기만 쏜다.",
      "https://www.radiance-online.org/learning/tutorials/"
-     "Tutorial-genBSDF_v1.0.1.pdf"),
+     "Tutorial-genBSDF_v1.0.1.pdf",
+     "genbsdf_tut.pdf"),
+    ("Schneider, J. B.",
+     "Understanding the Finite-Difference Time-Domain Method", "WSU 교재 3.9 절",
+     "파동 계산(FDTD)은 공간을 유한한 격자로 쪼개서 끝을 흡수 경계로 막는다. "
+     "광선 추적에는 그 격자가 없다. 우리가 판을 자르는 이유는 격자가 아니라 "
+     "<b>판이 무한히 넓기 때문</b>이다.",
+     "https://eecs.wsu.edu/~schneidj/ufdtd/ufdtd.pdf",
+     "ufdtd.pdf"),
     ("Cook, R. (1986)", "Stochastic Sampling in Computer Graphics",
      "ACM TOG 5(1)",
      "규칙적인 표본 격자가 규칙적인 구조와 맞부딪히면 무늬가 생긴다. 적분 "
      "변수를 차원을 더 늘린 것으로 보고 그 축에 표본을 흩뿌린다.",
      "https://www.cs.cmu.edu/afs/cs/academic/class/15869-f11/www/readings/"
-     "cook86_sampling.pdf"),
+     "cook86_sampling.pdf",
+     "cook86.pdf"),
     ("Owen, A. (2023)", "Practical quasi-Monte Carlo integration", "Stanford",
      "스크램블 소볼은 매끄러운 경우 오차가 n<sup>&minus;1.5</sup> 로 준다. "
      "주기성도 매끄러움도 요구하지 않고, 최악에도 몬테카를로의 2.72 배를 "
      "안 넘는다.",
-     "https://artowen.su.domains/mc/practicalqmc.pdf"),
+     "https://artowen.su.domains/mc/practicalqmc.pdf",
+     "practicalqmc.pdf"),
     ("Veach, E. (1997)",
      "Robust Monte Carlo Methods for Light Transport Simulation", "Stanford",
      "효율은 분산과 시간의 곱의 역수다. 헬름홀츠 상반성 원문은 거울 반사에만 "
      "해당한다 -- 실제 근거는 굴절률로 나눈 BSDF 의 대칭이다.",
-     "https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf"),
+     "https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf",
+     "veach_thesis.pdf"),
     ("Zirr, Hanika, Dachsbacher (2018)",
      "Reweighting Firefly Samples", "Computer Graphics Forum",
      "튀는 표본(반딧불)이 들어 있으면 유한 표본 추정이 참값보다 크다. 그런데 "
      "그냥 지우면 아래로 치우친다.",
-     "https://jo.dreggn.org/home/2018_fireflies.pdf"),
+     "https://jo.dreggn.org/home/2018_fireflies.pdf",
+     "zirr2018_fireflies.pdf"),
     ("Kanit 외 (2003)",
      "Determination of the size of the representative volume element",
      "Int. J. Solids and Structures 40",
      "단 하나의 최소 크기라는 발상을 버려야 한다. 무엇을 재느냐, 어느 정확도를 "
      "원하느냐, 몇 번 반복하느냐에 따라 달라진다. 답은 경계 조건 종류에 "
      "무관해야 한다.",
-     "https://matperso.minesparis.psl.eu/Donnees/data04/464-kanit03.pdf"),
+     "https://matperso.minesparis.psl.eu/Donnees/data04/464-kanit03.pdf",
+     "kanit2003_rve.pdf"),
     ("Kulesza 외 (2022)", "MCNP 6.3.0 매뉴얼", "LANL LA-UR-22-30006",
      "거울 경계를 쓰면 면 전체 평균은 정확히 두 배가 되는데 한 점 값은 "
      "1.67 배로 <b>항상 틀리고 항상 낮게</b> 나온다. 주기 경계도 같다.",
      "https://mcnp.lanl.gov/pdf_files/"
-     "TechReport_2022_LANL_LA-UR-22-30006Rev.1_KuleszaAdamsEtAl.pdf"),
+     "TechReport_2022_LANL_LA-UR-22-30006Rev.1_KuleszaAdamsEtAl.pdf",
+     "mcnp63.pdf"),
+]
+
+# 측정 규격. 2026-08-28 에 "빔 자리마다 재서 평균을 낸다" 를 정할 때 근거로
+# 읽었는데, 이 문서에는 규칙만 남고 규격이 빠져 있었다 (2026-09-24 에 더함).
+# 현행판은 유료라 못 읽었다. 여기 적은 판이 실제로 읽은 판이다.
+STANDARDS = [
+    ("ASTM D523-89 (1999 재승인)", "Standard Test Method for Specular Gloss",
+     "ASTM E12.03",
+     "광택 값은 시편이 되돌린 빛을 <b>같은 기하 조건에서</b> 표준면이 되돌린 "
+     "빛으로 나눈 비다. 우리 반짝임 값(판 &divide; 대조판)이 이 구조다. "
+     "최소 세 번 재서 <b>평균</b>을 보고하고, 평균에서 5 % 넘게 벗어나는 "
+     "것은 따로 적는다.",
+     "https://www.astm.org/d0523-14r18.html",  # ASTM 소개 페이지 (본문 유료)
+     "D523r.txt"),
+    ("ASTM E430-97",
+     "Measurement of Gloss of High-Gloss Surfaces by Goniophotometry",
+     "ASTM E12",
+     "<b>최대값은 시편을 어느 방향으로 놓을지 정할 때만 쓴다.</b> 보고값은 "
+     "세 자리의 평균이다. 우리가 빔 자리 평균을 대표값으로 쓰는 근거.",
+     "https://www.astm.org/e0430-19.html",  # ASTM 소개 페이지 (본문 유료)
+     "E430.txt"),
+    ("ISO 2813:1994", "Paints and varnishes -- Determination of specular gloss "
+     "of non-metallic paint films at 20&deg;, 60&deg; and 85&deg;",
+     "ISO TC 35 (미리보기)",
+     "여섯 번 재서 <b>평균과 퍼짐 폭</b>을 같이 적는다. 양 끝 차가 10 단위나 "
+     "평균의 20 % 를 넘으면 평균으로 대표하지 않고 <b>그 시편을 버린다</b>. "
+     "1978 년판도 받아 두었다 (iso2813_1978.pdf).",
+     "https://cdn.standards.iteh.ai/samples/7810/2ac0b6e5b66043eaa1e251f26637a756/"
+     "ISO-2813-1994.pdf",
+     "iso2813_1994_preview.pdf"),
+    ("Leach, R. K. (NPL)", "The Measurement of Surface Texture using Stylus "
+     "Instruments", "NPL 좋은 측정 안내서 37 호 (Good Practice Guide No. 37)",
+     "최대 높이 같은 값에는 extreme-value parameter 라는 이름이 붙어 있다. "
+     "평균 효과가 없어 흠집 하나에 흔들린다. 기본은 <b>창 다섯 개에서 각각 "
+     "재서 평균</b>이다. 최대값을 쓰려면 이름에 max 를 붙여 미리 선언한다. "
+     "창 길이는 구조의 주기를 먼저 재고 표에서 고른다 (ISO 4288). ISO 본문은 "
+     "유료라 이 안내서의 설명으로 읽었다.",
+     "https://eprintspublications.npl.co.uk/2041/1/mgpg37.pdf",
+     "mgpg37.pdf"),
+    ("Talbot&ndash;Plateau 법칙",
+     "Flicker fusion threshold", "Wikipedia",
+     "깜빡임이 눈이 뭉쳐 보는 문턱보다 빠르면 <b>보이는 밝기는 시간 평균과 "
+     "같다</b>. 레이저가 판을 훑을 때 대표값이 최대가 아니라 평균인 근거. "
+     "문턱은 막대세포 약 15 Hz, 원뿔세포는 아주 밝을 때 약 60 Hz. "
+     "원 논문(1834, 1835)은 못 열었다.",
+     "https://en.wikipedia.org/wiki/Flicker_fusion_threshold",
+     "wiki_flicker_fusion.pdf"),
 ]
 
 OPEN = [
     "<b>읽는 창 가로 60 % 에 근거가 없다.</b> 왜 20 % 를 잘라내는지 아무 데도 "
     "안 적혀 있다. 2026-08-28 에 네 파일에 흩어져 있던 상수를 "
     "<code>form_metrics</code> 한 곳으로 모았지만, 그건 자리를 정한 것이고 "
-    "값은 여전히 근거가 없다.",
+    "값은 여전히 근거가 없다. 광택 규격(ASTM D523)은 받는 창을 <b>각도로</b> "
+    "못 박는다. 우리 창은 아직 그렇게 정하지 않았다.",
+    "<b>평균이 맞다는 근거는 레이저가 눈의 문턱보다 빨리 훑을 때만 선다.</b> "
+    "Talbot&ndash;Plateau 법칙의 문턱은 막대세포 약 15 Hz, 원뿔세포는 아주 "
+    "밝을 때 약 60 Hz 다. 우리 레이저가 한 화면을 몇 Hz 로 훑는지 안 쟀다. "
+    "밝은 반사를 원뿔세포로 볼 때 문턱보다 느리면 깜빡임이 보이고, 그때는 "
+    "평균이 보이는 밝기가 아니다.",
     "<b>총량용 빛줄기 64 에 근거가 없다.</b> 총량은 넓이 평균이라 봉우리보다 "
     "적게 써도 되는 것은 맞다. 그런데 얼마면 되는지 잰 적이 없다. 봉우리 축은 "
     "2026-09-15 에 실제 경로로 다시 재서 256 이 필요함을 확인했는데 총량 축은 "
@@ -394,10 +504,92 @@ VALIDATION = [
      "results/FINDINGS_renderer_disagreement.md"),
 ]
 
+# 화면 글자. 영어판은 scripts/method_en.py 에 같은 열쇠로 있다.
+T = dict(
+    lang="ko",
+    title="공식과 구현",
+    eyebrow="Spill Sink Simulator · 방법",
+    sub='이 시뮬레이터가 무엇을 어떻게 재는지, 설정값이 어디서 '
+        '왔는지, 무엇이 아직 근거가 없는지. <b>숫자는 코드에서 직접 읽는다</b> '
+        '-- 손으로 옮겨 적으면 코드를 고쳤을 때 이 문서가 조용히 거짓말을 '
+        '한다.',
+    h_axes="재는 값 셋",
+    axis_rows=("무엇을 재나", "조명", "공식", "코드", "읽는 창", "왜 이렇게",
+               "걸리는 시간", "아는 결함"),
+    h_uses="어느 축이 어느 설정을 쓰나",
+    uses_p='셋이 설정을 다 쓰는 게 아니다. 반사 총량은 하늘 조명이라 빔도 '
+           '창도 안 쓴다. 그래서 이 문서의 결함이 총량에는 안 걸린다.',
+    uses_head=("설정", "반사 총량", "모양 뭉개기", "정면 반짝임"),
+    uses_tag=("total", "smear", "head-on peak"),
+    uses="쓴다",
+    now='지금 값: 봉우리 <b>%s</b> · 빔 자리 <b>%s</b> · '
+        '빛줄기 <b>%s</b> · 자리 수 <b>%s</b>',
+    h_settings="설정값과 그 근거",
+    settings_p='값은 소스에서 읽는다. 근거 등급을 같이 적는다 -- '
+               '<span class="g-jaem">잼</span>은 재거나 문헌에서 온 것, '
+               '<span class="g-half">반쯤</span>은 일부만, '
+               '<span class="g-none">없음</span>은 그냥 정한 것이다.',
+    settings_head=("설정", "값", "어디", "근거", "설명"),
+    grade_cls={"잼": "g-jaem", "없음": "g-none"},
+    settings_tail='설정이 아홉 군데에 흩어져 있다. 한곳에 모으는 것이 '
+                  '남은 일이다.',
+    h_findings="왜 이렇게 만들었나 -- 재서 알아낸 것",
+    findings_head=("알아낸 것", "무슨 일인가", "우리가 잰 것", "근거"),
+    h_valid="계산기를 어떻게 검증했나 -- validation against closed forms",
+    valid_p='두 계산기를 서로 견주면 누가 맞는지 알 수 없다. 그래서 <b>답이 이미 '
+            '식으로 나와 있는 문제</b>에 걸어 봤다. 아래 여섯 줄이 그것이다.',
+    valid_head=("기준", "식", "무엇을 가르나", "결과", "어디서 돌리나"),
+    valid_tail='아직 안 한 것: <b>우리 벌집 격자 자체를 공동 이론(Gouffe) 값과 '
+               '통째로 대조한 그림</b>이 없다. 한 점만 확인했고 0.83 배로 나왔다 '
+               '(results/PEER_REVIEW.md). 그리고 <b>실물 측정은 0 건</b>이다.',
+    h_open="아직 근거가 없는 것",
+    h_refs="참고 문헌",
+    refs_p='원문을 열어 확인한 것만 싣는다. 제목을 누르면 원문 '
+           '주소로, 파일 칸을 누르면 받아 둔 사본으로 간다 -- 링크가 죽어도 읽을 '
+           '수 있게.',
+    refs_head=("저자", "제목", "어디", "무엇을 말하나", "파일"),
+    too_big='원문 주소</a><br>%.0f MB 라 묶음에서 뺐다',
+    h_std="측정 규격",
+    std_p='빔 자리 평균을 대표값으로 정할 때 읽은 규격이다. '
+          'ASTM·ISO 현행판은 유료라 못 읽었다. 여기 적은 판이 실제로 읽은 '
+          '옛 판이다. ASTM 두 개는 글자만 뽑은 사본(.txt)이다.',
+    footer='이 문서를 짓는 스크립트: '
+           '<code>scripts/build_method_report.py</code>. 설정값은 '
+           '<code>scripts/form_metrics.py</code>, '
+           '<code>scripts/form_buildable.py</code>, '
+           '<code>scripts/blender_render.py</code> 에서 읽는다. 감사와 조치 기록은 '
+           '<code>results/FINDINGS_simulator_audit_2026_09_14.md</code>.',
+)
+
+if LANG == "en":
+    import method_en
+    E = method_en.texts(const, FM, FB, BR)
+    # 한국어 쪽에 줄을 더하고 영어 쪽을 안 고치면 여기서 멈춘다.
+    for name, ko in (("SETTINGS", SETTINGS), ("USES", USES), ("AXES", AXES),
+                     ("FINDINGS", FINDINGS), ("OPEN", OPEN),
+                     ("VALIDATION", VALIDATION)):
+        if len(E[name]) != len(ko):
+            raise SystemExit("영어판 %s 가 %d 줄, 한국어판은 %d 줄 -- "
+                             "method_en.py 를 고친다" % (name, len(E[name]), len(ko)))
+    for a_, b_ in zip(E["SETTINGS"], SETTINGS):
+        if a_[1] != b_[1] or a_[2] != b_[2]:
+            raise SystemExit("영어판 설정 순서가 다르다: %s / %s" % (a_[0], b_[0]))
+    missing = [r[5] for r in REFS + STANDARDS if r[5] not in E["REFS"]]
+    if missing:
+        raise SystemExit("영어판 문헌이 없다: %s" % ", ".join(missing))
+    SETTINGS, USES, AXES = E["SETTINGS"], E["USES"], E["AXES"]
+    FINDINGS, OPEN, VALIDATION = E["FINDINGS"], E["OPEN"], E["VALIDATION"]
+    REFS = [E["REFS"][r[5]] + (r[4], r[5]) for r in REFS]
+    STANDARDS = [E["REFS"][r[5]] + (r[4], r[5]) for r in STANDARDS]
+    missing = [k for k in T if k not in E]
+    if missing:
+        raise SystemExit("영어판 화면 글자가 없다: %s" % ", ".join(missing))
+    T = {k: E[k] for k in T}
+
 o = io.StringIO()
-o.write('<!doctype html><html lang="ko"><head><meta charset="utf-8">\n'
+o.write('<!doctype html><html lang="%s"><head><meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
-        '<title>공식과 구현</title>\n')
+        '<title>%s</title>\n' % (T["lang"], T["title"]))
 o.write('<style>%s\n.tag{font-family:var(--mono);font-size:11px;'
         'color:var(--muted);letter-spacing:.06em}\nul{margin:0;padding-left:20px;'
         'max-width:70ch}\nli{margin:6px 0}\na{color:var(--cy)}\n'
@@ -405,121 +597,119 @@ o.write('<style>%s\n.tag{font-family:var(--mono);font-size:11px;'
         '.g-jaem{color:#6bb873;font-weight:700}\n'
         '.g-none{color:var(--bad);font-weight:700}\n'
         '.g-half{color:#e0a44e;font-weight:700}\n'
+        'td{white-space:normal;vertical-align:top;min-width:7em}\n'
+        'td.tag{word-break:break-all}\n'
         '</style></head><body>\n<div class="wrap">\n' % style)
 
-o.write('<header><div class="eyebrow">Spill Sink Simulator · 방법</div>\n'
-        '<h1>공식과 구현</h1>\n'
-        '<p class="sub">이 시뮬레이터가 무엇을 어떻게 재는지, 설정값이 어디서 '
-        '왔는지, 무엇이 아직 근거가 없는지. <b>숫자는 코드에서 직접 읽는다</b> '
-        '-- 손으로 옮겨 적으면 코드를 고쳤을 때 이 문서가 조용히 거짓말을 '
-        '한다.</p></header>\n')
+o.write('<header><div class="eyebrow">%s</div>\n'
+        '<h1>%s</h1>\n'
+        '<p class="sub">%s</p></header>\n' % (T["eyebrow"], T["title"], T["sub"]))
 
 # ---- 세 축
-o.write('<section><h2>재는 값 셋</h2>\n')
+o.write('<section><h2>%s</h2>\n' % T["h_axes"])
 for a in AXES:
     o.write('<div class="ax"><h3 style="margin:0 0 4px">%s <span class="tag">'
             '%s · %s</span></h3>\n' % (a["ko"], a["en"], a["arrow"]))
     o.write('<div class="scroll"><table><tbody>\n')
-    for k, v in (("무엇을 재나", a["what"]), ("조명", a["light"]),
-                 ("공식", a["formula"]), ("코드", a["code"]),
-                 ("읽는 창", a["window"]), ("왜 이렇게", a["why"]),
-                 ("걸리는 시간", a["cost"]), ("아는 결함", a["risk"])):
+    for k, v in zip(T["axis_rows"],
+                    (a["what"], a["light"], a["formula"], a["code"],
+                     a["window"], a["why"], a["cost"], a["risk"])):
         o.write('<tr><td style="width:9em;color:var(--muted)">%s</td>'
                 '<td>%s</td></tr>\n' % (k, v))
     o.write('</tbody></table></div></div>\n')
 o.write('</section>\n')
 
 # ---- 어느 축이 무엇을 쓰나
-o.write('<section><h2>어느 축이 어느 설정을 쓰나</h2>\n'
-        '<p>셋이 설정을 다 쓰는 게 아니다. 반사 총량은 하늘 조명이라 빔도 '
-        '창도 안 쓴다. 그래서 이 문서의 결함이 총량에는 안 걸린다.</p>\n')
-o.write('<div class="scroll"><table><thead><tr><th>설정</th>'
-        '<th>반사 총량<br><span class="tag">total</span></th>'
-        '<th>모양 뭉개기<br><span class="tag">smear</span></th>'
-        '<th>정면 반짝임<br><span class="tag">head-on peak</span></th>'
-        '</tr></thead><tbody>\n')
+o.write('<section><h2>%s</h2>\n<p>%s</p>\n' % (T["h_uses"], T["uses_p"]))
+uh, ut = T["uses_head"], T["uses_tag"]
+o.write('<div class="scroll"><table><thead><tr><th>%s</th>'
+        '<th>%s<br><span class="tag">%s</span></th>'
+        '<th>%s<br><span class="tag">%s</span></th>'
+        '<th>%s<br><span class="tag">%s</span></th>'
+        '</tr></thead><tbody>\n'
+        % (uh[0], uh[1], ut[0], uh[2], ut[1], uh[3], ut[2]))
 for nm, a_, b_, c_ in USES:
     cell = lambda v: ('<td class="n" style="color:#6bb873">%s</td>' % v
-                      if v == "쓴다"
+                      if v == T["uses"]
                       else '<td class="n" style="color:var(--muted)">%s</td>' % v)
     o.write('<tr><td>%s</td>%s%s%s</tr>\n'
             % (nm, cell(a_), cell(b_), cell(c_)))
 o.write('</tbody></table></div>\n')
-o.write('<p class="tag">지금 값: 봉우리 <b>%s</b> · 빔 자리 <b>%s</b> · '
-        '빛줄기 <b>%s</b> · 자리 수 <b>%s</b></p></section>\n'
+o.write(('<p class="tag">' + T["now"] + '</p></section>\n')
         % (const(FM, "PEAK_STAT"), const(FM, "BEAM_POS"),
            const(FM, "SAMPLES"), const(FM, "N_PHASE")))
 
 # ---- 설정값
-o.write('<section><h2>설정값과 그 근거</h2>\n'
-        '<p>값은 소스에서 읽는다. 근거 등급을 같이 적는다 -- '
-        '<span class="g-jaem">잼</span>은 재거나 문헌에서 온 것, '
-        '<span class="g-half">반쯤</span>은 일부만, '
-        '<span class="g-none">없음</span>은 그냥 정한 것이다.</p>\n')
-o.write('<div class="scroll"><table><thead><tr><th>설정</th><th>값</th>'
-        '<th>어디</th><th>근거</th><th>설명</th></tr></thead><tbody>\n')
+o.write('<section><h2>%s</h2>\n<p>%s</p>\n' % (T["h_settings"], T["settings_p"]))
+o.write('<div class="scroll"><table><thead><tr>%s</tr></thead><tbody>\n'
+        % "".join('<th>%s</th>' % h for h in T["settings_head"]))
 for nm, val, where, grade, note in SETTINGS:
-    cls = {"잼": "g-jaem", "없음": "g-none"}.get(grade, "g-half")
+    cls = T["grade_cls"].get(grade, "g-half")
     o.write('<tr><td>%s</td><td class="n"><b>%s</b></td>'
             '<td class="tag">%s</td><td class="%s">%s</td><td>%s</td></tr>\n'
             % (nm, val, where, cls, grade, note))
 o.write('</tbody></table></div>\n')
-o.write('<p class="tag">설정이 아홉 군데에 흩어져 있다. 한곳에 모으는 것이 '
-        '남은 일이다.</p></section>\n')
+o.write('<p class="tag">%s</p></section>\n' % T["settings_tail"])
 
 # ---- 왜 이렇게 만들었나
-o.write('<section><h2>왜 이렇게 만들었나 -- 재서 알아낸 것</h2>\n')
-o.write('<div class="scroll"><table><thead><tr><th>알아낸 것</th>'
-        '<th>무슨 일인가</th><th>우리가 잰 것</th><th>근거</th>'
-        '</tr></thead><tbody>\n')
+o.write('<section><h2>%s</h2>\n' % T["h_findings"])
+o.write('<div class="scroll"><table><thead><tr>%s'
+        '</tr></thead><tbody>\n'
+        % "".join('<th>%s</th>' % h for h in T["findings_head"]))
 for t, w, m, r in FINDINGS:
     o.write('<tr><td><b>%s</b></td><td>%s</td><td>%s</td>'
             '<td class="tag">%s</td></tr>\n' % (t, w, m, r))
 o.write('</tbody></table></div></section>\n')
 
 # ---- 계산기를 어떻게 검증했나
-o.write('<section><h2>계산기를 어떻게 검증했나 -- validation against closed forms</h2>\n'
-        '<p>두 계산기를 서로 견주면 누가 맞는지 알 수 없다. 그래서 <b>답이 이미 식으로 나와 있는 '
-        '문제</b>에 걸어 봤다. 아래 여섯 줄이 그것이다.</p>\n')
-o.write('<div class="scroll"><table><thead><tr><th>기준</th><th>식</th>'
-        '<th>무엇을 가르나</th><th>결과</th><th>어디서 돌리나</th>'
-        '</tr></thead><tbody>\n')
+o.write('<section><h2>%s</h2>\n<p>%s</p>\n' % (T["h_valid"], T["valid_p"]))
+o.write('<div class="scroll"><table><thead><tr>%s'
+        '</tr></thead><tbody>\n'
+        % "".join('<th>%s</th>' % h for h in T["valid_head"]))
 for name, formula, what, res, where in VALIDATION:
     o.write('<tr><td><b>%s</b></td><td class="tag">%s</td><td>%s</td>'
             '<td class="n">%s</td><td class="tag">%s</td></tr>\n'
             % (name, formula, what, res, where))
 o.write('</tbody></table></div>\n')
-o.write('<p class="tag">아직 안 한 것: <b>우리 벌집 격자 자체를 공동 이론(Gouffe) 값과 통째로 '
-        '대조한 그림</b>이 없다. 한 점만 확인했고 0.83 배로 나왔다 '
-        '(results/PEER_REVIEW.md). 그리고 <b>실물 측정은 0 건</b>이다.</p></section>\n')
+o.write('<p class="tag">%s</p></section>\n' % T["valid_tail"])
 
 # ---- 아직 근거 없는 것
 o.write('<section><div class="card verdict"><h2 style="margin:0">'
-        '아직 근거가 없는 것</h2>\n<ul>\n')
+        '%s</h2>\n<ul>\n' % T["h_open"])
 for x in OPEN:
     o.write('<li>%s</li>\n' % x)
 o.write('</ul></div></section>\n')
 
 # ---- 참고 문헌
-o.write('<section><h2>참고 문헌</h2>\n'
-        '<p class="tag">원문을 열어 확인한 것만 싣는다. 유료라 못 읽은 것은 '
-        '싣지 않았다. 받아 둔 원문은 '
-        '<code>project/reference/papers_method/</code> 에 있다 -- 링크가 '
-        '죽어도 읽을 수 있게.</p>\n')
-o.write('<div class="scroll"><table><thead><tr><th>저자</th><th>제목</th>'
-        '<th>어디</th><th>무엇을 말하나</th></tr></thead><tbody>\n')
-for who, title, where, says, url in REFS:
-    o.write('<tr><td>%s</td><td><a href="%s">%s</a></td>'
-            '<td class="tag">%s</td><td>%s</td></tr>\n'
-            % (who, url, title, where, says))
-o.write('</tbody></table></div></section>\n')
+def ref_table(rows):
+    """제목은 원문 주소로, 파일 칸은 받아 둔 사본으로 건다."""
+    o.write('<div class="scroll"><table><thead><tr>%s'
+            '</tr></thead><tbody>\n'
+            % "".join('<th>%s</th>' % h for h in T["refs_head"]))
+    for who, title, where, says, url, fn in rows:
+        if not os.path.exists(os.path.join(PAPERS, fn)):
+            raise SystemExit("받아 둔 파일이 없다: %s" % fn)
+        size = os.path.getsize(os.path.join(PAPERS, fn))
+        if BUNDLE and size > BUNDLE_MAX:
+            file_cell = (('<a href="%s" target="_blank">' + T["too_big"])
+                         % (url, size / 1e6))
+        else:
+            file_cell = ('<a href="%s%s" target="_blank">%s</a>'
+                         % (PAPER_HREF, fn, fn))
+        o.write('<tr><td>%s</td><td><a href="%s" target="_blank">%s</a></td>'
+                '<td class="tag">%s</td><td>%s</td>'
+                '<td class="tag">%s</td></tr>\n'
+                % (who, url, title, where, says, file_cell))
+    o.write('</tbody></table></div>\n')
 
-o.write('<section><p class="tag">이 문서를 짓는 스크립트: '
-        '<code>scripts/build_method_report.py</code>. 설정값은 '
-        '<code>scripts/form_metrics.py</code>, '
-        '<code>scripts/form_buildable.py</code>, '
-        '<code>scripts/blender_render.py</code> 에서 읽는다. 감사와 조치 기록은 '
-        '<code>results/FINDINGS_simulator_audit_2026_09_14.md</code>.</p></section>\n')
+
+o.write('<section><h2>%s</h2>\n<p class="tag">%s</p>\n' % (T["h_refs"], T["refs_p"]))
+ref_table(REFS)
+o.write('<h3>%s</h3>\n<p class="tag">%s</p>\n' % (T["h_std"], T["std_p"]))
+ref_table(STANDARDS)
+o.write('</section>\n')
+
+o.write('<section><p class="tag">%s</p></section>\n' % T["footer"])
 o.write('</div></body></html>\n')
 
 html = o.getvalue()
@@ -529,5 +719,21 @@ if bad:
         print("남은 서식: %s" % ln)
     raise SystemExit("서식이 안 풀렸다 -- 발행 안 함")
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
+if BUNDLE:
+    # 아티팩트는 doctype·html·head·body 겉틀을 스스로 씌운다. 제목과 스타일부터 쓴다.
+    head = html[:html.index("<title>")]
+    html = html[len(head):].replace("</head><body>\n", "\n", 1)
+    html = html.replace("</body></html>\n", "")
 io.open(OUT, "w", encoding="utf-8").write(html)
-print("%s  (%d 바이트)" % (OUT, len(html)))
+print("%s  (%d 글자)" % (OUT, len(html)))
+if BUNDLE:
+    os.makedirs(os.path.join(BUNDLE, "papers"), exist_ok=True)
+    n = 0
+    for row in REFS + STANDARDS:
+        src = os.path.join(PAPERS, row[5])
+        if os.path.getsize(src) > BUNDLE_MAX:
+            print("묶음에서 뺌 (%.0f MB): %s" % (os.path.getsize(src) / 1e6, row[5]))
+            continue
+        shutil.copy2(src, os.path.join(BUNDLE, "papers", row[5]))
+        n += 1
+    print("papers/ 에 %d 개" % n)

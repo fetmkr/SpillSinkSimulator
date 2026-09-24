@@ -1,0 +1,228 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Formulas and Implementation</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1e24; --muted:#6d7481;
+  --line:#dfdcd6; --grid:#e7e4de;
+  --cy:#2f9d95; --pk:#b8577a; --warn:#b87b1e; --bad:#c2453c; --good:#3f8f57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --kr:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161b; --panel:#1b1e25; --ink:#e9e7e2; --muted:#98a0ad;
+  --line:#2b303a; --grid:#252a33;
+  --cy:#4ec9c0; --pk:#d98aa4; --warn:#e0a44e; --bad:#e0655c; --good:#7fc98a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);
+  line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:56px 22px 96px;
+  display:flex;flex-direction:column;gap:34px}
+header{display:flex;flex-direction:column;gap:10px;
+  border-bottom:2px solid var(--ink);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em;
+  text-wrap:balance;line-height:1.25}
+.sub{color:var(--muted);font-size:15px;max-width:60ch}
+h2{margin:26px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;
+  text-wrap:balance}
+h3{margin:18px 0 0;font-size:16px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+p{margin:0;max-width:64ch}
+.lead{font-size:18px}
+section{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.verdict{border-left:4px solid var(--bad)}
+.verdict.ok{border-left-color:var(--good)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;
+  font-variant-numeric:tabular-nums;min-width:520px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase}
+td.n{text-align:right}
+td.bad{color:var(--bad)}
+tr.pick td{background:color-mix(in srgb,var(--good) 14%,transparent);font-weight:700}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;color:var(--muted);max-width:64ch}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 8px;overflow-x:auto}
+.chart svg{display:block;min-width:640px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  font-size:15px;align-items:baseline}
+dt{font-family:var(--mono);font-size:13px;color:var(--cy);white-space:nowrap}
+dd{margin:0}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:7px}
+.big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat .lab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:700}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  padding-top:18px;display:flex;flex-direction:column;gap:6px}
+.wrong{color:var(--bad);font-weight:700}
+.right{color:var(--good);font-weight:700}
+svg text{font-family:var(--mono)}
+
+.tag{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+ul{margin:0;padding-left:20px;max-width:70ch}
+li{margin:6px 0}
+a{color:var(--cy)}
+.ax{border-left:3px solid var(--a);padding-left:14px;margin:22px 0}
+.g-jaem{color:#6bb873;font-weight:700}
+.g-none{color:var(--bad);font-weight:700}
+.g-half{color:#e0a44e;font-weight:700}
+td{white-space:normal;vertical-align:top;min-width:7em}
+td.tag{word-break:break-all}
+</style></head><body>
+<div class="wrap">
+<header><div class="eyebrow">Spill Sink Simulator · Method</div>
+<h1>Formulas and Implementation</h1>
+<p class="sub">What this simulator measures and how, where each setting comes from, and what still has no basis. <b>Numbers are read directly from the code</b>. Copying them by hand would let this document silently drift from the code.</p></header>
+<section><h2>The three measured values</h2>
+<div class="ax"><h3 style="margin:0 0 4px">Total reflectance <span class="tag">&rho;<sub>dh</sub> ratio · lower is better</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">What it measures</td><td>The <b>amount</b> of light sent back</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Lighting</td><td>From every direction like a sky (uniform hemisphere, radiance 1). Not a lamp.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Formula</td><td><b>Mean</b> of panel window pixels &divide; <b>mean</b> of control plate window pixels</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Code</td><td>blender_render.run(): <code>ratio = s_panel['mean'] / s_ctrl['mean']</code></td></tr>
+<tr><td style="width:9em;color:var(--muted)">Sampling window</td><td>None. The whole surface is area-averaged.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Why this way</td><td>Reads &rho;<sub>dh</sub>(&theta;) through Helmholtz reciprocity. One hemispherical render gives the fraction a beam from that angle sends back. No need to move the beam. <b>This reading holds only if the material obeys reciprocity.</b> The coating tree before 2026-09-15 did not.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Run time</td><td>0.74 s per angle</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Known defects</td><td>Uses neither beam positions nor the window. It depends on the coating tree instead: totals measured with the old tree are not the beam's return fraction, and the error grows with the glossy share of the material. The current tree passes the swap test.</td></tr>
+</tbody></table></div></div>
+<div class="ax"><h3 style="margin:0 0 4px">Smear <span class="tag">rms width ratio · higher is better</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">What it measures</td><td>The <b>width</b> of the light sent back</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Lighting</td><td>One beam stripe. Beam width vertically, the whole scene horizontally.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Formula</td><td><b>rms width</b> of the panel profile &divide; rms width of the control plate profile</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Code</td><td>form_mtf.rms_width(): treats the profile as a probability and takes its standard deviation. <code>sqrt(&Sigma;(z-c)&sup2;w)</code>, w = profile &divide; sum</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Sampling window</td><td><b>The window is widened to the panel edge, and the widest window is the value.</b> Converged means the last two windows are within 2 % and no more than 2 % of the second moment remains in the outer 10 %. The value the old rule (stop at the first two windows that agree) would have picked is also recorded.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Why this way</td><td>Divided by the control plate so a flat plate reads 1.0. The value is then independent of panel size. If the returned light overflows the panel it reports <code>converged False</code>, and the value is a lower bound.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Run time</td><td>Several minutes or more per angle (256 samples, depends on panel and depth)</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Known defects</td><td>The horizontal window is fixed at 60 % of the panel with no basis. <b>Light outside the frame cannot be seen by any rule</b>: on a small panel a far tail can be missed and still be called converged. Before 2026-09-15 the control plate was sometimes covered by the field (1D grooves, deep honeycomb).</td></tr>
+</tbody></table></div></div>
+<div class="ax"><h3 style="margin:0 0 4px">Head-on peak <span class="tag">2 mm box peak ratio · lower is better</span></h3>
+<div class="scroll"><table><tbody>
+<tr><td style="width:9em;color:var(--muted)">What it measures</td><td>The <b>brightest spot</b> of the light sent back</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Lighting</td><td>Uses <b>the same image</b> as smear. One render, read twice.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Formula</td><td><b>Maximum mean over a 2 mm square</b> in the panel window (2D) &divide; the same value in the control plate window, computed per beam position and <b>averaged</b>. p99 and the maximum are recorded for every render too.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Code</td><td><code>form_metrics.peak_stats</code> (summed-area table). <code>PEAK_STAT</code> selects <code>"p99"</code> or <code>"max"</code> to reproduce old values. Cycles and Mitsuba use the same function.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Sampling window</td><td>Same window as smear. The box is fixed in mm, so the value does not change when the window or panel grows (checked with a synthetic counterexample).</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Why this way</td><td>A flat matte black plate is 1.0. 2 mm is the size an observer sees as a single point [guess]. The 0.040 target came from the maximum, the old tree and the old material, so it cannot be compared with current values. The same sample measured under the current protocol reads 0.077.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Run time</td><td>Same image as smear. No extra cost.</td></tr>
+<tr><td style="width:9em;color:var(--muted)">Known defects</td><td>Noise lifts the peak in dark head-on views. At 16 samples the honeycomb head-on was +4.6 %, within 1 % only at 256. The old maximum was +11 % at the same spot. p99 varied up to tenfold with panel size.</td></tr>
+</tbody></table></div></div>
+</section>
+<section><h2>Which value uses which setting</h2>
+<p>Not every value uses every setting. Total reflectance uses hemispherical lighting, so it uses neither the beam nor the sampling window. Defects in those settings do not affect it.</p>
+<div class="scroll"><table><thead><tr><th>Setting</th><th>Total reflectance<br><span class="tag">&rho;<sub>dh</sub></span></th><th>Smear<br><span class="tag">rms width</span></th><th>Head-on peak<br><span class="tag">box peak</span></th></tr></thead><tbody>
+<tr><td>Pixel density mm/px</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Beam width</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Number of beam positions</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Beam position sampling (Sobol)</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Samples per pixel</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Sampling window</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Peak statistic (box 2 mm)</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:var(--muted)">-</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Coating tree (reciprocal)</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+<tr><td>Control plate position (field edge + 60 mm)</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td><td class="n" style="color:#6bb873">uses</td></tr>
+</tbody></table></div>
+<p class="tag">Current values: peak statistic <b>"box"</b> · beam positions <b>"sobol"</b> · samples <b>256</b> · number of positions <b>16</b></p></section>
+<section><h2>Settings and their basis</h2>
+<p>Values are read from the source. Each has a basis grade: <span class="g-jaem">measured</span> means measured or taken from the literature, <span class="g-half">partial</span> means only partly, <span class="g-none">none</span> means simply chosen.</p>
+<div class="scroll"><table><thead><tr><th>Setting</th><th>Value</th><th>Where</th><th>Basis</th><th>Explanation</th></tr></thead><tbody>
+<tr><td>Coating tree</td><td class="n"><b>"reciprocal"</b></td><td class="tag">blender_render.py</td><td class="g-jaem">measured</td><td>reciprocal since 2026-09-15. The old tree (fresnel_mix) used a Fresnel node as the mixing weight, so swapping light and observer changed the BRDF (238 % on a flat plate). hemi_view reads total reflectance through reciprocity, so that premise was broken. The new tree differs by 0.001 % under the swap and stays within 0.08 % of the analytic model (brdf_model) at 7 angles. gate_coating_reciprocity.py.</td></tr>
+<tr><td>Default Musou material</td><td class="n"><b>musou_fit2</b></td><td class="tag">material/</td><td class="g-half">partial</td><td>Fitted jointly to THR and TIS in figure 6 of the paper and to the lobe shape in figure 5 (body 0, spec_scale 0.50, alpha 0.75). The plots were read by eye, and alpha is open between 0.45 and 0.75. The old musou_fit misread head-on TIS as 0.985 to 0.995 (it is 0.96).</td></tr>
+<tr><td>Pixel density mm/px</td><td class="n"><b>0.215</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>Resolves the smallest feature with 4 pixels. It is fixed whatever the panel size, so the same instrument measures with the same ruler. If it cannot be met, the run is refused rather than made coarser.</td></tr>
+<tr><td>Pixel cap RES_CAP</td><td class="n"><b>20000</b></td><td class="tag">form_buildable.py</td><td class="g-half">chosen</td><td>A memory limit, not physics. Above it the run is refused with the reason.</td></tr>
+<tr><td>Beam width mm</td><td class="n"><b>7.5</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>The LaserCube Ultra MK2 measures 7 to 14 mm at the wall. This is the low end.</td></tr>
+<tr><td>Beam divergence deg</td><td class="n"><b>0.05</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>A nearly parallel beam. Reproducing the 0.040 target under the old conditions matched the published value within 1 % only at 0.05 degrees (at 1.0 degrees smear was -31 %).</td></tr>
+<tr><td>Number of beam positions</td><td class="n"><b>16</b></td><td class="tag">form_metrics.py</td><td class="g-half">partial</td><td>On a 6/12/24 ladder one case still moved 6.7 % at 24. Not re-measured after switching to Sobol.</td></tr>
+<tr><td>Samples per pixel</td><td class="n"><b>256</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>Re-measured on the real measurement path on 2026-09-15 (three shapes by four angles, two seeds, 256 taken as truth). Count needed to be within 1 %: smear 8, p99 64, <b>box 256</b>, max 256. At 16 the box value was +4.6 % on the honeycomb head-on. The old ladder (16 is enough) ran with 1.0 degree spread, old coating constants and the same seed, so it was not a basis. Nothing above 256 was measured.</td></tr>
+<tr><td>Peak statistic</td><td class="n"><b>"box"</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>The brightest average over a square <b>2.0 mm</b> on a side. It does not change when empty area is added to the panel. p99 dropped tenfold when the same signal was only padded with zeros (the array length follows the panel size). No row averaging is done first. 2 mm comes from one arcminute of visual acuity being 1.7 to 2.9 mm at 6 to 10 m [guess: the glare threshold of a laser spot was not measured]. <b>The 0.040 target was set with the maximum, the old tree and the old material, so it cannot be compared.</b></td></tr>
+<tr><td>Smear convergence tolerance</td><td class="n"><b>0.02</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>The widest window is the value. It counts as converged only if the last two windows are within this tolerance and no more than this tolerance of the second moment remains in the outer 10 %. The old rule (the first two windows that agree) passed a signal smeared 22 times as 1.00.</td></tr>
+<tr><td>Beam position sampling</td><td class="n"><b>"sobol"</b></td><td class="tag">form_metrics.py</td><td class="g-jaem">measured</td><td>Dividing one period evenly always lands on valleys and apexes. A real laser does not land on that grid. Values differ 23 times between positions, so positions must be spread. uniform is used only to reproduce published values on exactly periodic panels.</td></tr>
+<tr><td>Sampling window horizontal inset</td><td class="n"><b>0.20</b></td><td class="tag">form_metrics.py</td><td class="g-none">none</td><td><b>No basis.</b> 20 % of the panel is cut from each side. The code says nothing about why 20 %. On 2026-08-28 it was gathered from four files into one. That fixed where it lives, not its value.</td></tr>
+<tr><td>Sampling window vertical inset</td><td class="n"><b>0.30</b></td><td class="tag">form_metrics.py</td><td class="g-half">partial</td><td>30 % itself has no basis. But a rule widens the window when 'pitch + 2 x beam' does not fit, and that rule has a physical basis.</td></tr>
+<tr><td>Samples for total reflectance</td><td class="n"><b>256</b></td><td class="tag">form_metrics.py</td><td class="g-none">none</td><td><b>No basis.</b> Total reflectance is an area average, so noise cancels and fewer samples than the peak axis are fine. How many is enough was never measured. The number sat in the UI code since 2026-08-24. There is no ladder test yet.</td></tr>
+<tr><td>Samples for cross-checks</td><td class="n"><b>512</b></td><td class="tag">form_metrics.py</td><td class="g-half">partial</td><td>Used when comparing the two renderers. Until 2026-08-28 Mitsuba ran at 256 and Cycles at 512, <b>different from each other</b>. With different conditions the gap gets read as 'the renderers differ'. It is now one value.</td></tr>
+</tbody></table></div>
+<p class="tag">Settings are spread over nine places. Gathering them into one is still to do.</p></section>
+<section><h2>Why it is built this way: what measuring taught us</h2>
+<div class="scroll"><table><thead><tr><th>Finding</th><th>What happens</th><th>What we measured</th><th>Basis</th></tr></thead><tbody>
+<tr><td><b>The maximum is biased upward</b></td><td>Each pixel is unbiased, but picking the largest one introduces bias. The act of choosing creates it. More samples reduce it.</td><td>On the honeycomb head-on the value came down 8 % going from 64 to 2048 samples and had not settled. Splitting into two images, one to choose the spot and one to read it, showed the maximum 2.6 % above the unbiased value. At the head-on spot it was up to 9 times higher.</td><td class="tag">Efron 2011 · Forde 2023 · Kriegeskorte 2009</td></tr>
+<tr><td><b>A percentile is not a peak either (2026-09-15)</b></td><td>p99 is the value at the 99 % position of the array. The array length follows the panel size, so adding only dark cells to the same signal shifts the position. Averaging rows first also dilutes narrow flashes.</td><td>Placing the same profile in 461 and 931 cells moved p99 from 1.0 to 0.1. The maximum mean over a fixed-mm box stayed 0.800 in both. In real renders, at 40 degrees observer angle the box value was twice p99.</td><td class="tag">gate_form_stats.py (synthetic counterexample) · Pawlus 2023 · evalglare manual</td></tr>
+<tr><td><b>The coating broke reciprocity (2026-09-15)</b></td><td>Using a Fresnel node as the mixing weight makes the weight depend only on the viewing angle. Swapping light and observer changes the BRDF. The premise of the hemispherical reading breaks.</td><td>Flat plate swap difference: old tree 238 % (old constants), 55.5 % (audit, musou_fit). New tree 0.001 %. For the target sample measured with a 0.76 diffuse material, changing only the tree moved the head-on peak by -28 %.</td><td class="tag">gate_coating_reciprocity.py · Walter 2007 · PBRT microfacet model</td></tr>
+<tr><td><b>The control plate was covered by the field (2026-09-15)</b></td><td>The control plate sat at a fixed distance from the panel edge, but the field extends by the margin, and extruded families by half the panel. A covered control plate reads darker than 0.05.</td><td>The 500 mm grooved flat plate in the regression lock: field x 750, control plate x 600, control reading 0.0439. After moving it to the shape edge + 60 mm it read 0.05000, and all 18 lock cells 0.0 %.</td><td class="tag">FINDINGS_control_overlap.md (cause proven 2026-08-12) · rig_v2</td></tr>
+<tr><td><b>The sampling window followed the panel size</b></td><td>The window was 60 % of the panel, so a bigger panel meant a bigger window. A maximum grows with the number of points in the window. So panel size moved the value.</td><td>The pyramid peak moved 0.467 / 0.535 / 0.508 / 0.496 / 0.502 at 4/6/10/14/18 cells. Pixel density was the same throughout.</td><td class="tag">Pawlus 2023 (areal maxima exceed profile maxima because of point count) · Hartigan 2013</td></tr>
+<tr><td><b>Beam positions divided one period evenly (now Sobol)</b></td><td>The step always lines up with the structure's period. It always lands on the same spots. It cannot be used at all for shapes that do not repeat (STEP files, jittered apexes).</td><td>For smooth periodic functions even spacing is optimal (trapezoid rule, exponential convergence). But a real laser does not land on that grid. Moving the position within one cell changed the head-on value by <b>23 times</b> (valley 0.00116, just past the apex 0.02658). So we switched to Sobol.</td><td class="tag">Cook 1986 · Owen 2023</td></tr>
+<tr><td><b>The reported value is the mean over beam positions (2026-08-28)</b></td><td>Each beam position gives a different value. We had to decide which to report. Reporting the maximum makes the value grow with the number of positions.</td><td>We read the measurement standards. All three gloss standards measure several spots, report the mean and report the spread alongside it. The maximum is used only to orient the specimen. A scanning laser is seen as a time average. So the mean is reported, with p99 and the maximum recorded separately.</td><td class="tag">ASTM D523 · ASTM E430 · ISO 2813 · NPL Guide 37 · Talbot&ndash;Plateau</td></tr>
+<tr><td><b>A setting that lives in two places gets fixed in only one</b></td><td>The value in the file and the value the UI actually uses drift apart. Nothing in the results shows it. The numbers are simply different.</td><td>On 2026-08-28 samples were lowered from 512 to 16, yet the UI ran at <b>256</b>. The UI code was writing <code>samples: 256</code> into the request body. The same defect had happened twice before: diffuse 0.76 and roughness 0.30 were written separately in the server. The window size was spread over four files and the beam width over three, and Cycles once ran 7.5 while Mitsuba ran 2.0. <code>gate_no_shadow_defaults.py</code> now guards four things: hard-coded defaults, assignments outside the canonical file, values the UI writes into requests, and <b>whether the running server uses the same values as the file</b>.</td><td class="tag">Measured (we first confirmed the gate fails on the code it guards)</td></tr>
+<tr><td><b>One image per beam position</b></td><td>Time is proportional to the number of positions. Others give each ray a different starting point and do it in one pass.</td><td>Placing a stripe at every position and rendering once turned it into <b>a different object</b> (smear -65 %, peak +196 %). Cycles gives no access to ray generation.</td><td class="tag">genBSDF.pl · RayFlare source</td></tr>
+</tbody></table></div></section>
+<section><h2>How the calculator was validated: validation against closed forms</h2>
+<p>Comparing two calculators with each other cannot tell which one is right. So we ran both on <b>problems whose answer is already known as a formula</b>. These are the six rows below.</p>
+<div class="scroll"><table><thead><tr><th>Reference</th><th>Formula</th><th>What it separates</th><th>Result</th><th>Where it runs</th></tr></thead><tbody>
+<tr><td><b>Integrating sphere</b></td><td class="tag">&rho;<sub>eff</sub> = &rho;f / (1 &minus; &rho;(1&minus;f))</td><td>A Lambertian sphere with an opening of area fraction f. The standard formula in stray-light work. Raising &rho; pushes the mean bounce count past 25, so <b>a calculator that stops early always reads low</b></td><td class="n">Cycles error <b>0.06 %</b> · Mitsuba 0.22 %</td><td class="tag">scripts/bench_sphere.py</td></tr>
+<tr><td><b>Infinite canyon</b></td><td class="tag">Cosine-weighted fraction of sky visible from a point on the floor</td><td>Two walls of thickness t with a floor between. Separates <b>one bounce off a thin wall</b>. A sphere has no thin walls, so it cannot see this defect</td><td class="n">Matches Cycles · only Mitsuba deviates</td><td class="tag">scripts/bench_canyon.py</td></tr>
+<tr><td><b>Flat Lambertian</b></td><td class="tag">&rho;<sub>dh</sub>(&theta;) = &rho; (independent of angle)</td><td>Does a 0.05 reflectance plate read the same at every angle. Checks the whole measurement chain at once</td><td class="n"><b>0.0500</b> (0.050001)</td><td class="tag">gate_coating_reciprocity.py check C</td></tr>
+<tr><td><b>Energy conservation</b></td><td class="tag">1 in a space that absorbs no light, whatever the bounce count</td><td>Is energy still there after 2048 bounces</td><td class="n"><b>0.99974</b></td><td class="tag">results/FINDINGS_renderer_disagreement.md</td></tr>
+<tr><td><b>Helmholtz reciprocity</b></td><td class="tag">f<sub>r</sub>(&omega;<sub>i</sub>,&omega;<sub>o</sub>) = f<sub>r</sub>(&omega;<sub>o</sub>,&omega;<sub>i</sub>)</td><td>Does swapping light and eye give the same value. <b>Reading total reflectance with hemi_view rests on this symmetry</b></td><td class="n">New coating <b>0.001 %</b> difference · old coating off by 238 %</td><td class="tag">gate_coating_reciprocity.py check A</td></tr>
+<tr><td><b>Second renderer</b></td><td class="tag">Not a closed form but a different implementation</td><td>The same geometry recomputed with Mitsuba 3.9.1. <b>Comparing only the two cannot tell which is right</b>, so both were run against the references above</td><td class="n">They split by 27 % on thin walls and <b>Cycles matched the reference</b></td><td class="tag">results/FINDINGS_renderer_disagreement.md</td></tr>
+</tbody></table></div>
+<p class="tag">Not yet done: there is <b>no full comparison of our honeycomb lattice against the cavity theory (Gouffé)</b>. One point was checked and came out at 0.83 times (results/PEER_REVIEW.md). And <b>physical measurements: zero</b>.</p></section>
+<section><div class="card verdict"><h2 style="margin:0">What still has no basis</h2>
+<ul>
+<li><b>The 60 % horizontal sampling window has no basis.</b> Nothing says why 20 % is cut off. On 2026-08-28 the constants scattered over four files were gathered into <code>form_metrics</code>, but that fixed where they live; the value still has no basis. The gloss standard (ASTM D523) fixes the receiver window <b>as an angle</b>. Our window is not yet set that way.</li>
+<li><b>The case for the mean holds only if the laser scans faster than the eye's threshold.</b> The Talbot&ndash;Plateau threshold is about 15 Hz for rods and about 60 Hz for cones at very high luminance. How many times per second our laser redraws a frame was not measured. If a bright reflection seen by cones is redrawn slower than the threshold, flicker is visible, and the mean is then not the perceived brightness.</li>
+<li><b>64 samples for total reflectance has no basis.</b> Total reflectance is an area average, so it can use fewer than the peak. How many is enough was never measured. The peak axis was re-measured on the real path on 2026-09-15 and needs 256, but the total axis has no ladder yet.</li>
+<li><b>The Musou material comes from reading plots.</b> The paper has no raw data table, so the figures were read by eye. The lobe width alpha is open between 0.45 and 0.75, the absolute scale is &plusmn;20 %, and the narrow peak at 85 degrees is outside the model. The paper's sample was brush-painted.</li>
+<li><b>The 2 mm peak box has no measured basis.</b> It comes from visual acuity. Whether it matches the size at which a laser spot looks glaring to an observer was not measured.</li>
+<li><b>Beam positions assume periodicity.</b> Turning on <code>apex_jitter</code> or <code>row_offset</code> breaks the period, yet the code walks by the period without checking. STEP files have no value to put in.</li>
+<li><b>We do not know why the honeycomb needed a 381 mm panel.</b> The returned light spans 3 mm, and the two rules in the literature miss by 38 times and 4 times.</li>
+<li><b>Zero physical measurements.</b> CIE 171:2006 asks for half of the reference data to come from experiment. The simulator was checked only against simulators.</li>
+<li><b>The roughness and diffuse share of the 5 % paint are not ours.</b> They were borrowed from MERL's black paint. Roughness moves the peak a lot (1160 times with the old tree and a narrow lobe; not re-measured with the new tree).</li>
+</ul></div></section>
+<section><h2>References</h2>
+<p class="tag">Only sources we opened and checked are listed. The title links to the original; the file column links to our saved copy, so it stays readable if the link dies.</p>
+<div class="scroll"><table><thead><tr><th>Author</th><th>Title</th><th>Where</th><th>What it says</th><th>File</th></tr></thead><tbody>
+<tr><td>Efron, B. (2011)</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3325056/" target="_blank">Tweedie's Formula and Selection Bias</a></td><td class="tag">JASA 106(496)</td><td>The largest few estimates substantially overestimate their true values. Selection bias, regression to the mean.</td><td class="tag"><a href="../reference/papers_method/efron2011.pdf" target="_blank">efron2011.pdf</a></td></tr>
+<tr><td>Forde, Hemani, Ferguson (2023)</td><td><a href="https://doi.org/10.1371/journal.pgen.1010546" target="_blank">Review of Battling the Winner's Curse</a></td><td class="tag">PLoS Genetics 19(9):e1010546</td><td>Ranking bias. A larger sample reduces the bias considerably.</td><td class="tag"><a href="../reference/papers_method/forde2023.pdf" target="_blank">forde2023.pdf</a></td></tr>
+<tr><td>Kriegeskorte et al. (2009)</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2841687/" target="_blank">Circular analysis in systems neuroscience</a></td><td class="tag">Nature Neuroscience 12</td><td>Separating the data used to select from the data used to measure removes the bias. Sample splitting.</td><td class="tag"><a href="../reference/papers_method/kriegeskorte2009.pdf" target="_blank">kriegeskorte2009.pdf</a></td></tr>
+<tr><td>Pawlus, Reizer, &#379;elasko (2023)</td><td><a href="https://doi.org/10.3390/ma16227109" target="_blank">Characterization of the Maximum Height of a Surface Texture</a></td><td class="tag">Materials 16(22):7109</td><td>Maximum height is not a stable value. Percentiles and 'the mean of several maxima' agree with each other and are more stable. Areal maxima exceed profile maxima because of point count.</td><td class="tag"><a href="../reference/papers_method/pawlus2023.pdf" target="_blank">pawlus2023.pdf</a></td></tr>
+<tr><td>Wienold, J.</td><td><a href="https://www.radiance-online.org/learning/documentation/manual-pages/pdfs/evalglare.pdf" target="_blank">evalglare v2.10 manual</a></td><td class="tag">Radiance</td><td>Glare sources are picked by a threshold, grouped and <b>averaged</b>. The median and 75th / 95th percentiles are reported too. No point maximum is used.</td><td class="tag"><a href="../reference/papers_method/evalglare_man.pdf" target="_blank">evalglare_man.pdf</a></td></tr>
+<tr><td>Nicodemus et al. (1977)</td><td><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nbsmonograph160.pdf" target="_blank">Geometrical Considerations and Nomenclature for Reflectance</a></td><td class="tag">NBS Monograph 160</td><td>A finite panel only loses light sideways. On an infinite panel the light coming back in from the sides makes up for it. The difference is called edge losses. The procedure for measuring the lateral travel r<sub>m</sub> is the same as our convergence test.</td><td class="tag"><a href="../reference/papers_method/nbs_mono160.pdf" target="_blank">nbs_mono160.pdf</a></td></tr>
+<tr><td>Hsia, J. J. (1976)</td><td><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/TN/nbstechnicalnote594-12.pdf" target="_blank">The Translucent Blurring Effect -- Method of Evaluation and Estimation</a></td><td class="tag">NBS Technical Note 594-12</td><td>A real measurement procedure sets panel size as an absolute length. A sample opening of 19 mm radius can be treated as infinite; enlarging it makes no detectable difference. Basis for sizing the panel by <b>how far light travels sideways</b> rather than by the period.</td><td class="tag"><a href="../reference/papers_method/hsia_tn594-12.pdf" target="_blank">hsia_tn594-12.pdf</a></td></tr>
+<tr><td>IEA SHC Task 61 (2021)</td><td><a href="https://www.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task61--Technical-Report-C2.1-Whitepaper-BSDF.pdf" target="_blank">BSDF generation procedures for daylighting systems</a></td><td class="tag">T61.C.2.1</td><td>The lit area must be at least 5 and preferably 10 times the period. <b>Ours is 0.15 times.</b> So a BSDF cannot replace the geometry.</td><td class="tag"><a href="../reference/papers_method/iea_task61_C21.pdf" target="_blank">iea_task61_C21.pdf</a></td></tr>
+<tr><td>McNeil, A. (2015)</td><td><a href="https://www.radiance-online.org/learning/tutorials/Tutorial-genBSDF_v1.0.1.pdf" target="_blank">genBSDF Tutorial v1.0.1</a></td><td class="tag">LBNL</td><td>Rays starting near the edge escape without meeting geometry they would otherwise have hit. The fix is to build large and shoot only the middle. The cone example tiles 21 periods and shoots only the central one.</td><td class="tag"><a href="../reference/papers_method/genbsdf_tut.pdf" target="_blank">genbsdf_tut.pdf</a></td></tr>
+<tr><td>Schneider, J. B.</td><td><a href="https://eecs.wsu.edu/~schneidj/ufdtd/ufdtd.pdf" target="_blank">Understanding the Finite-Difference Time-Domain Method</a></td><td class="tag">WSU textbook, section 3.9</td><td>Wave solvers (FDTD) cut space into a finite grid and close its ends with absorbing boundaries. Ray tracing has no such grid. We cut the panel not because of a grid but <b>because the panel is infinitely wide</b>.</td><td class="tag"><a href="../reference/papers_method/ufdtd.pdf" target="_blank">ufdtd.pdf</a></td></tr>
+<tr><td>Cook, R. (1986)</td><td><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15869-f11/www/readings/cook86_sampling.pdf" target="_blank">Stochastic Sampling in Computer Graphics</a></td><td class="tag">ACM TOG 5(1)</td><td>A regular sample grid meeting a regular structure produces patterns. Treat the integration variable as an extra dimension and scatter samples along it.</td><td class="tag"><a href="../reference/papers_method/cook86.pdf" target="_blank">cook86.pdf</a></td></tr>
+<tr><td>Owen, A. (2023)</td><td><a href="https://artowen.su.domains/mc/practicalqmc.pdf" target="_blank">Practical quasi-Monte Carlo integration</a></td><td class="tag">Stanford</td><td>Scrambled Sobol error falls as n<sup>&minus;1.5</sup> in the smooth case. It needs neither periodicity nor smoothness, and at worst never exceeds 2.72 times Monte Carlo.</td><td class="tag"><a href="../reference/papers_method/practicalqmc.pdf" target="_blank">practicalqmc.pdf</a></td></tr>
+<tr><td>Veach, E. (1997)</td><td><a href="https://graphics.stanford.edu/papers/veach_thesis/thesis.pdf" target="_blank">Robust Monte Carlo Methods for Light Transport Simulation</a></td><td class="tag">Stanford</td><td>Efficiency is the inverse of variance times time. Helmholtz's original reciprocity applies only to mirror reflection; the real basis is the symmetry of the BSDF divided by refractive index.</td><td class="tag"><a href="../reference/papers_method/veach_thesis.pdf" target="_blank">veach_thesis.pdf</a></td></tr>
+<tr><td>Zirr, Hanika, Dachsbacher (2018)</td><td><a href="https://jo.dreggn.org/home/2018_fireflies.pdf" target="_blank">Reweighting Firefly Samples</a></td><td class="tag">Computer Graphics Forum</td><td>With outlier samples (fireflies) present, finite-sample estimates exceed the truth. But simply removing them biases low.</td><td class="tag"><a href="../reference/papers_method/zirr2018_fireflies.pdf" target="_blank">zirr2018_fireflies.pdf</a></td></tr>
+<tr><td>Kanit et al. (2003)</td><td><a href="https://matperso.minesparis.psl.eu/Donnees/data04/464-kanit03.pdf" target="_blank">Determination of the size of the representative volume element</a></td><td class="tag">Int. J. Solids and Structures 40</td><td>The idea of a single minimum size must be dropped. It depends on what is measured, the accuracy wanted and the number of repetitions. The answer must not depend on the boundary condition type.</td><td class="tag"><a href="../reference/papers_method/kanit2003_rve.pdf" target="_blank">kanit2003_rve.pdf</a></td></tr>
+<tr><td>Kulesza et al. (2022)</td><td><a href="https://mcnp.lanl.gov/pdf_files/TechReport_2022_LANL_LA-UR-22-30006Rev.1_KuleszaAdamsEtAl.pdf" target="_blank">MCNP 6.3.0 manual</a></td><td class="tag">LANL LA-UR-22-30006</td><td>With a mirror boundary the whole-surface mean is exactly doubled, but a point value comes out 1.67 times, <b>always wrong and always low</b>. Periodic boundaries behave the same.</td><td class="tag"><a href="../reference/papers_method/mcnp63.pdf" target="_blank">mcnp63.pdf</a></td></tr>
+</tbody></table></div>
+<h3>Measurement standards</h3>
+<p class="tag">Standards read when we chose the mean over beam positions as the reported value. The current ASTM and ISO editions are paid and we could not read them. The editions listed are the older ones we actually read. The two ASTM files are text-only extracts (.txt).</p>
+<div class="scroll"><table><thead><tr><th>Author</th><th>Title</th><th>Where</th><th>What it says</th><th>File</th></tr></thead><tbody>
+<tr><td>ASTM D523-89 (reapproved 1999)</td><td><a href="https://www.astm.org/d0523-14r18.html" target="_blank">Standard Test Method for Specular Gloss</a></td><td class="tag">ASTM E12.03</td><td>Gloss is the light a specimen sends back divided by the light a standard surface sends back <b>under the same geometric conditions</b>. Our peak value (panel &divide; control plate) has this structure. At least three readings, the <b>mean</b> is reported, and readings more than 5 % from the mean are noted separately.</td><td class="tag"><a href="../reference/papers_method/D523r.txt" target="_blank">D523r.txt</a></td></tr>
+<tr><td>ASTM E430-97</td><td><a href="https://www.astm.org/e0430-19.html" target="_blank">Measurement of Gloss of High-Gloss Surfaces by Goniophotometry</a></td><td class="tag">ASTM E12</td><td><b>The maximum is used only to decide how to orient the specimen.</b> The reported value is the mean of three areas. Basis for reporting the mean over beam positions.</td><td class="tag"><a href="../reference/papers_method/E430.txt" target="_blank">E430.txt</a></td></tr>
+<tr><td>ISO 2813:1994</td><td><a href="https://cdn.standards.iteh.ai/samples/7810/2ac0b6e5b66043eaa1e251f26637a756/ISO-2813-1994.pdf" target="_blank">Paints and varnishes -- Determination of specular gloss of non-metallic paint films at 20&deg;, 60&deg; and 85&deg;</a></td><td class="tag">ISO TC 35 (preview)</td><td>Six readings, reported as <b>mean and range</b>. If the extremes differ by more than 10 units or 20 % of the mean, the panel is not represented by the mean but <b>rejected</b>. The 1978 edition is saved too (iso2813_1978.pdf).</td><td class="tag"><a href="../reference/papers_method/iso2813_1994_preview.pdf" target="_blank">iso2813_1994_preview.pdf</a></td></tr>
+<tr><td>Leach, R. K. (NPL)</td><td><a href="https://eprintspublications.npl.co.uk/2041/1/mgpg37.pdf" target="_blank">The Measurement of Surface Texture using Stylus Instruments</a></td><td class="tag">NPL Measurement Good Practice Guide No. 37</td><td>Values like maximum height are called extreme-value parameters. With no averaging they swing on a single scratch. The default is to <b>measure in five windows and average</b>. Using the maximum requires declaring it with a max suffix in advance. The window length is chosen from a table after first estimating the structure's period (ISO 4288). The ISO texts are paid, so they were read through this guide.</td><td class="tag"><a href="../reference/papers_method/mgpg37.pdf" target="_blank">mgpg37.pdf</a></td></tr>
+<tr><td>Talbot&ndash;Plateau law</td><td><a href="https://en.wikipedia.org/wiki/Flicker_fusion_threshold" target="_blank">Flicker fusion threshold</a></td><td class="tag">Wikipedia</td><td>When flicker is faster than the eye's fusion threshold, <b>the perceived brightness equals the time average</b>. Basis for reporting the mean rather than the maximum for a scanning laser. The threshold is about 15 Hz for rods and about 60 Hz for cones at very high luminance. The original papers (1834, 1835) were not opened.</td><td class="tag"><a href="../reference/papers_method/wiki_flicker_fusion.pdf" target="_blank">wiki_flicker_fusion.pdf</a></td></tr>
+</tbody></table></div>
+</section>
+<section><p class="tag">Script that builds this document: <code>scripts/build_method_report.py --lang en</code> (text in <code>scripts/method_en.py</code>). Settings are read from <code>scripts/form_metrics.py</code>, <code>scripts/form_buildable.py</code> and <code>scripts/blender_render.py</code>. The audit and its fixes are in <code>results/FINDINGS_simulator_audit_2026_09_14.md</code>.</p></section>
+</div></body></html>

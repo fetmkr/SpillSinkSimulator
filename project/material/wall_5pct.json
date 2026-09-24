@@ -2,7 +2,7 @@
  "schema": "spillsink.material/2",
  "id": "wall_5pct",
  "label": "무광 검정 벽 — 5% (대조판)",
- "color": "#45484f",
+ "color": "#c22473",
  "scattering": {
   "band": "visible_rgb",
   "band_note": "가시광 RGB 가중. 파장별 값이 아니다. 검정 아노다이징은 700 nm 넘으면 반사가 크게 오르므로(arXiv:1407.8265 Fig.2, 1000 nm 에서 60~70 %) 단색 레이저 파장이 정해지면 spectral 을 채워야 한다.",

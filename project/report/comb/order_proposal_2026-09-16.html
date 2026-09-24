@@ -340,9 +340,10 @@ footer a{color:var(--muted)}
         <b>아래 숫자는 전부 0 ~ 45 도에서 잰 값입니다.</b>
       </li>
       <li>
-        <b>스치는 각에서는 피라미드가 벌집보다 밝습니다.</b> 75 도로 다시 재니
-        피라미드 4/22 는 <b>0.690 %</b>, 벌집 셀 10 은 <b>0.422 %</b> 였습니다 (무소 민판 2.455 %).
-        천장 대부분이 이 각도로 맞습니다. 다 밝아지는 이유는 도료 표면의 프레넬 반사입니다.
+        <b>75 도에서 피라미드가 갑자기 밝아집니다.</b> 55 ~ 70 도까지는 피라미드와 벌집이 비슷하고
+        (70 도에서 피라미드 0.337 %, 벌집 셀 10 0.374 %), <b>75 도에서만 피라미드가 0.690 % 로 뜁니다.</b>
+        같은 각도에서 벌집은 0.422 %, 무소 민판은 2.455 % 입니다.
+        천장 대부분이 이 각도 구간으로 맞습니다. 전체가 밝아지는 이유는 도료 표면의 프레넬 반사입니다.
       </li>
       <li>
         <b>칠할 면적 배수는 설계마다 다릅니다.</b> 아래 7 절의 12.15 배와 1,215 m² 는
@@ -635,7 +636,7 @@ footer a{color:var(--muted)}
     <div class="note beam">
       <strong>2026-09-18 정정 — 이 절의 결론은 뒤집혔습니다.</strong>
       아래에 적힌 "벌집을 안 고른 이유" 는 0 ~ 45 도에서만 잰 값으로 쓴 것입니다.
-      천장이 3.5 m 라 실제로는 스치는 각이 대부분이고, 75 도에서는 피라미드 0.690 % 대 벌집 0.422 % 로 순서가 반대입니다.
+      천장이 3.5 m 라 실제로는 스치는 각이 대부분입니다. 55 ~ 70 도에서는 둘이 비슷하고 75 도에서 피라미드가 0.690 % 로 뜁니다 (벌집 0.422 %).
       만들기까지 같이 놓고 <strong>벌집 셀 10 · 깊이 20</strong> 으로 정했습니다.
     </div>
 
@@ -685,31 +686,26 @@ footer a{color:var(--muted)}
       <table>
         <caption>
           2026-09-18 에 더 잰 것 — 스치는 각까지 넣은 반사 총량.
-          방 조건 최대는 입사각 0 ~ 45 도 안에서, 스치는 각 최대는 55 · 65 · 75 도까지 넣어서 가장 밝은 값입니다.
+          빔이 천장에 닿는 각도별로, 방위 0 도와 45 도 중 밝은 쪽입니다. 45 도가 옛 방 조건의 끝이고, 그 오른쪽이 천장 3.5 m 에서 실제로 생기는 각도입니다.
         </caption>
         <thead>
-          <tr><th>구조</th><th class="num">방 조건 최대 (~45°)</th><th class="num">스치는 각 최대 (75°)</th></tr>
+          <tr><th>구조</th><th class="num">45°</th><th class="num">55°</th><th class="num">60°</th><th class="num">65°</th><th class="num">70°</th><th class="num">75°</th></tr>
         </thead>
         <tbody>
           <tr class="pick">
-            <td><b>벌집 셀 10 / 깊이 20</b><span class="tag beam">지금 결론</span></td>
-            <td class="num">0.228 %</td><td class="num"><b>0.422 %</b></td>
+            <td><b>벌집 셀 10 / 깊이 20</b><span class="tag beam">지금 결론</span></td><td class="num">0.227 %</td><td class="num">0.273 %</td><td class="num">0.303 %</td><td class="num">0.335 %</td><td class="num">0.374 %</td><td class="num">0.421 %</td>
           </tr>
           <tr>
-            <td>벌집 셀 20 / 깊이 20</td>
-            <td class="num">0.219 %</td><td class="num">0.399 %</td>
+            <td>벌집 셀 20 / 깊이 20</td><td class="num">0.219 %</td><td class="num">0.261 %</td><td class="num">0.288 %</td><td class="num">0.319 %</td><td class="num">0.356 %</td><td class="num">0.399 %</td>
           </tr>
           <tr>
-            <td>피라미드 4 / 22 끝 0.4</td>
-            <td class="num">0.244 %</td><td class="num">0.690 %</td>
+            <td>피라미드 4 / 22 끝 0.4</td><td class="num">0.244 %</td><td class="num">0.273 %</td><td class="num">0.291 %</td><td class="num">0.312 %</td><td class="num">0.337 %</td><td class="num">0.689 %</td>
           </tr>
           <tr>
-            <td>무소 민판 (평평한 판)</td>
-            <td class="num">1.219 %</td><td class="num">2.455 %</td>
+            <td>무소 민판 (평평한 판)</td><td class="num">1.219 %</td><td class="num">1.429 %</td><td class="num">1.586 %</td><td class="num">1.794 %</td><td class="num">2.073 %</td><td class="num">2.455 %</td>
           </tr>
           <tr>
-            <td>5 % 무광 검정 민판</td>
-            <td class="num">5.013 %</td><td class="num">5.252 %</td>
+            <td>5 % 무광 검정 민판</td><td class="num">5.013 %</td><td class="num">5.037 %</td><td class="num">5.061 %</td><td class="num">5.099 %</td><td class="num">5.159 %</td><td class="num">5.252 %</td>
           </tr>
         </tbody>
       </table>

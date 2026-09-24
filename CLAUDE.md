@@ -16,7 +16,10 @@
    2026-09-17 에 민판 기준 줄 둘(무소 1.219 %, 5 % 5.013 %)을 순위 밖으로 더했다.
    (아티팩트 https://claude.ai/artifact/XAqBDwoMsWMsEUhRj3EMM7 — 다시 올릴 땐 같은 파일 경로로)
    연구 기록 보고서(다섯 주 전체 + 9/16 덧붙임): https://claude.ai/artifact/3gPYCx3j6N2CANw7BRB8Bm
-6. 과정과 틀린 길은 `project/JOURNAL.md` 맨 아래. 처음 보는 사람은 `project/START_HERE.md`.
+6. **방법 문서** `project/report/METHOD.html` (영어 `METHOD_en.html`, 둘 다 `scripts/build_method_report.py`).
+   친구에게 준 묶음(문헌 파일 20 개 포함, 2026-09-24): 한국어 https://claude.ai/artifact/MUaEsSVXkfBdgWNsh4rjLS ·
+   영어 https://claude.ai/artifact/X9g8gH9C2GCyGYB7EfdZzE. 원문 파일은 `project/reference/papers_method/` (PDF 는 git 밖).
+7. 과정과 틀린 길은 `project/JOURNAL.md` 맨 아래. 처음 보는 사람은 `project/START_HERE.md`.
 
 ## 지금 흔들리고 있는 것 (2026-09-16, 09-17 더함)
 

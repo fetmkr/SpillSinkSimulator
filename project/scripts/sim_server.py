@@ -2633,6 +2633,7 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, json.dumps({
                 "total_thetas": list(_FM.ROOM_TOTAL_THETAS),
                 "total_phis": list(_FM.ROOM_TOTAL_PHIS),
+                "graze_thetas": list(_FM.GRAZE_THETAS),
                 "form_thetas": list(_FM.FORM_THETAS),
                 "form_phis": list(_FM.FORM_PHIS),
                 "observers": list(_FM.ROOM_OBSERVERS),
@@ -3185,6 +3186,7 @@ def _snap_method_defaults():
         "rho_samples": _FM.RHO_SAMPLES,
         "total_thetas": list(_FM.ROOM_TOTAL_THETAS),
         "total_phis": list(_FM.ROOM_TOTAL_PHIS),
+        "graze_thetas": list(_FM.GRAZE_THETAS),
         "form_thetas": list(_FM.FORM_THETAS),
         "doc": "report/METHOD.html",
     }

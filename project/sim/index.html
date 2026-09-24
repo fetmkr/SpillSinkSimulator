@@ -550,7 +550,7 @@ details.why p{margin:.4em 0 0}
   <div class="row" style="margin:2px 0 6px">
     <label for="graze" style="display:flex;gap:7px;align-items:center;font-size:12.5px;cursor:pointer">
       <input type="checkbox" id="graze"> 스치는 각도까지 재기
-      <span class="note" style="margin:0">±55 · ±65 · ±75°</span></label></div>
+      <span class="note" style="margin:0" id="grazelist">—</span></label></div>
   <p class="note" id="grazenote" style="margin:-2px 0 6px">천장 3.5 m 에서는 천장 대부분이 45° 를 넘습니다.
    <b>보고서 순위는 30·40·45·−40° 로만 매깁니다.</b> 켜면 그 밖의 각도까지 같이 잽니다.</p>
   <button class="go" id="m5"><span class="lb">Render &middot; total
@@ -985,6 +985,7 @@ function showRig(r, err){
 // `report/METHOD.html` carries the formulas, the reasoning and the papers.
 function showMethod(m){
   const el = $('#kmeth'); if(!el) return;
+  window.LAST_METHOD = m;
   if(!m){ el.innerHTML = ''; return; }
   const n = x => x==null ? '—' : x;
   const rows = [
@@ -998,7 +999,14 @@ function showMethod(m){
   ];
   // 각도 목록도 여기 한 곳에만 적는다 (2026-09-18). 단추 밑에 또 적으면 두 곳이 된다.
   if(window.PROTO){
+    // 스치는 각은 켜고 끌 수 있지만 목록은 늘 보여준다 (2026-09-18). 처음에는
+    // 켰을 때만 보여줬는데, 꺼 놓고 본 사람은 "왜 작은 각도만 보여주냐" 가 된다.
     rows.push(['총량 각도 θ', PROTO.total_thetas.map(t=>`${t}°`).join(' ')]);
+    if(window.GRAZE){
+      const on = $('#graze') && $('#graze').checked;
+      rows.push(['스치는 각 θ', GRAZE.filter(t=>t>0).map(t=>`±${t}°`).join(' ')
+        + (on ? '  <b>재는 중</b>' : '  <span style="opacity:.6">꺼짐</span>')]);
+    }
     rows.push(['총량 방위 φ', PROTO.total_phis.map(t=>`${t}°`).join(' ')]);
     rows.push(['뭉개기 빔 θ', PROTO.form_thetas.map(t=>`${t}°`).join(' ')
       + ` · 방위 ${PROTO.form_phis.map(t=>`${t}°`).join(' ')}`]);
@@ -2424,6 +2432,18 @@ const THCOL = {
   // green sampling box
   '30': ['#c6e86b',[0.78,0.91,0.42],'#6f8f1f'],
   '45': ['#ffd84d',[1.00,0.85,0.30],'#a88400'],
+  // 스치는 각 (2026-09-18). 색이 없으면 전부 0 도 청록으로 떨어져서 추적기에서
+  // 구별이 안 됐다. 양수는 따뜻한 쪽, 음수는 청록 쪽으로 깊어진다.
+  '55': ['#f0a04b',[0.94,0.63,0.29],'#b4762f'],
+  '60': ['#e8763a',[0.91,0.46,0.23],'#ad5326'],
+  '65': ['#d9552f',[0.85,0.33,0.18],'#a13a1e'],
+  '70': ['#b83c3c',[0.72,0.24,0.24],'#8a2b2b'],
+  '75': ['#8f2d4d',[0.56,0.18,0.30],'#6b1f3a'],
+  '-55':['#6fd2a8',[0.44,0.82,0.66],'#3f9c78'],
+  '-60':['#3fb894',[0.25,0.72,0.58],'#2a8a6e'],
+  '-65':['#2f9a86',[0.18,0.60,0.53],'#1f7263'],
+  '-70':['#2a7d78',[0.16,0.49,0.47],'#1c5a56'],
+  '-75':['#1f5f66',[0.12,0.37,0.40],'#16464b'],
 };
 const thc = t => THCOL[String(t)] || THCOL['0'];
 // The trace's own readout beyond reflectance, from the paths themselves.
@@ -3322,14 +3342,20 @@ addEventListener('resize', () => draw());
   // used to measure [0, -20, -40, 20, 40]; the finalist report ranks on 30 and
   // 45 degrees too. Both now read form_metrics.ROOM_TOTAL_THETAS.
   // 켜면 규약 각도에 스치는 각도를 더한다. 끄면 규약 그대로 (화면 요청 검사 14/14 유지).
-  window.GRAZE = [55, 65, 75, -55, -65, -75];
+  // 스치는 각도 목록은 서버에서 읽는다 (form_metrics.GRAZE_THETAS). 여기 적어 두면
+  // 집이 둘이 된다 -- 2026-09-18 에 실제로 화면·측정 스크립트 넷이 따로 적고 있었다.
+  window.GRAZE = (PROTO && PROTO.graze_thetas) ? PROTO.graze_thetas.map(Number) : [];
+  // 칸 옆 글씨도 같은 목록에서 짓는다 (여기 손으로 적으면 또 두 곳이 된다)
+  if($('#grazelist')) $('#grazelist').textContent =
+    GRAZE.filter(t=>t>0).map(t=>`±${t}°`).join(' · ') || '없음';
   window.thetaList = () => {
     const base = PROTO.total_thetas.map(Number);
     return ($('#graze') && $('#graze').checked) ? base.concat(GRAZE) : base;
   };
   $('#m5').onclick = () => measure(thetaList());
   $('#graze').addEventListener('change', () => { resetResults();
-    $('#m5').querySelector('.t').textContent = $('#graze').checked ? '~12 s' : '~6 s'; });
+    if(window.LAST_METHOD) showMethod(LAST_METHOD);
+    $('#m5').querySelector('.t').textContent = $('#graze').checked ? '~15 s' : '~6 s'; });
   $('#step').onclick = async () => {
     const b = $('#step'), tag = $('#stepsize'), was = tag.textContent;
     b.disabled = true; tag.textContent = 'building…';

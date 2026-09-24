@@ -28,8 +28,10 @@ ALLM = dict(coating=M2, floor_coating=M2)
 
 CELL = 10.0
 DEPTHS = [20.0, 15.0, 10.0, 6.0, 4.0, 3.0, 2.0]
-THETAS = [0, 30, 40, 45, 55, 65, 75]
-PHIS = [0.0, 45.0]
+# 각도 목록의 집은 form_metrics 한 곳이다. 여기 손으로 적지 않는다.
+GRAZE = tuple(t for t in FM.GRAZE_THETAS if t > 0)
+THETAS = [int(t) for t in (0.0, 30.0, 40.0, 45.0) + GRAZE]
+PHIS = list(FM.ROOM_TOTAL_PHIS)
 
 
 def comb(pitch, depth, panel=500.0):
@@ -67,7 +69,7 @@ def main():
         r["room_45max"] = max(pl["%.0f" % t] for pl in planes.values()
                               for t in (30, 40, 45))
         r["graze_max"] = max(pl["%.0f" % t] for pl in planes.values()
-                             for t in (55, 65, 75))
+                             for t in GRAZE)
         save()
         print("[깊이 %5.1f] 방 조건 %.4f %%   스침 %.4f %%   (%.0fs)"
               % (d, 100 * r["room_45max"], 100 * r["graze_max"], r["sec"]), flush=True)
